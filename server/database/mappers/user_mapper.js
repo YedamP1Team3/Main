@@ -21,7 +21,7 @@ const selectBeneficiaryList = async () => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let [rows] = await conn.query(userSql.BeneficiaryList);
+    let rows = await conn.query(userSql.BeneficiaryList);
     return rows;
   } catch (err) {
     throw err;
@@ -56,9 +56,22 @@ const selectSupportPlan = async (beneId) => {
   }
 };
 
+const insertSupportPlan = async (supportPlan) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(userSql.insertSupportPlan, supportPlan);
+    return result;
+  } catch (err) {
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   selectAllUser,
   selectBeneficiaryList,
   selectBeneficiaryById,
   selectSupportPlan,
+  insertSupportPlan,
 };
