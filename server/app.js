@@ -6,7 +6,6 @@ const app = express();
 
 app.use(cors()); // 모든 요청 허용 (개발 단계)
 
-app.use(cors());
 
 app.use(express.json());
 
