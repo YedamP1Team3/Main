@@ -1,4 +1,4 @@
-import JsLayout from '@/layout/jslayout/JsLayout.vue';
+import sAdmin from '@/layout/sAdmin_layout/JsLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { systemAdmin } from './s_admin.js';
 import { sakaiLayoutRoutes, sakaiStandaloneRoutes } from './sakai.js';
@@ -8,7 +8,7 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            component: JsLayout, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
+            component: sAdmin, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
             children: [
                 ...systemAdmin, // 내가 만든 경로를 먼저 배치 (우선순위 높음)
                 ...sakaiLayoutRoutes // 템플릿 UI 참고용 경로들을 뒤에 배치
