@@ -24,5 +24,10 @@ router.get("/supportPlan/:beneId", async (req, res) => {
   let result = await userService.SupportPlan(target);
   res.send(result);
 });
+router.post("/insertSupportPlan", async (req, res) => {
+  let target = req.body;
+  let result = await userService.InsertSupportPlan(target);
+  res.send(result);
+});
 
 module.exports = router;
