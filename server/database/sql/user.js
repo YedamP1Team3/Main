@@ -1,7 +1,5 @@
 //전체조회
-const selectAllUser = `SELECT *
-                      FROM survey_version; 
-                      `;
+const selectAllUser = `SHOW CREATE TABLE survey_item;`;
 
 const BeneficiaryList = `
     SELECT 

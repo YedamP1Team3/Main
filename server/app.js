@@ -1,8 +1,10 @@
 require("dotenv").config({ path: "database/.env" });
 const cors = require("cors");
 const express = require("express");
-
 const app = express();
+const cors = require("cors");
+
+app.use(cors()); // 모든 요청 허용 (개발 단계)
 
 app.use(cors());
 
@@ -19,6 +21,9 @@ app.get("/", (req, res) => {
 });
 
 const userRouter = require("./router/user_router.js");
+const surveyRouter = require("./router/survey_router.js");
+
 app.use("/", userRouter);
 
 // app.use("/reserve", require("./router/res_router.js"));
+app.use("/survey", surveyRouter);
