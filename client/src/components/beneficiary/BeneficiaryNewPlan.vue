@@ -32,6 +32,31 @@ const Approval = async () => {
         alert('서버오류');
     }
 };
+
+const SaveTemp = async () => {
+    if (!planObjective.value || !planContent.value) {
+        alert('내용을 입력해주세요');
+        return;
+    }
+    const target = {
+        priority_id: props.priorityId,
+        manager_id: 'admin',
+        bene_id: props.beneId,
+        plan_objective: planObjective.value,
+        plan_content: planContent.value,
+        progress_state: '임시'
+    };
+    try {
+        const response = await axios.post('http://localhost:3000/insertSupportPlan', target);
+        if (response.data) {
+            alert('지원서가 입력되었습니다');
+            emit('refresh');
+        }
+    } catch (error) {
+        console.error('데이터 전송 중 에러', error);
+        alert('서버오류');
+    }
+};
 </script>
 <template>
     <div class="BfnewPlan">
@@ -54,7 +79,7 @@ const Approval = async () => {
         </div>
         <div>
             <button @click="Approval">승인하기</button>
-            <button @click="emit('savetem')">임시저장</button>
+            <button @click="SaveTemp">임시저장</button>
         </div>
     </div>
 </template>
