@@ -5,25 +5,21 @@ const selectAllUser = `SELECT *
 
 const BeneficiaryList = `
     SELECT 
-      b.bene_id,
-      b.bene_name,
-      b.family_id, 
-      u.user_name AS family_name, -- 보호자 이름
-      b.gender, 
-      b.birth_date, 
-      b.disability_type,
-      p.priority_status AS wait_step -- 우선순위 테이블의 상태를 wait_step으로 가져옴
-    FROM beneficiary_info b
-    LEFT JOIN user_info u ON b.family_id = u.user_id
-    LEFT JOIN priority p ON b.bene_id = p.bene_id
-    ORDER BY b.bene_id ASC
+        bene_id, 
+        bene_name 
+    FROM beneficiary_info 
+    ORDER BY bene_name ASC
 `;
 
 const BeneficiaryById = `
     SELECT 
-      b.*, 
-      u.user_name AS family_name, 
-      p.priority_status AS wait_step
+        b.bene_id,
+        b.bene_name,
+        u.user_name AS family_name,
+        b.gender,
+        DATE_FORMAT(b.birth_date, '%Y-%m-%d') AS birth_date,
+        b.disability_type,
+        p.priority_status
     FROM beneficiary_info b
     LEFT JOIN user_info u ON b.family_id = u.user_id
     LEFT JOIN priority p ON b.bene_id = p.bene_id
@@ -37,7 +33,7 @@ const SupportPlan = `
       plan_objective, 
       progress_state, 
       manager_id,
-      created_at
+      DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
     FROM support_plan
     WHERE bene_id = ?
     ORDER BY plan_id ASC

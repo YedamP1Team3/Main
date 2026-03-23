@@ -2,11 +2,8 @@ require("dotenv").config({ path: "database/.env" });
 const cors = require("cors");
 const express = require("express");
 const app = express();
-const cors = require("cors");
 
 app.use(cors()); // 모든 요청 허용 (개발 단계)
-
-app.use(cors());
 
 app.use(express.json());
 
