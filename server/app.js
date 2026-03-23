@@ -1,4 +1,7 @@
+const path = require("path");
 require("dotenv").config({ path: "database/.env" });
+
+const mysql = require("mysql2");
 const cors = require("cors");
 const express = require("express");
 const app = express();
@@ -20,7 +23,7 @@ app.get("/", (req, res) => {
 const userRouter = require("./router/user_router.js");
 const surveyRouter = require("./router/survey_router.js");
 
-app.use("/", userRouter);
+app.use("/api", userRouter);
 
 app.use("/reserve", require("./router/rsv_router.js"));
 
