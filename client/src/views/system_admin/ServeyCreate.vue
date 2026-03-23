@@ -16,18 +16,15 @@ const currentVersion = ref(''); // 상단에 표시할 버전 정보
 // [2] 백엔드 데이터 불러오기 함수
 const fetchSurveyData = async () => {
     try {
-        // 실제 백엔드 API 엔드포인트로 변경하세요 (예: /api/survey/latest)
         const response = await axios.get('/api/survey');
 
-        // 백엔드 응답 구조에 따라 데이터 할당
-        // response.data가 우리가 짰던 [{id: 1, name: '...', subItems: [...]}] 구조라고 가정합니다.
+        // 서버에서 리턴한 { version_id, items } 구조를 분해 할당
         surveyData.value = response.data.items;
-        currentVersion.value = response.data.version;
+        currentVersion.value = response.data.version_id; // 이제 숫자가 들어감
 
-        console.log('DB 데이터 로드 완료:', surveyData.value);
+        console.log('로드된 버전 ID:', currentVersion.value);
     } catch (error) {
-        console.error('데이터 로드 중 오류 발생:', error);
-        alert('데이터를 불러오는 데 실패했습니다.');
+        console.error('로드 실패:', error);
     }
 };
 
@@ -45,6 +42,7 @@ const currentSubItems = computed(() => {
 const currentDetails = computed(() => {
     const item = surveyData.value.find((i) => i.id === selectedItemId.value);
     if (!item) return [];
+
     const subItem = item.subItems.find((s) => s.id === selectedSubItemId.value);
     return subItem ? subItem.details : [];
 });
@@ -58,21 +56,160 @@ const handleSelectItem = (id) => {
 const handleSelectSubItem = (id) => {
     selectedSubItemId.value = id;
 };
+
+// 6 항목 추가 핸들러
+const handleAddItem = async (name) => {
+    if (!name.trim()) return;
+
+    const payload = {
+        item_name: name,
+        version_id: currentVersion.value
+    };
+
+    try {
+        const response = await axios.post('/api/survey/item', payload);
+
+        if (response.data.success) {
+            // 💡 [문제의 원인] 서버는 item_id, item_name으로 줍니다.
+            // 💡 [해결책] 하지만 위젯은 id, name을 기다리고 있습니다.
+            const serverItem = response.data.item;
+
+            const formattedItem = {
+                id: serverItem.item_id, // item_id -> id 매핑
+                name: serverItem.item_name, // item_name -> name 매핑
+                subItems: [] // 초기값 설정
+            };
+
+            // 이제 surveyData에 push하면 글자가 즉시 나타납니다!
+            surveyData.value.push(formattedItem);
+            console.log('추가된 항목 데이터 구조:', formattedItem);
+        }
+    } catch (error) {
+        console.error('추가 실패:', error);
+    }
+};
+
+const handleAddSubItem = async (name) => {
+    if (!selectedItemId.value) return alert('먼저 상위 항목을 선택하세요.');
+
+    const payload = {
+        sub_item_name: name,
+        item_id: selectedItemId.value // 현재 선택된 부모 ID
+    };
+
+    try {
+        const response = await axios.post('/api/survey/item/sub', payload);
+
+        if (response.data.success) {
+            const serverSubItem = response.data.item;
+
+            // 화면 즉시 반영: 현재 선택된 아이템의 subItems 배열에 추가
+            const parentItem = surveyData.value.find((it) => it.id === selectedItemId.value);
+
+            if (parentItem) {
+                if (!parentItem.subItems) parentItem.subItems = [];
+                parentItem.subItems.push({
+                    id: serverSubItem.sub_item_id,
+                    name: serverSubItem.sub_item_name
+                });
+            }
+        }
+    } catch (error) {
+        console.error(error);
+    }
+};
+const handleAddDetail = async (text) => {
+    if (!selectedSubItemId.value) return alert('먼저 서브 항목을 선택하세요.');
+
+    const payload = {
+        sub_item_id: selectedSubItemId.value,
+        question_text: text
+    };
+
+    try {
+        const response = await axios.post('/api/survey/details', payload);
+
+        if (response.data.success) {
+            const serverDetail = response.data.data;
+
+            // 1. 현재 선택된 상위 항목(Item) 찾기
+            const parentItem = surveyData.value.find((it) => it.id === selectedItemId.value);
+
+            if (parentItem) {
+                // 2. 그 안에서 현재 선택된 서브 항목(SubItem) 찾기
+                const parentSubItem = parentItem.subItems.find((s) => s.id === selectedSubItemId.value);
+
+                if (parentSubItem) {
+                    // 3. 서브 항목의 details 배열이 없으면 초기화 후 데이터 push
+                    if (!parentSubItem.details) parentSubItem.details = [];
+
+                    // 서브아이템 방식과 동일하게 구조 맞춰서 추가
+                    parentSubItem.details.push({
+                        id: serverDetail.detail_id, // PK 매핑
+                        question_text: serverDetail.question_text // 내용 매핑
+                    });
+                }
+            }
+        }
+    } catch (err) {
+        console.error('질문 저장 실패:', err);
+    }
+};
+
+// ServeyCreate.vue
+const handleDeleteSelected = async (selectedIds) => {
+    console.log('삭제 시도 IDs:', selectedIds); // 1. 데이터가 잘 찍히는지 확인
+
+    try {
+        const response = await axios.delete('/api/survey/delete-selected', {
+            // 필수: delete 메서드는 본문을 data 키에 담아야 함
+            data: { ids: selectedIds }
+        });
+
+        if (response.data.success) {
+            alert('삭제 성공');
+            // 화면 갱신 로직 실행...
+            location.reload(); // 일단 삭제되는지 확인용으로 새로고침 넣어보세요.
+        }
+    } catch (err) {
+        console.error('프론트 삭제 에러:', err.response?.data || err.message);
+    }
+};
+// ServeyCreate.vue 스크립트 구역
+const selectedItemName = computed(() => {
+    const item = surveyData.value.find((i) => i.id === selectedItemId.value);
+    // 콘솔에서 확인한 대로 'name' 필드를 참조합니다.
+    return item ? item.name : '';
+});
+
+const selectedSubItemName = computed(() => {
+    // currentSubItems도 내부 요소가 { id, name, ... } 구조일 테니 .name으로 참조
+    const subItem = currentSubItems.value.find((s) => s.id === selectedSubItemId.value);
+    return subItem ? subItem.name : '';
+});
 </script>
 
 <template>
-    <div class="bg-slate-50 pt-[5rem] px-4 pb-4 md:px-6 md:pb-6">
-        <div class="grid grid-cols-12 gap-4 md:gap-6 min-h-[calc(100vh-8rem)]">
+    <div class="bg-slate-50 min-h-screen pt-[5rem] px-4 pb-8 md:px-6 overflow-y-auto max-h-[600px] overflow-y-auto">
+        <div class="grid grid-cols-12 gap-4 md:gap-6 h-auto">
             <div class="col-span-12 lg:col-span-3">
-                <ServeyItemWidget :items="surveyData" :selectedId="selectedItemId" @select="handleSelectItem" />
+                <ServeyItemWidget :items="surveyData" :selectedId="selectedItemId" @select="handleSelectItem" @add-item="handleAddItem" />
             </div>
 
             <div class="col-span-12 lg:col-span-3">
-                <ServeySubItemWidget :subItems="currentSubItems" :selectedId="selectedSubItemId" @select="handleSelectSubItem" />
+                <ServeySubItemWidget :subItems="currentSubItems" :selectedId="selectedSubItemId" @select="handleSelectSubItem" @add-sub-item="handleAddSubItem" />
             </div>
 
             <div class="col-span-12 lg:col-span-6">
-                <ServeyDetailWidget :details="currentDetails" />
+                <ServeyDetailWidget
+                    :details="currentDetails"
+                    :selectedItemName="selectedItemName"
+                    :selectedSubItemName="selectedSubItemName"
+                    :selectedItemId="selectedItemId"
+                    :selectedSubItemId="selectedSubItemId"
+                    @add-detail="handleAddDetail"
+                    @delete-selected="handleDeleteSelected"
+                />
             </div>
         </div>
     </div>
