@@ -20,7 +20,13 @@ const router = createRouter({
         {
             path: '/BeneficiaryMain',
             name: 'beneficiaryMain',
-            component: () => import('../router/BeneficiaryMain.vue')
+            component: () => import('../views/beneficiary/BeneficiaryMain.vue')
+        },
+
+        {
+            path: '/ManagerSchedule',
+            name: 'managerSchedule',
+            component: () => import('../views/reservation/manager/ManagerSchedule.vue')
         }
     ]
 });
