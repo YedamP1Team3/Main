@@ -35,7 +35,7 @@ const SupportPlan = `
       manager_id,
       DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
     FROM support_plan
-    WHERE bene_id = ?
+    WHERE bene_id = ? AND progress_state != '임시'
     ORDER BY plan_id ASC
 `;
 const insertSupportPlan = `
@@ -49,6 +49,45 @@ const insertSupportPlan = `
       created_at         
     ) VALUES (?, ?, ?, ?, ?, ?, CURDATE())
 `;
+const provisionalPlan = `
+        SELECT 
+      plan_id, 
+      bene_id, 
+      plan_objective, 
+      progress_state, 
+      manager_id,
+      DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
+    FROM support_plan
+    WHERE bene_id = ? AND progress_state = '임시'
+    ORDER BY plan_id ASC
+ `;
+
+const DetailSupportPlan = `
+  SELECT
+    plan_id,
+    plan_objective,
+    plan_content,
+    progress_state,
+    DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at,
+    manager_id
+  FROM support_plan
+  WHERE plan_id =?
+`;
+
+const deleteSupportPlan = `
+DELETE FROM support_plan WHERE plan_id=?AND progress_state = '임시'
+`;
+
+const UpdateSupportPlan = `
+  UPDATE support_plan
+  SET
+    plan_objective =?,
+    plan_content =?,
+    progress_state ='승인',
+    updated_at = NOW()
+  WHERE
+    plan_id =? AND progress_state ='임시' 
+`;
 
 module.exports = {
   selectAllUser,
@@ -56,4 +95,8 @@ module.exports = {
   BeneficiaryById,
   SupportPlan,
   insertSupportPlan,
+  provisionalPlan,
+  DetailSupportPlan,
+  deleteSupportPlan,
+  UpdateSupportPlan,
 };
