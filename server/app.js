@@ -22,5 +22,6 @@ const surveyRouter = require("./router/survey_router.js");
 
 app.use("/", userRouter);
 
-// app.use("/reserve", require("./router/res_router.js"));
+app.use("/reserve", require("./router/rsv_router.js"));
+
 app.use("/survey", surveyRouter);

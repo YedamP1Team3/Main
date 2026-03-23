@@ -28,8 +28,12 @@ const router = createRouter({
             name: 'beneficiaryMain',
             component: () => import('../views/beneficiary/BeneficiaryMain.vue')
         },
-        // 레이아웃 바깥에 있는 템플릿 페이지들 전개
-        ...sakaiStandaloneRoutes
+
+        {
+            path: '/ManagerSchedule',
+            name: 'managerSchedule',
+            component: () => import('../views/reservation/manager/ManagerSchedule.vue')
+        }
     ]
 });
 
