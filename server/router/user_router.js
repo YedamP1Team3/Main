@@ -55,4 +55,11 @@ router.put("/updateSupportPlan/:planId", async (req, res) => {
   res.send(result);
 });
 
+router.put("/provisionalUpdate/:planId", async (req, res) => {
+  let planNo = req.params.planId;
+  let target = req.body;
+  let result = await userService.provisionalUpdate(planNo, target);
+  res.send(result);
+});
+
 module.exports = router;

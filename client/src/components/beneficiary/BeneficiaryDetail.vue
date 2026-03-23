@@ -54,6 +54,26 @@ const Approval = async (planId) => {
     }
 };
 
+const SaveTemp = async (planId) => {
+    if (!confirm('수정하시겠습니까?')) return;
+    try {
+        const updateData = {
+            plan_objective: planDetail.value.plan_objective,
+            plan_content: planDetail.value.plan_content
+        };
+        const response = await axios.put(`http://localhost:3000/provisionalUpdate/${planId}`, updateData);
+        if (response.data.status == true) {
+            alert('승인신청했습니다');
+            emit('refresh');
+        } else {
+            alert('승인이 신청되지 못했습니다');
+        }
+    } catch (error) {
+        console.error('삭제중 오류 발생', error);
+        alert('통신오류');
+    }
+};
+
 watch(
     () => props.planId,
     (newId) => {
@@ -87,7 +107,7 @@ watch(
         </div>
         <div>
             <button v-if="planDetail.progress_state === '임시'" @click="Approval(planDetail.plan_id)">승인</button>
-            <button v-if="planDetail.progress_state === '임시'" @click="SaveTemp">임시저장</button>
+            <button v-if="planDetail.progress_state === '임시'" @click="SaveTemp(planDetail.plan_id)">임시저장</button>
             <button v-if="planDetail.progress_state === '임시'" @click="DeleteTemp(planDetail.plan_id)">삭제</button>
         </div>
     </div>

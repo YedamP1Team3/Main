@@ -83,10 +83,21 @@ const UpdateSupportPlan = `
   SET
     plan_objective =?,
     plan_content =?,
-    progress_state ='승인',
+    progress_state ='대기',
     updated_at = NOW()
   WHERE
-    plan_id =? AND progress_state ='임시' 
+    plan_id =?
+`;
+
+const provisionalUpdate = `
+  UPDATE support_plan
+  SET
+    plan_objective =?,
+    plan_content =?,
+    progress_state ='임시',
+    updated_at = NOW()
+  WHERE
+    plan_id =?
 `;
 
 module.exports = {
@@ -99,4 +110,5 @@ module.exports = {
   DetailSupportPlan,
   deleteSupportPlan,
   UpdateSupportPlan,
+  provisionalUpdate,
 };

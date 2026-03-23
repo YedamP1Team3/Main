@@ -80,6 +80,18 @@ const UpdateSupportPlanService = async (planId, planDate) => {
   return resObj;
 };
 
+const provisionalUpdate = async (planId, planDate) => {
+  let result = await userMapper.provisionalUpdate(planId, planDate);
+  let resObj = {
+    status: result.affectedRows > 0,
+    target: {
+      plan_no: planId,
+      ...planDate,
+    },
+  };
+  return resObj;
+};
+
 module.exports = {
   findAll,
   BeneficiaryList,
@@ -90,4 +102,5 @@ module.exports = {
   DetailSupportPlanService,
   deleteSupportPlanService,
   UpdateSupportPlanService,
+  provisionalUpdate,
 };

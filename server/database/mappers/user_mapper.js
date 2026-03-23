@@ -127,6 +127,26 @@ const UpdateSupportPlan = async (planId, planDate) => {
   }
 };
 
+const provisionalUpdate = async (planId, planDate) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+    let result = await conn.query(userSql.provisionalUpdate, [
+      planDate.plan_objective,
+      planDate.plan_content,
+      planId,
+    ]);
+    await conn.commit();
+    return result;
+  } catch (err) {
+    console.log(err);
+    conn.rollback();
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   selectAllUser,
   selectBeneficiaryList,
@@ -137,4 +157,5 @@ module.exports = {
   DetailSupportPlan,
   deleteSupportPlan,
   UpdateSupportPlan,
+  provisionalUpdate,
 };
