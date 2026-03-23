@@ -1,3 +1,4 @@
+// 기존 selectSurvey 쿼리 수정: WHERE v.IS_ACTIVE = 1 을 삭제하고 VERSION_ID 조건으로 변경
 const selectSurvey = `
 SELECT 
     v.VERSION_ID,    
@@ -12,9 +13,9 @@ FROM survey_version v
 LEFT JOIN survey_item i ON v.VERSION_ID = i.VERSION_ID
 LEFT JOIN survey_sub_item s ON i.ITEM_ID = s.ITEM_ID
 LEFT JOIN survey_detail d ON s.SUB_ITEM_ID = d.SUB_ITEM_ID
-WHERE v.IS_ACTIVE = 1 
+WHERE v.VERSION_ID = ?  /* 이 부분이 핵심입니다! */
 ORDER BY i.DISPLAY_ORDER, s.DISPLAY_ORDER, d.DISPLAY_ORDER;
-    `;
+`;
 
 const insert_item = `
 INSERT INTO survey_item (item_name, version_id, display_order)
@@ -40,9 +41,21 @@ const insert_detail = `
     WHERE sub_item_id = ?
   `;
 
+const selectVersionList = `
+  SELECT VERSION_ID, IS_ACTIVE, DATE_FORMAT(CREATE_DATE, '%Y-%m-%d') as CREATE_DATE 
+  FROM survey_version 
+  ORDER BY VERSION_ID DESC;
+`;
+
+const deactivateVersions = `UPDATE survey_version SET IS_ACTIVE = 0 WHERE IS_ACTIVE = 1;`;
+const insertNewVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (1, NOW());`;
+
 module.exports = {
   selectSurvey,
   insert_item,
   insert_subitem,
   insert_detail,
+  selectVersionList,
+  deactivateVersions,
+  insertNewVersion,
 };
