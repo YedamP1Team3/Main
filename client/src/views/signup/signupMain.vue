@@ -36,14 +36,14 @@
             </div>
 
             <div class="form-group">
-              <label>소속 기관 선택</label>
-              <div class="row">
-                <select v-model="form.region">
-                  <option value="">지역</option>
-                  <option>서울</option>
-                  <option>대구</option>
-                </select>
-              </div>
+                <label>소속 기관 선택</label>
+                <div class="row">
+                    <select v-model="form.region">
+                        <option value="">지역</option>
+                        <option>서울</option>
+                        <option>대구</option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>
