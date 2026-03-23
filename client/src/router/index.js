@@ -20,7 +20,7 @@ const router = createRouter({
         {
             path: '/BeneficiaryMain',
             name: 'beneficiaryMain',
-            component: () => import('../router/BeneficiaryMain.vue')
+            component: () => import('../views/beneficiary/BeneficiaryMain.vue')
         },
         {
             path: '/login',
@@ -31,6 +31,11 @@ const router = createRouter({
             path: '/signup',
             name: 'signupForm',
             component: () => import('../views/signup/signupForm.vue')
+        },
+        {
+            path: '/dashboard',
+            name: 'Dashboard',
+            component: () => import('../views/Dashboard.vue') // 실제 대시보드 파일 경로
         }
     ]
 });

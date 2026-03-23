@@ -150,9 +150,9 @@ const submit = async () => {
     const endpoint = form.userType === 'user' ? '/api/signup/user' : '/api/signup/agency';
 
     try {
-        const response = await axios.post('/signup', form);
+        const response = await axios.post('http://localhost:3000/info/signup', form);
         alert(response.data.message);
-        router.push('/api/login');
+        router.push('/login');
     } catch (error) {
         alert('가입 처리 중 오류가 발생했습니다.');
     }

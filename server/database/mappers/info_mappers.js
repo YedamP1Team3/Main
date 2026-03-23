@@ -1,3 +1,6 @@
+const { pool } = require("../DAO");
+const userSql = require("../sql/info.js");
+
 // 회원 정보 등록 (회원가입)
 const insertUser = async (userDataArray) => {
   let conn = null;

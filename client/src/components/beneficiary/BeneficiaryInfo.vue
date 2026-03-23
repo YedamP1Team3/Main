@@ -1,28 +1,27 @@
 <script setup>
-import {ref, onMounted}from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const emit = defineEmits(['updateBeneId']);
 
-const selectedBeneId =ref('') // 사용자가 선택한 'ID' (v-model과 연결)
-const beneficiaryList =ref([]) // 드롭다운에 뿌릴 '이름 목록'
+const selectedBeneId = ref(''); // 사용자가 선택한 'ID' (v-model과 연결)
+const beneficiaryList = ref([]); // 드롭다운에 뿌릴 '이름 목록'
 const selectedBene = ref({}); // 서버에서 받아온 '한 명의 상세 정보'
 
-const fetchBeneDetail = async () =>{
-    if(!selectedBeneId.value){
-        selectedBene.value={};
+const fetchBeneDetail = async () => {
+    if (!selectedBeneId.value) {
+        selectedBene.value = {};
         return;
     }
-    const response = await axios.get(`http://localhost:3000/beneficiaries/${selectedBeneId.value}`)
+    const response = await axios.get(`http://localhost:3000/beneficiaries/${selectedBeneId.value}`);
     selectedBene.value = response.data;
-    emit('updateBeneId',selectedBeneId.value,response.data.priority_id);
-}
+    emit('updateBeneId', selectedBeneId.value, response.data.priority_id);
+};
 
-onMounted(async ()=>{
-    const response = await axios.get('http://localhost:3000/beneficiaries')
-    beneficiaryList.value= response.data;
-})
-
+onMounted(async () => {
+    const response = await axios.get('http://localhost:3000/beneficiaries');
+    beneficiaryList.value = response.data;
+});
 </script>
 <template>
     <h3>지원자 정보</h3>
@@ -53,7 +52,7 @@ onMounted(async ()=>{
                 <tr>
                     <th><label>성별</label></th>
                     <td>
-                        <input type="text" :value="selectedBene.gender? (selectedBene?.gender == 'M' ? '남자':'여자'):''" readonly />
+                        <input type="text" :value="selectedBene.gender ? (selectedBene?.gender == 'M' ? '남자' : '여자') : ''" readonly />
                     </td>
                     <th><label>생년월일</label></th>
                     <td>
@@ -116,8 +115,8 @@ td {
 }
 
 /* 입력창 및 셀렉트 박스 */
-select, 
-input[type="text"] {
+select,
+input[type='text'] {
     width: 100%; /* td의 남은 공간을 꽉 채움 */
     height: 38px;
     padding: 0 10px;

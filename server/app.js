@@ -22,8 +22,17 @@ app.get("/", (req, res) => {
 
 const userRouter = require("./router/user_router.js");
 const surveyRouter = require("./router/survey_router.js");
+const infoRouter = require("./router/info_router.js");
 
 app.use("/api", userRouter);
 
-// app.use("/reserve", require("./router/res_router.js"));
+app.use("/info", infoRouter);
+
+app.use("/reserve", require("./router/rsv_router.js"));
+
 app.use("/survey", surveyRouter);
+
+// app.get("/beneficiaries", (req, res) => {
+//   console.log("수혜자 목록 요청 들어옴!");
+//   res.json([]); // 우선 빈 배열이라도 보내주면 에러가 멈춥니다.
+// });
