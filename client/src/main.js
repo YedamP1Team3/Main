@@ -10,6 +10,8 @@ import ToastService from 'primevue/toastservice';
 import '@/assets/tailwind.css';
 import '@/assets/styles.scss';
 
+import 'primeicons/primeicons.css';
+
 const app = createApp(App);
 
 app.use(router);

@@ -30,4 +30,29 @@ router.post("/insertSupportPlan", async (req, res) => {
   res.send(result);
 });
 
+router.get("/provisionalPlan/:beneId", async (req, res) => {
+  let target = req.params.beneId;
+  let result = await userService.provisionalPlan(target);
+  res.send(result);
+});
+
+router.get("/detailSupportPlan/:planId", async (req, res) => {
+  let target = req.params.planId;
+  let result = await userService.DetailSupportPlanService(target);
+  res.send(result);
+});
+
+router.delete("/deleteSupportPlan/:planId", async (req, res) => {
+  let planNo = req.params.planId;
+  let result = await userService.deleteSupportPlanService(planNo);
+  res.send(result);
+});
+
+router.put("/updateSupportPlan/:planId", async (req, res) => {
+  let planNo = req.params.planId;
+  let target = req.body;
+  let result = await userService.UpdateSupportPlanService(planNo, target);
+  res.send(result);
+});
+
 module.exports = router;

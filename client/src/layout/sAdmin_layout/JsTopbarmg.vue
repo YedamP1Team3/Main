@@ -21,9 +21,9 @@ const { toggleDarkMode, isDarkTheme } = useLayout();
             </router-link>
 
             <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
-                <button type="button" class="p-link text-color font-medium">기관</button>
-                <button type="button" class="p-link text-color font-medium">기관관리자</button>
-                <button type="button" class="p-link text-color font-medium">조사지</button>
+                <button type="button" class="p-link text-color font-medium">신청내역</button>
+                <button type="button" class="p-link text-color font-medium">지원계획</button>
+                <button type="button" class="p-link text-color font-medium">상담관리</button>
             </div>
         </div>
 
@@ -37,7 +37,7 @@ const { toggleDarkMode, isDarkTheme } = useLayout();
         </div>
 
         <div class="flex items-center gap-2">
-            <span class="hidden sm:block font-medium text-color">시스템 관리자</span>
+            <span class="hidden sm:block font-medium text-color">기관 담당자</span>
             <button type="button" class="layout-topbar-action">
                 <i class="pi pi-user"></i>
                 <span class="hidden">Profile</span>

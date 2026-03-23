@@ -6,8 +6,9 @@ const props = defineProps({
     beneId: [String, Number]
 });
 
-const emit = defineEmits(['newaddplan']);
+const emit = defineEmits(['newaddplan', 'select-plan', 'refresh']);
 const planList = ref([]);
+const showTemp = ref(false);
 
 const fetchPlanList = async (id) => {
     if (!id) {
@@ -15,30 +16,40 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const response = await axios.get(`http://localhost:3000/supportPlan/${id}`);
+        const url = showTemp.value ? `http://localhost:3000/provisionalPlan/${id}` : `http://localhost:3000/supportPlan/${id}`;
+        const response = await axios.get(url);
         planList.value = response.data || [];
     } catch (error) {
         console.error('에러', error);
     }
 };
 
-const addNewPlan = () => {
+function addNewPlan() {
     if (!props.beneId) {
         alert('지원자를 클릭해주세요');
         return;
     }
     emit('newaddplan');
-};
+}
 const savefile = () => {
-    alert('임시 저장 기능은 아직 구현되지 않았습니다.');
+    if (!props.beneId) {
+        alert('지원자를 클릭해주세요');
+        return;
+    }
+    showTemp.value = !showTemp.value;
+    fetchPlanList(props.beneId);
 };
 
-//⭐️ 중요: 부모(Main.vue)가 이 함수를 호출할 수 있게 허용함
+const detailClick = (planId) => {
+    emit(`select-plan`, planId);
+};
+
 defineExpose({ fetchPlanList });
 
 watch(
     () => props.beneId,
     (newId) => {
+        showTemp.value = false;
         fetchPlanList(newId);
     },
     { immediate: true }
@@ -49,7 +60,7 @@ watch(
         <div>
             <h2>지원계획서</h2>
             <button @click="addNewPlan">+추가하기</button>
-            <button @click="savefile">임시저장</button>
+            <button @click="savefile" :class="{ 'active-temp': showTemp }" class="btn-temp-check">{{ showTemp ? '일반 목록' : '임시저장' }}</button>
         </div>
         <table>
             <tbody>
@@ -60,7 +71,7 @@ watch(
                     <th>작성일자</th>
                     <th>상태</th>
                 </tr>
-                <tr v-for="plan in planList" :key="plan.plan_id">
+                <tr v-for="plan in planList" :key="plan.plan_id" @click="detailClick(plan.plan_id)">
                     <td>{{ plan.plan_id }}</td>
                     <td>{{ plan.manager_id }}</td>
                     <td>{{ plan.plan_objective }}</td>
@@ -127,6 +138,14 @@ button:last-of-type {
     background-color: #ffffff;
     color: #475569;
     border: 1px solid #e2e8f0;
+}
+/*임시저장 버튼을 눌렀을때 화면 표시*/
+.active-temp {
+    background-color: #fff7ed; /* 연한 주황 배경 */
+    border-color: #fb923c; /* 진한 주황 테두리 */
+    color: #ea580c; /* 진한 주황 글씨 */
+    box-shadow: 0 0 8px rgba(251, 146, 60, 0.3); /* 살짝 빛나는 효과 */
+    font-weight: bold;
 }
 
 button:last-of-type:hover {

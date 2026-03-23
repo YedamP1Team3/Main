@@ -2,21 +2,28 @@
 import { ref } from 'vue';
 
 // 우리가 만든 컴포넌트들을 가져옵니다.
+import JsTopbarmg from '@/layout/sAdmin_layout/JsTopbarmg.vue';
 import BeneficiaryInfo from '@/components/beneficiary/BeneficiaryInfo.vue';
 import BeneficiaryManagement from '@/components/beneficiary/BeneficiaryManagement.vue';
 import BeneficiaryNewPlan from '@/components/beneficiary/BeneficiaryNewPlan.vue';
+import BeneficiaryDetail from '@/components/beneficiary/BeneficiaryDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
 const viewMode = ref('empty');
 const managementRef = ref(null); //새로고침
+const selectPlan = ref(null);
 
 //지원자를 새로 선택했을때
 const handleIdUpdate = (id, priorityId) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
     viewMode.value = 'empty'; //대상자가 바뀌면 입력창 닫음
-    console.log('메인 페이지에서 받은 ID:', id);
+};
+
+const handleIdDetail = (planId) => {
+    selectPlan.value = planId;
+    viewMode.value = 'detail';
 };
 
 // 저장후 새로고침 하는 함수
@@ -26,12 +33,12 @@ const reloadList = () => {
     }
     viewMode.value = 'empty';
 };
-
-// watch(viewMode, (newVal) => {
-//     console.log('부모의 viewMode가 변경됨:', newVal);
-// }); //
 </script>
 <template>
+    <header class="main-header">
+        <JsTopbarmg />
+    </header>
+
     <div class="dashboard-container">
         <aside class="side-panel">
             <section class="info-section">
@@ -39,13 +46,16 @@ const reloadList = () => {
             </section>
 
             <section class="list-section">
-                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @newaddplan="viewMode = 'create'" />
+                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @newaddplan="viewMode = 'create'" />
             </section>
         </aside>
 
         <main class="main-content">
             <div v-if="viewMode === 'create'" class="editor-container">
                 <BeneficiaryNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+            </div>
+            <div v-if="viewMode === 'detail'" class="editor-container">
+                <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
         </main>
     </div>
