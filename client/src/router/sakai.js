@@ -4,7 +4,7 @@
 // AppLayout(사이드바/헤더)이 적용되는 템플릿 페이지들
 export const sakaiLayoutRoutes = [
     {
-        path: '/ab',
+        path: '/',
         name: 'dashboard',
         component: () => import('@/views/Dashboard.vue')
     },
