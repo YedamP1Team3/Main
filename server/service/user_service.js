@@ -49,10 +49,45 @@ const InsertSupportPlan = async (supportPlan) => {
   return resObj;
 };
 
+const provisionalPlan = async (beneId) => {
+  let list = await userMapper.provisionalPlan(beneId);
+  return list || [];
+};
+
+const DetailSupportPlanService = async (planID) => {
+  let list = await userMapper.DetailSupportPlan(planID);
+  return list || {};
+};
+
+const deleteSupportPlanService = async (planDelete) => {
+  let result = await userMapper.deleteSupportPlan(planDelete);
+  let resObj = {
+    status: result.affectedRows > 0 ? "success" : "fail",
+    plan_no: planDelete,
+  };
+  return resObj;
+};
+
+const UpdateSupportPlanService = async (planId, planDate) => {
+  let result = await userMapper.UpdateSupportPlan(planId, planDate);
+  let resObj = {
+    status: result.affectedRows > 0,
+    target: {
+      plan_no: planId,
+      ...planDate,
+    },
+  };
+  return resObj;
+};
+
 module.exports = {
   findAll,
   BeneficiaryList,
   BeneficiaryDetail,
   SupportPlan,
   InsertSupportPlan,
+  provisionalPlan,
+  DetailSupportPlanService,
+  deleteSupportPlanService,
+  UpdateSupportPlanService,
 };

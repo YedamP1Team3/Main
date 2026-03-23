@@ -6,9 +6,13 @@ const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
-const emit = defineEmits(['newaddplan']);
+const emit = defineEmits(['newaddplan', 'select-plan']);
 const currentTab = ref('Plan');
 const tabPlanRef = ref(null);
+
+const handleSelectPlan = (planId) => {
+    emit('select-plan', planId);
+};
 
 defineExpose({
     refreshTabPlan: () => {
@@ -26,7 +30,7 @@ defineExpose({
         </nav>
 
         <div class="tab-content">
-            <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @Newaddplan="emit('newaddplan')" />
+            <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @Newaddplan="emit('newaddplan')" @select-plan="handleSelectPlan" />
         </div>
     </div>
 </template>
