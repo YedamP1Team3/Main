@@ -17,11 +17,11 @@ const router = createRouter({
         // 레이아웃 바깥에 있는 템플릿 페이지들 전개
         ...sakaiStandaloneRoutes,
 
-        // {
-        //     path: '/BeneficiaryMain',
-        //     name: 'beneficiaryMain',
-        //     component: () => import('../router/BeneficiaryMain.vue')
-        // }
+        {
+            path: '/BeneficiaryMain',
+            name: 'beneficiaryMain',
+            component: () => import('../router/BeneficiaryMain.vue')
+        },
         {
             path: '/login',
             name: 'loginForm',
