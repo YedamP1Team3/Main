@@ -1,30 +1,28 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted}from 'vue';
 import axios from 'axios';
 
-// 1. 상태(데이터) 정의
-const selectedBeneId = ref('');
-const beneficiaryList = ref([]);
-const selectedBene = ref({});
+const emit = defineEmits(['updateBeneId']);
 
-// 2. 지원자 선택 시 실행될 함수
-const fetchBeneDetail = () => {
-    const found = beneficiaryList.value.find((bene) => bene.bene_id === selectedBeneId.value);
-    if (found) {
-        selectedBene.value = found;
-    }
-};
+const selectedBeneId =ref('') // 사용자가 선택한 'ID' (v-model과 연결)
+const beneficiaryList =ref([]) // 드롭다운에 뿌릴 '이름 목록'
+const selectedBene = ref({}); // 서버에서 받아온 '한 명의 상세 정보'
 
-onMounted(async () => {
-    try {
-        const response = await axios.get('http://localhost:3000/beneficiaries');
-        if (response.data) {
-            beneficiaryList.value = response.data;
-        }
-    } catch (error) {
-        console.error('이유', error);
+const fetchBeneDetail = async () =>{
+    if(!selectedBeneId.value){
+        selectedBene.value={};
+        return;
     }
-});
+    const response = await axios.get(`http://localhost:3000/beneficiaries/${selectedBeneId.value}`)
+    selectedBene.value = response.data;
+    emit('updateBeneId',selectedBeneId.value,response.data.priority_id);
+}
+
+onMounted(async ()=>{
+    const response = await axios.get('http://localhost:3000/beneficiaries')
+    beneficiaryList.value= response.data;
+})
+
 </script>
 <template>
     <h3>지원자 정보</h3>
@@ -42,35 +40,111 @@ onMounted(async () => {
                             </option>
                         </select>
                     </td>
-
                     <th><label>보호자</label></th>
                     <td>
-                        <input type="text" :value="selectedBene?.family_name || ''" readonly />
+                        <input type="text" :value="selectedBene.family_name || ''" readonly />
                     </td>
 
                     <th><label>대기단계</label></th>
                     <td>
-                        <input type="text" :value="selectedBene?.wait_step || ''" readonly />
+                        <input type="text" :value="selectedBene.priority_status || ''" readonly />
                     </td>
                 </tr>
-
                 <tr>
                     <th><label>성별</label></th>
                     <td>
-                        <input type="text" :value="selectedBene?.gender || ''" readonly />
+                        <input type="text" :value="selectedBene.gender? (selectedBene?.gender == 'M' ? '남자':'여자'):''" readonly />
                     </td>
-
                     <th><label>생년월일</label></th>
                     <td>
-                        <input type="text" :value="selectedBene?.birth_date || ''" readonly />
+                        <input type="text" :value="selectedBene.birth_date || ''" readonly />
                     </td>
-
                     <th><label>장애유형</label></th>
                     <td>
-                        <input type="text" :value="selectedBene?.disability_type || ''" readonly />
+                        <input type="text" :value="selectedBene.disability_type || ''" readonly />
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 </template>
+<style scoped>
+/* 카드 전체 컨테이너 */
+.BfInfo {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 15px; /* 좌우 패딩을 줄여 내부 공간 확보 */
+    width: 100%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 15px;
+    margin-top: 0;
+}
+
+/* 테이블 레이아웃 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* 3등분 유지 */
+}
+
+/* 🟢 라벨(th) 영역: 너비를 더 줄여서 인풋 공간 확보 */
+th {
+    width: 60px; /* 기존 75~80px에서 60px로 축소 */
+    padding: 10px 0;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+    white-space: nowrap; /* 한 줄 고정 */
+}
+
+/* 🔵 데이터(td) 영역: 인풋 길이를 최대한 확보 */
+td {
+    padding: 8px 12px 8px 2px; /* 라벨과의 거리를 2px로 좁힘 */
+    vertical-align: middle;
+}
+
+/* 입력창 및 셀렉트 박스 */
+select, 
+input[type="text"] {
+    width: 100%; /* td의 남은 공간을 꽉 채움 */
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px; /* 조금 더 둥근 느낌으로 세련되게 */
+    font-size: 0.9rem;
+    color: #334155;
+    background-color: #ffffff;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+/* 읽기 전용 박스 디자인 */
+input[readonly] {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: #475569;
+}
+
+/* 마지막 열 우측 패딩 제거 */
+td:last-child {
+    padding-right: 0;
+}
+
+/* 셀렉트 박스 포커스 시 디자인 */
+select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+</style>

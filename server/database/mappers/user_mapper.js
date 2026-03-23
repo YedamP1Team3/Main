@@ -7,7 +7,7 @@ const selectAllUser = async () => {
   try {
     conn = await pool.getConnection();
 
-    let [rows, fields] = await conn.query(userSql.selectAllUser);
+    let rows = await conn.query(userSql.selectAllUser);
     return rows;
   } catch (err) {
     console.log(err);
@@ -34,7 +34,7 @@ const selectBeneficiaryById = async (id) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let [rows] = await conn.query(userSql.BeneficiaryById, [id]);
+    let rows = await conn.query(userSql.BeneficiaryById, [id]);
     return rows[0];
   } catch (err) {
     throw err;
@@ -47,7 +47,7 @@ const selectSupportPlan = async (beneId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let [rows] = await conn.query(userSql.SupportPlan, [beneId]);
+    let rows = await conn.query(userSql.SupportPlan, [beneId]);
     return rows;
   } catch (err) {
     console.log(err);
