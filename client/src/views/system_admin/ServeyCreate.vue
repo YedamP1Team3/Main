@@ -187,10 +187,41 @@ const selectedSubItemName = computed(() => {
     const subItem = currentSubItems.value.find((s) => s.id === selectedSubItemId.value);
     return subItem ? subItem.name : '';
 });
+
+const isVersionListOpen = ref(false);
+const allVersions = ref([1, 2, 3]); // 일단 테스트용 임시 데이터
+
+// 버전 변경 시 실행될 함수
+const handleVersionChange = async (versionId) => {
+    currentVersion.value = versionId;
+    isVersionListOpen.value = false;
+
+    // 💡 여기서 해당 버전의 데이터를 다시 불러오는 API를 호출하게 될 겁니다.
+    await fetchSurveyData(versionId);
+};
 </script>
 
 <template>
-    <div class="bg-slate-50 min-h-screen pt-[5rem] px-4 pb-8 md:px-6 overflow-y-auto max-h-[600px] overflow-y-auto">
+    <div class="bg-slate-50 min-h-screen pt-[5rem] px-4 pb-8 md:px-6 overflow-y-auto max-h-[800px] overflow-y-auto">
+        <div class="flex items-center gap-4 mb-6">
+            <h1 class="text-2xl font-black text-slate-800">설문조사 관리</h1>
+
+            <div class="relative">
+                <button @click="isVersionListOpen = !isVersionListOpen" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-500 transition-all">
+                    <span class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Version</span>
+                    <span class="text-sm font-bold text-slate-700">v{{ currentVersion }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div v-if="isVersionListOpen" class="absolute top-full left-0 mt-2 w-40 bg-white border border-slate-100 shadow-xl rounded-xl z-50 overflow-hidden">
+                    <ul class="max-h-60 overflow-y-auto">
+                        <li v-for="ver in allVersions" :key="ver" @click="handleVersionChange(ver)" class="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors">Version {{ ver }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
         <div class="grid grid-cols-12 gap-4 md:gap-6 h-auto">
             <div class="col-span-12 lg:col-span-3">
                 <ServeyItemWidget :items="surveyData" :selectedId="selectedItemId" @select="handleSelectItem" @add-item="handleAddItem" />
