@@ -9,14 +9,13 @@ const props = defineProps({
     selectedSubItemId: Number
 });
 
-// 필요 없는 개별 삭제(delete-item 등)는 다 날리고 통합 삭제만 남김
-const emit = defineEmits(['add-detail', 'delete-selected', 'save-all']);
+// [수정] 부모 컴포넌트(ServeyCreate)의 @save와 맞추기 위해 'save'로 변경
+const emit = defineEmits(['add-detail', 'delete-selected', 'save']);
 
 const showInput = ref(false);
 const newTitle = ref('');
-const selectedItems = ref([]); // 체크박스 선택된 ID들 (item-1, sub-5, detail-10 형태)
+const selectedItems = ref([]);
 
-// [전체 선택/해제]
 const toggleAll = () => {
     if (selectedItems.value.length > 0) {
         selectedItems.value = [];
@@ -29,12 +28,11 @@ const toggleAll = () => {
     }
 };
 
-// [선택 삭제 실행] - 부모의 handleDeleteSelected 호출
 const handleDeleteSelected = () => {
     if (selectedItems.value.length === 0) return alert('삭제할 항목을 선택해주세요.');
     if (confirm(`선택한 ${selectedItems.value.length}개의 항목을 삭제하시겠습니까?`)) {
         emit('delete-selected', selectedItems.value);
-        selectedItems.value = []; // 삭제 요청 후 로컬 선택 상태 초기화
+        selectedItems.value = [];
     }
 };
 
@@ -112,19 +110,9 @@ const handleSubmit = () => {
             </button>
             <div v-else></div>
 
-            <button @click="emit('save-all')" class="flex items-center gap-3 bg-slate-900 text-white px-6 py-2.5 rounded-xl font-black text-[11px] tracking-widest hover:bg-blue-600 active:scale-95 transition-all shadow-xl shadow-slate-200 uppercase">
-                버전 저장
+            <button @click="emit('save')" class="flex items-center gap-3 bg-slate-900 text-white px-6 py-2.5 rounded-xl font-black text-[11px] tracking-widest hover:bg-blue-600 active:scale-95 transition-all shadow-xl shadow-slate-200 uppercase">
+                버전 확정 및 저장
             </button>
         </div>
     </div>
 </template>
-
-<style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-    width: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 10px;
-}
-</style>
