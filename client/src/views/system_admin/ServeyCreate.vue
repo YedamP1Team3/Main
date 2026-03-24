@@ -53,6 +53,12 @@ const handleVersionChange = () => {
     fetchSurveyData(selectedVersionId.value);
 };
 
+// 저장버튼 들어내기
+const isActiveVersion = computed(() => {
+    const current = versionList.value.find((v) => v.VERSION_ID === selectedVersionId.value);
+    return current?.IS_ACTIVE === 1; // 1이면 true, 아니면 false 반환
+});
+
 // [3] 라이프사이클: 초기 로드
 onMounted(async () => {
     await fetchVersionList();
@@ -207,6 +213,7 @@ const handleCreateNewVersion = async () => {
                     :selectedSubItemName="selectedSubItemName"
                     :selectedItemId="selectedItemId"
                     :selectedSubItemId="selectedSubItemId"
+                    :is-active="isActiveVersion"
                     @add-detail="handleAddDetail"
                     @delete-selected="handleDeleteSelected"
                     @save="handleCreateNewVersion"
