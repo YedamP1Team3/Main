@@ -114,7 +114,7 @@ const createNewVersion = async () => {
   }
 };
 
-// ⭐️ [MEMBER용] 현재 활성화된(1) 버전 ID 딱 하나만 가져오는 함수 추가
+// ⭐️ Mebmer용1 현재 활성화된(1) 버전 ID 딱 하나만 가져오는 함수 추가
 const getActiveVersionId = async () => {
   let conn = null;
   try {
@@ -133,6 +133,58 @@ const getActiveVersionId = async () => {
     if (conn) conn.release();
   }
 };
+
+// ⭐️ Mebmer용2 신청서 제출 및 답변 저장 (트랜잭션 적용)
+const submitSurveyApplication = async (
+  versionId,
+  beneId,
+  userId,
+  answersArray,
+) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction(); // 🚦 트랜잭션 시작! (이제부터 실패하면 다 취소됨)
+
+    console.log(
+      `👉 [Mapper] 지원신청서 생성 시도 (USER: ${userId}, BENE: ${beneId})`,
+    );
+
+    const appResult = await conn.query(surveySql.appQuery, [
+      versionId,
+      beneId,
+      userId,
+    ]);
+
+    // 방금 생성된 신청서의 PK(APP_ID)를 가져옵니다.
+    const newAppId = appResult.insertId;
+    console.log(`✅ [Mapper] 신청서 생성 완료 (APP_ID: ${newAppId})`);
+
+    // 2. Survey_Answer (조사지답변) 테이블에 데이터 삽입
+    if (answersArray.length > 0) {
+      // 배열 형태: [[ANSWER_VALUE, DETAIL_ID, APP_ID], [ANSWER_VALUE, DETAIL_ID, APP_ID], ...]
+      // DB에 한 번의 쿼리로 여러 줄(Bulk Insert)을 넣기 위해 데이터를 가공합니다.
+      const answerValues = answersArray.map((ans) => [
+        ans.answerValue,
+        ans.detailId,
+        newAppId,
+      ]);
+
+      // '?' 하나에 2차원 배열을 통째로 넣으면 MariaDB/MySQL이 알아서 Bulk Insert를 해줍니다!
+      await conn.query(surveySql.answerQuery, [answerValues]);
+      console.log(`✅ [Mapper] 조사지 답변 ${answersArray.length}개 저장 완료`);
+    }
+
+    await conn.commit(); // 🚦 모든 것이 성공했으므로 DB에 완전 확정(저장)!
+    return newAppId; // 성공적으로 생성된 신청서 번호를 리턴
+  } catch (err) {
+    if (conn) await conn.rollback(); // 🚨 에러 발생! 지금까지 했던 작업 무효화(롤백)
+    console.error("❌ [Mapper 에러] 신청서 저장 중 에러 발생, 롤백됨:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
 module.exports = {
   selectSurvey,
   insertItem,
@@ -145,4 +197,5 @@ module.exports = {
   createNewVersion,
   //member 용
   getActiveVersionId,
+  submitSurveyApplication,
 };

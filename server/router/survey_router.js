@@ -126,4 +126,25 @@ router.get("/active_survey", async (req, res) => {
       .json({ success: false, message: "활성 설문지를 불러오지 못했습니다." });
   }
 });
+
+router.post("/submit", async (req, res) => {
+  console.log("👉 [Router] POST /api/survey/submit 요청 도달", req.body);
+
+  try {
+    // req.body 안에 프론트에서 보낸 { versionId, beneId, userId, answers } 가 다 들어있습니다.
+    const newAppId = await surveyService.submitSurvey(req.body);
+
+    // 성공 응답! 생성된 신청서 번호도 프론트에 알려줍니다.
+    res
+      .status(200)
+      .json({
+        success: true,
+        appId: newAppId,
+        message: "성공적으로 제출되었습니다.",
+      });
+  } catch (err) {
+    console.error("❌ [Router 에러] 제출 실패:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 module.exports = router;

@@ -187,6 +187,42 @@ const getActiveSurvey = async () => {
   }
 };
 
+const submitSurvey = async (payload) => {
+  // 프론트엔드에서 던져줄 데이터를 꺼냅니다.
+  const { versionId, beneId, userId, answers } = payload;
+
+  console.log("👉 [Service] 신청서 제출 로직 시작");
+
+  // 1. 최소한의 안전 검사 (데이터가 제대로 왔는가?)
+  if (!versionId || !beneId || !answers) {
+    throw new Error("필수 데이터가 누락되었습니다.");
+  }
+
+  // 2. 답변 객체 { "1": true, "2": false } 를 Mapper가 쓰기 좋게 배열로 변환
+  // Object.entries 를 쓰면 키와 값을 배열로 뽑아낼 수 있습니다.
+  const answersArray = Object.entries(answers).map(
+    ([detailId, answerValue]) => {
+      return {
+        detailId: Number(detailId), // 키 값은 문자열로 넘어오므로 숫자로 변환
+        answerValue: answerValue === true || answerValue === "true" ? 1 : 0, // DB boolean 처리를 위해 1, 0으로 변환
+      };
+    },
+  );
+
+  if (answersArray.length === 0) {
+    throw new Error("선택된 답변이 하나도 없습니다.");
+  }
+
+  // 3. 포장된 데이터를 Mapper로 전달
+  const newAppId = await surveyMapper.submitSurveyApplication(
+    versionId,
+    beneId,
+    userId,
+    answersArray,
+  );
+  return newAppId;
+};
+
 module.exports = {
   getSurveyStructure,
   itemAdd,
@@ -196,4 +232,5 @@ module.exports = {
   getSurveyVersions,
   makeNewSurveyVersion,
   getActiveSurvey,
+  submitSurvey,
 };
