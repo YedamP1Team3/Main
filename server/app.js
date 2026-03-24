@@ -24,6 +24,8 @@ const userRouter = require("./router/user_router.js");
 const surveyRouter = require("./router/survey_router.js");
 const infoRouter = require("./router/info_router.js");
 const DependentRouter = require("./router/Dependent_router.js");
+//const beneficiaryRouter = require("./router/beneficiary_router.js");
+const adsupportPlan = require("./router/adsupport_router.js");
 
 app.use("/api", userRouter);
 
@@ -34,3 +36,6 @@ app.use("/reserve", require("./router/rsv_router.js"));
 app.use("/survey", surveyRouter);
 
 app.use("/Dependent", DependentRouter);
+app.use("/adsupport", adsupportPlan);
+
+//app.use("/api/beneficiary", beneficiaryRouter);

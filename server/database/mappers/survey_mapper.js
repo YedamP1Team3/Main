@@ -133,6 +133,7 @@ const getActiveVersionId = async () => {
     if (conn) conn.release();
   }
 };
+
 module.exports = {
   selectSurvey,
   insertItem,
