@@ -56,6 +56,8 @@ const router = createRouter({
             meta: {
                 requiresAuth: true
             }
+        },
+        {
             path: '/ManagerSchedule',
             name: 'managerSchedule',
             component: () => import('../views/reservation/manager/ManagerSchedule.vue')
