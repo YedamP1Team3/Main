@@ -4,21 +4,27 @@ import memberLay from '@/layout/member/mLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { member } from './member.js';
 import { systemAdmin } from './s_admin.js';
-import { sakaiLayoutRoutes } from './sakai.js';
+import { sakaiLayoutRoutes, sakaiStandaloneRoutes } from './sakai.js';
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
             path: '/',
-            component: sAdmin, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
+            component: sakayLay, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
             children: [
-                ...systemAdmin, // 내가 만든 경로를 먼저 배치 (우선순위 높음)
                 ...sakaiLayoutRoutes // 템플릿 UI 참고용 경로들을 뒤에 배치
             ]
         },
-        // 레이아웃 바깥에 있는 템플릿 페이지들 전개
-        ...sakaiStandaloneRoutes,
+        {
+            path: '/sAdmin',
+            name: 'sAdmin',
+            component: sAdmin, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
+            children: [
+                ...systemAdmin // 내가 만든 경로를 먼저 배치 (우선순위 높음)
+            ]
+        },
+
         {
             path: '/member',
             name: 'member',
@@ -56,6 +62,8 @@ const router = createRouter({
             meta: {
                 requiresAuth: true
             }
+        },
+        {
             path: '/ManagerSchedule',
             name: 'managerSchedule',
             component: () => import('../views/reservation/manager/ManagerSchedule.vue')
@@ -64,7 +72,9 @@ const router = createRouter({
             path: '/AdministratorMain',
             name: 'AdministratorMain',
             component: () => import('../views/beneficiary/AdministratorMain.vue')
-        }
+        },
+        // 레이아웃 바깥에 있는 템플릿 페이지들 전개
+        ...sakaiStandaloneRoutes
     ]
 });
 
