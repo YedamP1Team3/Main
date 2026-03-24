@@ -19,6 +19,7 @@ router.get("/schedule", async (req, res) => {
 
     res.status(200).json({
       manager: manager.user_id,
+      // success: true,
       schedule,
     });
   } catch (err) {
