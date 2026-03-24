@@ -69,7 +69,8 @@ const DetailSupportPlan = `
     plan_content,
     progress_state,
     DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at,
-    manager_id
+    manager_id,
+    rejection_reason
   FROM support_plan
   WHERE plan_id =?
 `;

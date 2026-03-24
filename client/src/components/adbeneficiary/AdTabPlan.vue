@@ -23,28 +23,8 @@ const fetchPlanList = async (id) => {
     }
 };
 
-// function addNewPlan() {
-//     if (!props.beneId) {
-//         alert('지원자를 클릭해주세요');
-//         return;
-//     }
-//     if (!props.progress_state === '대기') {
-//         alert('대기단계 지원계획서를 신청하지 못합니다');
-//         return;
-//     }
-//     emit('newaddplan');
-// }
-// const savefile = () => {
-//     if (!props.beneId) {
-//         alert('지원자를 클릭해주세요');
-//         return;
-//     }
-//     showTemp.value = !showTemp.value;
-//     fetchPlanList(props.beneId);
-// };
-
 const detailClick = (planId) => {
-    emit(`select-plan`, planId);
+    emit('select-plan', planId);
 };
 
 defineExpose({ fetchPlanList });
@@ -52,7 +32,6 @@ defineExpose({ fetchPlanList });
 watch(
     () => props.beneId,
     (newId) => {
-        // showTemp.value = false;
         fetchPlanList(newId);
     },
     { immediate: true }
@@ -62,8 +41,6 @@ watch(
     <div>
         <div>
             <h2>지원계획서</h2>
-            <!-- <button @click="addNewPlan">+추가하기</button>
-            <button @click="savefile" :class="{ 'active-temp': showTemp }" class="btn-temp-check">{{ showTemp ? '일반 목록' : '임시저장' }}</button> -->
         </div>
         <table>
             <tbody>

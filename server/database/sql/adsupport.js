@@ -1,0 +1,52 @@
+const adSupportPlan = `
+SELECT 
+    p.plan_id, 
+    p.bene_id, 
+    p.plan_objective, 
+    p.progress_state, 
+    u.user_name, 
+    DATE_FORMAT(p.created_at, '%Y-%m-%d') AS created_at
+FROM support_plan p
+INNER JOIN user_info u ON p.manager_id = u.user_id 
+WHERE p.bene_id = ? AND p.progress_state != '임시'
+ORDER BY p.plan_id ASC;
+`;
+
+const adDetailSupportPlan = `
+  SELECT 
+    p.plan_id,
+    p.plan_objective,
+    p.plan_content,
+    p.progress_state,
+    DATE_FORMAT(p.created_at, '%Y-%m-%d') AS created_at,
+    p.manager_id,
+    p.rejection_reason,
+    u.user_name AS manager_name
+  FROM support_plan p
+  LEFT JOIN user_info u ON p.manager_id = u.user_id 
+  WHERE p.plan_id = ?
+`;
+
+const updateApproval = `
+UPDATE support_plan
+SET
+  progress_state = '승인'
+WHERE
+  plan_id =?
+`;
+
+const updatereturn = `
+UPDATE support_plan
+SET
+  rejection_reason = ?,
+  progress_state = '반려'
+WHERE
+  plan_id =?
+`;
+
+module.exports = {
+  adSupportPlan,
+  adDetailSupportPlan,
+  updateApproval,
+  updatereturn,
+};

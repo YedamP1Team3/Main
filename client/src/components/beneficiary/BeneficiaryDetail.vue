@@ -12,6 +12,7 @@ const fetchPlanDetail = async (id) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/detailSupportPlan/${id}`);
         planDetail.value = response.data;
+        console.log(planDetail.value);
     } catch (error) {
         console.error(`에러`, error);
     }
@@ -110,10 +111,15 @@ watch(
             <button v-if="planDetail.progress_state === '임시'" @click="SaveTemp(planDetail.plan_id)">임시저장</button>
             <button v-if="planDetail.progress_state === '임시'" @click="DeleteTemp(planDetail.plan_id)">삭제</button>
         </div>
+        <div>
+            <div v-if="planDetail.progress_state == '반려'" class="reason-area">
+                <label class="reasonFont">반려사유</label>
+                <textarea :value="planDetail.rejection_reason" rows="4" class="reasonText" :disabled="planDetail.progress_state === '반려'" readonly></textarea>
+            </div>
+        </div>
     </div>
 </template>
 <style scoped>
-/* 1. 전체 컨테이너 */
 .BfnewPlan {
     max-width: 900px;
     margin: 0 auto;
@@ -121,7 +127,6 @@ watch(
     background-color: #ffffff;
 }
 
-/* 제목 */
 h2 {
     font-size: 1.5rem;
     font-weight: 800;
@@ -136,11 +141,7 @@ hr {
     margin-bottom: 10px;
 }
 
-/* 상태 표시 (progress_state) */
-.BfnewPlan > div:nth-child(3) {
-    margin-bottom: 5px;
-}
-
+/* 상태 표시 및 작성일 */
 .BfnewPlan > div:nth-child(3) span {
     display: inline-block;
     padding: 4px 12px;
@@ -151,21 +152,14 @@ hr {
     font-weight: 700;
 }
 
-/* 작성일 영역 */
 .BfnewPlan > div:nth-child(4) {
     text-align: right;
     margin-bottom: 20px;
     color: #64748b;
     font-size: 0.95rem;
-    padding-bottom: 10px;
 }
 
-.BfnewPlan > div:nth-child(4) label {
-    font-weight: 600;
-    margin-right: 5px;
-}
-
-/* 2. 폼 필드 레이아웃 (표 형식) */
+/* 2. 기존 폼 필드 레이아웃 (표 형식 유지) */
 .form_BfnewPlan {
     display: flex;
     border-bottom: 1px solid #e2e8f0;
@@ -173,12 +167,10 @@ hr {
     border-right: 1px solid #e2e8f0;
 }
 
-/* 첫 번째 폼 필드(지원목표)에 상단 테두리 추가 */
 .form_BfnewPlan:nth-of-type(1) {
     border-top: 1px solid #e2e8f0;
 }
 
-/* 라벨 스타일 */
 .form_BfnewPlan label {
     width: 140px;
     background-color: #f8fafc;
@@ -189,30 +181,57 @@ hr {
     justify-content: center;
     padding: 20px;
     border-right: 1px solid #e2e8f0;
-    font-size: 0.9rem;
 }
 
-/* 읽기 전용 입력창 공통 스타일 */
 input[readonly],
 textarea[readonly] {
     flex: 1;
     border: none;
     padding: 15px 20px;
-    font-size: 1rem;
-    color: #334155;
+    background-color: #ffffff;
     outline: none;
-    background-color: #ffffff; /* 조회시에는 깨끗한 흰색 유지 */
+}
+
+/* --- 반려사유 영역 전체 교체 --- */
+
+.reason-area {
+    margin-top: 40px;
+    width: 100%; /* 전체 너비 확보 */
+    clear: both; /* 이전 요소들의 float 영향 제거 */
+    display: block; /* 블록 요소로 명시 */
+}
+
+.reasonFont {
+    display: block;
+    color: #e11d48;
+    font-weight: 800; /* 더 두껍게 */
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    text-align: left; /* 왼쪽 정렬 고정 */
+}
+
+.reasonText {
+    width: 100%; /* 왼쪽 화면에서도 꽉 차게 만듭니다 */
+    min-height: 140px;
+    padding: 20px; /* 내부 여백 넉넉히 */
+    border: 1px solid #e2e8f0;
+    border-radius: 12px; /* 오른쪽 이미지처럼 부드러운 라운딩 */
+    background-color: #ffffff;
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    box-sizing: border-box; /* 패딩이 너비에 영향을 주지 않도록 설정 */
+}
+
+/* 조회용(readonly)일 때도 배경색을 흰색으로 고정하여 깔끔하게 유지 */
+.reasonText[readonly] {
+    background-color: #ffffff;
     cursor: default;
 }
 
-/* 계획내용 높이 확보 */
-textarea[readonly] {
-    min-height: 250px;
-    line-height: 1.6;
-    resize: none;
-}
-
-/* 3. 하단 버튼 영역 */
+/* 4. 하단 버튼 영역 (알약 모양 유지) */
 .BfnewPlan > div:last-child {
     display: flex;
     justify-content: flex-end;
@@ -220,40 +239,25 @@ textarea[readonly] {
     margin-top: 30px;
 }
 
-/* 버튼 공통 스타일 (알약 모양) */
 .BfnewPlan > div:last-child button {
     padding: 12px 24px;
     border-radius: 30px;
     font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
     border: none;
 }
 
-/* 승인 버튼 (강조) */
 button:nth-child(1) {
     background-color: #1e293b;
     color: #ffffff;
 }
-
-button:nth-child(1):hover {
-    background-color: #334155;
-}
-
-/* 임시저장 버튼 */
 button:nth-child(2) {
     background-color: #f1f5f9;
     color: #475569;
 }
-
-/* 삭제 버튼 */
 button:nth-child(3) {
     background-color: #fff1f2;
     color: #e11d48;
-}
-
-button:nth-child(3):hover {
-    background-color: #ffe4e6;
 }
 </style>
