@@ -1,49 +1,61 @@
+const express = require("express");
+const router = express.Router();
+const infoService = require("../service/info_service.js");
+
+// 회원가입
 router.post("/signup", async (req, res) => {
-  const type = req.params.type;
-  const userData = req.body;
+  const userData = req.body; // 프론트에서 보낸 데이터 전체
 
   try {
-    let result = await userService.userSignup(userData, type);
-    if (result.affectedRows > 0) {
+    // 인자를 userData 하나만 전달하도록 수정
+    const result = await infoService.userSignup(userData);
+
+    // 서비스에서 { status: "success", ... } 형태로 리턴하므로 조건문 수정
+    if (result.status === "success") {
       res.status(201).send({ message: "회원가입이 완료되었습니다." });
     } else {
       res.status(400).send({ message: "가입에 실패했습니다." });
     }
   } catch (err) {
     console.error("Signup Error:", err);
-    res
-      .status(500)
-      .send({ message: "서버 오류가 발생했습니다.", error: err.message });
+    res.status(500).send({ message: "서버 오류", error: err.message });
   }
 });
 
+// 로그인
 router.post("/login", async (req, res) => {
-  const loginData = req.body;
-
   try {
-    let user = await userService.userLogin(loginData);
+    const user = await infoService.userLogin(req.body);
 
     if (user) {
+      // DB 컬럼명에 맞춰서 응답 (user_name, role 등 DB 컬럼명 확인 필요)
       res.status(200).send({
         message: "로그인 성공",
-        user: { name: user.name, type: user.user_type, id: user.user_id },
+        user: {
+          name: user.user_name,
+          role: user.role,
+          id: user.user_id,
+        },
       });
     } else {
       res.status(401).send({ message: "아이디 또는 비밀번호가 틀렸습니다." });
     }
   } catch (err) {
     console.error("Login Error:", err);
-    res.status(500).send({ message: "서버 오류가 발생했습니다." });
+    res.status(500).send({ message: "서버 오류" });
   }
 });
 
-router.get("/check-id/:id", async (req, res) => {
-  const userId = req.params.id;
+// 아이디 중복 체크 경로 추가
+router.get("/check-id/:userId", async (req, res) => {
   try {
-    const isAvailble = await userService.checkIdAvailability(userId);
-    res.send({ available: isAvailble });
-  } catch (err) {
-    res.status(500).send(err);
+    const { userId } = req.params;
+    // 서비스 함수명이 정확한지 확인!
+    const isAvailable = await infoService.checkIdAvailability(userId);
+    res.json({ isAvailable });
+  } catch (error) {
+    console.error("Router Error:", error); // 서버 터미널에 에러 출력
+    res.status(500).send(error.message);
   }
 });
 

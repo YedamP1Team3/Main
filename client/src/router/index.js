@@ -11,19 +11,14 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            component: sakayLay, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
+            component: sAdmin, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
             children: [
+                ...systemAdmin, // 내가 만든 경로를 먼저 배치 (우선순위 높음)
                 ...sakaiLayoutRoutes // 템플릿 UI 참고용 경로들을 뒤에 배치
             ]
         },
-        {
-            path: '/sAdmin',
-            name: 'sAdmin',
-            component: sAdmin, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
-            children: [
-                ...systemAdmin // 내가 만든 경로를 먼저 배치 (우선순위 높음)
-            ]
-        },
+        // 레이아웃 바깥에 있는 템플릿 페이지들 전개
+        ...sakaiStandaloneRoutes,
         {
             path: '/member',
             name: 'member',
@@ -48,8 +43,19 @@ const router = createRouter({
             name: 'signupForm',
             component: () => import('../views/signup/signupForm.vue')
         },
-
         {
+            path: '/dashboard',
+            name: 'Dashboard',
+            component: () => import('../views/Dashboard.vue')
+        },
+        {
+            // 지원대상자 추가 페이지
+            path: '/beneficiary/add',
+            name: 'AddBeneficiary',
+            component: () => import('../views/beneficiary/AddBeneficiary.vue'),
+            meta: {
+                requiresAuth: true
+            }
             path: '/ManagerSchedule',
             name: 'managerSchedule',
             component: () => import('../views/reservation/manager/ManagerSchedule.vue')

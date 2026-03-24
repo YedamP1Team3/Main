@@ -1,76 +1,65 @@
-// 회원가입 처리
+const infoMapper = require("../database/mappers/info_mappers.js");
+const bcrypt = require("bcrypt");
+
+// 1. 회원가입 처리
 const userSignup = async (userData) => {
-  const {
-    userId,
-    organization,
-    password,
-    name,
-    userType,
-    zipcode,
-    address,
-    detailAddress,
-    phone,
-    email,
-  } = userData;
-
-  // 비밀번호 암호화
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  let agency_no = 101;
-  if (organization === "기관 A") agency_no = 100;
-  else if (organization === "기관 B") agency_no = 101;
-
-  // Mapper에 전달할 데이터 배열
-  const signupData = [
-    userId,
-    agency_no,
-    hashedPassword,
-    name,
-    userType === "일반이용자" ? "FAMILY" : "AGENCY",
-    "PENDING",
-    zipcode,
-    address + " " + detailAddress,
-    phone,
-    email,
-  ];
-
   try {
-    const result = await userMapper.insertUser(signupData);
-    return {
-      status: result.affectedRows > 0 ? "success" : "fail",
-      user_id: userId,
-    };
+    console.log("서비스가 받은 데이터:", userData);
+
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+    const signupData = [
+      userData.user_id,
+      userData.agency_id,
+      hashedPassword,
+      userData.user_name,
+      userData.role,
+      "PENDING",
+      userData.zip_code,
+      userData.address + " " + (userData.detail_address || ""),
+      userData.tel,
+      userData.email,
+    ];
+
+    console.log("최종 DB로 들어가는 배열:", signupData);
+    await infoMapper.insertUser(signupData);
+
+    return { status: "success", user_id: userData.user_id };
   } catch (err) {
-    console.error("서비스 단 에러 로그:", err);
+    console.error("회원가입 서비스 에러:", err);
     throw err;
   }
 };
 
-// 로그인 처리
+// 2. 로그인 처리
 const userLogin = async (loginData) => {
-  const { userId, password } = loginData;
-
   try {
-    const user = await userMapper.selectUserById(userId);
-
+    const user = await infoMapper.selectUserById(loginData.userId);
     if (user) {
-      const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await bcrypt.compare(loginData.password, user.password);
       if (isMatch) {
-        const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
+        const userClean = { ...user };
+        delete userClean.password;
+        return userClean;
       }
     }
     return null;
-  } catch {
-    err;
-  }
-  {
-    console.error("Login Sercice Error:", err);
+  } catch (err) {
+    console.error("로그인 에러:", err);
     throw err;
   }
 };
 
-module.exports = {
-  userSignup,
-  userLogin,
+// ✅ 아이디 중복 여부 확인 로직 (안전하게 수정)
+const checkIdAvailability = async (userId) => {
+  try {
+    const count = await infoMapper.countUserId(userId);
+    // count가 0이면 중복 없음(true), 1 이상이면 중복 있음(false)
+    return count === 0;
+  } catch (err) {
+    console.error("중복체크 서비스 에러:", err);
+    throw err;
+  }
 };
+
+module.exports = { userSignup, userLogin, checkIdAvailability };

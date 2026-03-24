@@ -22,9 +22,15 @@ app.get("/", (req, res) => {
 
 const userRouter = require("./router/user_router.js");
 const surveyRouter = require("./router/survey_router.js");
+const infoRouter = require("./router/info_router.js");
+const beneficiaryRouter = require("./router/beneficiary_router.js");
 
 app.use("/api", userRouter);
+
+app.use("/info", infoRouter);
 
 app.use("/reserve", require("./router/rsv_router.js"));
 
 app.use("/survey", surveyRouter);
+
+// app.use("/api/beneficiary", beneficiaryRouter);

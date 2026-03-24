@@ -8,18 +8,18 @@
                         <span class="text-600 font-medium">서비스 이용을 위해 로그인해주세요</span>
                     </div>
 
-                    <form @submit.prevent="login">
+                    <form @submit.prevent="handleLogin">
                         <div class="form-group">
                             <label for="userId" class="block text-900 font-medium mb-2">ID</label>
-                            <InputText id="userId" v-model="form.userId" placeholder="아이디를 입력하세요" class="w-full p-3" />
+                            <InputText id="userId" v-model="form.userId" placeholder="아이디를 입력하세요" class="w-full p-3" autocomplete="username" />
                         </div>
 
                         <div class="form-group">
                             <label for="password" class="block text-900 font-medium mb-2">Password</label>
-                            <Password id="password" v-model="form.password" placeholder="비밀번호를 입력하세요" :toggleMask="true" :feedback="false" class="w-full" inputClass="w-full p-3" />
+                            <Password id="password" v-model="form.password" placeholder="비밀번호를 입력하세요" :toggleMask="true" :feedback="false" class="w-full" inputClass="w-full p-3" :inputProps="{ autocomplete: 'current-password' }" />
                         </div>
 
-                        <div class="links-row flex justify-content-between mt-2 mb-5">
+                        <div class="flex justify-content-between mt-2 mb-5 text-sm">
                             <div class="left-links">
                                 <span class="text-600 cursor-pointer hover:underline mr-3" @click="findId">아이디 찾기</span>
                                 <span class="text-600 cursor-pointer hover:underline" @click="findPw">비밀번호 찾기</span>
@@ -40,50 +40,60 @@
 <script setup>
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
+// PrimeVue 컴포넌트 (main.js에 등록했다면 여기서 생략 가능)
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
 
 const router = useRouter();
 
+// 1. 데이터 상태 관리
 const form = reactive({
     userId: '',
     password: ''
 });
 
-const login = async () => {
+// 2. 로그인 실행 로직
+const handleLogin = async () => {
+    // 유효성 검사
     if (!form.userId || !form.password) {
-        alert('아이디와 비밀번호를 입력해주세요.');
+        alert('아이디와 비밀번호를 모두 입력해주세요.');
         return;
     }
 
     try {
-        const response = await axios.post('http://localhost:5173/login', {
+        // 백엔드 서버(3000번 포트)로 요청 전송
+        const response = await axios.post('http://localhost:3000/info/login', {
             userId: form.userId,
             password: form.password
         });
-        alert(`${response.data.user.name}님 환영합니다!`);
-        router.push('/dashboard'); // 로그인 성공 후 이동할 페이지
+
+        // 성공 시 처리
+        if (response.data) {
+            alert(`${response.data.user.name}님 환영합니다!`);
+
+            // [수정] 라우터에 등록된 실제 경로로 이동하세요.
+            // 아까 `/dashboard`가 없다고 떴으므로 `/BeneficiaryMain`으로 변경했습니다.
+            router.push('/BeneficiaryMain');
+        }
     } catch (error) {
-        alert(error.response?.data?.message || '로그인 실패');
+        // 상세 에러 메시지가 있으면 보여주고, 없으면 기본 메시지 출력
+        const errorMsg = error.response?.data?.message || '로그인 중 오류가 발생했습니다.';
+        alert(errorMsg);
+        console.error('Login Error:', error);
     }
 };
 
-const goToSignUp = () => {
-    router.push('/signup');
-};
-
-const findId = () => {
-    console.log('아이디 찾기 페이지로 이동');
-};
-
-const findPw = () => {
-    console.log('비밀번호 찾기 페이지로 이동');
-};
+// 3. 페이지 이동 함수들
+const goToSignUp = () => router.push('/signup');
+const findId = () => alert('서비스 준비 중입니다.');
+const findPw = () => alert('서비스 준비 중입니다.');
 </script>
+
 <style scoped>
-/* 전체 화면 배경 (연한 하늘색 유지) */
+/* 페이지 중앙 정렬 레이아웃 */
 .page-wrapper {
     background-color: #dae8f5;
     min-height: 100vh;
@@ -95,10 +105,10 @@ const findPw = () => {
 
 .login-container {
     width: 100%;
-    max-width: 500px;
+    max-width: 450px; /* 약간 더 슬림하게 조정 */
 }
 
-/* Sakai 특유의 그라데이션 카드 테두리 */
+/* Sakai 테마 스타일의 카드 테두리 그라데이션 */
 .gradient-card {
     border-radius: 56px;
     padding: 0.3rem;
@@ -106,30 +116,19 @@ const findPw = () => {
 }
 
 .login-card {
-    background: var(--surface-card, #ffffff);
+    background: #ffffff;
     padding: 3rem 2rem;
     border-radius: 53px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
 }
 
+/* 유틸리티 클래스 */
 .text-center {
     text-align: center;
-}
-.mb-5 {
-    margin-bottom: 2rem;
-}
-.mb-3 {
-    margin-bottom: 1rem;
-}
-.mb-2 {
-    margin-bottom: 0.5rem;
-}
-.mt-2 {
-    margin-top: 0.5rem;
 }
 .w-full {
     width: 100%;
@@ -143,10 +142,13 @@ const findPw = () => {
 .justify-content-between {
     justify-content: space-between;
 }
-.text-primary {
-    color: #6366f1;
-} /* 기본 테마 색상 */
 .cursor-pointer {
     cursor: pointer;
+}
+.text-primary {
+    color: #6366f1;
+}
+.text-sm {
+    font-size: 0.875rem;
 }
 </style>
