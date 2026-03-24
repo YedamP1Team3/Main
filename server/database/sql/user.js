@@ -75,7 +75,7 @@ const DetailSupportPlan = `
 `;
 
 const deleteSupportPlan = `
-DELETE FROM support_plan WHERE plan_id=?AND progress_state = '임시'
+DELETE FROM support_plan WHERE plan_id=?
 `;
 
 const UpdateSupportPlan = `

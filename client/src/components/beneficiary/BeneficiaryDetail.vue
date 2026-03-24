@@ -10,7 +10,7 @@ const planDetail = ref({});
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/detailSupportPlan/${id}`);
+        const response = await axios.get(`http://localhost:3000/api/detailSupportPlan/${id}`);
         planDetail.value = response.data;
     } catch (error) {
         console.error(`에러`, error);
@@ -21,7 +21,7 @@ const DeleteTemp = async (planId) => {
     if (!confirm('삭제하시겠습니까?')) return;
 
     try {
-        const response = await axios.delete(`http://localhost:3000/deleteSupportPlan/${planId}`);
+        const response = await axios.delete(`http://localhost:3000/api/deleteSupportPlan/${planId}`);
         if (response.data.status == 'success') {
             alert('삭제되었습니다');
             emit('refresh');
@@ -41,7 +41,7 @@ const Approval = async (planId) => {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
         };
-        const response = await axios.put(`http://localhost:3000/updateSupportPlan/${planId}`, updateData);
+        const response = await axios.put(`http://localhost:3000/api/updateSupportPlan/${planId}`, updateData);
         if (response.data.status == true) {
             alert('승인신청했습니다');
             emit('refresh');
@@ -61,9 +61,9 @@ const SaveTemp = async (planId) => {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
         };
-        const response = await axios.put(`http://localhost:3000/provisionalUpdate/${planId}`, updateData);
+        const response = await axios.put(`http://localhost:3000/api/provisionalUpdate/${planId}`, updateData);
         if (response.data.status == true) {
-            alert('승인신청했습니다');
+            alert('임시저장되었습니다');
             emit('refresh');
         } else {
             alert('승인이 신청되지 못했습니다');
@@ -95,11 +95,11 @@ watch(
         </div>
         <div class="form_BfnewPlan">
             <label for="objective">지원목표</label>
-            <input id="objective" :value="planDetail.plan_objective" :readonly="planDetail.progress_state !== '임시'" type="text" class="read-only" />
+            <input id="objective" v-model="planDetail.plan_objective" :readonly="planDetail.progress_state !== '임시'" type="text" class="read-only" />
         </div>
         <div class="form_BfnewPlan">
             <label for="content">계획내용</label>
-            <textarea id="content" :value="planDetail.plan_content" rows="5" :readonly="planDetail.progress_state !== '임시'" class="read-only"></textarea>
+            <textarea id="content" v-model="planDetail.plan_content" rows="5" :readonly="planDetail.progress_state !== '임시'" class="read-only"></textarea>
         </div>
         <div class="form_BfnewPlan">
             <label for="file">파일첨부</label>

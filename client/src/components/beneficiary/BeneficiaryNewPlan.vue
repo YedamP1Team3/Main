@@ -22,7 +22,7 @@ const Approval = async () => {
         progress_state: '대기'
     };
     try {
-        const response = await axios.post('http://localhost:3000/insertSupportPlan', target);
+        const response = await axios.post('http://localhost:3000/api/insertSupportPlan', target);
         if (response.data) {
             alert('지원서가 입력되었습니다');
             emit('refresh');
@@ -47,7 +47,7 @@ const SaveTemp = async () => {
         progress_state: '임시'
     };
     try {
-        const response = await axios.post('http://localhost:3000/insertSupportPlan', target);
+        const response = await axios.post('http://localhost:3000/api/insertSupportPlan', target);
         if (response.data) {
             alert('지원서가 입력되었습니다');
             emit('refresh');

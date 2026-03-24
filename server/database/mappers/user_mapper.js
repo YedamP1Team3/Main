@@ -128,6 +128,7 @@ const UpdateSupportPlan = async (planId, planDate) => {
 };
 
 const provisionalUpdate = async (planId, planDate) => {
+  console.log("매퍼로 들어온 데이터:", planDate);
   let conn = null;
   try {
     conn = await pool.getConnection();

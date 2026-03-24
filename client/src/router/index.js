@@ -2,7 +2,7 @@ import sAdmin from '@/layout/sAdmin_layout/JsLayout.vue';
 import sakayLay from '@/layout/sakima_layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { systemAdmin } from './s_admin.js';
-import { sakaiLayoutRoutes, sakaiStandaloneRoutes } from './sakai.js';
+import { sakaiLayoutRoutes } from './sakai.js';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -23,11 +23,11 @@ const router = createRouter({
             ]
         },
 
-         {
-             path: '/BeneficiaryMain',
-             name: 'beneficiaryMain',
-             component: () => import('../router/BeneficiaryMain.vue')
-         },
+        {
+            path: '/BeneficiaryMain',
+            name: 'beneficiaryMain',
+            component: () => import('../views/beneficiary/BeneficiaryMain.vue')
+        },
         {
             path: '/login',
             name: 'loginForm',
@@ -37,7 +37,6 @@ const router = createRouter({
             path: '/signup',
             name: 'signupForm',
             component: () => import('../views/signup/signupForm.vue')
-
         },
 
         {

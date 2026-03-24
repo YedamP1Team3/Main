@@ -16,7 +16,7 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const url = showTemp.value ? `http://localhost:3000/provisionalPlan/${id}` : `http://localhost:3000/supportPlan/${id}`;
+        const url = showTemp.value ? `http://localhost:3000/api/provisionalPlan/${id}` : `http://localhost:3000/api/supportPlan/${id}`;
         const response = await axios.get(url);
         planList.value = response.data || [];
     } catch (error) {
@@ -27,6 +27,10 @@ const fetchPlanList = async (id) => {
 function addNewPlan() {
     if (!props.beneId) {
         alert('지원자를 클릭해주세요');
+        return;
+    }
+    if (!props.progress_state === '대기') {
+        alert('대기단계 지원계획서를 신청하지 못합니다');
         return;
     }
     emit('newaddplan');
