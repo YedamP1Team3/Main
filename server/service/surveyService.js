@@ -1,25 +1,26 @@
 // services/surveyService.js
 const surveyMapper = require("../database/mappers/survey_mapper");
 
-const getSurveyStructure = async () => {
-  const rawData = await surveyMapper.selectSurvey();
+const getSurveyStructure = async (versionId) => {
+  // 1. 매퍼를 통해 DB 데이터 조회 (인자로 받은 versionId 사용)
+  const rawData = await surveyMapper.selectSurvey(versionId);
 
-  // 1. 데이터가 아예 없는 경우 방어 로직
+  // 2. 데이터가 없는 경우 방어 로직
   if (!rawData || (Array.isArray(rawData) && rawData.length === 0)) {
-    return { items: [], version_id: null };
+    // version_id는 null 대신 요청받은 versionId를 반환하여 프론트 상태 유지를 돕습니다.
+    return { items: [], version_id: versionId };
   }
 
-  // ⭐️ 핵심: 단일 객체면 [ ]로 감싸고, 이미 배열이면 그대로 씁니다.
+  // ⭐️ 핵심: 결과가 단일 객체면 배열로 변환
   const rows = Array.isArray(rawData) ? rawData : [rawData];
 
-  // 2. ⭐️ 추가: 버전 정보 추출 (모든 행에 동일하게 들어있으므로 첫 번째 행에서 가져옴)
-  // SQL에서 VERSION_ID를 조회하도록 수정했다면 row.VERSION_ID로 접근 가능합니다.
-  const versionId = rows[0].VERSION_ID || rows[0].version_id;
+  // 3. 🚨 [수정 완료] 변수명 충돌 해결
+  // 함수 매개변수인 versionId와 겹치지 않도록 'currentVid' 등으로 이름을 변경합니다.
+  const currentVid = rows[0].VERSION_ID || rows[0].version_id;
 
   const itemMap = new Map();
 
   rows.forEach((row) => {
-    // 테이블 정의서에 따른 대문자/소문자 컬럼명 대응 (ERD 기준 대문자 권장)
     const itemId = row.ITEM_ID || row.item_id;
     const itemName = row.ITEM_NAME || row.item_name;
     const subItemId = row.SUB_ITEM_ID || row.sub_item_id;
@@ -27,7 +28,7 @@ const getSurveyStructure = async () => {
     const detailId = row.DETAIL_ID || row.detail_id;
     const questionText = row.QUESTION_TEXT || row.question_text;
 
-    if (!itemId) return; // 항목이 없으면 다음 행으로
+    if (!itemId) return;
 
     if (!itemMap.has(itemId)) {
       itemMap.set(itemId, {
@@ -49,9 +50,7 @@ const getSurveyStructure = async () => {
       }
       const subItem = item.subItems.get(subItemId);
 
-      // detail_id가 있을 때만 중복 없이 추가
       if (detailId) {
-        // 이미 추가된 상세 질문인지 확인 (Join 결과 특성상 중복 행 발생 방지)
         const isDuplicate = subItem.details.some((d) => d.id === detailId);
         if (!isDuplicate) {
           subItem.details.push({
@@ -63,20 +62,18 @@ const getSurveyStructure = async () => {
     }
   });
 
-  // 3. Map을 배열 구조로 최종 변환
+  // 4. Map을 배열 구조로 변환
   const finalItems = Array.from(itemMap.values()).map((item) => ({
     ...item,
     subItems: Array.from(item.subItems.values()),
   }));
 
-  // 4. ⭐️ 팩트: 프론트엔드가 요구하는 '봉투' 구조로 반환
+  // 5. 프론트엔드가 요구하는 구조로 반환
   return {
-    version_id: versionId, // 이제 프론트의 currentVersion.value가 이 값을 잡습니다.
-    items: finalItems, // surveyData.value에 들어갈 배열
+    version_id: currentVid, // 수정된 변수명 적용
+    items: finalItems,
   };
 };
-
-// services/surveyService.js
 
 const itemAdd = async (data) => {
   try {
@@ -86,15 +83,13 @@ const itemAdd = async (data) => {
       throw new Error("필수 데이터(이름 또는 버전ID)가 누락되었습니다.");
     }
 
-    // DB 하나로 끝내기 (서브쿼리 방식)
     const result = await surveyMapper.insertItem({ item_name, version_id });
 
-    // 화면에 즉시 추가하기 위해 생성된 ID와 함께 리턴
     return {
       item_id: result.insertId,
       item_name,
       version_id,
-      subItems: [], // 프론트엔드 구조용
+      subItems: [],
     };
   } catch (err) {
     throw new Error("ItemAdd Service Error: " + err.message);
@@ -118,31 +113,49 @@ const subItemAdd = async (data) => {
   }
 };
 
-// survey_service.js
 const registerDetail = async (params) => {
-  const result = await surveyMapper.insertSurveyDetail(params);
-
-  // 서브아이템 패턴과 동일하게 작성
-  return {
-    detail_id: result.insertId, // 생성된 PK (서브아이턴의 sub_item_id 역할)
-    question_text: params.question_text, // 질문 내용
-    sub_item_id: params.sub_item_id, // 부모 ID
-  };
+  try {
+    const result = await surveyMapper.insertSurveyDetail(params);
+    return {
+      detail_id: result.insertId,
+      question_text: params.question_text,
+      sub_item_id: params.sub_item_id,
+    };
+  } catch (err) {
+    throw new Error("RegisterDetail Error: " + err.message);
+  }
 };
 
-// survey_service.js
 const deleteSelected = async (itemIds, subIds, detailIds) => {
-  // 1. 가장 하위인 질문(Detail)부터 삭제
-  if (detailIds.length > 0) {
-    await surveyMapper.deleteDetails(detailIds);
+  try {
+    if (detailIds.length > 0) await surveyMapper.deleteDetails(detailIds);
+    if (subIds.length > 0) await surveyMapper.deleteSubItems(subIds);
+    if (itemIds.length > 0) await surveyMapper.deleteItems(itemIds);
+  } catch (err) {
+    throw new Error("DeleteSelected Error: " + err.message);
   }
-  // 2. 서브항목 삭제
-  if (subIds.length > 0) {
-    await surveyMapper.deleteSubItems(subIds);
+};
+
+const getSurveyVersions = async () => {
+  try {
+    const versions = await surveyMapper.getVersions();
+    return Array.isArray(versions) ? versions : [versions];
+  } catch (err) {
+    throw new Error("GetSurveyVersions Error: " + err.message);
   }
-  // 3. 최상위 항목 삭제
-  if (itemIds.length > 0) {
-    await surveyMapper.deleteItems(itemIds);
+};
+
+/**
+ * 새 설문 버전을 생성하는 서비스 로직
+ * 1. 기존 활성 버전을 찾아 비활성화(IS_ACTIVE=0)
+ * 2. 새로운 버전 레코드 생성(IS_ACTIVE=1)
+ */
+// 1. 함수가 정의되어 있는지 확인
+const makeNewSurveyVersion = async () => {
+  try {
+    return await surveyMapper.createNewVersion();
+  } catch (err) {
+    throw new Error(err.message);
   }
 };
 
@@ -152,4 +165,6 @@ module.exports = {
   subItemAdd,
   registerDetail,
   deleteSelected,
+  getSurveyVersions,
+  makeNewSurveyVersion,
 };

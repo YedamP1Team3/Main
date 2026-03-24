@@ -1,20 +1,35 @@
-// routes/surveyRouter.js
 const express = require("express");
 const router = express.Router();
 const surveyService = require("../service/surveyService");
 
+// 1. [조회] 전체 버전 목록 (구체적인 경로를 가장 위로 올립니다)
+router.get("/versions", async (req, res) => {
+  try {
+    const versions = await surveyService.getSurveyVersions();
+    res.status(200).json({ success: true, versions });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 2. [조회] 특정 버전의 상세 구조 (항목, 세부항목, 질문)
 router.get("/", async (req, res) => {
   try {
-    const result = await surveyService.getSurveyStructure();
+    const { versionId } = req.query; // ✅ 구조 분해 할당으로 깔끔하게 선언
+
+    if (!versionId) {
+      return res.status(400).json({ message: "versionId가 필요합니다." });
+    }
+
+    const result = await surveyService.getSurveyStructure(versionId);
     res.status(200).json(result);
   } catch (err) {
+    console.error("라우터 에러:", err);
     res.status(500).json({ message: "서버 오류 발생", error: err.message });
   }
 });
 
-// routes/survey.js (또는 해당 라우터 파일)
-
-// 항목 추가 API
+// 3. [추가] 조사지 항목(Item) 추가
 router.post("/item", async (req, res) => {
   try {
     const result = await surveyService.itemAdd(req.body);
@@ -24,6 +39,7 @@ router.post("/item", async (req, res) => {
   }
 });
 
+// 4. [추가] 세부 항목(SubItem) 추가
 router.post("/item/sub", async (req, res) => {
   try {
     const result = await surveyService.subItemAdd(req.body);
@@ -33,32 +49,25 @@ router.post("/item/sub", async (req, res) => {
   }
 });
 
-// survey_router.js
+// 5. [추가] 상세 질문(Detail) 추가
 router.post("/details", async (req, res) => {
   try {
-    console.log("입력 데이터(body):", req.body); // 1. 프론트에서 데이터가 잘 왔나?
-
     const params = {
       sub_item_id: req.body.sub_item_id,
       question_text: req.body.question_text,
     };
-
-    console.log("정리된 params:", params); // 2. 서비스로 넘길 데이터 확인
-
     const data = await surveyService.registerDetail(params);
     res.status(200).json({ success: true, data });
   } catch (error) {
-    console.error("❌ 백엔드 실제 에러 로그:", error); // 3. 여기서 진짜 원인이 찍힘!
+    console.error("❌ 상세 질문 추가 에러:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// survey_router.js
+// 6. [삭제] 선택된 항목들 일괄 삭제
 router.delete("/delete-selected", async (req, res) => {
   try {
     const { ids } = req.body;
-    console.log("서버 수신 IDs:", ids); // 2. 여기서 데이터가 안 찍히면 프론트 호출 문제
-
     if (!ids || ids.length === 0) {
       return res
         .status(400)
@@ -79,7 +88,19 @@ router.delete("/delete-selected", async (req, res) => {
     await surveyService.deleteSelected(itemIds, subIds, detailIds);
     res.json({ success: true });
   } catch (err) {
-    console.error("라우터 에러:", err);
+    console.error("삭제 라우터 에러:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// routes/surveyRouter.js
+router.post("/version/new", async (req, res) => {
+  try {
+    // 🚨 여기서 호출하는 함수명이 surveyService.js에 정의된 이름과 같아야 합니다.
+    const newVersionId = await surveyService.makeNewSurveyVersion();
+    res.status(200).json({ success: true, newVersionId });
+  } catch (err) {
+    console.error("라우터 에러:", err); // 서버 터미널에 찍힌 이 로그를 확인해야 합니다.
     res.status(500).json({ success: false, message: err.message });
   }
 });
