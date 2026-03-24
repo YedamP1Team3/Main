@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 // 기존 컴포넌트들
-import BeneficiaryInfo from '@/components/member/BeneficiaryInfo.vue';
+import BeneficiaryInfo from '@/components/member/m_BeneficiaryInfo.vue';
 import BeneficiaryManagement from '@/components/member/MemberManagement.vue';
 // ⭐️ 새로 분리할 설문지 컴포넌트 가져오기 (경로는 프로젝트에 맞게 수정하세요)
 import SurveyApplicationForm from '@/components/member/MemberSurvey.vue';
