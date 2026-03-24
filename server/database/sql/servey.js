@@ -53,18 +53,6 @@ const insertNewVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VA
 const memberSurvey =
   "SELECT VERSION_ID FROM survey_version WHERE IS_ACTIVE = 1";
 
-// 1. APPLICATION (지원신청서) 테이블에 데이터 삽입
-// USER_ID는 나중에 실제 로그인 세션에서 가져온 값으로 교체될 수 있도록 변수로 받습니다.
-const appQuery = `
-      INSERT INTO APPLICATION (VERSION_ID, BENE_ID, USER_ID, CREATED_AT) 
-      VALUES (?, ?, ?, NOW())
-    `;
-
-const answerQuery = `
-        INSERT INTO Survey_Answer (ANSWER_VALUE, DETAIL_ID, APP_ID) 
-        VALUES ?
-      `;
-
 module.exports = {
   selectSurvey,
   insert_item,
@@ -75,6 +63,4 @@ module.exports = {
   insertNewVersion,
   // member용
   memberSurvey,
-  appQuery,
-  answerQuery,
 };

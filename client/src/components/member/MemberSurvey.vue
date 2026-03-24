@@ -39,38 +39,6 @@ const currentItem = computed(() => {
 onMounted(() => {
     fetchActiveSurvey();
 });
-
-// 기존 코드 아래에 이 함수를 추가해 주세요.
-const submitSurvey = async () => {
-    // 1. 빈 답변 방지 (선택적으로 체크)
-    if (Object.keys(answers.value).length === 0) {
-        alert('답변을 하나 이상 선택해주세요.');
-        return;
-    }
-
-    // 2. 💡 핵심: 로그인 전이므로 가짜(Mock) 데이터를 섞어서 백엔드로 보낼 포장지를 만듭니다.
-    const payload = {
-        versionId: 1, // 방금 DB에서 활성화해둔 버전 ID (임시로 1이라고 가정)
-        beneId: 999, // 임의의 대상자 ID (나중에 props로 받아올 예정)
-        userId: 'test_manager_01', // 임의의 담당자 ID (나중에 로그인 세션에서 가져올 예정)
-        answers: answers.value // 사용자가 방금 화면에서 누른 답변들 { "15": true, "16": false ... }
-    };
-
-    console.log('👉 [프론트] 백엔드로 전송할 데이터:', payload);
-
-    // 3. 백엔드로 쏘기!
-    try {
-        const response = await axios.post('/api/survey/submit', payload);
-
-        if (response.data.success) {
-            alert(`✅ 제출 성공! (생성된 신청서 번호: ${response.data.appId})`);
-            // 성공 후 답변 초기화 등 처리
-        }
-    } catch (error) {
-        console.error('❌ [프론트 에러] 제출 실패:', error);
-        alert('제출 중 오류가 발생했습니다. (F12 콘솔 확인)');
-    }
-};
 </script>
 
 <template>
@@ -107,7 +75,7 @@ const submitSurvey = async () => {
         </div>
 
         <div class="submit-box">
-            <button @click="submitSurvey">신청 하기</button>
+            <button>신청 하기</button>
         </div>
     </div>
 </template>
