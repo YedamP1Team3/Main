@@ -2,11 +2,10 @@
 import { ref } from 'vue';
 
 // 우리가 만든 컴포넌트들을 가져옵니다.
-import JsTopbarmg from '@/layout/sAdmin_layout/JsTopbarmg.vue';
+import JsTopbarad from '@/layout/sAdmin_layout/JsTopbarad.vue';
 import BeneficiaryInfo from '@/components/beneficiary/BeneficiaryInfo.vue';
-import BeneficiaryManagement from '@/components/beneficiary/BeneficiaryManagement.vue';
-import BeneficiaryNewPlan from '@/components/beneficiary/BeneficiaryNewPlan.vue';
-import BeneficiaryDetail from '@/components/beneficiary/BeneficiaryDetail.vue';
+import AdminManagement from '@/components/adbeneficiary/AdminManagement.vue';
+// import BeneficiaryDetail from '@/components/beneficiary/BeneficiaryDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
@@ -27,16 +26,16 @@ const handleIdDetail = (planId) => {
 };
 
 // 저장후 새로고침 하는 함수
-const reloadList = () => {
-    if (managementRef.value) {
-        managementRef.value.refreshTabPlan();
-    }
-    viewMode.value = 'empty';
-};
+// const reloadList = () => {
+//     if (managementRef.value) {
+//         managementRef.value.refreshTabPlan();
+//     }
+//     viewMode.value = 'empty';
+// };
 </script>
 <template>
     <header class="main-header">
-        <JsTopbarmg />
+        <JsTopbarad />
     </header>
 
     <div class="dashboard-container">
@@ -46,18 +45,15 @@ const reloadList = () => {
             </section>
 
             <section class="list-section">
-                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @newaddplan="viewMode = 'create'" />
+                <AdminManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @newaddplan="viewMode = 'create'" />
             </section>
         </aside>
 
-        <main class="main-content">
-            <div v-if="viewMode === 'create'" class="editor-container">
-                <BeneficiaryNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
-            </div>
+        <!-- <main class="main-content">
             <div v-if="viewMode === 'detail'" class="editor-container">
                 <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
-        </main>
+        </main> -->
     </div>
 </template>
 
@@ -126,6 +122,7 @@ const reloadList = () => {
     font-size: 2rem;
     margin-bottom: 1rem;
 }
+
 .main-header {
     width: 100%;
     height: 64px; /* 헤더 높이 명시 (원하는 대로 조절 가능) */

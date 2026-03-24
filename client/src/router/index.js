@@ -43,6 +43,11 @@ const router = createRouter({
             path: '/ManagerSchedule',
             name: 'managerSchedule',
             component: () => import('../views/reservation/manager/ManagerSchedule.vue')
+        },
+        {
+            path: '/AdministratorMain',
+            name: 'AdministratorMain',
+            component: () => import('../views/beneficiary/AdministratorMain.vue')
         }
     ]
 });
