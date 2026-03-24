@@ -6,7 +6,7 @@ const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
-const emit = defineEmits('select-plan');
+const emit = defineEmits(['select-plan']);
 const currentTab = ref('Plan');
 const tabPlanRef = ref(null);
 
