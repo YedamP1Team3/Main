@@ -50,6 +50,9 @@ const selectVersionList = `
 const deactivateVersions = `UPDATE survey_version SET IS_ACTIVE = 0 WHERE IS_ACTIVE = 1;`;
 const insertNewVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (1, NOW());`;
 
+const memberSurvey =
+  "SELECT VERSION_ID FROM survey_version WHERE IS_ACTIVE = 1";
+
 module.exports = {
   selectSurvey,
   insert_item,
@@ -58,4 +61,6 @@ module.exports = {
   selectVersionList,
   deactivateVersions,
   insertNewVersion,
+  // member용
+  memberSurvey,
 };

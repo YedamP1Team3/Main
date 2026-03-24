@@ -105,4 +105,25 @@ router.post("/version/new", async (req, res) => {
   }
 });
 
+// Member 조사지 불러오기
+router.get("/active_survey", async (req, res) => {
+  console.log("👉 [Router] GET /api/survey/active 요청 도달");
+
+  try {
+    // 프론트에서 받을 파라미터(req.query)는 없습니다.
+    // 서비스에게 "알아서 활성화된 거 가져와"라고 지시만 합니다.
+    const result = await surveyService.getActiveSurvey();
+
+    console.log(
+      "👉 [Router] 데이터 응답 성공, 항목 개수:",
+      result.items?.length,
+    );
+    res.status(200).json({ success: true, data: result });
+  } catch (err) {
+    console.error("❌ [Router 에러] 활성 설문지 조회 실패:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "활성 설문지를 불러오지 못했습니다." });
+  }
+});
 module.exports = router;

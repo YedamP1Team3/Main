@@ -1,6 +1,8 @@
 import sAdmin from '@/layout/sAdmin_layout/JsLayout.vue';
 import sakayLay from '@/layout/sakima_layout/AppLayout.vue';
+import memberLay from '@/layout/member/mLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import { member } from './member.js';
 import { systemAdmin } from './s_admin.js';
 import { sakaiLayoutRoutes, sakaiStandaloneRoutes } from './sakai.js';
 
@@ -20,6 +22,14 @@ const router = createRouter({
             component: sAdmin, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
             children: [
                 ...systemAdmin // 내가 만든 경로를 먼저 배치 (우선순위 높음)
+            ]
+        },
+        {
+            path: '/member',
+            name: 'member',
+            component: memberLay, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
+            children: [
+                ...member // 내가 만든 경로를 먼저 배치 (우선순위 높음)
             ]
         },
 

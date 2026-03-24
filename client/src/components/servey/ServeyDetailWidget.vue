@@ -6,7 +6,8 @@ const props = defineProps({
     selectedItemName: String,
     selectedSubItemName: String,
     selectedItemId: Number,
-    selectedSubItemId: Number
+    selectedSubItemId: Number,
+    isActive: Boolean // ⭐️ 부모가 준 true/false 값 받기
 });
 
 // [수정] 부모 컴포넌트(ServeyCreate)의 @save와 맞추기 위해 'save'로 변경
@@ -46,71 +47,71 @@ const handleSubmit = () => {
 
 <template>
     <div class="card bg-white shadow-xl rounded-2xl h-[40rem] flex flex-col border border-slate-100 overflow-hidden">
-        <div class="bg-slate-50/80 border-b border-slate-100 p-4 shrink-0">
-            <div class="flex items-center justify-between mb-3">
+        <div class="bg-slate-50/80 border-b border-slate-100 p-5 shrink-0">
+            <div v-if="isActive" class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
-                    <div class="w-1 h-3.5 bg-slate-800 rounded-full"></div>
-                    <h5 class="font-extrabold text-[11px] text-slate-500 uppercase tracking-widest">선택항목</h5>
+                    <div class="w-1.5 h-4 bg-slate-800 rounded-full"></div>
+                    <h5 class="font-extrabold text-sm text-slate-500 uppercase tracking-widest">선택항목</h5>
                 </div>
-                <div class="flex gap-4 items-center">
-                    <button @click="toggleAll" class="text-[10px] font-bold text-slate-400 hover:text-blue-600 transition-colors">전체 선택</button>
-                    <button @click="handleDeleteSelected" class="px-3 py-1 bg-red-50 text-red-600 rounded-md text-[10px] font-black hover:bg-red-100 active:scale-95 transition-all">선택 삭제</button>
+                <div class="flex gap-5 items-center">
+                    <button @click="toggleAll" class="text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors">전체 선택</button>
+                    <button @click="handleDeleteSelected" class="px-4 py-2 bg-red-50 text-red-600 rounded-md text-[13px] font-black hover:bg-red-100 active:scale-95 transition-all">선택 삭제</button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
-                <div v-if="selectedItemName" class="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-lg shadow-sm">
-                    <input type="checkbox" v-model="selectedItems" :value="'item-' + selectedItemId" class="h-3.5 w-3.5 rounded border-slate-300 text-slate-900 focus:ring-0" />
+            <div class="grid grid-cols-2 gap-3">
+                <div v-if="selectedItemName" class="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <input v-if="isActive" type="checkbox" v-model="selectedItems" :value="'item-' + selectedItemId" class="h-5 w-5 rounded border-slate-300 text-slate-900 focus:ring-0 cursor-pointer" />
                     <div class="flex-1 min-w-0">
-                        <span class="text-[10px] font-bold text-slate-700 truncate block">{{ selectedItemName }}</span>
+                        <span class="text-[15px] font-bold text-slate-700 truncate block">{{ selectedItemName }}</span>
                     </div>
                 </div>
 
-                <div v-if="selectedSubItemName" class="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-lg shadow-sm">
-                    <input type="checkbox" v-model="selectedItems" :value="'sub-' + selectedSubItemId" class="h-3.5 w-3.5 rounded border-slate-300 text-slate-900 focus:ring-0" />
+                <div v-if="selectedSubItemName" class="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <input v-if="isActive" type="checkbox" v-model="selectedItems" :value="'sub-' + selectedSubItemId" class="h-5 w-5 rounded border-slate-300 text-slate-900 focus:ring-0 cursor-pointer" />
                     <div class="flex-1 min-w-0">
-                        <span class="text-[10px] font-bold text-slate-700 truncate block">{{ selectedSubItemName }}</span>
+                        <span class="text-[15px] font-bold text-slate-700 truncate block">{{ selectedSubItemName }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar bg-white">
-            <div class="flex items-center justify-between mb-3 px-1">
-                <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Questions</p>
-                <span class="text-[10px] font-bold text-slate-400">{{ details?.length || 0 }} 문항</span>
+        <div class="flex-1 overflow-y-auto p-5 custom-scrollbar bg-white">
+            <div class="flex items-center justify-between mb-4 px-1">
+                <p class="text-sm font-black text-slate-300 uppercase tracking-[0.2em]">Questions List</p>
+                <span class="text-sm font-bold text-blue-500 bg-blue-50 px-3 py-0.5 rounded-full">{{ details?.length || 0 }} 문항</span>
             </div>
 
-            <ul v-if="details?.length > 0" class="space-y-2">
-                <li v-for="detail in details" :key="detail.id" class="flex items-center gap-4 p-3.5 bg-slate-50/50 border border-slate-100 rounded-xl hover:bg-white hover:border-blue-200 hover:shadow-sm transition-all">
-                    <input type="checkbox" v-model="selectedItems" :value="'detail-' + detail.id" class="h-4 w-4 rounded border-slate-300 text-blue-600 cursor-pointer focus:ring-0" />
+            <ul v-if="details?.length > 0" class="space-y-3">
+                <li v-for="detail in details" :key="detail.id" class="flex items-start gap-4 p-5 bg-slate-50/50 border border-slate-100 rounded-xl hover:bg-white hover:border-blue-200 hover:shadow-sm transition-all">
+                    <input v-if="isActive" type="checkbox" v-model="selectedItems" :value="'detail-' + detail.id" class="h-6 w-6 mt-0.5 rounded border-slate-300 text-blue-600 cursor-pointer focus:ring-0" />
                     <div class="flex-1 min-w-0">
-                        <p class="text-slate-600 text-[13px] font-medium leading-relaxed truncate">{{ detail.question_text }}</p>
+                        <p class="text-slate-700 text-base font-semibold leading-relaxed">{{ detail.question_text }}</p>
                     </div>
                 </li>
             </ul>
 
-            <div v-else class="h-40 flex flex-col items-center justify-center border-2 border-dashed border-slate-50 rounded-2xl bg-slate-50/30">
-                <p class="text-slate-300 text-[10px] font-bold uppercase tracking-widest text-center leading-loose">질문 데이터가 없습니다.<br />하단의 추가 버튼을 이용하세요.</p>
+            <div v-else class="h-40 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/30">
+                <p class="text-slate-300 text-sm font-bold uppercase tracking-widest text-center leading-loose">질문 데이터가 없습니다.</p>
             </div>
 
-            <div v-if="showInput" class="mt-4 p-4 bg-white border-2 border-blue-500 rounded-xl shadow-xl animate-in zoom-in-95 duration-200">
-                <textarea v-model="newTitle" placeholder="질문 내용을 입력하세요..." rows="2" class="w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-slate-700 placeholder:text-slate-300 resize-none"></textarea>
-                <div class="flex justify-end gap-2 mt-2 pt-2 border-t border-slate-50">
-                    <button @click="showInput = false" class="px-3 py-1 text-[11px] font-bold text-slate-400 hover:text-slate-600">CANCEL</button>
-                    <button @click="handleSubmit" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[11px] font-black shadow-lg shadow-blue-100">ADD QUESTION</button>
+            <div v-if="showInput" class="mt-4 p-5 bg-white border-2 border-blue-500 rounded-xl shadow-xl animate-in zoom-in-95 duration-200">
+                <textarea v-model="newTitle" placeholder="질문 내용을 입력하세요..." rows="2" class="w-full bg-transparent border-none focus:ring-0 text-base font-semibold text-slate-700 placeholder:text-slate-300 resize-none"></textarea>
+                <div class="flex justify-end gap-3 mt-3 pt-3 border-t border-slate-50">
+                    <button @click="showInput = false" class="px-4 py-2 text-[13px] font-bold text-slate-400 hover:text-slate-600">CANCEL</button>
+                    <button @click="handleSubmit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-[13px] font-black shadow-lg shadow-blue-100">ADD QUESTION</button>
                 </div>
             </div>
         </div>
 
-        <div class="px-5 py-4 bg-white border-t border-slate-50 flex items-center justify-between shrink-0">
-            <button v-if="!showInput" @click="showInput = true" class="group flex items-center gap-2 text-blue-600 font-black text-[11px] uppercase tracking-wider hover:text-blue-700 transition-all">
-                <span class="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">+</span>
+        <div v-if="isActive" class="px-6 py-6 bg-white border-t border-slate-100 flex items-center justify-between shrink-0">
+            <button v-if="!showInput" @click="showInput = true" class="group flex items-center gap-4 text-blue-600 font-black text-base uppercase tracking-wider hover:text-blue-700 transition-all">
+                <span class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all text-2xl">+</span>
                 질문 추가
             </button>
             <div v-else></div>
 
-            <button @click="emit('save')" class="flex items-center gap-3 bg-slate-900 text-white px-6 py-2.5 rounded-xl font-black text-[11px] tracking-widest hover:bg-blue-600 active:scale-95 transition-all shadow-xl shadow-slate-200 uppercase">
+            <button @click="emit('save')" class="flex items-center gap-4 bg-slate-900 text-white px-10 py-4 rounded-xl font-black text-base tracking-widest hover:bg-blue-600 active:scale-95 transition-all shadow-xl shadow-slate-200 uppercase">
                 버전 확정 및 저장
             </button>
         </div>
