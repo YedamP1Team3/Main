@@ -1,17 +1,26 @@
 // 담당자 ID 조회
-const selectManagerId = `
-SELECT * 
-FROM user_info 
-WHERE user_id = ? 
-AND role = 'MANAGER'
-`;
-
-// 담당자 스케쥴 조회
 const selectManagerSchedule = `
-SELECT slot_id, slot_datetime, available
-FROM time_slot
-WHERE manager_id = ?
-ORDER BY slot_datetime
+  SELECT 
+    man_schedule_id,
+    manager_id,
+    work_date,
+    work_start_time,
+    work_end_time,
+    break_start_time,
+    break_end_time
+  FROM manager_schedules
+  WHERE manager_id = ?
+    AND work_date = ?
 `;
 
-module.exports = { selectManagerId, selectManagerSchedule };
+const insertBlockedTime = `
+  INSERT INTO manager_blocked_times (
+    manager_id,
+    work_date,
+    start_time,
+    end_time
+  )
+  VALUES (?, ?, ?, ?)
+`;
+
+module.exports = { selectManagerSchedule, insertBlockedTime };
