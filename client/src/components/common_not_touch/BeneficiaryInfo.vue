@@ -1,9 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useAuthStore } from '@/stores/auth';
 
-const authStore = useAuthStore();
 const emit = defineEmits(['updateBeneId']);
 
 const selectedBeneId = ref(''); // 사용자가 선택한 'ID' (v-model과 연결)
@@ -36,11 +34,9 @@ onMounted(async () => {
                     <td>
                         <select v-model="selectedBeneId" @change="fetchBeneDetail">
                             <option value="">지원자를 선택하세요</option>
-                            <template v-if="authStore.userId">
-                                <option v-for="bene in beneficiaryList" :key="bene.bene_id" :value="bene.bene_id">
-                                    {{ bene.bene_name }}
-                                </option>
-                            </template>
+                            <option v-for="bene in beneficiaryList" :key="bene.bene_id" :value="bene.bene_id">
+                                {{ bene.bene_name }}
+                            </option>
                         </select>
                     </td>
                     <th><label>보호자</label></th>

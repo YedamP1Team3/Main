@@ -1,8 +1,11 @@
 <script setup>
 import axios from 'axios';
 import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+
 const props = defineProps({ beneId: [String, Number], priorityId: [String, Number] });
 const emit = defineEmits(['refresh', 'savetem']);
+const authStore = useAuthStore();
 
 const planObjective = ref(''); //목표저장
 const planContent = ref(''); //내용저장
@@ -15,14 +18,14 @@ const Approval = async () => {
     }
     const target = {
         priority_id: props.priorityId,
-        manager_id: 'admin',
+        manager_id: authStore.userId,
         bene_id: props.beneId,
         plan_objective: planObjective.value,
         plan_content: planContent.value,
         progress_state: '대기'
     };
     try {
-        const response = await axios.post('http://localhost:3000/insertSupportPlan', target);
+        const response = await axios.post('http://localhost:3000/api/insertSupportPlan', target);
         if (response.data) {
             alert('지원서가 입력되었습니다');
             emit('refresh');
@@ -40,14 +43,14 @@ const SaveTemp = async () => {
     }
     const target = {
         priority_id: props.priorityId,
-        manager_id: 'admin',
+        manager_id: authStore.userId,
         bene_id: props.beneId,
         plan_objective: planObjective.value,
         plan_content: planContent.value,
         progress_state: '임시'
     };
     try {
-        const response = await axios.post('http://localhost:3000/insertSupportPlan', target);
+        const response = await axios.post('http://localhost:3000/api/insertSupportPlan', target);
         if (response.data) {
             alert('지원서가 입력되었습니다');
             emit('refresh');

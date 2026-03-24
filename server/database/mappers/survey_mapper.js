@@ -113,6 +113,26 @@ const createNewVersion = async () => {
     if (conn) conn.release();
   }
 };
+
+// ⭐️ [MEMBER용] 현재 활성화된(1) 버전 ID 딱 하나만 가져오는 함수 추가
+const getActiveVersionId = async () => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    console.log("👉 [Mapper] 활성화된(IS_ACTIVE=1) 버전 ID 조회 시도");
+
+    // 복잡한 JOIN 없이, 단순히 활성 상태인 버전의 ID만 찾습니다.
+    let rows = await conn.query(surveySql.memberSurvey);
+
+    // 결과가 있으면 첫 번째 행의 ID를 반환, 없으면 null 반환
+    return rows.length > 0 ? rows[0].VERSION_ID : null;
+  } catch (err) {
+    console.error("❌ [Mapper 에러] 활성 버전 ID 조회 실패:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
 module.exports = {
   selectSurvey,
   insertItem,
@@ -123,4 +143,6 @@ module.exports = {
   deleteDetails,
   getVersions, // 추가됨
   createNewVersion,
+  //member 용
+  getActiveVersionId,
 };

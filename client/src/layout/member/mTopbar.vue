@@ -2,31 +2,7 @@
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from '../AppConfigurator.vue';
 
-import { useAuthStore } from '@/stores/auth';
-import { storeToRefs } from 'pinia';
-
-const authStore = useAuthStore();
-const { userId, userName } = storeToRefs(authStore);
-
 const { toggleDarkMode, isDarkTheme } = useLayout();
-
-const handleIdLogin = () => {
-    if (!authStore.userId) {
-        const tempuser = {
-            user_id: 'sskk',
-            user_name: '김덕모',
-            role: 'MANAGER'
-        };
-        authStore.login(tempuser);
-        alert(`${tempuser.user_name}이 로그인 되었습니다`);
-        location.reload();
-    } else {
-        if (confirm('로그아웃 하시겠습니까?')) {
-            authStore.logout();
-            location.reload();
-        }
-    }
-};
 </script>
 
 <template>
@@ -45,9 +21,10 @@ const handleIdLogin = () => {
             </router-link>
 
             <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
+                <div class="a-name text-color font-medium">기관명</div>
                 <button type="button" class="p-link text-color font-medium">신청내역</button>
-                <button type="button" class="p-link text-color font-medium">지원계획</button>
-                <button type="button" class="p-link text-color font-medium">상담관리</button>
+                <button type="button" class="p-link text-color font-medium">지원신청</button>
+                <button type="button" class="p-link text-color font-medium">상담예약</button>
             </div>
         </div>
 
@@ -60,12 +37,11 @@ const handleIdLogin = () => {
             </div>
         </div>
 
-        <div class="flex items-center gap-2 cursor-pointer" @click="handleIdLogin">
-            <span class="hidden sm:block font-medium text-color">
-                {{ authStore.userId ? `${authStore.userName} 담당자` : '기관 담당자(로그인)' }}
-            </span>
+        <div class="flex items-center gap-2">
+            <span class="hidden sm:block font-medium text-color">신재성님</span>
             <button type="button" class="layout-topbar-action">
-                <i class="pi pi-user" :style="{ color: authStore.userId ? 'var(--primary-color)' : '' }"></i>
+                <i class="pi pi-user"></i>
+                <span class="hidden">Profile</span>
             </button>
         </div>
     </div>

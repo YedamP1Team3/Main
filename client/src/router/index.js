@@ -1,7 +1,10 @@
 import sAdmin from '@/layout/sAdmin_layout/JsLayout.vue';
+import sakayLay from '@/layout/sakima_layout/AppLayout.vue';
+import memberLay from '@/layout/member/mLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import { member } from './member.js';
 import { systemAdmin } from './s_admin.js';
-import { sakaiLayoutRoutes, sakaiStandaloneRoutes } from './sakai.js';
+import { sakaiLayoutRoutes } from './sakai.js';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -16,6 +19,14 @@ const router = createRouter({
         },
         // 레이아웃 바깥에 있는 템플릿 페이지들 전개
         ...sakaiStandaloneRoutes,
+        {
+            path: '/member',
+            name: 'member',
+            component: memberLay, // Sakima의 기본 레이아웃 (사이드바, 상단 네비게이션)
+            children: [
+                ...member // 내가 만든 경로를 먼저 배치 (우선순위 높음)
+            ]
+        },
 
         {
             path: '/BeneficiaryMain',
@@ -45,6 +56,14 @@ const router = createRouter({
             meta: {
                 requiresAuth: true
             }
+            path: '/ManagerSchedule',
+            name: 'managerSchedule',
+            component: () => import('../views/reservation/manager/ManagerSchedule.vue')
+        },
+        {
+            path: '/AdministratorMain',
+            name: 'AdministratorMain',
+            component: () => import('../views/beneficiary/AdministratorMain.vue')
         }
     ]
 });
