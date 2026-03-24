@@ -4,7 +4,7 @@ import memberLay from '@/layout/member/mLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { member } from './member.js';
 import { systemAdmin } from './s_admin.js';
-import { sakaiLayoutRoutes, sakaiStandaloneRoutes } from './sakai.js';
+import { sakaiLayoutRoutes } from './sakai.js';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -53,6 +53,11 @@ const router = createRouter({
             path: '/ManagerSchedule',
             name: 'managerSchedule',
             component: () => import('../views/reservation/manager/ManagerSchedule.vue')
+        },
+        {
+            path: '/AdministratorMain',
+            name: 'AdministratorMain',
+            component: () => import('../views/beneficiary/AdministratorMain.vue')
         }
     ]
 });
