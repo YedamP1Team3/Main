@@ -1,273 +1,206 @@
 <template>
     <div class="timeslot-container">
-        <div class="timeslot-card">
-            <!-- 날짜 표시 -->
-            <h3 v-if="selectedDate" class="date-title">
-                {{ formattedDate }}
-            </h3>
-            <div v-else class="empty-message">날짜를 선택해주세요</div>
+        <!-- 선택된 날짜 표시 -->
+        <div class="header">
+            <h3>시간 선택</h3>
+            <p v-if="selectedDate">{{ selectedDate }}</p>
+            <p v-else>날짜를 먼저 선택하세요</p>
+        </div>
 
-            <!-- 오전 / 오후 선택 -->
-            <div v-if="selectedDate" class="period-selector">
-                <button :class="['period-btn', { active: selectedPeriod === 'AM' }]" @click="selectPeriod('AM')">오전</button>
+        <!-- 오전 / 오후 선택 -->
+        <div class="period-toggle">
+            <button :class="{ active: period === 'AM' }" @click="period = 'AM'">오전</button>
+            <button :class="{ active: period === 'PM' }" @click="period = 'PM'">오후</button>
+        </div>
 
-                <button :class="['period-btn', { active: selectedPeriod === 'PM' }]" @click="selectPeriod('PM')">오후</button>
+        <!-- 시간 리스트 -->
+        <div class="time-grid">
+            <div v-for="time in timeSlots" :key="time" class="time-item" :class="{ selected: selectedTimes.includes(time) }" @click="toggleTime(time)">
+                {{ time }}
             </div>
+        </div>
 
-            <!-- 시간 슬롯 -->
-            <div v-if="selectedDate" class="slots">
-                <button
-                    v-for="slot in filteredSlots"
-                    :key="slot.slot_id"
-                    class="slot-btn"
-                    :class="{
-                        selected: selectedSlot?.slot_id === slot.slot_id,
-                        disabled: slot.available === 'BLOCKED'
-                    }"
-                    @click="selectSlot(slot)"
-                >
-                    {{ formatTime(slot.slot_datetime) }}
-                </button>
-            </div>
-
-            <!-- 상태 변경 버튼 -->
-            <div v-if="selectedSlot" class="action-buttons">
-                <button class="available-btn" @click="setAvailable">예약가능</button>
-
-                <button class="unavailable-btn" @click="blockSlot">예약불가</button>
-            </div>
+        <!-- 버튼 -->
+        <div class="action-buttons">
+            <button class="available-btn">예약가능</button>
+            <button class="unavailable-btn">예약불가</button>
         </div>
     </div>
 </template>
 
-<script setup>
+<script>
 import { ref, computed, watch } from 'vue';
 import axios from 'axios';
 
-const props = defineProps({
-    selectedDate: Date
-});
-
-const selectedPeriod = ref('AM');
-const selectedSlot = ref(null);
-const slots = ref([]);
-
-// 📌 날짜 포맷 (YYYY-MM-DD)
-const formattedDate = computed(() => {
-    if (!props.selectedDate) return '';
-
-    const year = props.selectedDate.getFullYear();
-    const month = String(props.selectedDate.getMonth() + 1).padStart(2, '0');
-    const day = String(props.selectedDate.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-});
-
-const findSlotDateTime = async () => {
-    if (!formattedDate.value) return;
-
-    try {
-        let response = await axios.get(`/api/reserve/schedule`, {
-            params: { date: formattedDate.value }
-        });
-        if (response.data.schedule) {
-            slots.value = response.data.schedule;
-        } else {
-            console.error('슬롯 조회 실패');
-        }
-    } catch (err) {
-        console.error('슬롯 조회 에러:', err);
-    }
-};
-
-// 📌 날짜 변경 감지 → 슬롯 조회
-watch(
-    () => props.selectedDate,
-    () => {
-        selectedSlot.value = null; // 선택 초기화
-        findSlotDateTime();
+export default {
+    name: 'TimeSlot',
+    props: {
+        selectedDate: String
     },
-    { immediate: true }
-);
+    setup(props) {
+        const period = ref('AM');
+        const selectedTimes = ref([]);
 
-// 🔹 오전/오후 선택
-const selectPeriod = (period) => {
-    selectedPeriod.value = period;
-    selectedSlot.value = null;
-};
+        const fetchSchedule = async (date) => {
+            let schedule = [];
+            try {
+                const res = await axios.get('/api/reserve/schedule', {
+                    params: { date }
+                });
 
-// 🔹 시간 필터링 (AM / PM)
-const filteredSlots = computed(() => {
-    return slots.value.filter((slot) => {
-        const hour = new Date(slot.slot_datetime).getHours();
-        return selectedPeriod.value === 'AM' ? hour < 13 : hour >= 14;
-    });
-});
+                if (res.data.success) {
+                    schedule.value = res.data.schedule;
+                    console.log('스케줄 데이터:', schedule.value);
+                }
+            } catch (err) {
+                console.error('스케줄 조회 실패:', err);
+            }
+        };
 
-// 🔹 시간 포맷
-const formatTime = (datetime) => {
-    return new Date(datetime).toLocaleTimeString('ko-KR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
-};
+        // 날짜 변경 감지
+        watch(
+            () => props.selectedDate,
+            (newDate) => {
+                if (!newDate) return;
 
-// 🔹 슬롯 선택
-const selectSlot = (slot) => {
-    if (slot.status === 'BLOCKED') return;
-    selectedSlot.value = slot;
-};
+                selectedTimes.value = []; // 선택 초기화
+                fetchSchedule(newDate); // 🔥 API 호출
+            }
+        );
 
-// 🔹 예약가능
-const setAvailable = async () => {
-    if (!selectedSlot.value) return;
+        // 시간 생성 함수
+        const generateTimeSlots = (start, end) => {
+            const times = [];
+            let [hour, minute] = start.split(':').map(Number);
+            const [endHour, endMinute] = end.split(':').map(Number);
 
-    await axios.put('/reserve/available', {
-        slot_id: selectedSlot.value.slot_id
-    });
+            while (hour < endHour || (hour === endHour && minute <= endMinute)) {
+                const h = String(hour).padStart(2, '0');
+                const m = String(minute).padStart(2, '0');
+                times.push(`${h}:${m}`);
 
-    fetchSlots(); // 새로고침
-};
+                minute += 30;
+                if (minute >= 60) {
+                    minute = 0;
+                    hour += 1;
+                }
+            }
 
-// 🔹 예약불가
-const blockSlot = async () => {
-    if (!selectedSlot.value) return;
+            return times;
+        };
 
-    await axios.put('/reserve/block', {
-        slot_id: selectedSlot.value.slot_id
-    });
+        const timeSlots = computed(() => {
+            if (period.value === 'AM') {
+                return generateTimeSlots('09:00', '12:30');
+            } else {
+                return generateTimeSlots('14:00', '17:30');
+            }
+        });
 
-    findSlotDateTime(); // 새로고침
+        const toggleTime = (time) => {
+            if (selectedTimes.value.includes(time)) {
+                selectedTimes.value = selectedTimes.value.filter((t) => t !== time);
+            } else {
+                selectedTimes.value.push(time);
+            }
+        };
+
+        return {
+            period,
+            timeSlots,
+            selectedTimes,
+            toggleTime
+        };
+    }
 };
 </script>
 
 <style scoped>
-/* 전체 배경 */
 .timeslot-container {
-    background: #f4f8ff;
-    padding: 20px;
-    border-radius: 16px;
-}
-
-/* 카드 */
-.timeslot-card {
+    width: 320px;
     background: white;
-    border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* 날짜 */
-.date-title {
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-/* 안내문 */
-.empty-message {
-    color: #888;
-    text-align: center;
+/* 헤더 */
+.header {
+    margin-bottom: 15px;
 }
 
 /* 오전/오후 */
-.period-selector {
+.period-toggle {
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
 }
 
-.period-btn {
+.period-toggle button {
     flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    background: #e3ecff;
+    padding: 8px;
+    border: 1px solid #3b82f6;
+    background: white;
+    color: #3b82f6;
+    border-radius: 8px;
     cursor: pointer;
-    transition: 0.2s;
 }
 
-.period-btn:hover {
-    background: #cddcff;
-}
-
-.period-btn.active {
-    background: #4a90e2;
+.period-toggle button.active {
+    background: #3b82f6;
     color: white;
-    font-weight: bold;
 }
 
-/* 슬롯 */
-.slots {
+/* 시간 grid */
+.time-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 }
 
-/* 버튼 */
-.slot-btn {
+.time-item {
     padding: 10px;
-    border-radius: 10px;
-    border: none;
-    background: #eef4ff;
+    text-align: center;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
     cursor: pointer;
     transition: 0.2s;
 }
 
-/* hover */
-.slot-btn:hover {
-    background: #dbe7ff;
+.time-item:hover {
+    background: #e6f0ff;
 }
 
-/* 선택됨 */
-.slot-btn.selected {
-    background: #4a90e2;
+.time-item.selected {
+    background: #3b82f6;
     color: white;
-    font-weight: bold;
+    border-color: #3b82f6;
 }
 
-/* 비활성 */
-.slot-btn.disabled {
-    background: #eee;
-    color: #aaa;
-    cursor: not-allowed;
-}
-
-/* 버튼 영역 */
+/* 버튼 */
 .action-buttons {
     display: flex;
     gap: 10px;
     margin-top: 20px;
 }
 
-/* 공통 버튼 */
-.action-buttons button {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s;
-    font-weight: bold;
-}
-
-/* 예약가능 */
 .available-btn {
-    background: #4a90e2;
+    flex: 1;
+    padding: 10px;
+    background: #3b82f6;
     color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
-.available-btn:hover {
-    background: #357bd8;
-}
-
-/* 예약불가 */
 .unavailable-btn {
-    background: #eee;
-    color: #555;
-}
-
-.unavailable-btn:hover {
-    background: #ddd;
+    flex: 1;
+    padding: 10px;
+    background: white;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    border-radius: 8px;
+    cursor: pointer;
 }
 </style>
