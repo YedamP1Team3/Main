@@ -5,7 +5,7 @@ import { ref } from 'vue';
 import JsTopbarad from '@/layout/sAdmin_layout/JsTopbarad.vue';
 import BeneficiaryInfo from '@/components/beneficiary/BeneficiaryInfo.vue';
 import AdminManagement from '@/components/adbeneficiary/AdminManagement.vue';
-// import BeneficiaryDetail from '@/components/beneficiary/BeneficiaryDetail.vue';
+import AdplanDetail from '@/components/adbeneficiary/AdplanDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
@@ -25,13 +25,13 @@ const handleIdDetail = (planId) => {
     viewMode.value = 'detail';
 };
 
-// 저장후 새로고침 하는 함수
-// const reloadList = () => {
-//     if (managementRef.value) {
-//         managementRef.value.refreshTabPlan();
-//     }
-//     viewMode.value = 'empty';
-// };
+//저장후 새로고침 하는 함수
+const reloadList = () => {
+    if (managementRef.value) {
+        managementRef.value.refreshTabPlan();
+    }
+    viewMode.value = 'empty';
+};
 </script>
 <template>
     <header class="main-header">
@@ -49,11 +49,11 @@ const handleIdDetail = (planId) => {
             </section>
         </aside>
 
-        <!-- <main class="main-content">
+        <main class="main-content">
             <div v-if="viewMode === 'detail'" class="editor-container">
-                <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+                <AdplanDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
-        </main> -->
+        </main>
     </div>
 </template>
 
