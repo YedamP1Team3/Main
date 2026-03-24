@@ -27,7 +27,7 @@ const handleAdd = () => {
 </script>
 
 <template>
-    <div class="flex flex-col h-[50rem] bg-white shadow-md rounded-xl border border-slate-200 p-5">
+    <div class="flex flex-col h-[40rem] bg-white shadow-md rounded-xl border border-slate-200 p-5">
         <div class="pb-4 shrink-0">
             <h5 class="font-bold text-xl text-slate-800">지원서 항목</h5>
         </div>

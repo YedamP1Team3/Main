@@ -46,7 +46,7 @@ const handleSubmit = () => {
 </script>
 
 <template>
-    <div class="card bg-white shadow-xl rounded-2xl h-[50rem] flex flex-col border border-slate-100 overflow-hidden">
+    <div class="card bg-white shadow-xl rounded-2xl h-[40rem] flex flex-col border border-slate-100 overflow-hidden">
         <div class="bg-slate-50/80 border-b border-slate-100 p-5 shrink-0">
             <div v-if="isActive" class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
