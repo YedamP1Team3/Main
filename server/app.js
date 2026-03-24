@@ -20,10 +20,10 @@ app.get("/", (req, res) => {
   res.send("Welcom!!");
 });
 
-const userRouter = require("./router/user_router.js");
+// const userRouter = require("./router/user_router.js");
 const surveyRouter = require("./router/survey_router.js");
 
-app.use("/api", userRouter);
+// app.use("/api", userRouter);
 
 app.use("/reserve", require("./router/rsv_router.js"));
 
