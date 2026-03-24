@@ -3,6 +3,13 @@ import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from '../AppConfigurator.vue';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
+
+// 페이지 이동하기 (vue라서 이동은 아니고 )
+const router = useRouter();
+const naviToApply = () => {
+    router.push({ name: 'mApplication' });
+};
 
 const { toggleDarkMode, isDarkTheme } = useLayout();
 const surveyStore = useSurveyStore();
@@ -44,7 +51,7 @@ const toggleAuth = async () => {
             <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
                 <div class="a-name text-color font-medium">기관명</div>
                 <button type="button" class="p-link text-color font-medium">신청내역</button>
-                <button type="button" class="p-link text-color font-medium">지원신청</button>
+                <button type="button" class="p-link text-color font-medium" @click="naviToApply">지원신청</button>
                 <button type="button" class="p-link text-color font-medium">상담예약</button>
             </div>
         </div>
