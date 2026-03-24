@@ -120,4 +120,51 @@ router.get("/active_survey", async (req, res) => {
   }
 });
 
+// [추가] 7. 지원신청서 및 조사지 답변 제출 (POST)
+router.post("/submit", async (req, res) => {
+  try {
+    // 프론트에서 보낸 데이터(req.body)를 서비스로 넘김
+    // 예상 구조: { bene_id: 1, version_id: 1, user_id: 'test_user', answers: { '상세내용ID': true/false, ... } }
+    const appId = await surveyService.submitSurveyResult(req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "신청서가 성공적으로 저장되었습니다.",
+      app_id: appId,
+    });
+  } catch (err) {
+    console.error("❌ [Router 에러] 설문 제출 실패:", err);
+    res.status(500).json({
+      success: false,
+      message: "신청서 저장 중 오류가 발생했습니다.",
+      error: err.message,
+    });
+  }
+});
+
+// [조회] 8. 특정 신청서의 상세 내용 및 답변 불러오기
+router.get("/result/:appId", async (req, res) => {
+  try {
+    const { appId } = req.params;
+    const result = await surveyService.getApplicationDetail(appId);
+
+    res.status(200).json({ success: true, data: result });
+  } catch (err) {
+    console.error("❌ [Router 에러] 조회 실패:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.get("/list/:beneId", async (req, res) => {
+  try {
+    const { beneId } = req.params;
+    const list = await surveyService.getApplicationListByBene(beneId);
+
+    res.status(200).json({ success: true, data: list });
+  } catch (err) {
+    console.error("❌ [Router 에러] 리스트 조회 실패:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;

@@ -28,8 +28,8 @@ onMounted(async () => {
 </script>
 
 <template>
+    <h3>지원자 정보</h3>
     <div class="BfInfo">
-        <h3>지원자 정보</h3>
         <table>
             <tbody>
                 <tr>

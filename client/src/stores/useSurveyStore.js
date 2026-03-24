@@ -1,4 +1,3 @@
-// useSurveyStore.js
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
@@ -6,14 +5,17 @@ export const useSurveyStore = defineStore('survey', {
     state: () => ({
         login_user_id: null,
         login_user_name: null,
-        beneficiary_list: [], // 원본 전체 목록
-        my_beneficiaries: [], // 필터링된 "내 가족" 목록
-        selected_bene_detail: {}, // 선택된 대상자 상세 정보
+        beneficiary_list: [],
+        my_beneficiaries: [],
+        selected_bene_detail: {},
+        selected_bene_id: null,
+        application_list: [],
+        is_survey_visible: false,
 
-        // --- [신규 추가 상태] ---
-        selected_bene_id: null, // 현재 선택된 대상자 ID
-        application_list: [], // 선택된 대상자의 신청서 리스트
-        is_survey_visible: false // 우측 설문지창 표시 여부
+        // ⭐️ [신규] 조회 모드용 상태 변수들
+        is_view_mode: false, // 현재 창이 '조회 모드'인지 여부
+        view_survey_data: [], // 과거에 작성했던 버전의 문항들
+        view_answers: {} // 과거에 체크했던 답변들
     }),
 
     actions: {
@@ -25,6 +27,9 @@ export const useSurveyStore = defineStore('survey', {
             this.selected_bene_id = null;
             this.application_list = [];
             this.is_survey_visible = false;
+            this.is_view_mode = false;
+            this.view_survey_data = [];
+            this.view_answers = {};
         },
 
         setLoginUser(id, name) {
@@ -52,10 +57,7 @@ export const useSurveyStore = defineStore('survey', {
         },
 
         async fetchBeneficiaryDetail(beneId) {
-            if (!beneId) {
-                this.selected_bene_detail = {};
-                return;
-            }
+            if (!beneId) return (this.selected_bene_detail = {});
             try {
                 const res = await axios.get(`http://localhost:3000/api/beneficiaries/${beneId}`);
                 this.selected_bene_detail = res.data;
@@ -64,10 +66,9 @@ export const useSurveyStore = defineStore('survey', {
             }
         },
 
-        // --- [신규: 대상자 선택 통합 로직] ---
         async selectBeneficiary(beneId) {
             this.selected_bene_id = beneId;
-            this.is_survey_visible = false; // 다른 대상자를 선택하면 일단 설문창을 닫음
+            this.is_survey_visible = false;
 
             if (!beneId) {
                 this.selected_bene_detail = {};
@@ -75,34 +76,54 @@ export const useSurveyStore = defineStore('survey', {
                 return;
             }
 
-            // 1. 상세 정보 불러오기
             await this.fetchBeneficiaryDetail(beneId);
-
-            // 2. 해당 대상자의 신청서 리스트 불러오기
             await this.fetchApplicationList(beneId);
         },
 
-        // --- [신규: 신청서 리스트 불러오기 (임시 목업)] ---
+        // ⭐️ [수정됨] 진짜 DB에서 리스트 불러오기
         async fetchApplicationList(beneId) {
             try {
-                // 실제 백엔드 연동 시:
-                // const res = await axios.get(`http://localhost:3000/api/applications?beneId=${beneId}`);
-                // this.application_list = res.data;
+                // 1. 가짜 목업 데이터 삭제하고 실제 API 호출!
+                const res = await axios.get(`http://localhost:3000/survey/list/${beneId}`);
 
-                // [프론트엔드 테스트용 목업 데이터]
-                const beneName = this.my_beneficiaries.find((b) => b.bene_id === beneId)?.bene_name || '대상자';
-                this.application_list = [
-                    { id: 1, writer: this.login_user_name, bene_name: beneName, date: '2026.01.25' },
-                    { id: 2, writer: this.login_user_name, bene_name: beneName, date: '2026.02.10' }
-                ];
+                if (res.data.success) {
+                    this.application_list = res.data.data; // DB에서 가져온 진짜 리스트 꽂아넣기
+                } else {
+                    this.application_list = [];
+                }
             } catch (error) {
                 console.error('리스트 로드 실패:', error);
+                this.application_list = []; // 에러 나면 빈 배열로 초기화
             }
         },
 
-        // --- [신규: 설문창 제어] ---
+        // --- 설문창 제어 로직 ---
         openSurvey() {
+            this.is_view_mode = false; // 추가하기를 누르면 작성 모드로 엶
             this.is_survey_visible = true;
+        },
+        closeSurvey() {
+            this.is_survey_visible = false;
+            this.is_view_mode = false;
+        },
+
+        // ⭐️ [신규] 목록 클릭 시 상세 데이터 불러오기
+        async loadApplicationView(appId) {
+            try {
+                const res = await axios.get(`http://localhost:3000/survey/result/${appId}`);
+                if (res.data.success) {
+                    // 백엔드에서 조립해준 과거 데이터 덮어씌우기
+                    this.view_survey_data = res.data.data.survey_data.items;
+                    this.view_answers = res.data.data.answers;
+
+                    // 화면을 조회 모드로 전환
+                    this.is_view_mode = true;
+                    this.is_survey_visible = true;
+                }
+            } catch (error) {
+                console.error('조회 로드 실패:', error);
+                alert('신청서 정보를 불러오는데 실패했습니다.');
+            }
         }
     }
 });
