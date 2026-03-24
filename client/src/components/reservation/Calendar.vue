@@ -17,7 +17,13 @@
 
             <!-- 날짜 -->
             <div class="calendar-dates">
-                <div v-for="(date, index) in calendarDates" :key="index" class="date" :class="[{ empty: !date }, getDayClass(index % 7), isSelected(date) ? 'selected' : '']" @click="selectDate(date)">
+                <div
+                    v-for="(date, index) in calendarDates"
+                    :key="index"
+                    class="date"
+                    :class="[{ empty: !date }, getDayClass(index % 7), isSelected(date) ? 'selected' : '', isToday(date) ? 'today' : '', isPast(date) ? 'past' : '']"
+                    @click="!isPast(date) && selectDate(date)"
+                >
                     {{ date || '' }}
                 </div>
             </div>
@@ -38,6 +44,7 @@ const selectedDate = ref(null);
 
 const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
 
+// 📅 달력 날짜 생성
 const calendarDates = computed(() => {
     const firstDay = new Date(currentYear.value, currentMonth.value, 1);
     const lastDate = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
@@ -56,6 +63,7 @@ const calendarDates = computed(() => {
     return dates;
 });
 
+// ⬅ 이전달
 const prevMonth = () => {
     if (currentMonth.value === 0) {
         currentMonth.value = 11;
@@ -65,6 +73,7 @@ const prevMonth = () => {
     }
 };
 
+// ➡ 다음달
 const nextMonth = () => {
     if (currentMonth.value === 11) {
         currentMonth.value = 0;
@@ -74,6 +83,7 @@ const nextMonth = () => {
     }
 };
 
+// 📌 날짜 선택
 const selectDate = (date) => {
     if (!date) return;
 
@@ -81,6 +91,27 @@ const selectDate = (date) => {
 
     const selected = new Date(currentYear.value, currentMonth.value, date);
     emit('select-date', selected);
+};
+
+// 🔴 오늘 날짜 체크
+const isToday = (date) => {
+    if (!date) return false;
+
+    const now = new Date();
+    return now.getFullYear() === currentYear.value && now.getMonth() === currentMonth.value && now.getDate() === date;
+};
+
+// ⛔ 과거 날짜 체크
+const isPast = (date) => {
+    if (!date) return false;
+
+    const today = new Date();
+    const target = new Date(currentYear.value, currentMonth.value, date);
+
+    today.setHours(0, 0, 0, 0);
+    target.setHours(0, 0, 0, 0);
+
+    return target < today;
 };
 
 // 요일 색상
@@ -104,7 +135,7 @@ const isSelected = (date) => {
     border-radius: 16px;
 }
 
-/* 카드 느낌 */
+/* 카드 */
 .calendar {
     background: white;
     border-radius: 16px;
@@ -183,5 +214,17 @@ const isSelected = (date) => {
     background-color: #4a90e2;
     color: white !important;
     font-weight: bold;
+}
+
+/* 오늘 */
+.today {
+    border: 2px solid #4a90e2;
+    font-weight: bold;
+}
+
+/* 과거 날짜 */
+.past {
+    color: #ccc;
+    cursor: not-allowed;
 }
 </style>
