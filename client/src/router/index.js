@@ -35,7 +35,16 @@ const router = createRouter({
         {
             path: '/dashboard',
             name: 'Dashboard',
-            component: () => import('../views/Dashboard.vue') // 실제 대시보드 파일 경로
+            component: () => import('../views/Dashboard.vue')
+        },
+        {
+            // 지원대상자 추가 페이지
+            path: '/beneficiary/add',
+            name: 'AddBeneficiary',
+            component: () => import('../views/beneficiary/AddBeneficiary.vue'),
+            meta: {
+                requiresAuth: true
+            }
         }
     ]
 });

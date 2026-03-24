@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const userService = require("../service/info_service.js");
+const infoService = require("../service/info_service.js");
 
 // 회원가입
 router.post("/signup", async (req, res) => {
@@ -8,7 +8,7 @@ router.post("/signup", async (req, res) => {
 
   try {
     // 인자를 userData 하나만 전달하도록 수정
-    const result = await userService.userSignup(userData);
+    const result = await infoService.userSignup(userData);
 
     // 서비스에서 { status: "success", ... } 형태로 리턴하므로 조건문 수정
     if (result.status === "success") {
@@ -25,7 +25,7 @@ router.post("/signup", async (req, res) => {
 // 로그인
 router.post("/login", async (req, res) => {
   try {
-    const user = await userService.userLogin(req.body);
+    const user = await infoService.userLogin(req.body);
 
     if (user) {
       // DB 컬럼명에 맞춰서 응답 (user_name, role 등 DB 컬럼명 확인 필요)
@@ -43,6 +43,19 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).send({ message: "서버 오류" });
+  }
+});
+
+// 아이디 중복 체크 경로 추가
+router.get("/check-id/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    // 서비스 함수명이 정확한지 확인!
+    const isAvailable = await infoService.checkIdAvailability(userId);
+    res.json({ isAvailable });
+  } catch (error) {
+    console.error("Router Error:", error); // 서버 터미널에 에러 출력
+    res.status(500).send(error.message);
   }
 });
 

@@ -13,13 +13,13 @@ const fetchBeneDetail = async () => {
         selectedBene.value = {};
         return;
     }
-    const response = await axios.get(`http://localhost:3000/beneficiaries/${selectedBeneId.value}`);
+    const response = await axios.get(`http://localhost:3000/api/beneficiaries/${selectedBeneId.value}`);
     selectedBene.value = response.data;
     emit('updateBeneId', selectedBeneId.value, response.data.priority_id);
 };
 
 onMounted(async () => {
-    const response = await axios.get('http://localhost:3000/beneficiaries');
+    const response = await axios.get('http://localhost:3000/api/beneficiaries');
     beneficiaryList.value = response.data;
 });
 </script>
