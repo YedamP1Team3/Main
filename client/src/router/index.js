@@ -1,6 +1,7 @@
 import sAdmin from '@/layout/sAdmin_layout/JsLayout.vue';
 import sakayLay from '@/layout/sakima_layout/AppLayout.vue';
 import memberLay from '@/layout/member/mLayout.vue';
+import AddDependentLayout from '@/views/Dependent/AddDependentLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { member } from './member.js';
 import { systemAdmin } from './s_admin.js';
@@ -40,11 +41,13 @@ const router = createRouter({
             component: () => import('../views/beneficiary/BeneficiaryMain.vue')
         },
         {
+            // 로그인 페이지
             path: '/login',
             name: 'loginForm',
             component: () => import('../views/signup/loginForm.vue')
         },
         {
+            // 회원가입 페이지
             path: '/signup',
             name: 'signupForm',
             component: () => import('../views/signup/signupForm.vue')
@@ -55,13 +58,20 @@ const router = createRouter({
             component: () => import('../views/Dashboard.vue')
         },
         {
-            // 지원대상자 추가 페이지
-            path: '/beneficiary/add',
-            name: 'AddBeneficiary',
-            component: () => import('../views/beneficiary/AddBeneficiary.vue'),
-            meta: {
-                requiresAuth: true
-            }
+            path: '/Dependent',
+            name: 'dependentParent',
+            component: AddDependentLayout,
+            children: [
+                {
+                    path: 'add', // 실제 주소는 /Dependent/add 가 됩니다.
+                    name: 'AddDependent',
+                    component: () => import('../views/Dependent/AddDependent.vue'),
+                    meta: {
+                        requiresAuth: true
+                    }
+                }
+                // 추후 본인의 다른 페이지(예: 수정, 목록 등)가 생기면 여기에 추가하세요.
+            ]
         },
         {
             path: '/ManagerSchedule',
