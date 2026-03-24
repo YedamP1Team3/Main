@@ -161,20 +161,13 @@ const makeNewSurveyVersion = async () => {
 
 //member용
 const getActiveSurvey = async () => {
-  console.log("👉 [Service] 사용자용 활성 설문지 데이터 조립 시작");
-
   try {
     // 1. 매퍼에게 활성화된 버전 ID를 물어봅니다.
     const activeVid = await surveyMapper.getActiveVersionId();
 
     if (!activeVid) {
-      console.log("⚠️ [Service] 현재 활성화된 설문지 버전이 없습니다.");
       return { version_id: null, items: [] };
     }
-
-    console.log(
-      `👉 [Service] 찾은 활성 버전 ID: ${activeVid}. 기존 만능 함수(getSurveyStructure) 재활용 시작!`,
-    );
 
     // 2. 💡 핵심: 우리가 예전에 고생해서 짜둔 구조화 함수에 찾은 ID를 쏙 넣어줍니다.
     // 그러면 알아서 DB 조인 쿼리를 돌고, 항목>세부항목>질문 구조로 예쁘게 포장해서 돌려줍니다!

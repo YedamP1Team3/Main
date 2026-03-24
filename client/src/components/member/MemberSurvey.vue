@@ -1,48 +1,43 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
+import { useSurveyStore } from '@/stores/useSurveyStore';
+import { storeToRefs } from 'pinia';
 
-// 1. 상태 관리
-const surveyData = ref([]); // 전체 설문 데이터
-const selectedTabId = ref(null); // 현재 선택된 탭(항목) ID
-const answers = ref({}); // 사용자 답변 저장용 { 질문ID: true/false }
+// 스토어 연결
+const surveyStore = useSurveyStore();
+const { is_survey_visible } = storeToRefs(surveyStore);
 
-// 2. 백엔드에서 활성화된 설문지 가져오기
+const surveyData = ref([]);
+const selectedTabId = ref(null);
+const answers = ref({});
+
 const fetchActiveSurvey = async () => {
-    console.log('👉 [프론트] 활성 설문지 데이터 요청 시작');
     try {
-        // 백엔드 라우터 주소 (작성하신 이름 반영)
         const response = await axios.get('/api/survey/active_survey');
 
         if (response.data.success) {
-            // response.data.data 안에는 { version_id: 1, items: [...] } 가 들어있습니다.
             surveyData.value = response.data.data.items;
-            console.log('✅ [프론트] 데이터 수신 완료:', surveyData.value);
-
-            // 💡 센스있는 처리: 데이터가 있으면 첫 번째 탭을 기본으로 선택해줌
             if (surveyData.value.length > 0) {
                 selectedTabId.value = surveyData.value[0].id;
             }
         }
     } catch (error) {
-        console.error('❌ [프론트 에러] 설문지 로드 실패:', error);
+        console.error('설문지 로드 실패:', error);
     }
 };
 
-// 3. 현재 선택된 탭(항목)의 데이터만 쏙 뽑아내는 계산된 속성(Computed)
 const currentItem = computed(() => {
-    // surveyData 안에서 id가 selectedTabId와 같은 놈을 찾아서 반환
     return surveyData.value.find((item) => item.id === selectedTabId.value) || null;
 });
 
-// 화면이 켜질 때 실행
 onMounted(() => {
     fetchActiveSurvey();
 });
 </script>
 
 <template>
-    <div class="survey-wrap">
+    <div v-if="is_survey_visible" class="survey-wrap">
         <h2>지원 신청하기</h2>
 
         <nav class="tabs" v-if="surveyData.length > 0">
@@ -53,6 +48,7 @@ onMounted(() => {
         <div v-else class="tabs">
             <p>등록된 설문 항목이 없습니다.</p>
         </div>
+
         <div v-if="currentItem">
             <section v-for="subItem in currentItem.subItems" :key="subItem.id" class="q-section">
                 <h3>{{ subItem.name }}</h3>
@@ -60,17 +56,15 @@ onMounted(() => {
                 <ul v-if="subItem.details && subItem.details.length > 0">
                     <li v-for="(detail, index) in subItem.details" :key="detail.id">
                         <p>
-                            <span>{{ index + 1 }}.</span>
-                            {{ detail.question_text }}
+                            <span>{{ index + 1 }}.</span> {{ detail.question_text }}
                         </p>
-
                         <div class="radios">
-                            <label> <input type="radio" :value="true" :name="'q_' + detail.id" v-model="answers[detail.id]" /> 예 </label>
-                            <label> <input type="radio" :value="false" :name="'q_' + detail.id" v-model="answers[detail.id]" /> 아니오 </label>
+                            <label><input type="radio" :value="true" :name="'q_' + detail.id" v-model="answers[detail.id]" /> 예</label>
+                            <label><input type="radio" :value="false" :name="'q_' + detail.id" v-model="answers[detail.id]" /> 아니오</label>
                         </div>
                     </li>
                 </ul>
-                <div v-else style="padding: 20px 10px; color: #94a3b8; font-size: 0.9rem">등록된 질문이 없습니다.</div>
+                <div v-else class="empty-msg">등록된 질문이 없습니다.</div>
             </section>
         </div>
 
@@ -81,109 +75,120 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 1. 전체 컨테이너 및 제목 */
+/* 기존 스타일 100% 유지 */
 .survey-wrap {
     max-width: 850px;
     margin: 0 auto;
     color: #1e293b;
 }
+
 .survey-wrap h2 {
-    font-size: 1.5rem;
     margin-bottom: 30px;
+    font-size: 1.5rem;
     font-weight: 700;
 }
 
-/* 2. 탭 영역 (선 없이 여백으로만 분리) */
 .tabs {
     display: flex;
     gap: 12px;
     margin-bottom: 40px;
 }
+
 .tabs button {
     padding: 10px 24px;
-    border-radius: 6px;
-    border: none;
-    background: #f1f5f9;
-    color: #64748b;
     font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
 }
+
 .tabs button.active {
-    background: #94a3b8;
     color: #fff;
+    background: #94a3b8;
 }
 
-/* 3. 세부항목 및 질문 영역 */
 .q-section {
     margin-bottom: 20px;
 }
+
 .q-section h3 {
-    font-size: 0.95rem;
-    color: #64748b;
     margin-bottom: 15px;
+    font-size: 0.95rem;
     font-weight: 600;
+    color: #64748b;
 }
+
 .q-section ul {
-    list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
+    list-style: none;
     border-top: 2px solid #334155;
 }
+
 .q-section li {
     display: flex;
-    justify-content: space-between;
     gap: 40px;
+    justify-content: space-between;
     padding: 24px 10px;
     border-bottom: 1px solid #e2e8f0;
 }
 
-/* 질문 텍스트 강조 */
 .q-section p {
     flex: 1;
+    margin: 0;
     font-size: 1.05rem;
     line-height: 1.6;
-    margin: 0;
 }
 
 .q-section span {
-    font-weight: 700;
     margin-right: 6px;
+    font-weight: 700;
 }
 
-/* 라디오 버튼 */
 .radios {
     display: flex;
     gap: 24px;
-    min-width: 140px;
     align-items: flex-start;
+    min-width: 140px;
     padding-top: 4px;
 }
+
 .radios label {
     display: flex;
-    align-items: center;
     gap: 8px;
-    cursor: pointer;
+    align-items: center;
     font-weight: 500;
+    cursor: pointer;
 }
+
 .radios input {
     width: 18px;
     height: 18px;
     accent-color: #475569;
 }
 
-/* 4. 하단 버튼 */
-.submit-box {
-    text-align: right;
-    margin-top: 50px;
+.empty-msg {
+    padding: 20px 10px;
+    font-size: 0.9rem;
+    color: #94a3b8;
 }
+
+.submit-box {
+    margin-top: 50px;
+    text-align: right;
+}
+
 .submit-box button {
     padding: 12px 40px;
-    border-radius: 30px;
-    border: 1px solid #94a3b8;
-    background: #fff;
     font-weight: 700;
+    background: #fff;
+    border: 1px solid #94a3b8;
+    border-radius: 30px;
     cursor: pointer;
 }
+
 .submit-box button:hover {
     background: #f8fafc;
     border-color: #0f172a;

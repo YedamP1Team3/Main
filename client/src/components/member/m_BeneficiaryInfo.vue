@@ -1,101 +1,94 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, computed } from 'vue';
+import { useSurveyStore } from '@/stores/useSurveyStore';
+import { storeToRefs } from 'pinia';
 
-const emit = defineEmits(['updateBeneId']);
+const surveyStore = useSurveyStore();
+const { my_beneficiaries, selected_bene_detail } = storeToRefs(surveyStore);
 
-const selectedBeneId = ref(''); // 사용자가 선택한 'ID' (v-model과 연결)
-const beneficiaryList = ref([]); // 드롭다운에 뿌릴 '이름 목록'
-const selectedBene = ref({}); // 서버에서 받아온 '한 명의 상세 정보'
+const localSelectedId = ref('');
 
-const fetchBeneDetail = async () => {
-    if (!selectedBeneId.value) {
-        selectedBene.value = {};
-        return;
-    }
-    const response = await axios.get(`http://localhost:3000/api/beneficiaries/${selectedBeneId.value}`);
-    selectedBene.value = response.data;
-    emit('updateBeneId', selectedBeneId.value, response.data.priority_id);
+const formattedGender = computed(() => {
+    const gender = selected_bene_detail.value?.gender;
+    if (gender === 'M') return '남자';
+    if (gender === 'F') return '여자';
+    return '';
+});
+
+const handleSelectChange = async () => {
+    // ★ 변경: 선택 시 스토어의 통합 액션을 호출하여 리스트까지 세팅합니다.
+    await surveyStore.selectBeneficiary(localSelectedId.value);
 };
 
 onMounted(async () => {
-    const response = await axios.get('http://localhost:3000/api/beneficiaries');
-    beneficiaryList.value = response.data;
+    if (surveyStore.my_beneficiaries.length === 0) {
+        await surveyStore.fetchBeneficiaryList();
+    }
 });
 </script>
-<template>
-    <h3>지원자 정보</h3>
 
+<template>
     <div class="BfInfo">
+        <h3>지원자 정보</h3>
         <table>
             <tbody>
                 <tr>
                     <th><label>지원자</label></th>
                     <td>
-                        <select v-model="selectedBeneId" @change="fetchBeneDetail">
+                        <select v-model="localSelectedId" @change="handleSelectChange">
                             <option value="">지원자를 선택하세요</option>
-                            <option v-for="bene in beneficiaryList" :key="bene.bene_id" :value="bene.bene_id">
+                            <option v-for="bene in my_beneficiaries" :key="bene.bene_id" :value="bene.bene_id">
                                 {{ bene.bene_name }}
                             </option>
                         </select>
                     </td>
+
                     <th><label>보호자</label></th>
-                    <td>
-                        <input type="text" :value="selectedBene.family_name || ''" readonly />
-                    </td>
+                    <td><input type="text" :value="selected_bene_detail.family_name || ''" readonly /></td>
 
                     <th><label>대기단계</label></th>
-                    <td>
-                        <input type="text" :value="selectedBene.priority_status || ''" readonly />
-                    </td>
+                    <td><input type="text" :value="selected_bene_detail.priority_status || ''" readonly /></td>
                 </tr>
                 <tr>
                     <th><label>성별</label></th>
-                    <td>
-                        <input type="text" :value="selectedBene.gender ? (selectedBene?.gender == 'M' ? '남자' : '여자') : ''" readonly />
-                    </td>
+                    <td><input type="text" :value="formattedGender" readonly /></td>
+
                     <th><label>생년월일</label></th>
-                    <td>
-                        <input type="text" :value="selectedBene.birth_date || ''" readonly />
-                    </td>
+                    <td><input type="text" :value="selected_bene_detail.birth_date || ''" readonly /></td>
+
                     <th><label>장애유형</label></th>
-                    <td>
-                        <input type="text" :value="selectedBene.disability_type || ''" readonly />
-                    </td>
+                    <td><input type="text" :value="selected_bene_detail.disability_type || ''" readonly /></td>
                 </tr>
             </tbody>
         </table>
     </div>
 </template>
+
 <style scoped>
-/* 카드 전체 컨테이너 */
 .BfInfo {
+    width: 100%;
+    padding: 20px 15px;
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 20px 15px; /* 좌우 패딩을 줄여 내부 공간 확보 */
-    width: 100%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
 
 h3 {
+    margin: 0 0 15px 0;
     font-size: 1.1rem;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 15px;
-    margin-top: 0;
 }
 
-/* 테이블 레이아웃 */
 table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
-    table-layout: fixed; /* 3등분 유지 */
 }
 
-/* 🟢 라벨(th) 영역: 너비를 더 줄여서 인풋 공간 확보 */
 th {
-    width: 60px; /* 기존 75~80px에서 60px로 축소 */
+    width: 60px;
     padding: 10px 0;
     text-align: left;
     vertical-align: middle;
@@ -103,47 +96,41 @@ th {
 
 th label {
     font-size: 0.85rem;
-    color: #64748b;
     font-weight: 600;
-    white-space: nowrap; /* 한 줄 고정 */
+    color: #64748b;
+    white-space: nowrap;
 }
 
-/* 🔵 데이터(td) 영역: 인풋 길이를 최대한 확보 */
 td {
-    padding: 8px 12px 8px 2px; /* 라벨과의 거리를 2px로 좁힘 */
+    padding: 8px 12px 8px 2px;
     vertical-align: middle;
 }
-
-/* 입력창 및 셀렉트 박스 */
-select,
-input[type='text'] {
-    width: 100%; /* td의 남은 공간을 꽉 채움 */
-    height: 38px;
-    padding: 0 10px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px; /* 조금 더 둥근 느낌으로 세련되게 */
-    font-size: 0.9rem;
-    color: #334155;
-    background-color: #ffffff;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-/* 읽기 전용 박스 디자인 */
-input[readonly] {
-    background-color: #f8fafc;
-    border-color: #e2e8f0;
-    color: #475569;
-}
-
-/* 마지막 열 우측 패딩 제거 */
 td:last-child {
     padding-right: 0;
 }
 
-/* 셀렉트 박스 포커스 시 디자인 */
+select,
+input[type='text'] {
+    width: 100%;
+    height: 38px;
+    padding: 0 10px;
+    font-size: 0.9rem;
+    color: #334155;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
 select:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+input[readonly] {
+    color: #475569;
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
 }
 </style>
