@@ -2,11 +2,11 @@
 import { ref } from 'vue';
 
 // 우리가 만든 컴포넌트들을 가져옵니다.
-import JsTopbarmg from '@/layout/sAdmin_layout/JsTopbarmg.vue';
-import BeneficiaryInfo from '@/components/beneficiary/BeneficiaryInfo.vue';
-import BeneficiaryManagement from '@/components/beneficiary/BeneficiaryManagement.vue';
-import BeneficiaryNewPlan from '@/components/beneficiary/BeneficiaryNewPlan.vue';
-import BeneficiaryDetail from '@/components/beneficiary/BeneficiaryDetail.vue';
+import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
+import BeneficiaryInfo from '@/components/manager/supportplan/beneficiary/BeneficiaryInfo.vue';
+import BeneficiaryManagement from '@/components/manager/supportplan/beneficiary/BeneficiaryManagement.vue';
+import BeneficiaryNewPlan from '@/components/manager/supportplan/beneficiary/BeneficiaryNewPlan.vue';
+import BeneficiaryDetail from '@/components/manager/supportplan/beneficiary/BeneficiaryDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
