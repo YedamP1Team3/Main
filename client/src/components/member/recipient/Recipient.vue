@@ -1,4 +1,5 @@
 <script setup>
+import axios from 'axios';
 import { ref, watch } from 'vue';
 
 // [상태] 입력 폼 데이터 (zipCode, addr1은 API로 채워질 예정)
@@ -45,6 +46,36 @@ const openPostcode = () => {
 };
 
 // 관계가 '기타'가 아니게 되면 입력했던 기타 내용을 초기화
+
+const onFileSelect = (event) => {
+    form.value.file = event.files[0];
+};
+
+const submitForm = async () => {
+    try {
+        // 1. 로컬스토리지나 Store에 저장된 로그인 유저 정보를 가져온다.
+        const userInfo = JSON.parse(localStorage.getItem('user'));
+        const userId = userInfo ? userInfo.id : null;
+
+        if (!userId) {
+            alert('로그인 정보가 없습니다. 다시 로그인 해주세요');
+            return;
+        }
+
+        // 2. 기존 form 데이터에 family_id를 추가하여 전송한다.
+        const sendData = {
+            ...form.value,
+            family_id: userId // 서버의 family_id 컬럼으로 들어갈 값
+        };
+        const response = await axios.post('/recipient/register', sendData);
+
+        if (response.data.success) {
+            alert('대상자가 성공적으로 등록되었습니다.');
+        }
+    } catch (error) {
+        alert('등록 중 오류 발생');
+    }
+};
 watch(
     () => form.value.relation,
     (newVal) => {
@@ -53,20 +84,6 @@ watch(
         }
     }
 );
-
-const onFileSelect = (event) => {
-    form.value.file = event.files[0];
-};
-
-const submitForm = () => {
-    if (!form.value.name) {
-        alert('대상자 성명을 입력해주세요.');
-        return;
-    }
-    // 전송 시 관계가 기타라면 relationEtc 값을 사용하도록 처리 로직 구성 가능
-    console.log('전송 데이터:', form.value);
-    alert('등록되었습니다.');
-};
 </script>
 
 <template>

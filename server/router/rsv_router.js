@@ -21,7 +21,7 @@ router.get("/schedule", async (req, res) => {
     }
 
     const schedule = await rsvService.getManagerSchedule(managerId, date);
-
+    console.log("schedule :", schedule);
     res.status(200).json({
       success: true,
       schedule,
@@ -53,6 +53,35 @@ router.post("/blocked-times", async (req, res) => {
     res.status(200).json({
       success: true,
       message: "예약불가 시간 등록 완료",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+// 예약 가능 처리 (예약불가 해제)
+router.delete("/unblock-times", async (req, res) => {
+  try {
+    const managerId = "manager_02"; // 나중엔 로그인된 사용자 ID 사용
+    const { date, times } = req.body; // times: ["09:30", "10:00", ...]
+    console.log("delete(/unblock). req.body : ", req.body);
+
+    if (!date || !times || times.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "date와 times가 필요합니다.",
+      });
+    }
+
+    const removed = await rsvService.removeBlockedTimes(managerId, date, times);
+
+    res.status(200).json({
+      success: true,
+      message: "예약 가능 처리 완료",
+      removed,
     });
   } catch (err) {
     res.status(500).json({

@@ -1,27 +1,27 @@
 <script setup>
 import { onMounted } from 'vue';
-import { useLayout } from '@/layout/composables/layout';
-import AppConfigurator from '../AppConfigurator.vue';
-import { useSurveyStore } from '@/stores/useSurveyStore';
-import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 
+import { useAuthStore } from '@/stores/auth';
+import { useSurveyStore } from '@/stores/useSurveyStore';
+
+import { useLayout } from '@/layout/composables/layout';
+import AppConfigurator from '../AppConfigurator.vue';
+
 const router = useRouter();
+const authStore = useAuthStore();
+const surveyStore = useSurveyStore();
+const { toggleDarkMode, isDarkTheme } = useLayout();
+
 const naviToApply = () => router.push({ name: 'mApplication' });
 
-const { toggleDarkMode, isDarkTheme } = useLayout();
-const surveyStore = useSurveyStore();
-const authStore = useAuthStore();
-
-// ⭐️ 엄청 간결해진 onMounted
 onMounted(async () => {
     if (authStore.isLoggedIn) {
-        // 그냥 리스트 가져오라고 명령만 내리면 됨. (자기가 알아서 authStore 뒤져서 가져옴)
         await surveyStore.fetchBeneficiaryList();
     }
 });
 
-// 로그인/로그아웃 통합 핸들러
+// 로그인/로그아웃 핸들러
 const toggleAuth = async () => {
     if (authStore.isLoggedIn) {
         surveyStore.clearStore();
@@ -77,10 +77,6 @@ const toggleAuth = async () => {
         </div>
 
         <div class="flex items-center gap-2">
-            <span class="hidden sm:block font-medium text-color">
-                {{ authStore.isLoggedIn ? `${authStore.userName}님` : '로그인 해주세요' }}
-            </span>
-
             <button type="button" class="layout-topbar-action" @click="toggleAuth">
                 <i class="pi pi-sign-out" title="로그아웃"></i>
             </button>

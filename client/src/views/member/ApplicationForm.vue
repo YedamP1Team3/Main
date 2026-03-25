@@ -1,10 +1,8 @@
 <script setup>
-import { ref } from 'vue';
-
-// 기존 컴포넌트들
+// 1. 자식 컴포넌트 임포트
+// (이 파일은 앱의 전체적인 레이아웃 구조만 잡아주는 역할을 합니다)
 import BeneficiaryInfo from '@/components/member/m_application/m_BeneficiaryInfo.vue';
 import BeneficiaryManagement from '@/components/member/m_application/MemberManagement.vue';
-// ⭐️ 새로 분리할 설문지 컴포넌트 가져오기 (경로는 프로젝트에 맞게 수정하세요)
 import SurveyApplicationForm from '@/components/member/m_application/MemberSurvey.vue';
 import MemberSupportDetail from '@/components/member/m_application/MemberSupportDetail.vue';
 
@@ -25,22 +23,29 @@ const handleIdDetail = (planId) => {
     selectPlan.value = planId;
     viewMode.value = 'detail';
 };
+// 💡 모든 데이터의 상태 변경(id, 모드 등)은 스토어(Pinia)에서 알아서 처리하므로
+// 부모 컴포넌트에 불필요한 로컬 변수나 이벤트 리스너를 둘 필요가 없습니다!
 </script>
 
 <template>
+    <!-- 상단 공통 헤더 -->
     <header class="main-header"></header>
 
     <div class="dashboard-container">
+        <!-- 🟢 왼쪽 사이드 패널: 지원자 기본 정보 및 신청서/계획서 등 목록 관리 -->
         <aside class="side-panel">
             <section class="info-section">
-                <BeneficiaryInfo @updateBeneId="handleIdUpdate" />
+                <BeneficiaryInfo />
             </section>
 
             <section class="list-section">
                 <BeneficiaryManagement ref="managementRef" @select-plan="handleIdDetail" :beneId="selectedId" />
+                <!-- 불필요했던 ref="managementRef" 바인딩도 깔끔하게 제거했습니다 -->
+                <BeneficiaryManagement />
             </section>
         </aside>
 
+        <!-- 🔵 오른쪽 메인 콘텐츠 영역: 선택된 메뉴에 따른 폼(설문조사 등) 출력 -->
         <main class="main-content">
             <div>
                 <SurveyApplicationForm />
@@ -73,7 +78,7 @@ const handleIdDetail = (planId) => {
     overflow: hidden;
 }
 
-/* 🟢 왼쪽 사이드 패널 (600px) */
+/* 🟢 왼쪽 사이드 패널 (600px 고정, 내부 스크롤) */
 .side-panel {
     flex: 0 0 600px;
     background-color: #f8fafc;
@@ -90,7 +95,7 @@ const handleIdDetail = (planId) => {
     width: 100%;
 }
 
-/* 🔵 오른쪽 메인 콘텐츠 영역 (크기 및 스크롤 설정만 남김) */
+/* 🔵 오른쪽 메인 콘텐츠 영역 (남은 공간 모두 차지, 내부 스크롤) */
 .main-content {
     flex: 1;
     background-color: #ffffff;
