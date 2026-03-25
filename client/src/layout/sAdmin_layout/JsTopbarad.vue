@@ -3,27 +3,21 @@ import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from '../AppConfigurator.vue';
 
 import { useAuthStore } from '@/stores/auth';
-import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
-const { agencyId, agencyName } = storeToRefs(authStore);
+const router = useRouter();
 
 const { toggleDarkMode, isDarkTheme } = useLayout();
 
-const handleIdLogin = () => {
-    if (!authStore.agencyId) {
-        const tempuser = {
-            agency_id: '101',
-            agency_name: '서울희망복지재단'
-        };
-        authStore.login(tempuser);
-        alert(`${tempuser.agency_name}이 로그인 되었습니다`);
-        location.reload();
-    } else {
+const handleAuthAction = () => {
+    if (authStore.isLoggedIn) {
         if (confirm('로그아웃 하시겠습니까?')) {
             authStore.logout();
-            location.reload();
+            router.push('/login');
         }
+    } else {
+        router.push('/login');
     }
 };
 </script>
@@ -59,14 +53,14 @@ const handleIdLogin = () => {
             </div>
         </div>
 
-        <div class="flex items-center gap-2 cursor-pointer" @click="handleIdLogin">
-            <span class="hidden sm:block font-medium text-color">
-                {{ authStore.agencyId ? `${authStore.agencyName} 담당자` : '기관 담당자(로그인)' }}
-            </span>
-            <button type="button" class="layout-topbar-action">
-                <i class="pi pi-user" :style="{ color: authStore.agencyName ? 'var(--primary-color)' : '' }"></i>
-            </button>
-        </div>
+       <div class="flex items-center gap-2 cursor-pointer" @click="handleAuthAction">
+        <span class="hidden sm:block font-medium text-color">
+            {{ authStore.isLoggedIn ? `${authStore.userName} 담당자` : '로그인이 필요합니다' }}
+        </span>
+        <button type="button" class="layout-topbar-action">
+            <i class="pi pi-user" :style="{ color: authStore.isLoggedIn ? 'var(--primary-color)' : '' }"></i>
+        </button>
+    </div>
     </div>
 </template>
 
