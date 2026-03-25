@@ -17,11 +17,11 @@ const selectAllUser = async () => {
 };
 
 //지원자정보
-const selectBeneficiaryList = async () => {
+const selectBeneficiaryList = async (managerId) => {
   let conn = null;
   try {
-    conn = await pool.getConnection();
-    let rows = await conn.query(userSql.BeneficiaryList);
+    conn = await pool.getConnection(managerId);
+    let rows = await conn.query(userSql.BeneficiaryList, [managerId]);
     return rows;
   } catch (err) {
     throw err;

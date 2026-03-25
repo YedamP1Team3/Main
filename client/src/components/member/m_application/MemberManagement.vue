@@ -6,12 +6,20 @@ import { storeToRefs } from 'pinia';
 // 3. 로컬 스토어 및 기타
 import { useSurveyStore } from '@/stores/useSurveyStore';
 
+import TabPlan from './MemberTabPlan.vue';
+
 // 설문 관련 전역 상태 관리를 위한 스토어 호출
 const surveyStore = useSurveyStore();
 
 // 스토어에서 '선택된 지원자 ID'와 '신청서 리스트 데이터'를 반응형으로 추출
 const { selected_bene_id, application_list } = storeToRefs(surveyStore);
 
+const emit = defineEmits(['select-plan']);
+const currentTab = ref('Application', 'Plan');
+
+const handleSelectPlan = (planId) => {
+    emit('select-plan', planId);
+};
 // 현재 활성화된 탭을 관리하는 로컬 상태 (기본값: 'Application' 지원신청서)
 const currentTab = ref('Application');
 </script>
@@ -61,9 +69,8 @@ const currentTab = ref('Application');
             </table>
         </div>
 
-        <!-- [기타 탭] 아직 개발되지 않은 탭을 위한 임시 화면 -->
-        <div v-else class="tab-content">
-            <p class="empty-msg">해당 탭의 내용이 없습니다.</p>
+        <div class="tab-content">
+            <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @select-plan="handleSelectPlan" />
         </div>
     </div>
 </template>

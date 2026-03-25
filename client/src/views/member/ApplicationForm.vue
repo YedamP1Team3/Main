@@ -4,7 +4,25 @@
 import BeneficiaryInfo from '@/components/member/m_application/m_BeneficiaryInfo.vue';
 import BeneficiaryManagement from '@/components/member/m_application/MemberManagement.vue';
 import SurveyApplicationForm from '@/components/member/m_application/MemberSurvey.vue';
+import MemberSupportDetail from '@/components/member/m_application/MemberSupportDetail.vue';
 
+const selectedId = ref('');
+const selectedPriorityId = ref(null);
+const viewMode = ref('empty');
+const managementRef = ref(null);
+const selectPlan = ref(null);
+
+const handleIdUpdate = (id, priorityId) => {
+    selectedId.value = id;
+    selectedPriorityId.value = priorityId;
+    viewMode.value = 'empty';
+    surveyStore.is_survey_visible = false;
+};
+
+const handleIdDetail = (planId) => {
+    selectPlan.value = planId;
+    viewMode.value = 'detail';
+};
 // 💡 모든 데이터의 상태 변경(id, 모드 등)은 스토어(Pinia)에서 알아서 처리하므로
 // 부모 컴포넌트에 불필요한 로컬 변수나 이벤트 리스너를 둘 필요가 없습니다!
 </script>
@@ -21,6 +39,7 @@ import SurveyApplicationForm from '@/components/member/m_application/MemberSurve
             </section>
 
             <section class="list-section">
+                <BeneficiaryManagement ref="managementRef" @select-plan="handleIdDetail" :beneId="selectedId" />
                 <!-- 불필요했던 ref="managementRef" 바인딩도 깔끔하게 제거했습니다 -->
                 <BeneficiaryManagement />
             </section>
@@ -28,7 +47,12 @@ import SurveyApplicationForm from '@/components/member/m_application/MemberSurve
 
         <!-- 🔵 오른쪽 메인 콘텐츠 영역: 선택된 메뉴에 따른 폼(설문조사 등) 출력 -->
         <main class="main-content">
-            <SurveyApplicationForm />
+            <div>
+                <SurveyApplicationForm />
+            </div>
+            <div v-if="viewMode === 'detail'" class="editor-container">
+                <MemberSupportDetail :planId="selectPlan" :beneId="selectedId" />
+            </div>
         </main>
     </div>
 </template>
