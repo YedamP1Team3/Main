@@ -169,9 +169,11 @@ hr {
 /* 2. 테이블 형태의 폼 레이아웃 */
 .form_BfnewPlan {
     display: flex;
+    width: 100%; /* 부모 컨테이너 너비를 꽉 채움 */
     border-bottom: 1px solid #e2e8f0;
     border-left: 1px solid #e2e8f0;
     border-right: 1px solid #e2e8f0;
+    box-sizing: border-box; /* 너비 계산 오류 방지 */
 }
 
 .form_BfnewPlan:nth-of-type(1) {
@@ -195,20 +197,26 @@ hr {
 input[readonly],
 textarea[readonly],
 input[v-model],
-textarea[v-model] {
-    flex: 1;
+textarea[v-model],
+.read-only {
+    flex: 1; /* 남은 가로 공간을 모두 차지 */
+    width: 100%; /* 가로를 꽉 채우도록 강제 */
+    min-width: 0; /* flex 아이템의 최소 너비 제한 해제 */
     border: none;
     padding: 15px 20px;
     font-size: 1rem;
     color: #334155;
     outline: none;
     background-color: #ffffff;
+    box-sizing: border-box; /* 패딩이 가로 너비를 넘지 않게 함 */
 }
 
+/* 계획내용 전용 textarea 스타일 */
 textarea {
+    display: block; /* 영역을 확실히 차지하도록 설정 */
     min-height: 180px;
     line-height: 1.6;
-    resize: none;
+    resize: vertical; /* 가로는 고정, 세로만 조절 가능하게 */
 }
 
 /* 3. 버튼 영역 (클래스 직접 지정으로 꼬임 방지) */
@@ -270,17 +278,17 @@ button:hover {
 
 .reasonText {
     width: 100%;
-    min-height: 140px;
+    min-height: 150px; /* 반려사유도 조금 더 넉넉하게 */
     padding: 20px;
-    border: 1.5px solid #e2e8f0; /* 부드러운 테두리 */
-    border-radius: 12px; /* 이미지의 둥근 모서리 */
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
     background-color: #ffffff;
     color: #475569;
     font-size: 1rem;
     line-height: 1.6;
     resize: none;
     outline: none;
-    box-sizing: border-box; /* 너비 100% 고정 핵심 */
+    box-sizing: border-box;
 }
 
 /* readonly 상태에서도 깨끗한 흰색 유지 */
