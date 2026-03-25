@@ -20,9 +20,7 @@ const handleIdUpdate = (id, priorityId) => {
 </script>
 
 <template>
-    <header class="main-header">
-        <JsTopbarmg />
-    </header>
+    <header class="main-header"></header>
 
     <div class="dashboard-container">
         <aside class="side-panel">
