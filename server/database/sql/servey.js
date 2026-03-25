@@ -79,15 +79,17 @@ const select_answers_by_app_id = `
 `;
 // [목록 조회] 5. 특정 대상자(bene_id)의 신청서 목록 가져오기
 const select_application_list_by_bene = `
-  SELECT 
+SELECT 
     a.app_id AS id, 
     a.user_id AS writer, 
     b.bene_name, 
-    DATE_FORMAT(a.created_at, '%Y.%m.%d') AS date
-  FROM application a
-  LEFT JOIN beneficiary_info b ON a.bene_id = b.bene_id
-  WHERE a.bene_id = ?
-  ORDER BY a.created_at DESC;
+    DATE_FORMAT(a.created_at, '%Y.%m.%d') AS date,
+    p.priority_status
+FROM application a
+LEFT JOIN beneficiary_info b ON a.bene_id = b.bene_id
+LEFT JOIN priority p ON a.app_id = p.app_id 
+WHERE a.bene_id = ?
+ORDER BY a.created_at DESC;
 `;
 
 module.exports = {

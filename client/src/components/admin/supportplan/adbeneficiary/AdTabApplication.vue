@@ -121,7 +121,7 @@ watch(
                     <th>신청번호</th>
                     <th>작성자</th>
                     <th>신청일자</th>
-                    <th>상태</th>
+                    <th>대기단계</th>
                 </tr>
             </thead>
             <tbody>
@@ -132,7 +132,7 @@ watch(
                     <td>{{ app.id }}</td>
                     <td>{{ app.writer }}</td>
                     <td>{{ app.date }}</td>
-                    <td class="status-text">접수대기</td>
+                    <td>{{ app.priority_status }}</td>
                 </tr>
             </tbody>
         </table>
