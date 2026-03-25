@@ -3,7 +3,7 @@ import { ref } from 'vue';
 
 // 우리가 만든 컴포넌트들을 가져옵니다.
 import JsTopbarad from '@/layout/manger/JsTopbarmg.vue';
-import BeneficiaryInfo from '@/components/manager/supportplan/beneficiary/BeneficiaryInfo.vue';
+import AdSupportInfo from '@/components/admin/supportplan/adbeneficiary/AdSupportInfo.vue';
 import AdminManagement from '@/components/admin/supportplan/adbeneficiary/AdminManagement.vue';
 import AdplanDetail from '@/components/admin/supportplan/adbeneficiary/AdplanDetail.vue';
 
@@ -41,7 +41,7 @@ const reloadList = () => {
     <div class="dashboard-container">
         <aside class="side-panel">
             <section class="info-section">
-                <BeneficiaryInfo @updateBeneId="handleIdUpdate" />
+                <AdSupportInfo @updateBeneId="handleIdUpdate" />
             </section>
 
             <section class="list-section">

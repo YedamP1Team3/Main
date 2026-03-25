@@ -35,7 +35,7 @@ const router = createRouter({
         },
 
         {
-            path: '/BeneficiaryMain',
+            path: '/beneficiaryMain',
             name: 'beneficiaryMain',
             component: () => import('../views/beneficiary/BeneficiaryMain.vue')
         },
@@ -69,8 +69,8 @@ const router = createRouter({
             component: () => import('../views/reservation/manager/ManagerSchedule.vue')
         },
         {
-            path: '/AdministratorMain',
-            name: 'AdministratorMain',
+            path: '/administratorMain',
+            name: 'administratorMain',
             component: () => import('../views/beneficiary/AdministratorMain.vue')
         },
         // 레이아웃 바깥에 있는 템플릿 페이지들 전개
