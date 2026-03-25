@@ -61,9 +61,23 @@ const ReturnMapper = async (planId, planDate) => {
   }
 };
 
+const AdSupportListMapper = async (agencyId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let row = await conn.query(adminSql.AdSupportList, [agencyId]);
+    return row;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   AdSupportPlanMapper,
   AdDetailSupportPlanMapper,
   ApprovalChangeMapper,
   ReturnMapper,
+  AdSupportListMapper,
 };

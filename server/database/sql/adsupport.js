@@ -44,9 +44,20 @@ WHERE
   plan_id =?
 `;
 
+const AdSupportList = `
+SELECT 
+    b.bene_name,
+    b.bene_id
+FROM beneficiary_info b
+JOIN user_info u ON b.family_id = u.user_id
+WHERE u.agency_id = ?
+ORDER BY bene_name ASC;
+`;
+
 module.exports = {
   AdSupportPlan,
   AdDetailSupportPlan,
   ApprovalChange,
   Return,
+  AdSupportList,
 };

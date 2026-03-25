@@ -7,8 +7,9 @@ const BeneficiaryList = `
     SELECT 
         bene_id, 
         bene_name 
-    FROM beneficiary_info 
-    ORDER BY bene_name ASC
+    FROM beneficiary_info
+    WHERE manager_id = ?
+    ORDER BY bene_name ASC;
 `;
 
 const BeneficiaryById = `
