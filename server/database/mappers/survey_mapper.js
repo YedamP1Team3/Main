@@ -32,7 +32,6 @@ const insertItem = async (params) => {
     ]);
     return result;
   } catch (dbError) {
-    console.error("!!! DB 실행 중 진짜 에러 발생 !!!");
     console.error(dbError);
     throw dbError;
   }
@@ -103,7 +102,6 @@ const createNewVersion = async () => {
       (result[0] && result[0].insertId) ||
       result.affectedRows;
 
-    console.log("새로 생성된 버전 ID:", insertId);
     return insertId;
   } catch (err) {
     if (conn) await conn.rollback();
@@ -119,7 +117,6 @@ const getActiveVersionId = async () => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    console.log("👉 [Mapper] 활성화된(IS_ACTIVE=1) 버전 ID 조회 시도");
 
     // 복잡한 JOIN 없이, 단순히 활성 상태인 버전의 ID만 찾습니다.
     let rows = await conn.query(surveySql.memberSurvey);
@@ -129,6 +126,93 @@ const getActiveVersionId = async () => {
   } catch (err) {
     console.error("❌ [Mapper 에러] 활성 버전 ID 조회 실패:", err);
     throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+// [추가] 지원신청서 및 답변 트랜잭션 저장 로직
+const submitSurveyApplication = async (params) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction(); // ⭐️ 트랜잭션 시작 (실패 시 롤백을 위함)
+
+    // 1. APPLICATION (지원신청서) 테이블에 INSERT
+    // 파라미터 순서: VERSION_ID, BENE_ID, USER_ID
+    const appResult = await conn.query(surveySql.insert_application, [
+      params.version_id,
+      params.bene_id,
+      params.user_id,
+    ]);
+
+    // 새로 생성된 신청서의 APP_ID (PK) 추출
+    const appId =
+      appResult.insertId ||
+      (appResult[0] && appResult[0].insertId) ||
+      appResult.affectedRows;
+
+    if (!appId)
+      throw new Error("신청서 생성 실패: APP_ID를 가져올 수 없습니다.");
+
+    // 2. Survey_Answer (조사지답변) 테이블에 다중 INSERT
+    // 프론트에서 온 답변 데이터 형태: { "상세내용_ID": true, "상세내용_ID": false }
+    const answers = params.answers;
+
+    // 객체(Object) 형태의 답변을 배열 형태로 변환하여 반복 저장
+    for (const [detailId, answerValue] of Object.entries(answers)) {
+      // 파라미터 순서: ANSWER_VALUE, DETAIL_ID, APP_ID
+      await conn.query(surveySql.insert_survey_answer, [
+        answerValue, // true/false (또는 1/0)
+        detailId, // 프론트에서 넘어온 문항의 DETAIL_ID
+        appId, // 방금 위에서 만든 신청서의 ID
+      ]);
+    }
+
+    await conn.commit(); // ⭐️ 모든 저장이 성공하면 DB에 확정!
+
+    return appId; // 생성된 신청서 번호 반환
+  } catch (err) {
+    if (conn) await conn.rollback(); // 🚨 중간에 하나라도 에러나면 전체 취소!
+    console.error("❌ [Mapper 에러] 설문 답변 저장 중 오류:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// [조회] 신청서 번호로 마스터 정보 조회
+const getApplicationById = async (appId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(surveySql.select_application_by_id, [appId]);
+    return rows.length > 0 ? rows[0] : null;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// [조회] 신청서 번호로 답변 목록 조회
+const getAnswersByAppId = async (appId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(surveySql.select_answers_by_app_id, [appId]);
+    return rows;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// [목록 조회] 대상자 ID로 신청서 리스트 조회
+const getApplicationList = async (beneId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(surveySql.select_application_list_by_bene, [
+      beneId,
+    ]);
+    return rows; // 리스트 반환
   } finally {
     if (conn) conn.release();
   }
@@ -146,4 +230,8 @@ module.exports = {
   createNewVersion,
   //member 용
   getActiveVersionId,
+  submitSurveyApplication,
+  getApplicationById,
+  getAnswersByAppId,
+  getApplicationList,
 };

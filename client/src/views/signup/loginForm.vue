@@ -41,6 +41,7 @@
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useAuthStore } from '@/stores/auth'; //pinia 스토어 불러오기
 
 // PrimeVue 컴포넌트 (main.js에 등록했다면 여기서 생략 가능)
 import InputText from 'primevue/inputtext';
@@ -48,6 +49,7 @@ import Password from 'primevue/password';
 import Button from 'primevue/button';
 
 const router = useRouter();
+const authStore = useAuthStore(); // ★ 2. 스토어 사용 준비
 
 // 1. 데이터 상태 관리
 const form = reactive({
@@ -72,11 +74,21 @@ const handleLogin = async () => {
 
         // 성공 시 처리
         if (response.data) {
-            alert(`${response.data.user.name}님 환영합니다!`);
+            const user = response.data.user;
+            authStore.login(user);
+            const userRole = user.role.toUpperCase();
 
-            // [수정] 라우터에 등록된 실제 경로로 이동하세요.
-            // 아까 `/dashboard`가 없다고 떴으므로 `/BeneficiaryMain`으로 변경했습니다.
-            router.push('/BeneficiaryMain');
+            if(userRole === 'ADMIN'){
+                alert(`${user.name}님 환영합니다 관리자페이지로 이동합니다`)
+                router.push('/AdministratorMain')
+            } else if (userRole === 'MANAGER'){
+                alert(`${user.name}님 환영합니다 담당자페이지로 이동합니다`)
+                router.push('/BeneficiaryMain')
+            } else if (userRole === 'FAMILY'){
+                alert(`${user.name}님 환영합니다 일반사용자 페이지로 이동합니다.`)
+            } else {
+                alert(`${user.name}님 환영합니다`)
+            }
         }
     } catch (error) {
         // 상세 에러 메시지가 있으면 보여주고, 없으면 기본 메시지 출력

@@ -1,4 +1,4 @@
-const adSupportPlan = `
+const AdSupportPlan = `
 SELECT 
     p.plan_id, 
     p.bene_id, 
@@ -12,7 +12,7 @@ WHERE p.bene_id = ? AND p.progress_state != '임시'
 ORDER BY p.plan_id ASC;
 `;
 
-const adDetailSupportPlan = `
+const AdDetailSupportPlan = `
   SELECT 
     p.plan_id,
     p.plan_objective,
@@ -27,7 +27,7 @@ const adDetailSupportPlan = `
   WHERE p.plan_id = ?
 `;
 
-const updateApproval = `
+const ApprovalChange = `
 UPDATE support_plan
 SET
   progress_state = '승인'
@@ -35,7 +35,7 @@ WHERE
   plan_id =?
 `;
 
-const updatereturn = `
+const Return = `
 UPDATE support_plan
 SET
   rejection_reason = ?,
@@ -45,8 +45,8 @@ WHERE
 `;
 
 module.exports = {
-  adSupportPlan,
-  adDetailSupportPlan,
-  updateApproval,
-  updatereturn,
+  AdSupportPlan,
+  AdDetailSupportPlan,
+  ApprovalChange,
+  Return,
 };

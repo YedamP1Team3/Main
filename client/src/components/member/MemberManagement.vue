@@ -42,7 +42,7 @@ const currentTab = ref('Application');
                             {{ selected_bene_id ? '등록된 신청서가 없습니다.' : '지원자를 먼저 선택해주세요.' }}
                         </td>
                     </tr>
-                    <tr v-else v-for="item in application_list" :key="item.id">
+                    <tr v-else v-for="item in application_list" :key="item.id" class="clickable-row" @click="surveyStore.loadApplicationView(item.id)">
                         <td>{{ item.writer }}</td>
                         <td>{{ item.bene_name }}</td>
                         <td>{{ item.date }}</td>
@@ -160,5 +160,12 @@ const currentTab = ref('Application');
     padding: 30px !important;
     color: #94a3b8 !important;
     text-align: center;
+}
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.clickable-row:hover {
+    background-color: #f8fafc; /* 마우스 올렸을 때 살짝 회색빛 */
 }
 </style>

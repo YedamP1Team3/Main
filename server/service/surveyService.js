@@ -179,6 +179,70 @@ const getActiveSurvey = async () => {
     throw new Error(err.message);
   }
 };
+// [추가] 설문 답변 제출 처리 로직
+const submitSurveyResult = async (data) => {
+  try {
+    // 1. 필수 데이터가 다 있는지 검사
+    if (!data.bene_id || !data.version_id || !data.user_id || !data.answers) {
+      throw new Error(
+        "필수 데이터(대상자, 버전, 작성자, 답변)가 누락되었습니다.",
+      );
+    }
+
+    // 2. 매퍼 호출해서 DB에 저장
+    const appId = await surveyMapper.submitSurveyApplication(data);
+    return appId;
+  } catch (err) {
+    console.error("❌ [Service 에러] 설문 제출 처리 실패:", err);
+    throw new Error(err.message);
+  }
+};
+
+// [조회] 특정 신청서의 구조 + 답변 조합하기
+const getApplicationDetail = async (appId) => {
+  try {
+    // 1. 신청서 마스터 조회 (작성 당시의 version_id 확보)
+    const appInfo = await surveyMapper.getApplicationById(appId);
+    if (!appInfo) throw new Error("해당 신청서를 찾을 수 없습니다.");
+
+    // 소문자/대문자 호환성 처리
+    const versionId = appInfo.VERSION_ID || appInfo.version_id;
+
+    // 2. ⭐️ 작성 당시의 조사지 버전 구조 그대로 가져오기! ⭐️
+    const structure = await getSurveyStructure(versionId);
+
+    // 3. 당시 작성했던 답변 가져오기
+    const answerRows = await surveyMapper.getAnswersByAppId(appId);
+
+    // 4. 프론트가 화면에 바로 뿌리기 좋게 { "상세ID": true } 객체로 포장
+    const answers = {};
+    answerRows.forEach((row) => {
+      const detailId = row.DETAIL_ID || row.detail_id;
+      const val = row.ANSWER_VALUE || row.answer_value;
+      answers[detailId] = val === 1 || val === true;
+    });
+
+    return {
+      app_info: appInfo,
+      survey_data: structure, // 옛날 버전의 문항들
+      answers: answers, // 당시 체크한 답변들
+    };
+  } catch (err) {
+    console.error("❌ [Service 에러] 상세 조회 실패:", err);
+    throw new Error(err.message);
+  }
+};
+
+// [목록 조회] 대상자의 신청서 리스트 가져오기
+const getApplicationListByBene = async (beneId) => {
+  try {
+    const list = await surveyMapper.getApplicationList(beneId);
+    return list;
+  } catch (err) {
+    console.error("❌ [Service 에러] 리스트 조회 실패:", err);
+    throw new Error(err.message);
+  }
+};
 
 module.exports = {
   getSurveyStructure,
@@ -189,4 +253,7 @@ module.exports = {
   getSurveyVersions,
   makeNewSurveyVersion,
   getActiveSurvey,
+  submitSurveyResult,
+  getApplicationDetail,
+  getApplicationListByBene,
 };
