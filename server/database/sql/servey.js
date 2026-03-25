@@ -53,6 +53,43 @@ const insertNewVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VA
 const memberSurvey =
   "SELECT VERSION_ID FROM survey_version WHERE IS_ACTIVE = 1";
 
+// [수정] 1. 지원신청서(application) 마스터 저장
+const insert_application = `
+  INSERT INTO application (version_id, bene_id, user_id, created_at) 
+  VALUES (?, ?, ?, NOW());
+`;
+
+// [수정] 2. 조사지답변(survey_answer) 상세 저장
+const insert_survey_answer = `
+  INSERT INTO survey_answer (answer_value, detail_id, app_id) 
+  VALUES (?, ?, ?);
+`;
+// [조회] 3. 특정 신청서 마스터 정보 가져오기 (버전 ID 확인용)
+const select_application_by_id = `
+  SELECT app_id, version_id, bene_id, user_id, DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
+  FROM application 
+  WHERE app_id = ?;
+`;
+
+// [조회] 4. 특정 신청서의 상세 답변 모두 가져오기
+const select_answers_by_app_id = `
+  SELECT detail_id, answer_value 
+  FROM survey_answer 
+  WHERE app_id = ?;
+`;
+// [목록 조회] 5. 특정 대상자(bene_id)의 신청서 목록 가져오기
+const select_application_list_by_bene = `
+  SELECT 
+    a.app_id AS id, 
+    a.user_id AS writer, 
+    b.bene_name, 
+    DATE_FORMAT(a.created_at, '%Y.%m.%d') AS date
+  FROM application a
+  LEFT JOIN beneficiary_info b ON a.bene_id = b.bene_id
+  WHERE a.bene_id = ?
+  ORDER BY a.created_at DESC;
+`;
+
 module.exports = {
   selectSurvey,
   insert_item,
@@ -63,4 +100,9 @@ module.exports = {
   insertNewVersion,
   // member용
   memberSurvey,
+  insert_application,
+  insert_survey_answer,
+  select_application_by_id,
+  select_answers_by_app_id,
+  select_application_list_by_bene,
 };

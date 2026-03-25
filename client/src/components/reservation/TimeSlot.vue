@@ -23,7 +23,7 @@
         <!-- 버튼 -->
         <div class="action-buttons">
             <button class="available-btn">예약가능</button>
-            <button class="unavailable-btn">예약불가</button>
+            <button class="unavailable-btn" @click="blockTimes">예약불가</button>
         </div>
     </div>
 </template>
@@ -105,11 +105,38 @@ export default {
             }
         };
 
+        const blockTimes = async () => {
+            if (!props.selectedDate || selectedTimes.value.length === 0) {
+                alert('날짜와 시간을 선택하세요.');
+                return;
+            }
+
+            try {
+                const res = await axios.post('/api/reserve/blocked-times', {
+                    date: props.selectedDate,
+                    times: selectedTimes.value
+                });
+
+                if (res.data.success) {
+                    alert('예약불가 설정 완료');
+
+                    // 선택 초기화
+                    selectedTimes.value = [];
+
+                    console.log('차단 완료:', res.data);
+                }
+            } catch (err) {
+                console.error('차단 실패:', err);
+                alert('오류 발생');
+            }
+        };
+
         return {
             period,
             timeSlots,
             selectedTimes,
-            toggleTime
+            toggleTime,
+            blockTimes
         };
     }
 };
