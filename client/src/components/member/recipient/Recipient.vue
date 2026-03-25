@@ -1,35 +1,41 @@
 <script setup>
-import axios from 'axios';
-import { ref, watch } from 'vue';
+import axios from 'axios'; // http 통신을 위한 axios 임포트
+import { ref, watch } from 'vue'; // Vue 반응형 객체 및 감시자 임포트
+import { useAuthStore } from '@/stores/auth'; // 작성한 Auth(피니아) 스토어 임포트
 
-// [상태] 입력 폼 데이터 (zipCode, addr1은 API로 채워질 예정)
+// [상태] 입력 폼 데이터 정의
 const form = ref({
-    name: '',
-    birth: '',
-    gender: '여성',
-    zipCode: '',
-    addr1: '',
-    addr2: '',
-    disabilityType: null,
-    relation: '부모', // 기본값
-    relationEtc: '', // 기타 입력내용
-    file: null
+    name: '', // 대상자 이름
+    birth: '', // 생년월일
+    gender: '여성', // 성별 (기본값 = 여성)
+    zipCode: '', // 우편번호
+    addr1: '', // 기본 주소
+    addr2: '', // 상세 주소
+    disabilityType: null, // 장애 유형
+    relation: '부모', // 대상자와의 관계 (기본값 = 부모)
+    relationEtc: '', // 관계 '기타'를 선택 시 입력값
+    file: null // 첨부파일
 });
 
-// [옵션] 장애유형
+// [상태] Pinia 스토어 인스턴스 생성
+const authStore = useAuthStore(); // 로그인 정보를 담고 있는 스토어 호출
+
+// [옵션] 장애유형 리스트
 const disabilityOptions = ['지체장애', '시각장애', '청각장애', '지적장애', '뇌병변장애', '기타'];
-// [옵션] 대상자와의 관계
+// [옵션] 대상자와의 관계 리스트
 const relations = ['부모', '배우자', '자녀', '친족', '후견인', '기타'];
 
+// [함수] 주소 검색 API 팝업창 열기
 const openPostcode = () => {
     new window.daum.Postcode({
         oncomplete: (data) => {
             // 도로명 주소와 지번 주소 중 우선순위에 따라 주소 설정
-            let fullAddress = data.roadAddress || data.jibunAddress;
-            let extraAddress = '';
+            let fullAddress = data.roadAddress || data.jibunAddress; // 주소 방식 선택
+            let extraAddress = ''; // 참고 항목 변수
 
             // 도로명 주소일 경우 참고항목(법정동, 건물명) 조합
             if (data.userSelectedType === 'R') {
+                // 도로명 주소 선택 시
                 if (data.bname !== '') extraAddress += data.bname;
                 if (data.buildingName !== '') extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName;
                 fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';

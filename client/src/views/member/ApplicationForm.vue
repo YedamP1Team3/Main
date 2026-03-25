@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 // 1. 자식 컴포넌트 임포트
 // (이 파일은 앱의 전체적인 레이아웃 구조만 잡아주는 역할을 합니다)
 import BeneficiaryInfo from '@/components/member/m_application/m_BeneficiaryInfo.vue';
