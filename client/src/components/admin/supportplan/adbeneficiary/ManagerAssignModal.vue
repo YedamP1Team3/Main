@@ -19,7 +19,7 @@ const currentManagerName = ref('');
 // 매니저 목록 불러오기
 const fetchManagerList = async () => {
     try {
-        const res = await axios.get('http://localhost:3000/api/users/managers');
+        const res = await axios.get('http://localhost:3000/abc/managers');
         managerList.value = res.data.data || [];
     } catch (error) {
         console.error('담당자 목록 로드 실패:', error);
@@ -37,7 +37,7 @@ const handleConfirm = async () => {
             bene_id: props.beneId,
             manager_id: selectedManagerId.value
         };
-        const res = await axios.put(`http://localhost:3000/api/beneficiary/assign`, payload);
+        const res = await axios.put(`http://localhost:3000/abc/assign-manager`, payload);
 
         if (res.data.success || res.status === 200) {
             alert('담당자 배정이 완료되었습니다.');

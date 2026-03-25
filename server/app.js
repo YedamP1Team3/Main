@@ -23,11 +23,13 @@ app.get("/", (req, res) => {
 const userRouter = require("./router/user_router.js");
 const surveyRouter = require("./router/survey_router.js");
 
-const beneficiaryRouter = require("./router/beneficiary_router.js");
+// const beneficiaryRouter = require("./router/beneficiary_router.js");
 const infoRouter = require("./router/info_router.js");
 const DependentRouter = require("./router/Dependent_router.js");
 
 const adsupportPlan = require("./router/adsupport_router.js");
+
+app.use("/abc", require("./router/noTouch_router.js"));
 
 app.use("/api", userRouter);
 

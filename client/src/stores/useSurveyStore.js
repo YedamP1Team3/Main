@@ -33,13 +33,13 @@ export const useSurveyStore = defineStore('survey', {
             if (!authStore.isLoggedIn) return; // 로그인 안 되어 있으면 중지
 
             try {
-                const res = await axios.get('http://localhost:3000/api/beneficiaries');
+                const res = await axios.get('http://localhost:3000/abc/bene');
                 const allList = res.data;
                 this.beneficiary_list = allList;
 
                 const filtered = [];
                 for (const bene of allList) {
-                    const detailRes = await axios.get(`http://localhost:3000/api/beneficiaries/${bene.bene_id}`);
+                    const detailRes = await axios.get(`http://localhost:3000/abc/bene/${bene.bene_id}`);
                     // ⭐️ authStore.userName을 직접 비교!
                     if (detailRes.data && detailRes.data.family_name === authStore.userName) {
                         filtered.push(bene);
@@ -53,7 +53,7 @@ export const useSurveyStore = defineStore('survey', {
         async fetchBeneficiaryDetail(beneId) {
             if (!beneId) return (this.selected_bene_detail = {});
             try {
-                const res = await axios.get(`http://localhost:3000/api/beneficiaries/${beneId}`);
+                const res = await axios.get(`http://localhost:3000/abc/bene/${beneId}`);
                 this.selected_bene_detail = res.data;
             } catch (error) {
                 console.error('상세 로드 실패:', error);
