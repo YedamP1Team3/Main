@@ -212,6 +212,7 @@ const getApplicationList = async (beneId) => {
     const rows = await conn.query(surveySql.select_application_list_by_bene, [
       beneId,
     ]);
+    console.log(rows);
     return rows; // 리스트 반환
   } finally {
     if (conn) conn.release();

@@ -1,13 +1,19 @@
 <script setup>
+// 1. Vue 내장 함수
 import { ref, onMounted, computed } from 'vue';
-import { useSurveyStore } from '@/stores/useSurveyStore';
+// 2. 외부 라이브러리 (Pinia)
 import { storeToRefs } from 'pinia';
+// 3. 로컬 스토어 및 기타
+import { useSurveyStore } from '@/stores/useSurveyStore';
 
 const surveyStore = useSurveyStore();
+// 스토어 상태를 반응형으로 추출
 const { my_beneficiaries, selected_bene_detail } = storeToRefs(surveyStore);
 
+// 지원자 선택 select 박스에 바인딩할 로컬 ID
 const localSelectedId = ref('');
 
+// 스토어에서 받아온 성별 코드(M/F)를 한글로 변환
 const formattedGender = computed(() => {
     const gender = selected_bene_detail.value?.gender;
     if (gender === 'M') return '남자';
@@ -15,11 +21,13 @@ const formattedGender = computed(() => {
     return '';
 });
 
+// 지원자 select 박스 변경 시 실행되는 함수
 const handleSelectChange = async () => {
-    // ★ 변경: 선택 시 스토어의 통합 액션을 호출하여 리스트까지 세팅합니다.
+    // 스토어 액션을 호출하여 전역 상태(ID, 상세정보, 관련 신청 리스트 등) 업데이트
     await surveyStore.selectBeneficiary(localSelectedId.value);
 };
 
+// 컴포넌트 마운트 시 지원자 리스트가 없다면 최초 1회 로드
 onMounted(async () => {
     if (surveyStore.my_beneficiaries.length === 0) {
         await surveyStore.fetchBeneficiaryList();
@@ -28,43 +36,50 @@ onMounted(async () => {
 </script>
 
 <template>
-    <h3>지원자 정보</h3>
-    <div class="BfInfo">
-        <table>
-            <tbody>
-                <tr>
-                    <th><label>지원자</label></th>
-                    <td>
-                        <select v-model="localSelectedId" @change="handleSelectChange">
-                            <option value="">지원자를 선택하세요</option>
-                            <option v-for="bene in my_beneficiaries" :key="bene.bene_id" :value="bene.bene_id">
-                                {{ bene.bene_name }}
-                            </option>
-                        </select>
-                    </td>
+    <!-- 다중 루트 노드 에러(Fragment warning) 방지를 위한 래퍼 div -->
+    <div class="beneficiary-info-container">
+        <h3>지원자 정보</h3>
+        <div class="BfInfo">
+            <table>
+                <tbody>
+                    <tr>
+                        <th><label>지원자</label></th>
+                        <td>
+                            <select v-model="localSelectedId" @change="handleSelectChange">
+                                <option value="">지원자를 선택하세요</option>
+                                <option v-for="bene in my_beneficiaries" :key="bene.bene_id" :value="bene.bene_id">
+                                    {{ bene.bene_name }}
+                                </option>
+                            </select>
+                        </td>
 
-                    <th><label>보호자</label></th>
-                    <td><input type="text" :value="selected_bene_detail.family_name || ''" readonly /></td>
+                        <th><label>보호자</label></th>
+                        <td><input type="text" :value="selected_bene_detail.family_name || ''" readonly /></td>
 
-                    <th><label>대기단계</label></th>
-                    <td><input type="text" :value="selected_bene_detail.priority_status || ''" readonly /></td>
-                </tr>
-                <tr>
-                    <th><label>성별</label></th>
-                    <td><input type="text" :value="formattedGender" readonly /></td>
+                        <th><label>대기단계</label></th>
+                        <td><input type="text" :value="selected_bene_detail.priority_status || ''" readonly /></td>
+                    </tr>
+                    <tr>
+                        <th><label>성별</label></th>
+                        <td><input type="text" :value="formattedGender" readonly /></td>
 
-                    <th><label>생년월일</label></th>
-                    <td><input type="text" :value="selected_bene_detail.birth_date || ''" readonly /></td>
+                        <th><label>생년월일</label></th>
+                        <td><input type="text" :value="selected_bene_detail.birth_date || ''" readonly /></td>
 
-                    <th><label>장애유형</label></th>
-                    <td><input type="text" :value="selected_bene_detail.disability_type || ''" readonly /></td>
-                </tr>
-            </tbody>
-        </table>
+                        <th><label>장애유형</label></th>
+                        <td><input type="text" :value="selected_bene_detail.disability_type || ''" readonly /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 
 <style scoped>
+.beneficiary-info-container {
+    width: 100%;
+}
+
 .BfInfo {
     width: 100%;
     padding: 20px 15px;

@@ -105,6 +105,7 @@ export const useSurveyStore = defineStore('survey', {
         async loadApplicationView(appId) {
             try {
                 const res = await axios.get(`http://localhost:3000/survey/result/${appId}`);
+
                 if (res.data.success) {
                     // 백엔드에서 조립해준 과거 데이터 덮어씌우기
                     this.view_survey_data = res.data.data.survey_data.items;
