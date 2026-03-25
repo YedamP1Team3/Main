@@ -1,7 +1,7 @@
 import sAdmin from '@/layout/sAdmin_layout/JsLayout.vue';
 import sakayLay from '@/layout/sakima_layout/AppLayout.vue';
 import memberLay from '@/layout/member/mLayout.vue';
-import AddDependentLayout from '@/views/Dependent/AddDependentLayout.vue';
+// import memberSid from '@/layout/member/mSidbar.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { member } from './member.js';
 import { systemAdmin } from './s_admin.js';
@@ -34,7 +34,12 @@ const router = createRouter({
                 ...member // 내가 만든 경로를 먼저 배치 (우선순위 높음)
             ]
         },
-
+        // {
+        //     // 지원자 추가 페이지
+        //     path: '/Recipient/add',
+        //     name: 'AddRecipient',
+        //     component: () => import('@/views/Dependent/AddRecipientForm.vue')
+        // },
         {
             path: '/beneficiaryMain',
             name: 'beneficiaryMain',
@@ -56,22 +61,6 @@ const router = createRouter({
             path: '/dashboard',
             name: 'Dashboard',
             component: () => import('../views/Dashboard.vue')
-        },
-        {
-            path: '/Dependent',
-            name: 'dependentParent',
-            component: AddDependentLayout,
-            children: [
-                {
-                    path: 'add', // 실제 주소는 /Dependent/add 가 됩니다.
-                    name: 'AddDependent',
-                    component: () => import('../views/Dependent/AddDependent.vue'),
-                    meta: {
-                        requiresAuth: true
-                    }
-                }
-                // 추후 본인의 다른 페이지(예: 수정, 목록 등)가 생기면 여기에 추가하세요.
-            ]
         },
         {
             path: '/ManagerSchedule',
