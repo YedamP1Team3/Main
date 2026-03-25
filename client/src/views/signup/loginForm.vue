@@ -78,16 +78,17 @@ const handleLogin = async () => {
             authStore.login(user);
             const userRole = user.role.toUpperCase();
 
-            if(userRole === 'ADMIN'){
-                alert(`${user.name}님 환영합니다 관리자페이지로 이동합니다`)
-                router.push('/AdministratorMain')
-            } else if (userRole === 'MANAGER'){
-                alert(`${user.name}님 환영합니다 담당자페이지로 이동합니다`)
-                router.push('/BeneficiaryMain')
-            } else if (userRole === 'FAMILY'){
-                alert(`${user.name}님 환영합니다 일반사용자 페이지로 이동합니다.`)
+            if (userRole === 'ADMIN') {
+                alert(`${user.name}님 환영합니다 관리자페이지로 이동합니다`);
+                router.push('/AdministratorMain');
+            } else if (userRole === 'MANAGER') {
+                alert(`${user.name}님 환영합니다 담당자페이지로 이동합니다`);
+                router.push('/BeneficiaryMain');
+            } else if (userRole === 'FAMILY') {
+                alert(`${user.name}님 환영합니다 일반사용자 페이지로 이동합니다.`);
+                router.push('/memberApplication');
             } else {
-                alert(`${user.name}님 환영합니다`)
+                alert(`${user.name}님 환영합니다`);
             }
         }
     } catch (error) {

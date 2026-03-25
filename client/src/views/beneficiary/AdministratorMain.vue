@@ -1,28 +1,47 @@
 <script setup>
 import { ref } from 'vue';
-
+import { useSurveyStore } from '@/stores/useSurveyStore'; // ⭐️ 스토어 가져오기
 // 우리가 만든 컴포넌트들을 가져옵니다.
 import JsTopbarad from '@/layout/manger/JsTopbarmg.vue';
 import BeneficiaryInfo from '@/components/manager/supportplan/beneficiary/BeneficiaryInfo.vue';
 import AdminManagement from '@/components/admin/supportplan/adbeneficiary/AdminManagement.vue';
 import AdplanDetail from '@/components/admin/supportplan/adbeneficiary/AdplanDetail.vue';
-
+import MemberSurvey from '@/components/member/m_application/MemberSurvey.vue';
+import ManagerAssignView from '@/components/admin/supportplan/adbeneficiary/ManagerAssignModal.vue';
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
 const viewMode = ref('empty');
 const managementRef = ref(null); //새로고침
 const selectPlan = ref(null);
-
+const surveyStore = useSurveyStore(); // ⭐️ 스토어 인스턴스
 //지원자를 새로 선택했을때
 const handleIdUpdate = (id, priorityId) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
-    viewMode.value = 'empty'; //대상자가 바뀌면 입력창 닫음
+    viewMode.value = 'empty'; // ⭐️ 우측 화면 닫기
+    surveyStore.is_survey_visible = false; // ⭐️ 신청서 스토어 화면도 강제 종료
 };
 
 const handleIdDetail = (planId) => {
     selectPlan.value = planId;
-    viewMode.value = 'detail';
+    viewMode.value = 'plan_detail';
+};
+// 3. 지원신청서 클릭 시
+const handleAppDetail = (appId) => {
+    viewMode.value = 'app_detail'; // ⭐️ 신청서 모드로 변경
+};
+
+// ⭐️ 2. 배정 화면 열기 함수
+const handleAssignManager = () => {
+    viewMode.value = 'assign_manager'; // 우측 화면 전환
+};
+
+// ⭐️ 3. 배정 성공 후 초기화 함수
+const handleAssignSuccess = async () => {
+    alert('담당자 배정이 성공적으로 반영되었습니다.');
+    viewMode.value = 'empty'; // 완료 후 창 닫기
+    // 필요한 경우 대상자 리스트 새로고침
+    // await surveyStore.fetchBeneficiaryList();
 };
 
 //저장후 새로고침 하는 함수
@@ -45,13 +64,27 @@ const reloadList = () => {
             </section>
 
             <section class="list-section">
-                <AdminManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @newaddplan="viewMode = 'create'" />
+                <AdminManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @select-app="handleAppDetail" @assign-manager="handleAssignManager" @newaddplan="viewMode = 'create'" />
             </section>
         </aside>
 
         <main class="main-content">
-            <div v-if="viewMode === 'detail'" class="editor-container">
+            <div v-if="viewMode === 'plan_detail'" class="editor-container">
                 <AdplanDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+            </div>
+            <div v-else-if="viewMode === 'app_detail'" class="editor-container">
+                <MemberSurvey />
+            </div>
+
+            <div v-else-if="viewMode === 'assign_manager'" class="editor-container">
+                <ManagerAssignView :beneId="selectedId" @close="viewMode = 'empty'" @success="handleAssignSuccess" />
+            </div>
+
+            <div v-else class="empty-state">
+                <div class="guide-box">
+                    <i class="pi pi-file"></i>
+                    <p>좌측 목록에서 항목을 선택해주세요.</p>
+                </div>
             </div>
         </main>
     </div>

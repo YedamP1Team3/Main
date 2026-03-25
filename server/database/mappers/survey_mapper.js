@@ -9,7 +9,7 @@ const selectSurvey = async (versionId) => {
     conn = await pool.getConnection();
 
     // 💡 디버깅용 로그: 실제로 DB에 어떤 ID를 던지는지 확인
-    console.log("DB 조회 시도 versionId:", versionId);
+    // console.log("DB 조회 시도 versionId:", versionId);
 
     // [ ] 배열 안에 versionId를 넣어서 SQL의 ? 자리에 매칭시킵니다.
     let rows = await conn.query(surveySql.selectSurvey, [versionId]);

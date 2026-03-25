@@ -3,7 +3,9 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 import { storeToRefs } from 'pinia';
+import { useAuthStore } from '@/stores/auth';
 
+const authStore = useAuthStore();
 const surveyStore = useSurveyStore();
 // ⭐️ [수정] 스토어에서 조회 모드용 변수들도 함께 꺼내옵니다.
 const { is_survey_visible, is_view_mode, view_survey_data, view_answers } = storeToRefs(surveyStore);
@@ -67,9 +69,10 @@ const submitSurvey = async () => {
     const payload = {
         bene_id: surveyStore.selected_bene_id,
         version_id: currentVersionId.value,
-        user_id: surveyStore.login_user_id,
+        user_id: authStore.userId,
         answers: answers.value
     };
+    console.log(payload);
 
     try {
         const res = await axios.post('/api/survey/submit', payload);
