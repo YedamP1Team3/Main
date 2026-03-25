@@ -2,7 +2,7 @@
 // import { ref } from 'vue';
 import mTopbar from '../../layout/member/mTopbar.vue';
 import memberSid from '../../layout/member/mSidbar.vue';
-import mainrecipient from '@/components/member/memeberApplication/mRecipient/Recipient.vue';
+import mainrecipient from '@/components/member/recipient/Recipient.vue';
 </script>
 
 <template>
