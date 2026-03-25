@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 import { storeToRefs } from 'pinia';
 
+import TabPlan from './MemberTabPlan.vue';
+
 const surveyStore = useSurveyStore();
 const { selected_bene_id, application_list } = storeToRefs(surveyStore);
 
@@ -10,7 +12,12 @@ const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
-const currentTab = ref('Application');
+const emit = defineEmits(['select-plan']);
+const currentTab = ref('Application', 'Plan');
+
+const handleSelectPlan = (planId) => {
+    emit('select-plan', planId);
+};
 </script>
 
 <template>
@@ -51,8 +58,8 @@ const currentTab = ref('Application');
             </table>
         </div>
 
-        <div v-else class="tab-content">
-            <p class="empty-msg">해당 탭의 내용이 없습니다.</p>
+        <div class="tab-content">
+            <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @select-plan="handleSelectPlan" />
         </div>
     </div>
 </template>

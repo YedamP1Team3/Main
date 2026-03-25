@@ -6,16 +6,24 @@ import BeneficiaryInfo from '@/components/member/m_application/m_BeneficiaryInfo
 import BeneficiaryManagement from '@/components/member/m_application/MemberManagement.vue';
 // ⭐️ 새로 분리할 설문지 컴포넌트 가져오기 (경로는 프로젝트에 맞게 수정하세요)
 import SurveyApplicationForm from '@/components/member/m_application/MemberSurvey.vue';
+import MemberSupportDetail from '@/components/member/m_application/MemberSupportDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
 const viewMode = ref('empty');
 const managementRef = ref(null);
+const selectPlan = ref(null);
 
 const handleIdUpdate = (id, priorityId) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
     viewMode.value = 'empty';
+    surveyStore.is_survey_visible = false;
+};
+
+const handleIdDetail = (planId) => {
+    selectPlan.value = planId;
+    viewMode.value = 'detail';
 };
 </script>
 
@@ -29,12 +37,17 @@ const handleIdUpdate = (id, priorityId) => {
             </section>
 
             <section class="list-section">
-                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" />
+                <BeneficiaryManagement ref="managementRef" @select-plan="handleIdDetail" :beneId="selectedId" />
             </section>
         </aside>
 
         <main class="main-content">
-            <SurveyApplicationForm />
+            <div>
+                <SurveyApplicationForm />
+            </div>
+            <div v-if="viewMode === 'detail'" class="editor-container">
+                <MemberSupportDetail :planId="selectPlan" :beneId="selectedId" />
+            </div>
         </main>
     </div>
 </template>
