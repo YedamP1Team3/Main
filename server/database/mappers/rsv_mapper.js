@@ -38,4 +38,28 @@ const insertBlockedTime = async (managerId, date, startTime, endTime) => {
   }
 };
 
-module.exports = { selectManagerSchedule, insertBlockedTime };
+const selectAllOccupiedTimes = async (managerId, date) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+
+    const rows = await conn.query(rsvSql.selectAllOccupiedTimes, [
+      managerId,
+      date,
+      managerId,
+      date,
+    ]);
+
+    return rows;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+module.exports = {
+  selectManagerSchedule,
+  insertBlockedTime,
+  selectAllOccupiedTimes,
+};

@@ -1,32 +1,118 @@
 <template>
     <div class="container">
-        <Calendar @selectDate="handleDate" />
+        <Calendar v-model="selectedDate" />
 
-        <TimeSlot :selectedDate="selectedDate" />
+        <TimeSlot :selectedDate="selectedDate" :slots="slots" mode="manager" @blockTimes="handleBlock" />
     </div>
 </template>
 
 <script>
-import { ref } from 'vue';
-import Calendar from '@/components/reservation/Calendar.vue';
-import TimeSlot from '@/components/reservation/TimeSlot.vue';
+import { ref, watch } from 'vue';
+import Calendar from '@/components/common/Calendar.vue';
+import TimeSlot from '@/components/common/TimeSlot.vue';
+
+import { getManagerSchedule } from '@/api/reservation/schedule';
+import { createBlockedTimes } from '@/api/reservation/block';
 
 export default {
     components: {
         Calendar,
         TimeSlot
     },
+
     setup() {
         const selectedDate = ref(null);
+        const slots = ref([]);
 
-        const handleDate = (date) => {
-            selectedDate.value = date;
-            console.log('선택 날짜:', date);
+        // 🔥 날짜 변경 감지 → API 호출
+        watch(selectedDate, async (newDate) => {
+            if (!newDate) return;
+
+            try {
+                const res = await getManagerSchedule(newDate);
+                console.log('서버 응답:', res.data);
+                console.log('slots : ', slots.value);
+
+                // schedule이 배열일 가능성 대비
+                const schedule = res.data.schedule;
+
+                if (!schedule) {
+                    slots.value = [];
+                    return;
+                }
+
+                slots.value = convertToSlots(schedule);
+            } catch (err) {
+                console.error('스케줄 조회 실패:', err);
+                slots.value = [];
+            }
+        });
+
+        // 🔥 근무시간 → 타임슬롯 변환
+        const convertToSlots = (schedule) => {
+            const result = [];
+
+            let [hour, minute] = schedule.work_start_time.split(':').map(Number);
+            const [endHour, endMinute] = schedule.work_end_time.split(':').map(Number);
+
+            while (hour < endHour || (hour === endHour && minute < endMinute)) {
+                const time = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+
+                result.push(time);
+
+                minute += 30;
+                if (minute === 60) {
+                    hour++;
+                    minute = 0;
+                }
+            }
+
+            return result;
+        };
+
+        // 🔥 차단 처리 (아직 API 연결 전 단계)
+        const handleBlock = async (data) => {
+            console.log('차단 요청:', data);
+
+            try {
+                const { date, times, type } = data;
+
+                // 🔴 예약가능 버튼 (지금은 미구현)
+                if (type === 'available') {
+                    console.log('예약가능 처리 (추후 구현)');
+                    return;
+                }
+
+                // 🔥 API 요청 (그대로 보내면 됨)
+                const payload = {
+                    date,
+                    times
+                };
+
+                console.log('API 요청:', payload);
+
+                await createBlockedTimes(payload);
+
+                alert('차단시간이 등록되었습니다.');
+
+                // 🔥 UI 갱신
+                const res = await getManagerSchedule(date);
+                const raw = res.data.schedule;
+                const schedule = Array.isArray(raw) ? raw[0] : raw;
+
+                slots.value = convertToSlots(schedule);
+            } catch (err) {
+                console.error('차단 실패:', err);
+
+                // 🔥 서버 에러 메시지 그대로 보여주기 (중요)
+                alert(err.response?.data?.message || '차단 처리 실패');
+            }
         };
 
         return {
             selectedDate,
-            handleDate
+            slots,
+            handleBlock
         };
     }
 };

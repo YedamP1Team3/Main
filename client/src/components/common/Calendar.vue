@@ -37,14 +37,18 @@
 import { ref, computed } from 'vue';
 
 export default {
-    name: 'CalendarPicker',
-    emits: ['selectDate'],
+    name: 'Calendar',
+
+    props: {
+        modelValue: String
+    },
+
+    emits: ['update:modelValue'],
+
     setup(props, { emit }) {
         const today = new Date();
         const currentYear = ref(today.getFullYear());
         const currentMonth = ref(today.getMonth());
-
-        const selectedDate = ref(null);
 
         const days = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -78,8 +82,7 @@ export default {
         const selectDate = (date) => {
             if (!date.day) return;
 
-            selectedDate.value = date.fullDate;
-            emit('selectDate', date.fullDate);
+            emit('update:modelValue', date.fullDate);
         };
 
         const isToday = (date) => {
@@ -90,7 +93,7 @@ export default {
         };
 
         const isSelected = (date) => {
-            return selectedDate.value === date.fullDate;
+            return props.modelValue === date.fullDate;
         };
 
         const prevMonth = () => {

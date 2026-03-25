@@ -1,13 +1,13 @@
 <template>
     <div class="timeslot-container">
-        <!-- 선택된 날짜 표시 -->
+        <!-- 헤더 -->
         <div class="header">
             <h3>시간 선택</h3>
             <p v-if="selectedDate">{{ selectedDate }}</p>
             <p v-else>날짜를 먼저 선택하세요</p>
         </div>
 
-        <!-- 오전 / 오후 선택 -->
+        <!-- 오전 / 오후 토글 -->
         <div class="period-toggle">
             <button :class="{ active: period === 'AM' }" @click="period = 'AM'">오전</button>
             <button :class="{ active: period === 'PM' }" @click="period = 'PM'">오후</button>
@@ -20,81 +20,51 @@
             </div>
         </div>
 
-        <!-- 버튼 -->
+        <!-- 액션 버튼 -->
         <div class="action-buttons">
-            <button class="available-btn">예약가능</button>
-            <button class="unavailable-btn" @click="blockTimes">예약불가</button>
+            <!-- 담당자 모드 -->
+            <template v-if="mode === 'manager'">
+                <button class="available-btn" @click="handleManagerAction('available')">예약가능</button>
+                <button class="unavailable-btn" @click="handleManagerAction('unavailable')">예약불가</button>
+            </template>
+
+            <!-- 보호자 모드 -->
+            <template v-else>
+                <button class="available-btn" @click="handleUserAction">상담신청</button>
+                <button class="unavailable-btn" @click="$emit('cancelSelection')">취소</button>
+            </template>
         </div>
     </div>
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue';
-import axios from 'axios';
+import { ref, computed } from 'vue';
 
 export default {
     name: 'TimeSlot',
+
     props: {
-        selectedDate: String
+        selectedDate: String,
+        slots: {
+            type: Array,
+            default: () => []
+        },
+        mode: {
+            type: String,
+            default: 'user'
+        }
     },
-    setup(props) {
+
+    emits: ['blockTimes', 'reserveTimes'],
+
+    setup(props, { emit }) {
         const period = ref('AM');
         const selectedTimes = ref([]);
 
-        const fetchSchedule = async (date) => {
-            let schedule = [];
-            try {
-                const res = await axios.get('/api/reserve/schedule', {
-                    params: { date }
-                });
-
-                if (res.data.success) {
-                    schedule.value = res.data.schedule;
-                    console.log('스케줄 데이터:', schedule.value);
-                }
-            } catch (err) {
-                console.error('스케줄 조회 실패:', err);
-            }
-        };
-
-        // 날짜 변경 감지
-        watch(
-            () => props.selectedDate,
-            (newDate) => {
-                if (!newDate) return;
-
-                selectedTimes.value = []; // 선택 초기화
-                fetchSchedule(newDate); // 🔥 API 호출
-            }
-        );
-
-        // 시간 생성 함수
-        const generateTimeSlots = (start, end) => {
-            const times = [];
-            let [hour, minute] = start.split(':').map(Number);
-            const [endHour, endMinute] = end.split(':').map(Number);
-
-            while (hour < endHour || (hour === endHour && minute <= endMinute)) {
-                const h = String(hour).padStart(2, '0');
-                const m = String(minute).padStart(2, '0');
-                times.push(`${h}:${m}`);
-
-                minute += 30;
-                if (minute >= 60) {
-                    minute = 0;
-                    hour += 1;
-                }
-            }
-
-            return times;
-        };
-
         const timeSlots = computed(() => {
-            if (period.value === 'AM') {
-                return generateTimeSlots('09:00', '12:30');
-            } else {
-                return generateTimeSlots('14:00', '17:30');
-            }
+            if (!props.slots.length) return [];
+
+            return props.slots.filter((t) => (period.value === 'AM' ? t < '13:00' : t >= '14:00'));
         });
 
         const toggleTime = (time) => {
@@ -105,30 +75,33 @@ export default {
             }
         };
 
-        const blockTimes = async () => {
+        const handleManagerAction = (type) => {
             if (!props.selectedDate || selectedTimes.value.length === 0) {
                 alert('날짜와 시간을 선택하세요.');
                 return;
             }
 
-            try {
-                const res = await axios.post('/api/reserve/blocked-times', {
-                    date: props.selectedDate,
-                    times: selectedTimes.value
-                });
+            emit('blockTimes', {
+                date: props.selectedDate,
+                times: selectedTimes.value,
+                type // 'available' | 'unavailable'
+            });
 
-                if (res.data.success) {
-                    alert('예약불가 설정 완료');
+            selectedTimes.value = [];
+        };
 
-                    // 선택 초기화
-                    selectedTimes.value = [];
-
-                    console.log('차단 완료:', res.data);
-                }
-            } catch (err) {
-                console.error('차단 실패:', err);
-                alert('오류 발생');
+        const handleUserAction = () => {
+            if (!props.selectedDate || selectedTimes.value.length === 0) {
+                alert('날짜와 시간을 선택하세요.');
+                return;
             }
+
+            emit('reserveTimes', {
+                date: props.selectedDate,
+                times: selectedTimes.value
+            });
+
+            selectedTimes.value = [];
         };
 
         return {
@@ -136,7 +109,8 @@ export default {
             timeSlots,
             selectedTimes,
             toggleTime,
-            blockTimes
+            handleManagerAction,
+            handleUserAction
         };
     }
 };

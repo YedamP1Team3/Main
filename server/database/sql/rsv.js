@@ -23,4 +23,25 @@ const insertBlockedTime = `
   VALUES (?, ?, ?, ?)
 `;
 
-module.exports = { selectManagerSchedule, insertBlockedTime };
+const selectAllOccupiedTimes = `
+      SELECT start_time, end_time
+      FROM reservations
+      WHERE manager_id = ?
+        AND DATE(start_time) = ?
+        AND rsv_status IN ('REQUESTED', 'APPROVED')
+
+      UNION ALL
+
+      SELECT 
+        CONCAT(work_date, ' ', start_time) AS start_time,
+        CONCAT(work_date, ' ', end_time) AS end_time
+      FROM manager_blocked_times
+      WHERE manager_id = ?
+        AND work_date = ?
+      `;
+
+module.exports = {
+  selectManagerSchedule,
+  insertBlockedTime,
+  selectAllOccupiedTimes,
+};
