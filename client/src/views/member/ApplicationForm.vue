@@ -24,16 +24,12 @@ const handleIdDetail = (planId) => {
     selectPlan.value = planId;
     viewMode.value = 'detail';
 };
-// 💡 모든 데이터의 상태 변경(id, 모드 등)은 스토어(Pinia)에서 알아서 처리하므로
-// 부모 컴포넌트에 불필요한 로컬 변수나 이벤트 리스너를 둘 필요가 없습니다!
 </script>
 
 <template>
-    <!-- 상단 공통 헤더 -->
     <header class="main-header"></header>
 
     <div class="dashboard-container">
-        <!-- 🟢 왼쪽 사이드 패널: 지원자 기본 정보 및 신청서/계획서 등 목록 관리 -->
         <aside class="side-panel">
             <section class="info-section">
                 <BeneficiaryInfo />
@@ -41,8 +37,6 @@ const handleIdDetail = (planId) => {
 
             <section class="list-section">
                 <BeneficiaryManagement ref="managementRef" @select-plan="handleIdDetail" :beneId="selectedId" />
-                <!-- 불필요했던 ref="managementRef" 바인딩도 깔끔하게 제거했습니다 -->
-                <BeneficiaryManagement />
             </section>
         </aside>
 

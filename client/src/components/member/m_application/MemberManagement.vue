@@ -16,12 +16,11 @@ const { selected_bene_id, application_list } = storeToRefs(surveyStore);
 
 const emit = defineEmits(['select-plan']);
 const currentTab = ref('Application', 'Plan');
+const beneId = selected_bene_id;
 
 const handleSelectPlan = (planId) => {
     emit('select-plan', planId);
 };
-// 현재 활성화된 탭을 관리하는 로컬 상태 (기본값: 'Application' 지원신청서)
-const currentTab = ref('Application');
 </script>
 
 <template>
