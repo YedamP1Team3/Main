@@ -11,6 +11,7 @@ import '@/assets/tailwind.css';
 import '@/assets/styles.scss';
 
 import 'primeicons/primeicons.css';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 
 import { createPinia } from 'pinia';
 
@@ -26,6 +27,7 @@ app.use(PrimeVue, {
     }
 });
 const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
 
 app.use(pinia);
 app.use(ToastService);
