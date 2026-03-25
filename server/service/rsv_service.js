@@ -57,7 +57,21 @@ const mergeTimes = (times) => {
 const createBlockedTimes = async (managerId, date, times) => {
   const ranges = mergeTimes(times);
 
+  const existing = await rsvMapper.selectAllOccupiedTimes(managerId, date);
+
   for (const range of ranges) {
+    const newStart = new Date(`${date}T${range.start_time}:00`).getTime();
+    const newEnd = new Date(`${date}T${range.end_time}:00`).getTime();
+
+    for (const ex of existing) {
+      const exStart = new Date(ex.start_time).getTime();
+      const exEnd = new Date(ex.end_time).getTime();
+
+      if (newStart < exEnd && newEnd > exStart) {
+        throw new Error("이미 예약 또는 차단된 시간입니다.");
+      }
+    }
+
     await rsvMapper.insertBlockedTime(
       managerId,
       date,
