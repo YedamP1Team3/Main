@@ -96,23 +96,24 @@ watch(
         </div>
         <div class="form_BfnewPlan">
             <label for="objective">지원목표</label>
-            <input id="objective" v-model="planDetail.plan_objective" :readonly="planDetail.progress_state !== '임시'" type="text" class="read-only" />
+            <input id="objective" v-model="planDetail.plan_objective" :readonly="!['임시', '반려'].includes(planDetail.progress_state)" type="text" class="read-only" />
         </div>
         <div class="form_BfnewPlan">
             <label for="content">계획내용</label>
-            <textarea id="content" v-model="planDetail.plan_content" rows="5" :readonly="planDetail.progress_state !== '임시'" class="read-only"></textarea>
+            <textarea id="content" v-model="planDetail.plan_content" rows="5" :readonly="!['임시', '반려'].includes(planDetail.progress_state)" class="read-only"></textarea>
         </div>
         <div class="form_BfnewPlan">
             <label for="file">파일첨부</label>
             <input type="text" placeholder="임시" :readonly="planDetail.progress_state !== '임시'" class="read-only" />
         </div>
         <div>
-            <button v-if="planDetail.progress_state === '임시'" @click="Approval(planDetail.plan_id)">승인</button>
-            <button v-if="planDetail.progress_state === '임시'" @click="SaveTemp(planDetail.plan_id)">임시저장</button>
-            <button v-if="planDetail.progress_state === '임시'" @click="DeleteTemp(planDetail.plan_id)">삭제</button>
+            <button v-if="['임시', '반려'].includes(planDetail.progress_state)" class="btn-approve" @click="Approval(planDetail.plan_id)">승인</button>
+            <button v-if="['임시', '반려'].includes(planDetail.progress_state)" class="btn-temp" @click="SaveTemp(planDetail.plan_id)">임시저장</button>
+            <button v-if="planDetail.progress_state === '임시'" class="btn-delete" @click="DeleteTemp(planDetail.plan_id)">삭제</button>
         </div>
+        <div v-if="planDetail.progress_state == '반려'" class="reason-area"></div>
         <div>
-            <div v-if="planDetail.progress_state == '반려'" class="reason-area">
+            <div v-if="planDetail.progress_state === '반려' || (planDetail.progress_state === '임시' && planDetail.rejection_reason)" class="reason-area">
                 <label class="reasonFont">반려사유</label>
                 <textarea :value="planDetail.rejection_reason" rows="4" class="reasonText" :disabled="planDetail.progress_state === '반려'" readonly></textarea>
             </div>
@@ -120,11 +121,16 @@ watch(
     </div>
 </template>
 <style scoped>
+/* 1. 기본 레이아웃 및 폰트 */
 .BfnewPlan {
     max-width: 900px;
     margin: 0 auto;
     padding: 30px;
     background-color: #ffffff;
+    font-family:
+        'Pretendard',
+        -apple-system,
+        sans-serif;
 }
 
 h2 {
@@ -138,10 +144,10 @@ h2 {
 hr {
     border: none;
     border-top: 2px solid #334155;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
-/* 상태 표시 및 작성일 */
+/* 상태 표시 배지 */
 .BfnewPlan > div:nth-child(3) span {
     display: inline-block;
     padding: 4px 12px;
@@ -152,6 +158,7 @@ hr {
     font-weight: 700;
 }
 
+/* 작성일 우측 정렬 */
 .BfnewPlan > div:nth-child(4) {
     text-align: right;
     margin-bottom: 20px;
@@ -159,7 +166,7 @@ hr {
     font-size: 0.95rem;
 }
 
-/* 2. 기존 폼 필드 레이아웃 (표 형식 유지) */
+/* 2. 테이블 형태의 폼 레이아웃 */
 .form_BfnewPlan {
     display: flex;
     border-bottom: 1px solid #e2e8f0;
@@ -181,83 +188,104 @@ hr {
     justify-content: center;
     padding: 20px;
     border-right: 1px solid #e2e8f0;
+    font-size: 0.9rem;
 }
 
+/* 입력창 및 텍스트 영역 */
 input[readonly],
-textarea[readonly] {
+textarea[readonly],
+input[v-model],
+textarea[v-model] {
     flex: 1;
     border: none;
     padding: 15px 20px;
-    background-color: #ffffff;
-    outline: none;
-}
-
-/* --- 반려사유 영역 전체 교체 --- */
-
-.reason-area {
-    margin-top: 40px;
-    width: 100%; /* 전체 너비 확보 */
-    clear: both; /* 이전 요소들의 float 영향 제거 */
-    display: block; /* 블록 요소로 명시 */
-}
-
-.reasonFont {
-    display: block;
-    color: #e11d48;
-    font-weight: 800; /* 더 두껍게 */
-    font-size: 1.1rem;
-    margin-bottom: 12px;
-    text-align: left; /* 왼쪽 정렬 고정 */
-}
-
-.reasonText {
-    width: 100%; /* 왼쪽 화면에서도 꽉 차게 만듭니다 */
-    min-height: 140px;
-    padding: 20px; /* 내부 여백 넉넉히 */
-    border: 1px solid #e2e8f0;
-    border-radius: 12px; /* 오른쪽 이미지처럼 부드러운 라운딩 */
-    background-color: #ffffff;
-    color: #475569;
     font-size: 1rem;
+    color: #334155;
+    outline: none;
+    background-color: #ffffff;
+}
+
+textarea {
+    min-height: 180px;
     line-height: 1.6;
     resize: none;
-    outline: none;
-    box-sizing: border-box; /* 패딩이 너비에 영향을 주지 않도록 설정 */
 }
 
-/* 조회용(readonly)일 때도 배경색을 흰색으로 고정하여 깔끔하게 유지 */
-.reasonText[readonly] {
-    background-color: #ffffff;
-    cursor: default;
-}
-
-/* 4. 하단 버튼 영역 (알약 모양 유지) */
-.BfnewPlan > div:last-child {
+/* 3. 버튼 영역 (클래스 직접 지정으로 꼬임 방지) */
+.BfnewPlan > div:nth-last-child(2) {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
     margin-top: 30px;
+    margin-bottom: 10px;
 }
 
-.BfnewPlan > div:last-child button {
+/* 모든 버튼 공통 스타일 */
+.BfnewPlan button {
     padding: 12px 24px;
     border-radius: 30px;
     font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
     border: none;
+    transition: all 0.2s;
 }
 
-button:nth-child(1) {
-    background-color: #1e293b;
-    color: #ffffff;
+/* 버튼별 고유 색상 (클래스명 기준) */
+.btn-approve {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
 }
-button:nth-child(2) {
-    background-color: #f1f5f9;
+
+.btn-temp {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+.btn-delete {
+    background-color: #fff1f2 !important;
+    color: #e11d48 !important;
+}
+
+button:hover {
+    opacity: 0.8;
+    transform: translateY(-1px);
+}
+
+/* 4. 반려 사유 영역 (이미지 느낌 100% 재현) */
+.reason-area {
+    margin-top: 40px;
+    width: 100%;
+    clear: both;
+}
+
+.reasonFont {
+    display: block;
+    color: #e11d48; /* 이미지의 붉은색 */
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.reasonText {
+    width: 100%;
+    min-height: 140px;
+    padding: 20px;
+    border: 1.5px solid #e2e8f0; /* 부드러운 테두리 */
+    border-radius: 12px; /* 이미지의 둥근 모서리 */
+    background-color: #ffffff;
     color: #475569;
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    box-sizing: border-box; /* 너비 100% 고정 핵심 */
 }
-button:nth-child(3) {
-    background-color: #fff1f2;
-    color: #e11d48;
+
+/* readonly 상태에서도 깨끗한 흰색 유지 */
+.reasonText[readonly] {
+    background-color: #ffffff;
+    cursor: default;
 }
 </style>

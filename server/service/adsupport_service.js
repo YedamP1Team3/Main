@@ -1,25 +1,25 @@
 const userMapper = require("../database/mappers/adsupport_mapper.js");
 
-const adSupportPlan_service = async (beneId) => {
-  let list = await userMapper.adSupportPlan_mapper(beneId);
+const AdSupportPlanService = async (beneId) => {
+  let list = await userMapper.AdSupportPlanMapper(beneId);
   return list || [];
 };
 
-const adDetailSupportPlanService = async (planID) => {
-  let list = await userMapper.adDetailSupportPlan(planID);
+const AdDetailSupportPlanService = async (planID) => {
+  let list = await userMapper.AdDetailSupportPlanMapper(planID);
   return list || {};
 };
 
-const updateApprovalService = async (planID) => {
-  let result = await userMapper.updateApproval(planID);
+const ApprovalChangeService = async (planID) => {
+  let result = await userMapper.ApprovalChangeMapper(planID);
   let resObj = {
     status: result.affectedRows > 0,
   };
   return resObj;
 };
 
-const updateReturnService = async (planId, planDate) => {
-  let result = await userMapper.updateReturn(planId, planDate);
+const ReturnService = async (planId, planDate) => {
+  let result = await userMapper.ReturnMapper(planId, planDate);
   let resObj = {
     status: result.affectedRows > 0,
     target: {
@@ -31,8 +31,8 @@ const updateReturnService = async (planId, planDate) => {
 };
 
 module.exports = {
-  adSupportPlan_service,
-  adDetailSupportPlanService,
-  updateApprovalService,
-  updateReturnService,
+  AdSupportPlanService,
+  AdDetailSupportPlanService,
+  ApprovalChangeService,
+  ReturnService,
 };

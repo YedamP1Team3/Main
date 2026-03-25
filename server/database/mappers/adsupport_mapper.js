@@ -1,11 +1,11 @@
 const { pool } = require("../DAO");
-const userSql = require("../sql/adsupport.js");
+const adminSql = require("../sql/adsupport.js");
 
-const adSupportPlan_mapper = async (beneId) => {
+const AdSupportPlanMapper = async (beneId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(userSql.adSupportPlan, [beneId]);
+    let rows = await conn.query(adminSql.AdSupportPlan, [beneId]);
     return rows;
   } catch (err) {
     console.log(err);
@@ -14,11 +14,11 @@ const adSupportPlan_mapper = async (beneId) => {
   }
 };
 
-const adDetailSupportPlan = async (planId) => {
+const AdDetailSupportPlanMapper = async (planId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(userSql.adDetailSupportPlan, [planId]);
+    let rows = await conn.query(adminSql.AdDetailSupportPlan, [planId]);
     return rows[0];
   } catch (err) {
     console.log(err);
@@ -27,11 +27,11 @@ const adDetailSupportPlan = async (planId) => {
   }
 };
 
-const updateApproval = async (planID) => {
+const ApprovalChangeMapper = async (planID) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let result = await conn.query(userSql.updateApproval, [planID]);
+    let result = await conn.query(adminSql.ApprovalChange, [planID]);
     await conn.commit();
     return result;
   } catch (err) {
@@ -42,11 +42,11 @@ const updateApproval = async (planID) => {
   }
 };
 
-const updateReturn = async (planId, planDate) => {
+const ReturnMapper = async (planId, planDate) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let result = await conn.query(userSql.updatereturn, [
+    let result = await conn.query(adminSql.Return, [
       planDate.rejection_reason,
       planId,
     ]);
@@ -62,8 +62,8 @@ const updateReturn = async (planId, planDate) => {
 };
 
 module.exports = {
-  adSupportPlan_mapper,
-  adDetailSupportPlan,
-  updateApproval,
-  updateReturn,
+  AdSupportPlanMapper,
+  AdDetailSupportPlanMapper,
+  ApprovalChangeMapper,
+  ReturnMapper,
 };
