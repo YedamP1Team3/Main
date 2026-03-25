@@ -1,20 +1,24 @@
 <script setup>
+// 1. Vue 내장 함수
 import { ref } from 'vue';
-import { useSurveyStore } from '@/stores/useSurveyStore';
+// 2. 외부 라이브러리 (Pinia)
 import { storeToRefs } from 'pinia';
+// 3. 로컬 스토어 및 기타
+import { useSurveyStore } from '@/stores/useSurveyStore';
 
+// 설문 관련 전역 상태 관리를 위한 스토어 호출
 const surveyStore = useSurveyStore();
+
+// 스토어에서 '선택된 지원자 ID'와 '신청서 리스트 데이터'를 반응형으로 추출
 const { selected_bene_id, application_list } = storeToRefs(surveyStore);
 
-const props = defineProps({
-    beneId: { type: [String, Number] }
-});
-
+// 현재 활성화된 탭을 관리하는 로컬 상태 (기본값: 'Application' 지원신청서)
 const currentTab = ref('Application');
 </script>
 
 <template>
     <div class="management-container">
+        <!-- 상단 탭 메뉴: 클릭 시 currentTab 상태를 변경하여 화면을 전환함 -->
         <nav class="tab-menu">
             <button :class="{ active: currentTab === 'Application' }" @click="currentTab = 'Application'">지원신청서</button>
             <button :class="{ active: currentTab === 'Plan' }" @click="currentTab = 'Plan'">지원계획서</button>
@@ -22,9 +26,11 @@ const currentTab = ref('Application');
             <button :class="{ active: currentTab === 'Consult' }" @click="currentTab = 'Consult'">상담내역</button>
         </nav>
 
+        <!-- [지원 신청서 탭] 콘텐츠 영역 -->
         <div v-if="currentTab === 'Application'" class="tab-content">
             <div class="content-header">
                 <h3>지원 신청서</h3>
+                <!-- 추가하기 버튼: 선택된 지원자가 없으면 비활성화, 누르면 설문 작성 모달 오픈 -->
                 <button class="btn-add" :disabled="!selected_bene_id" @click="surveyStore.openSurvey()">+ 추가하기</button>
             </div>
 
@@ -33,24 +39,29 @@ const currentTab = ref('Application');
                     <tr>
                         <th>작성자</th>
                         <th>지원자</th>
+                        <th>대기단계</th>
                         <th>작성일자</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- 데이터가 없을 때 띄워주는 안내 메시지 -->
                     <tr v-if="application_list.length === 0">
-                        <td colspan="3" class="empty-msg">
+                        <td colspan="4" class="empty-msg">
                             {{ selected_bene_id ? '등록된 신청서가 없습니다.' : '지원자를 먼저 선택해주세요.' }}
                         </td>
                     </tr>
+                    <!-- 데이터가 있을 때 반복 출력하며, 클릭 시 조회 모드로 진입 -->
                     <tr v-else v-for="item in application_list" :key="item.id" class="clickable-row" @click="surveyStore.loadApplicationView(item.id)">
                         <td>{{ item.writer }}</td>
                         <td>{{ item.bene_name }}</td>
+                        <td>{{ item.priority_status }}</td>
                         <td>{{ item.date }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
+        <!-- [기타 탭] 아직 개발되지 않은 탭을 위한 임시 화면 -->
         <div v-else class="tab-content">
             <p class="empty-msg">해당 탭의 내용이 없습니다.</p>
         </div>
