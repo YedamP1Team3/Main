@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import ServeyDetailWidget from '@/components/servey/ServeyDetailWidget.vue';
-import ServeyItemWidget from '@/components/servey/ServeyItemWidget.vue';
-import ServeySubItemWidget from '@/components/servey/ServeySubItemWidget.vue';
+import ServeyDetailWidget from '@/components/systemAdmin/serveyCreate/ServeyDetailWidget.vue';
+import ServeyItemWidget from '@/components/systemAdmin/serveyCreate/ServeyItemWidget.vue';
+import ServeySubItemWidget from '@/components/systemAdmin/serveyCreate/ServeySubItemWidget.vue';
 
 // axios 서버연결
 import axios from 'axios';
