@@ -12,7 +12,7 @@ import Calendar from '@/components/common/Calendar.vue';
 import TimeSlot from '@/components/common/TimeSlot.vue';
 
 import { getManagerSchedule } from '@/api/reservation/schedule';
-import { createBlockedTimes } from '@/api/reservation/block';
+import { createBlockedTimes, deleteBlockedTimes } from '@/api/reservation/block';
 
 export default {
     components: {
@@ -29,7 +29,8 @@ export default {
             if (!newDate) return;
 
             try {
-                const res = await getManagerSchedule(newDate);
+                const formattedDate = new Date(newDate).toISOString().slice(0, 10);
+                const res = await getManagerSchedule(formattedDate);
                 console.log('서버 응답:', res.data);
                 console.log('slots : ', slots.value);
 
@@ -77,13 +78,6 @@ export default {
             try {
                 const { date, times, type } = data;
 
-                // 🔴 예약가능 버튼 (지금은 미구현)
-                if (type === 'available') {
-                    console.log('예약가능 처리 (추후 구현)');
-                    return;
-                }
-
-                // 🔥 API 요청 (그대로 보내면 됨)
                 const payload = {
                     date,
                     times
@@ -91,21 +85,30 @@ export default {
 
                 console.log('API 요청:', payload);
 
-                await createBlockedTimes(payload);
+                // 🔵 예약가능 → 차단 해제
+                if (type === 'available') {
+                    await deleteBlockedTimes(payload);
 
-                alert('차단시간이 등록되었습니다.');
+                    alert('예약가능으로 변경되었습니다.');
+                }
 
-                // 🔥 UI 갱신
+                // 🔴 예약불가 → 차단 등록
+                else if (type === 'unavailable') {
+                    await createBlockedTimes(payload);
+
+                    alert('차단시간이 등록되었습니다.');
+                }
+
+                // 🔥 UI 갱신 (공통)
                 const res = await getManagerSchedule(date);
                 const raw = res.data.schedule;
                 const schedule = Array.isArray(raw) ? raw[0] : raw;
 
                 slots.value = convertToSlots(schedule);
             } catch (err) {
-                console.error('차단 실패:', err);
+                console.error('처리 실패:', err);
 
-                // 🔥 서버 에러 메시지 그대로 보여주기 (중요)
-                alert(err.response?.data?.message || '차단 처리 실패');
+                alert(err.response?.data?.message || '처리 실패');
             }
         };
 

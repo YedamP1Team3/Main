@@ -81,4 +81,28 @@ const createBlockedTimes = async (managerId, date, times) => {
   }
 };
 
-module.exports = { getManagerSchedule, createBlockedTimes };
+const removeBlockedTimes = async (managerId, date, times) => {
+  const ranges = mergeTimes(times);
+
+  let totalDeleted = 0;
+
+  for (const range of ranges) {
+    const count = await rsvMapper.deleteBlockedTimeRange(
+      managerId,
+      date,
+      range.start_time,
+      range.end_time,
+    );
+
+    totalDeleted += count;
+  }
+
+  // 🔥 삭제된 게 없으면 에러 처리
+  if (totalDeleted === 0) {
+    throw new Error("해당 시간에 해제할 예약불가 데이터가 없습니다.");
+  }
+
+  return totalDeleted;
+};
+
+module.exports = { getManagerSchedule, createBlockedTimes, removeBlockedTimes };
