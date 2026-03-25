@@ -8,8 +8,8 @@ const findAll = async () => {
 };
 
 //지원자 조회
-const BeneficiaryList = async () => {
-  const list = await userMapper.selectBeneficiaryList();
+const BeneficiaryList = async (managerId) => {
+  const list = await userMapper.selectBeneficiaryList(managerId);
   return list || [];
 };
 //지원제 상세조회

@@ -35,6 +35,8 @@ router.post("/login", async (req, res) => {
           name: user.user_name,
           role: user.role,
           id: user.user_id,
+          agency_id: user.agency_id,
+          agency_name: user.agency_name,
         },
       });
     } else {

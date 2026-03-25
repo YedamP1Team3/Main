@@ -9,7 +9,8 @@ router.get("/users", async (req, res) => {
 });
 
 router.get("/beneficiaries", async (req, res) => {
-  let result = await userService.BeneficiaryList();
+  let managerId = req.query.user_id;
+  let result = await userService.BeneficiaryList(managerId);
   res.send(result);
 });
 
