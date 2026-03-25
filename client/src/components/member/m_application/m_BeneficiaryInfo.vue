@@ -8,6 +8,8 @@ const { my_beneficiaries, selected_bene_detail } = storeToRefs(surveyStore);
 
 const localSelectedId = ref('');
 
+const emit = defineEmits(['updateBeneId']);
+
 const formattedGender = computed(() => {
     const gender = selected_bene_detail.value?.gender;
     if (gender === 'M') return '남자';
@@ -18,6 +20,10 @@ const formattedGender = computed(() => {
 const handleSelectChange = async () => {
     // ★ 변경: 선택 시 스토어의 통합 액션을 호출하여 리스트까지 세팅합니다.
     await surveyStore.selectBeneficiary(localSelectedId.value);
+
+    // ★ 추가 2: 부모 컴포넌트에게 선택된 ID와 우선순위(Priority)를 전달합니다.
+    const priority = selected_bene_detail.value?.priority_status || null;
+    emit('updateBeneId', localSelectedId.value, priority);
 };
 
 onMounted(async () => {
