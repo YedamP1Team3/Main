@@ -87,7 +87,7 @@ const removeBlockedTimes = async (managerId, date, times) => {
   let totalDeleted = 0;
 
   for (const range of ranges) {
-    const count = await rsvMapper.deleteBlockedTimeRange(
+    const count = await rsvMapper.deleteBlockedTime(
       managerId,
       date,
       range.start_time,
