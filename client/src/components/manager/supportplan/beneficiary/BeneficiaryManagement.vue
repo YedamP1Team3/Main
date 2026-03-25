@@ -42,7 +42,7 @@ defineExpose({
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 0; /* 내부에서 여백 조절 */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     overflow: hidden; /* 테두리 밖으로 내용 안 나가게 */
 }
 
