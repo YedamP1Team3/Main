@@ -7,7 +7,7 @@ const authStore = useAuthStore();
 const emit = defineEmits(['updateBeneId']);
 
 const selectedBeneId = ref(''); // 사용자가 선택한 'ID' (v-model과 연결)
-const beneficiaryList = ref([]); // 드롭다운에 뿌릴 '이름 목록'
+const AdSupportList = ref([]); // 드롭다운에 뿌릴 '이름 목록'
 const selectedBene = ref({}); // 서버에서 받아온 '한 명의 상세 정보'
 
 const fetchBeneDetail = async () => {
@@ -21,9 +21,11 @@ const fetchBeneDetail = async () => {
 };
 
 onMounted(async () => {
-    const userList = authStore.userId;
-    const response = await axios.get('http://localhost:3000/api/beneficiaries', { params: { user_id: userList } });
-    beneficiaryList.value = response.data;
+    const agencylist = authStore.agencyId;
+    const response = await axios.get('http://localhost:3000/adsupport/AdSupportList', {
+        params: { agency_id: agencylist }
+    });
+    AdSupportList.value = response.data;
 });
 </script>
 <template>
@@ -38,7 +40,7 @@ onMounted(async () => {
                         <select v-model="selectedBeneId" @change="fetchBeneDetail">
                             <option value="">지원자를 선택하세요</option>
                             <template v-if="authStore.userId">
-                                <option v-for="bene in beneficiaryList" :key="bene.bene_id" :value="bene.bene_id">
+                                <option v-for="bene in AdSupportList" :key="bene.bene_id" :value="bene.bene_id">
                                     {{ bene.bene_name }}
                                 </option>
                             </template>
