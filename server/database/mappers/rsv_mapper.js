@@ -58,8 +58,29 @@ const selectAllOccupiedTimes = async (managerId, date) => {
   }
 };
 
+const deleteBlockedTime = async (managerId, date, startTime, endTime) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+
+    const result = await conn.query(rsvSql.deleteBlockedTime, [
+      managerId,
+      date,
+      startTime,
+      endTime,
+    ]);
+    return result.affectedRows; // 삭제된 row 수 반환
+  } catch (err) {
+    console.log(err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   selectManagerSchedule,
   insertBlockedTime,
   selectAllOccupiedTimes,
+  deleteBlockedTime,
 };

@@ -40,8 +40,18 @@ const selectAllOccupiedTimes = `
         AND work_date = ?
       `;
 
+const deleteBlockedTime = `
+      DELETE FROM manager_blocked_times
+      WHERE manager_id = ?
+        AND work_date = ?
+        AND NOT (
+          end_time <= ? OR start_time >= ?
+        )
+    `;
+
 module.exports = {
   selectManagerSchedule,
   insertBlockedTime,
   selectAllOccupiedTimes,
+  deleteBlockedTime,
 };
