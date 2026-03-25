@@ -2,10 +2,10 @@
 import { ref } from 'vue';
 
 // 우리가 만든 컴포넌트들을 가져옵니다.
-import JsTopbarad from '@/layout/sAdmin_layout/JsTopbarad.vue';
-import BeneficiaryInfo from '@/components/beneficiary/BeneficiaryInfo.vue';
-import AdminManagement from '@/components/adbeneficiary/AdminManagement.vue';
-import AdplanDetail from '@/components/adbeneficiary/AdplanDetail.vue';
+import JsTopbarad from '@/layout/manger/JsTopbarmg.vue';
+import BeneficiaryInfo from '@/components/manager/supportplan/beneficiary/BeneficiaryInfo.vue';
+import AdminManagement from '@/components/admin/supportplan/adbeneficiary/AdminManagement.vue';
+import AdplanDetail from '@/components/admin/supportplan/adbeneficiary/AdplanDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);

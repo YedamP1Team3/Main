@@ -12,7 +12,7 @@ const rejectReason = ref('');
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/adsupport/AddetailSupportPlan/${id}`);
+        const response = await axios.get(`http://localhost:3000/adsupport/AdDetailSupportPlan/${id}`);
         planDetail.value = response.data;
     } catch (error) {
         console.error(`에러`, error);
@@ -22,7 +22,7 @@ const fetchPlanDetail = async (id) => {
 const Approval = async (planId) => {
     if (!confirm('수정하시겠습니까?')) return;
     try {
-        const response = await axios.put(`http://localhost:3000/adsupport/updateApproval/${planId}`);
+        const response = await axios.put(`http://localhost:3000/adsupport/ApprovalChange/${planId}`);
         if (response.data.status == true) {
             alert('승인신청했습니다');
             emit('refresh');
@@ -41,7 +41,7 @@ const updatereturn = async (planId) => {
         const updateData = {
             rejection_reason: rejectReason.value
         };
-        const response = await axios.put(`http://localhost:3000/adsupport/updateReturn/${planId}`, updateData);
+        const response = await axios.put(`http://localhost:3000/adsupport/Return/${planId}`, updateData);
         if (response.data.status == true) {
             alert('반려신청되었습니다');
             emit('refresh');
