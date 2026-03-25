@@ -1,17 +1,15 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
 
 export const useSurveyStore = defineStore('survey', {
     state: () => ({
-        login_user_id: null,
-        login_user_name: null,
         beneficiary_list: [],
         my_beneficiaries: [],
         selected_bene_detail: {},
         selected_bene_id: null,
         application_list: [],
         is_survey_visible: false,
-
         // ⭐️ [신규] 조회 모드용 상태 변수들
         is_view_mode: false, // 현재 창이 '조회 모드'인지 여부
         view_survey_data: [], // 과거에 작성했던 버전의 문항들
@@ -20,8 +18,6 @@ export const useSurveyStore = defineStore('survey', {
 
     actions: {
         clearStore() {
-            this.login_user_id = null;
-            this.login_user_name = null;
             this.my_beneficiaries = [];
             this.selected_bene_detail = {};
             this.selected_bene_id = null;
@@ -32,12 +28,10 @@ export const useSurveyStore = defineStore('survey', {
             this.view_answers = {};
         },
 
-        setLoginUser(id, name) {
-            this.login_user_id = id;
-            this.login_user_name = name;
-        },
-
         async fetchBeneficiaryList() {
+            const authStore = useAuthStore(); // ⭐️ 현재 로그인한 유저 정보 꺼내기
+            if (!authStore.isLoggedIn) return; // 로그인 안 되어 있으면 중지
+
             try {
                 const res = await axios.get('http://localhost:3000/api/beneficiaries');
                 const allList = res.data;
@@ -46,7 +40,8 @@ export const useSurveyStore = defineStore('survey', {
                 const filtered = [];
                 for (const bene of allList) {
                     const detailRes = await axios.get(`http://localhost:3000/api/beneficiaries/${bene.bene_id}`);
-                    if (detailRes.data && detailRes.data.family_name === this.login_user_name) {
+                    // ⭐️ authStore.userName을 직접 비교!
+                    if (detailRes.data && detailRes.data.family_name === authStore.userName) {
                         filtered.push(bene);
                     }
                 }
@@ -55,7 +50,6 @@ export const useSurveyStore = defineStore('survey', {
                 console.error('데이터 로드 실패:', error);
             }
         },
-
         async fetchBeneficiaryDetail(beneId) {
             if (!beneId) return (this.selected_bene_detail = {});
             try {

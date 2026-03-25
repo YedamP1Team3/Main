@@ -1,14 +1,23 @@
 <script setup>
 import { ref } from 'vue';
 import AdTabPlan from './AdTabPlan.vue';
+import AdTabApplication from './AdTabApplication.vue';
 
 const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
-const emit = defineEmits(['select-plan']);
+const emit = defineEmits(['select-plan', 'select-app', 'assign-manager']); // ⭐️ 추가
+
 const currentTab = ref('Plan');
 const tabPlanRef = ref(null);
+
+const handleSelectApp = (appId) => {
+    emit('select-app', appId);
+};
+const handleAssignManager = () => {
+    emit('assign-manager'); // 위로 토스
+};
 
 const handleSelectPlan = (planId) => {
     emit('select-plan', planId);
@@ -30,6 +39,7 @@ defineExpose({
         </nav>
 
         <div class="tab-content">
+            <AdTabApplication v-if="currentTab === 'Application'" ref="tabAppRef" :beneId="beneId" @select-app="handleSelectApp" @assign-manager="handleAssignManager" />
             <AdTabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @select-plan="handleSelectPlan" />
         </div>
     </div>
