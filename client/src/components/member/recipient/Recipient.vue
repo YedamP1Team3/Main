@@ -36,57 +36,65 @@ const openPostcode = () => {
             // 도로명 주소일 경우 참고항목(법정동, 건물명) 조합
             if (data.userSelectedType === 'R') {
                 // 도로명 주소 선택 시
-                if (data.bname !== '') extraAddress += data.bname;
-                if (data.buildingName !== '') extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName;
-                fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
+                if (data.bname !== '') extraAddress += data.bname; // 법정동 추가
+                if (data.buildingName !== '') extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName; // 건물명 추가
+                fullAddress += extraAddress !== '' ? ` (${extraAddress})` : ''; // 최종 주소 조합
             }
 
             // [데이터 바인딩] 우편번호와 주소를 form 객체에 저장
-            form.value.zipCode = data.zonecode;
-            form.value.addr1 = fullAddress;
+            form.value.zipCode = data.zonecode; // 우편번호 저장
+            form.value.addr1 = fullAddress; // 기본 주소 저장
 
             // 주소 입력 후 상세주소 필드로 포커스 이동 (선택 사항)
-            document.getElementById('addr2')?.focus();
+            document.getElementById('addr2')?.focus(); // 상세주소 입력창으로 포커스 이동
         }
     }).open();
 };
 
-// 관계가 '기타'가 아니게 되면 입력했던 기타 내용을 초기화
-
+// [함수] 파일 선택 시 상태 업데이트
 const onFileSelect = (event) => {
-    form.value.file = event.files[0];
+    form.value.file = event.files[0]; // 선택된 첫 번째 파일을 저장
 };
 
+// [함수] 서버로 데이터 전송 (등록 버튼 클릭 시)
 const submitForm = async () => {
     try {
-        // 1. 로컬스토리지나 Store에 저장된 로그인 유저 정보를 가져온다.
-        const userInfo = JSON.parse(localStorage.getItem('user'));
-        const userId = userInfo ? userInfo.id : null;
+        // 1. Pinia 스토어에서 로그인된 유저 ID 확인
+        const userId = authStore.userId;
 
         if (!userId) {
+            // 로그인 정보가 없는 경우 처리
             alert('로그인 정보가 없습니다. 다시 로그인 해주세요');
-            return;
+            return; // 함수 종료
         }
 
-        // 2. 기존 form 데이터에 family_id를 추가하여 전송한다.
+        // 2. 서버로 보낼 최종 데이터 조립
         const sendData = {
-            ...form.value,
-            family_id: userId // 서버의 family_id 컬럼으로 들어갈 값
+            ...form.value, // 입력 폼의 모든 데이터 복사
+            family_id: userId // Pinia의 userId를 family_id 컬럼에 매칭
         };
+
+        // 3. 백엔드 API 호출 (경로 주의: /recipient/register 등... 서버 설정에 맞출 것)
         const response = await axios.post('/recipient/register', sendData);
 
         if (response.data.success) {
+            // 서버 응답이 성공인 경우
             alert('대상자가 성공적으로 등록되었습니다.');
         }
     } catch (error) {
+        // 통신 중 오류 발생 시
+        console.error('Error:', error); // 콘솔에 상세 에러 출력
         alert('등록 중 오류 발생');
     }
 };
+
+// [감시자] 관계 설정이 '기타'가 아닐 경우 입력값 초기화
 watch(
-    () => form.value.relation,
+    () => form.value.relation, // 감시 대상: 관계 라디오 버튼
     (newVal) => {
         if (newVal !== '기타') {
-            form.value.relationEtc = '';
+            // '기타'가 선택 해제되면
+            form.value.relationEtc = ''; // 직접 입력했던 내용 삭제
         }
     }
 );
