@@ -16,7 +16,8 @@ const userSignup = async (userData) => {
       userData.role,
       "PENDING",
       userData.zip_code,
-      userData.address + " " + (userData.detail_address || ""),
+      userData.address,
+      userData.detail_address,
       userData.tel,
       userData.email,
     ];
@@ -38,8 +39,10 @@ const userLogin = async (loginData) => {
     if (user) {
       const isMatch = await bcrypt.compare(loginData.password, user.password);
       if (isMatch) {
-        const userClean = { ...user };
-        delete userClean.password;
+        // [이 부분을 수정합니다]
+        // password를 제외한 모든 데이터를 복사해서 보냅니다.
+        const { password, ...userClean } = user;
+
         return userClean;
       }
     }

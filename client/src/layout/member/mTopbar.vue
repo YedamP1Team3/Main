@@ -8,12 +8,20 @@ import { useSurveyStore } from '@/stores/useSurveyStore';
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from '../AppConfigurator.vue';
 
+import { storeToRefs } from 'pinia';
+
 const router = useRouter();
 const authStore = useAuthStore();
 const surveyStore = useSurveyStore();
 const { toggleDarkMode, isDarkTheme } = useLayout();
+const { userName } = storeToRefs(authStore);
 
 const naviToApply = () => router.push({ name: 'mApplication' });
+
+// 지원대상자 추가 페이지로 이동 함수
+const goToRecipient = () => {
+    router.push({ name: 'myInfo' });
+};
 
 onMounted(async () => {
     if (authStore.isLoggedIn) {
@@ -77,11 +85,12 @@ const toggleAuth = async () => {
         </div>
 
         <div class="flex items-center gap-2">
+            <span v-if="authStore.isLoggedIn" class="font-bold mr-2 text-color">{{ userName }}님</span>
             <button type="button" class="layout-topbar-action" @click="toggleAuth">
                 <i class="pi pi-sign-out" title="로그아웃"></i>
             </button>
 
-            <button type="button" class="layout-topbar-action">
+            <button type="button" class="layout-topbar-action" @click="goToRecipient">
                 <i class="pi pi-user"></i>
                 <span class="hidden">Profile</span>
             </button>

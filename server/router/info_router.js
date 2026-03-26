@@ -37,6 +37,9 @@ router.post("/login", async (req, res) => {
           id: user.user_id,
           agency_id: user.agency_id,
           agency_name: user.agency_name,
+          zip_code: user.zip_code,
+          address: user.address,
+          detail_address: user.detail_address,
         },
       });
     } else {

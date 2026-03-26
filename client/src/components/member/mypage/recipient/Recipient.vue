@@ -1,7 +1,13 @@
 <script setup>
 import axios from 'axios'; // http 통신을 위한 axios 임포트
-import { ref, watch } from 'vue'; // Vue 반응형 객체 및 감시자 임포트
+import { ref, watch, onMounted } from 'vue'; // Vue 반응형 객체 및 감시자 임포트
 import { useAuthStore } from '@/stores/auth'; // 작성한 Auth(피니아) 스토어 임포트
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+// [상태] Pinia 스토어 인스턴스 생성
+const authStore = useAuthStore(); // 로그인 정보를 담고 있는 스토어 호출
 
 // [상태] 입력 폼 데이터 정의
 const form = ref({
@@ -17,8 +23,17 @@ const form = ref({
     file: null // 첨부파일
 });
 
-// [상태] Pinia 스토어 인스턴스 생성
-const authStore = useAuthStore(); // 로그인 정보를 담고 있는 스토어 호출
+onMounted(() => {
+    // [로그 확인 결과]
+    // zip_code -> 우편번호
+    // address -> 기본 주소
+    // detail_address -> 상세 주소
+
+    // authStore에 추가한 필드명으로 데이터를 가져옵니다.
+    if (authStore.userZip) form.value.zipCode = authStore.userZip;
+    if (authStore.userAddr1) form.value.addr1 = authStore.userAddr1;
+    if (authStore.userAddr2) form.value.addr2 = authStore.userAddr2;
+});
 
 // [옵션] 장애유형 리스트
 const disabilityOptions = ['지체장애', '시각장애', '청각장애', '지적장애', '뇌병변장애', '기타'];
@@ -75,11 +90,15 @@ const submitForm = async () => {
         };
 
         // 3. 백엔드 API 호출 (경로 주의: /recipient/register 등... 서버 설정에 맞출 것)
-        const response = await axios.post('/recipient/register', sendData);
+        const response = await axios.post('http://localhost:3000/recipient/register', sendData);
 
         if (response.data.success) {
             // 서버 응답이 성공인 경우
             alert('대상자가 성공적으로 등록되었습니다.');
+
+            // ★ [추가] 등록 성공 시 '지원신청' 페이지로 이동
+            router.push({ name: 'mApplication' });
+            // router.push({name: 'myInfo'}) // 일반이용자 마이페이지 경로
         }
     } catch (error) {
         // 통신 중 오류 발생 시
@@ -125,13 +144,14 @@ watch(
                 </div>
 
                 <div class="input-set address-section">
-                    <label>주소</label>
-                    <div class="flex gap-2 mb-1">
-                        <InputText v-model="form.zipCode" placeholder="우편번호" readonly class="p-inputtext-sm" />
-                        <button type="button" class="post-btn" @click="openPostcode">우편번호 검색</button>
+                    <label>서비스 제공 주소 <small class="notice ml-2">(회원 정보와 동일)</small></label>
+                    <div class="flex gap-2 mb-2">
+                        <InputText v-model="form.zipCode" placeholder="우편번호" readonly class="p-inputtext-sm w-6rem disabled-input" />
                     </div>
-                    <InputText v-model="form.addr1" placeholder="기본 주소" class="mb-1 p-inputtext-sm" readonly />
-                    <InputText id="addr2" v-model="form.addr2" placeholder="상세 주소를 입력하세요" class="p-inputtext-sm" />
+                    <InputText v-model="form.addr1" placeholder="기본 주소" class="mb-2 p-inputtext-sm disabled-input" readonly />
+                    <InputText v-model="form.addr2" placeholder="상세 주소" class="p-inputtext-sm disabled-input" readonly />
+
+                    <p class="text-xs mt-2 text-500">※ 주소지는 본인 주소로 자동 설정되며, 마이페이지에서 변경 가능합니다.</p>
                 </div>
 
                 <div class="input-set">
@@ -169,8 +189,8 @@ watch(
     display: flex;
     justify-content: center;
     width: 100%;
-    padding: 50px 0;
-    min-height: calc(100vh - 150px);
+    padding: 20px 0;
+    min-height: auto;
 }
 .form-container {
     width: 100%;
@@ -203,8 +223,8 @@ watch(
     padding: 0 1rem;
     border-radius: 6px;
     font-size: 0.85rem;
+    white-space: nowrap; /* 글자 줄바꿈 방지 */
     cursor: pointer;
-    transition: 0.2s;
 }
 .post-btn:hover {
     background: #f0fdf4;
@@ -244,5 +264,24 @@ watch(
 :deep(.p-inputtext:disabled) {
     background-color: #f1f5f9;
     border-color: #e2e8f0;
+}
+
+/* [추가] 사진처럼 입력 불가한 느낌을 주는 전용 스타일 */
+.disabled-input {
+    background-color: #f1f5f9 !important; /* [설명] 사진처럼 살짝 어두운 배경색 적용 */
+    border-color: #e2e8f0 !important; /* [설명] 테두리 색상을 연하게 조절 */
+    color: #64748b !important; /* [설명] 글자색을 흐리게 변경 */
+    cursor: not-allowed !important; /* [설명] 마우스 커서를 금지 모양으로 변경 */
+    pointer-events: none; /* [설명] 클릭이나 포커스 이벤트를 완전히 차단 */
+}
+
+.text-500 {
+    color: #64748b;
+}
+.text-xs {
+    font-size: 0.75rem;
+}
+.mt-2 {
+    margin-top: 0.5rem;
 }
 </style>

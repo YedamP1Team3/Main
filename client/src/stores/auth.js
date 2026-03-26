@@ -11,6 +11,11 @@ export const useAuthStore = defineStore(
         const agencyId = ref(sessionStorage.getItem('agencyId') || '');
         const agencyName = ref(sessionStorage.getItem('agencyName') || '');
 
+        // 주소 관련 상태 변수 추가
+        const userZip = ref(sessionStorage.getItem('userZip') || ''); // 우편번호
+        const userAddr1 = ref(sessionStorage.getItem('userAddr1') || ''); // 기본주소
+        const userAddr2 = ref(sessionStorage.getItem('userAddr2') || ''); // 상세주소
+
         const isLoggedIn = computed(() => !!userId.value);
 
         //[Action] 데이터를 변경하는 함수
@@ -21,11 +26,21 @@ export const useAuthStore = defineStore(
             agencyId.value = userData.agency_id;
             agencyName.value = userData.agency_name;
 
+            // 로그인 시 주소 데이터도 함께 저장
+            userZip.value = userData.zip_code || '';
+            userAddr1.value = userData.address || '';
+            userAddr2.value = userData.detail_address || '';
+
             sessionStorage.setItem('userId', userData.user_id);
             sessionStorage.setItem('userName', userData.user_name);
             sessionStorage.setItem('userRole', userData.role);
             sessionStorage.setItem('agencyId', userData.agency_id);
             sessionStorage.setItem('agencyName', userData.agency_name);
+
+            // 세션 스토리지에 주소 정보 저장
+            sessionStorage.setItem('userZip', userZip.value);
+            sessionStorage.setItem('userAddr1', userAddr1.value);
+            sessionStorage.setItem('userAddr2', userAddr2.value);
         }
 
         function logout() {
@@ -40,9 +55,26 @@ export const useAuthStore = defineStore(
             agencyId.value = '';
             agencyName.value = '';
 
+            // 로그아웃 시 주소 정보도 초기화
+            userZip.value = '';
+            userAddr1.value = '';
+            userAddr2.value = '';
+
             sessionStorage.clear();
         }
-        return { userId, userName, userRole, agencyId, agencyName, isLoggedIn, login, logout };
+        return {
+            userId,
+            userName,
+            userRole,
+            agencyId,
+            agencyName,
+            userZip,
+            userAddr1,
+            userAddr2,
+            isLoggedIn,
+            login,
+            logout
+        };
     },
     {
         persist: { storage: sessionStorage }
