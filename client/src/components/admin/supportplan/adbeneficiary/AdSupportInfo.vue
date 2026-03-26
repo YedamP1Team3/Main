@@ -4,11 +4,12 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 
 const authStore = useAuthStore();
-const emit = defineEmits(['updateBeneId']);
+// 수정됨: open-priority 이벤트 추가
+const emit = defineEmits(['updateBeneId', 'open-priority']);
 
-const selectedBeneId = ref(''); // 사용자가 선택한 'ID' (v-model과 연결)
-const AdSupportList = ref([]); // 드롭다운에 뿌릴 '이름 목록'
-const selectedBene = ref({}); // 서버에서 받아온 '한 명의 상세 정보'
+const selectedBeneId = ref('');
+const beneficiaryList = ref([]);
+const selectedBene = ref({});
 
 const fetchBeneDetail = async () => {
     if (!selectedBeneId.value) {
@@ -21,16 +22,14 @@ const fetchBeneDetail = async () => {
 };
 
 onMounted(async () => {
-    const agencylist = authStore.agencyId;
-    const response = await axios.get('http://localhost:3000/adsupport/AdSupportList', {
-        params: { agency_id: agencylist }
-    });
-    AdSupportList.value = response.data;
+    const userList = authStore.userId;
+    const response = await axios.get('http://localhost:3000/api/beneficiaries', { params: { user_id: userList } });
+    beneficiaryList.value = response.data;
 });
 </script>
+
 <template>
     <h3>지원자 정보</h3>
-
     <div class="BfInfo">
         <table>
             <tbody>
@@ -40,7 +39,7 @@ onMounted(async () => {
                         <select v-model="selectedBeneId" @change="fetchBeneDetail">
                             <option value="">지원자를 선택하세요</option>
                             <template v-if="authStore.userId">
-                                <option v-for="bene in AdSupportList" :key="bene.bene_id" :value="bene.bene_id">
+                                <option v-for="bene in beneficiaryList" :key="bene.bene_id" :value="bene.bene_id">
                                     {{ bene.bene_name }}
                                 </option>
                             </template>
@@ -52,8 +51,9 @@ onMounted(async () => {
                     </td>
 
                     <th><label>대기단계</label></th>
+                    <!-- 수정됨: Manager에서 클릭 가능하도록 속성 및 이벤트 추가 -->
                     <td>
-                        <input type="text" :value="selectedBene.priority_status || ''" readonly />
+                        <input type="text" :value="selectedBene.priority_status || ''" readonly class="clickable-input" @click="emit('open-priority')" />
                     </td>
                 </tr>
                 <tr>
@@ -152,5 +152,15 @@ td:last-child {
 select:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+/* 추가된 코드만 작성 */
+.clickable-input {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.clickable-input:hover {
+    border-color: #3b82f6 !important;
+    background-color: #f0f8ff !important;
+    box-shadow: inset 0 0 0 1px #3b82f6;
 }
 </style>

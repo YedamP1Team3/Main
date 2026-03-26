@@ -1,12 +1,8 @@
 <script setup>
-// 1. 외부 라이브러리
 import { storeToRefs } from 'pinia';
-// 2. 로컬 스토어
 import { useSurveyStore } from '@/stores/useSurveyStore';
 
 const surveyStore = useSurveyStore();
-
-// 💡 작성/수정 로직 없이, 오직 스토어에서 '조회용 데이터'만 꺼내옵니다.
 const { view_survey_data, view_answers } = storeToRefs(surveyStore);
 </script>
 
@@ -17,15 +13,12 @@ const { view_survey_data, view_answers } = storeToRefs(surveyStore);
         <div class="confirm-notice"><i class="pi pi-file"></i> 제출된 신청서 내용입니다. (수정 불가)</div>
 
         <div class="confirm-scroll-area">
-            <!-- 큰 카테고리 반복 -->
             <div v-for="item in view_survey_data" :key="'view_' + item.id" class="conf-item-box">
                 <h4 class="conf-item-title">{{ item.name }}</h4>
 
-                <!-- 소분류 반복 -->
                 <div v-for="sub in item.subItems" :key="'view_sub_' + sub.id" class="conf-sub-box">
                     <h5 class="conf-sub-title">- {{ sub.name }}</h5>
                     <ul class="conf-list">
-                        <!-- 실제 질문 및 답변 반복 -->
                         <li v-for="(detail, index) in sub.details" :key="'view_det_' + detail.id">
                             <div class="conf-q">
                                 <span>{{ index + 1 }}.</span> {{ detail.question_text }}
@@ -39,8 +32,9 @@ const { view_survey_data, view_answers } = storeToRefs(surveyStore);
             </div>
         </div>
 
-        <!-- 닫기 버튼: 스토어의 closeSurvey 액션을 호출하여 화면을 닫음 -->
         <div class="submit-box">
+            <!-- 💡 [추가] 삭제 버튼 바인딩 -->
+            <button class="btn-danger" @click="surveyStore.deleteApplication()">삭제</button>
             <button class="btn-secondary" @click="surveyStore.closeSurvey()">닫기</button>
         </div>
     </div>
@@ -169,5 +163,27 @@ const { view_survey_data, view_answers } = storeToRefs(surveyStore);
 .btn-secondary:hover {
     background: #e2e8f0;
     color: #475569;
+}
+.submit-box {
+    margin-top: 50px;
+    display: flex;
+    justify-content: flex-end; /* 우측 정렬 유지 */
+    gap: 12px; /* 버튼 사이 간격 */
+}
+
+.btn-danger {
+    padding: 12px 40px;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+}
+
+.btn-danger:hover {
+    background: #fee2e2;
+    color: #dc2626;
 }
 </style>

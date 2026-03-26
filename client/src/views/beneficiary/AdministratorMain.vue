@@ -1,57 +1,72 @@
 <script setup>
 import { ref } from 'vue';
-import { useSurveyStore } from '@/stores/useSurveyStore'; // ⭐️ 스토어 가져오기
-// 우리가 만든 컴포넌트들을 가져옵니다.
+import { useSurveyStore } from '@/stores/useSurveyStore';
 import JsTopbarad from '@/layout/manger/JsTopbarmg.vue';
 import AdSupportInfo from '@/components/admin/supportplan/adbeneficiary/AdSupportInfo.vue';
 import AdminManagement from '@/components/admin/supportplan/adbeneficiary/AdminManagement.vue';
 import AdplanDetail from '@/components/admin/supportplan/adbeneficiary/AdplanDetail.vue';
 import MemberSurvey from '@/components/member/m_application/MemberSurvey.vue';
 import ManagerAssignView from '@/components/admin/supportplan/adbeneficiary/ManagerAssignModal.vue';
+// 추가됨: 관리자용으로 이식된 대기단계 스위치 컴포넌트 임포트
+import ManagerPrioritySwitch from '@/components/admin/supportplan/adbeneficiary/ManagerPrioritySwitch.vue';
+
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
 const viewMode = ref('empty');
-const managementRef = ref(null); //새로고침
+const managementRef = ref(null);
 const selectPlan = ref(null);
-const surveyStore = useSurveyStore(); // ⭐️ 스토어 인스턴스
-//지원자를 새로 선택했을때
-const handleIdUpdate = (id, priorityId) => {
+const surveyStore = useSurveyStore();
+
+// 수정됨: 지원자 선택 시 Store 상태를 강제 동기화하여 이식된 컴포넌트들이 데이터를 읽을 수 있게 함
+const handleIdUpdate = async (id, priorityId) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
-    viewMode.value = 'empty'; // ⭐️ 우측 화면 닫기
-    surveyStore.is_survey_visible = false; // ⭐️ 신청서 스토어 화면도 강제 종료
+    viewMode.value = 'empty';
+    surveyStore.is_survey_visible = false;
+
+    // 핵심 로직: Pinia Store에 Manager가 선택한 지원자 세팅 (Priority 컴포넌트 작동을 위함)
+    if (id) {
+        await surveyStore.selectBeneficiary(id);
+    }
 };
 
 const handleIdDetail = (planId) => {
     selectPlan.value = planId;
     viewMode.value = 'plan_detail';
 };
-// 3. 지원신청서 클릭 시
+
 const handleAppDetail = (appId) => {
-    viewMode.value = 'app_detail'; // ⭐️ 신청서 모드로 변경
+    viewMode.value = 'app_detail';
 };
 
-// ⭐️ 2. 배정 화면 열기 함수
 const handleAssignManager = () => {
-    viewMode.value = 'assign_manager'; // 우측 화면 전환
+    viewMode.value = 'assign_manager';
 };
 
-// ⭐️ 3. 배정 성공 후 초기화 함수
 const handleAssignSuccess = async () => {
     alert('담당자 배정이 성공적으로 반영되었습니다.');
-    viewMode.value = 'empty'; // 완료 후 창 닫기
-    // 필요한 경우 대상자 리스트 새로고침
-    // await surveyStore.fetchBeneficiaryList();
+    viewMode.value = 'empty';
 };
 
-//저장후 새로고침 하는 함수
 const reloadList = () => {
     if (managementRef.value) {
         managementRef.value.refreshTabPlan();
     }
     viewMode.value = 'empty';
 };
+
+// 추가됨: 대기단계 신청 모달 열기 로직
+const handleOpenPriority = async () => {
+    if (!selectedId.value) {
+        alert('지원자를 먼저 선택해주세요.');
+        return;
+    }
+    // Store 데이터 최신화 후 모드 변경
+    await surveyStore.fetchPriorityInfo(selectedId.value);
+    viewMode.value = 'priority';
+};
 </script>
+
 <template>
     <header class="main-header">
         <JsTopbarad />
@@ -60,7 +75,8 @@ const reloadList = () => {
     <div class="dashboard-container">
         <aside class="side-panel">
             <section class="info-section">
-                <AdSupportInfo @updateBeneId="handleIdUpdate" />
+                <!-- 수정됨: open-priority 이벤트 수신 -->
+                <AdSupportInfo @updateBeneId="handleIdUpdate" @open-priority="handleOpenPriority" />
             </section>
 
             <section class="list-section">
@@ -75,9 +91,13 @@ const reloadList = () => {
             <div v-else-if="viewMode === 'app_detail'" class="editor-container">
                 <MemberSurvey />
             </div>
-
             <div v-else-if="viewMode === 'assign_manager'" class="editor-container">
                 <ManagerAssignView :beneId="selectedId" @close="viewMode = 'empty'" @success="handleAssignSuccess" />
+            </div>
+
+            <!-- 추가됨: Manager 대기단계 설정 화면 -->
+            <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">
+                <ManagerPrioritySwitch @close="viewMode = 'empty'" />
             </div>
 
             <div v-else class="empty-state">
@@ -89,7 +109,6 @@ const reloadList = () => {
         </main>
     </div>
 </template>
-
 <style scoped>
 /* 전체 화면 컨테이너 */
 .dashboard-container {
