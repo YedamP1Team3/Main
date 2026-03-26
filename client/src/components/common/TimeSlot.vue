@@ -15,8 +15,18 @@
 
         <!-- 시간 리스트 -->
         <div class="time-grid">
-            <div v-for="time in timeSlots" :key="time" class="time-item" :class="{ selected: selectedTimes.includes(time) }" @click="toggleTime(time)">
-                {{ time }}
+            <div
+                v-for="slot in timeSlots"
+                :key="slot.time"
+                class="time-item"
+                :class="{
+                    selected: selectedTimes.includes(slot.time),
+                    blocked: slot.status === 'blocked',
+                    disabled: mode !== 'manager' && slot.status === 'blocked'
+                }"
+                @click="toggleTime(slot)"
+            >
+                {{ slot.time }}
             </div>
         </div>
 
@@ -39,6 +49,7 @@
 
 <script>
 import { ref, computed } from 'vue';
+import { toggleTimeHandler } from '@/utils/timeslot';
 
 export default {
     name: 'TimeSlot',
@@ -51,7 +62,7 @@ export default {
         },
         mode: {
             type: String,
-            default: 'user'
+            default: 'manager'
         }
     },
 
@@ -64,15 +75,11 @@ export default {
         const timeSlots = computed(() => {
             if (!props.slots.length) return [];
 
-            return props.slots.filter((t) => (period.value === 'AM' ? t < '13:00' : t >= '14:00'));
+            return props.slots.filter((s) => (period.value === 'AM' ? s.time < '13:00' : s.time >= '14:00'));
         });
 
-        const toggleTime = (time) => {
-            if (selectedTimes.value.includes(time)) {
-                selectedTimes.value = selectedTimes.value.filter((t) => t !== time);
-            } else {
-                selectedTimes.value.push(time);
-            }
+        const toggleTime = (slot) => {
+            selectedTimes.value = toggleTimeHandler(slot, selectedTimes.value, props.mode);
         };
 
         const handleManagerAction = (type) => {
@@ -176,6 +183,8 @@ export default {
     background: #3b82f6;
     color: white;
     border-color: #3b82f6;
+    outline: 2px solid #2563eb;
+    outline-offset: -2px;
 }
 
 /* 버튼 */
@@ -203,5 +212,26 @@ export default {
     border: 1px solid #ef4444;
     border-radius: 8px;
     cursor: pointer;
+}
+
+.time-item.blocked {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.time-item.blocked:hover {
+    background: #ef4444;
+}
+
+.time-item.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.time-item.blocked.selected {
+    background: #f87171; /* 기존 빨간색보다 밝게 */
+    color: white;
+    border: 2px solid #7f1d1d; /* 진한 테두리로 강조 */
 }
 </style>

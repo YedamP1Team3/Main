@@ -42,7 +42,9 @@ export default {
                     return;
                 }
 
+                console.log('res.data.schedule : ', schedule);
                 slots.value = convertToSlots(schedule);
+                console.log('schedule : ', slots.value);
             } catch (err) {
                 console.error('스케줄 조회 실패:', err);
                 slots.value = [];
@@ -52,6 +54,16 @@ export default {
         // 🔥 근무시간 → 타임슬롯 변환
         const convertToSlots = (schedule) => {
             const result = [];
+            const occupied = schedule.occupied_times || [];
+
+            const isBlocked = (time) => {
+                return occupied.some((o) => {
+                    const start = o.start_time.slice(11, 16); // "09:00"
+                    const end = o.end_time.slice(11, 16); // "10:00"
+
+                    return time >= start && time < end;
+                });
+            };
 
             let [hour, minute] = schedule.work_start_time.split(':').map(Number);
             const [endHour, endMinute] = schedule.work_end_time.split(':').map(Number);
@@ -59,7 +71,10 @@ export default {
             while (hour < endHour || (hour === endHour && minute < endMinute)) {
                 const time = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
 
-                result.push(time);
+                result.push({
+                    time,
+                    status: isBlocked(time) ? 'blocked' : 'available'
+                });
 
                 minute += 30;
                 if (minute === 60) {
@@ -71,7 +86,7 @@ export default {
             return result;
         };
 
-        // 🔥 차단 처리 (아직 API 연결 전 단계)
+        // 🔥 차단 처리
         const handleBlock = async (data) => {
             console.log('차단 요청:', data);
 

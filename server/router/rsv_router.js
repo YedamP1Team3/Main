@@ -11,7 +11,6 @@ router.get("/schedule", async (req, res) => {
 
     // 날짜는 쿼리로 받는 게 좋음 (ex: ?date=2026-03-24)
     const { date } = req.query;
-    console.log("rsv.router.date : ", date);
 
     if (!date) {
       return res.status(400).json({
@@ -21,7 +20,6 @@ router.get("/schedule", async (req, res) => {
     }
 
     const schedule = await rsvService.getManagerSchedule(managerId, date);
-    console.log("schedule :", schedule);
     res.status(200).json({
       success: true,
       schedule,
@@ -67,7 +65,6 @@ router.delete("/unblock-times", async (req, res) => {
   try {
     const managerId = "manager_02"; // 나중엔 로그인된 사용자 ID 사용
     const { date, times } = req.body; // times: ["09:30", "10:00", ...]
-    console.log("delete(/unblock). req.body : ", req.body);
 
     if (!date || !times || times.length === 0) {
       return res.status(400).json({
