@@ -29,4 +29,22 @@ const connectionPool = mariadb.createPool({
 
 module.exports = {
   pool: connectionPool,
+
+  // 서비스에서 호출하는 execute 함수를 정의
+  execute: async (sql, params) => {
+    let conn;
+    try {
+      // 커넥션 풀에서 연결 가져오기
+      conn = await connectionPool.getConnection();
+      // SQL 실행 (쿼리문과 파라미터 전달)
+      const res = await conn.query(sql, params);
+      return res;
+    } catch (err) {
+      console.error("DAO Execute Error:", err);
+      throw err;
+    } finally {
+      // 연결 반납 (★)
+      if (conn) conn.end();
+    }
+  },
 };

@@ -34,12 +34,6 @@ const router = createRouter({
                 ...member // 내가 만든 경로를 먼저 배치 (우선순위 높음)
             ]
         },
-        // {
-        //     // 지원자 추가 페이지
-        //     path: '/Recipient/add',
-        //     name: 'AddRecipient',
-        //     component: () => import('@/views/Dependent/AddRecipientForm.vue')
-        // },
         {
             path: '/beneficiaryMain',
             name: 'beneficiaryMain',

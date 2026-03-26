@@ -27,6 +27,8 @@ const infoRouter = require("./router/info_router.js");
 
 const adsupportPlan = require("./router/adsupport_router.js");
 
+const recipientRouter = require("./router/recipient_router.js");
+
 app.use("/abc", require("./router/noTouch_router.js"));
 
 app.use("/api", userRouter);
@@ -38,3 +40,5 @@ app.use("/reserve", require("./router/rsv_router.js"));
 app.use("/survey", surveyRouter);
 
 app.use("/adsupport", adsupportPlan);
+
+app.use("/recipient", recipientRouter);

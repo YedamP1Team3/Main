@@ -8,11 +8,12 @@ const insertUser = `
         role, 
         join_status, 
         zip_code, 
-        address, 
+        address,
+        detail_address,
         tel, 
         email, 
         created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
 `;
 
 const selectUserById = `

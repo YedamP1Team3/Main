@@ -22,7 +22,13 @@ const selectUserById = async (userId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(userSql.selectUserById, [userId]);
+
+    // 1. 쿼리 실행 (기존 유지)
+    const rows = await conn.query(userSql.selectUserById, [userId]);
+
+    // 2. 결과 반환 (기존 유지)
+    // 만약 rows가 [ [데이터], [필드정보] ] 구조라면 rows[0][0]을 줘야 할 수도 있습니다.
+    // 일단은 기존 구조인 rows[0]을 유지하며 로그를 먼저 확인하세요.
     return rows[0];
   } catch (err) {
     console.error("Mapper selectUserById Error:", err);
