@@ -75,8 +75,7 @@ const reloadList = () => {
             </section>
 
             <section class="list-section">
-                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @newaddplan="viewMode = 'create'" @newresultplan="viewMode = 'resultCreate'" />
-                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @select-app="handleAppDetail" @newaddplan="viewMode = 'create'" />
+                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @select-app="handleAppDetail" @newresultplan="viewMode = 'resultCreate'" @newaddplan="viewMode = 'create'" />
             </section>
         </aside>
 
@@ -87,9 +86,9 @@ const reloadList = () => {
             <div v-else-if="viewMode === 'detail'" class="editor-container">
                 <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
-            <div v-if="viewMode === 'resultCreate'" class="editor-container">
+            <div v-else-if="viewMode === 'resultCreate'" class="editor-container">
                 <ResultNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
-
+            </div>
             <div v-else-if="viewMode === 'app_detail'" class="editor-container">
                 <ManagerSurveyView @close="viewMode = 'empty'" />
             </div>
