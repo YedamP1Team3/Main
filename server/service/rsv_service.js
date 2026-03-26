@@ -97,7 +97,10 @@ const removeBlockedTimes = async (managerId, date, times) => {
       range.end_time,
     );
 
+    console.log("service.range : ", range);
+
     totalDeleted += count;
+    console.log("totalDeleted : ", totalDeleted);
   }
 
   // 🔥 삭제된 게 없으면 에러 처리

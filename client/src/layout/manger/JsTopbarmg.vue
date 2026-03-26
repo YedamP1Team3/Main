@@ -20,6 +20,11 @@ const handleAuthAction = () => {
         router.push('/login');
     }
 };
+
+const goToSchedule = () => {
+    router.push({ name: 'managerSchedule' });
+    console.log('상담관리 페이지로 이동합니다.');
+};
 </script>
 
 <template>
@@ -40,7 +45,7 @@ const handleAuthAction = () => {
             <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
                 <button type="button" class="p-link text-color font-medium">신청내역</button>
                 <button type="button" class="p-link text-color font-medium">지원계획</button>
-                <button type="button" class="p-link text-color font-medium">상담관리</button>
+                <button type="button" class="p-link text-color font-medium" @click="goToSchedule">상담관리</button>
             </div>
         </div>
 
@@ -53,14 +58,14 @@ const handleAuthAction = () => {
             </div>
         </div>
 
-       <div class="flex items-center gap-2 cursor-pointer" @click="handleAuthAction">
-        <span class="hidden sm:block font-medium text-color">
-            {{ authStore.isLoggedIn ? `${authStore.userName} 담당자` : '로그인이 필요합니다' }}
-        </span>
-        <button type="button" class="layout-topbar-action">
-            <i class="pi pi-user" :style="{ color: authStore.isLoggedIn ? 'var(--primary-color)' : '' }"></i>
-        </button>
-    </div>
+        <div class="flex items-center gap-2 cursor-pointer" @click="handleAuthAction">
+            <span class="hidden sm:block font-medium text-color">
+                {{ authStore.isLoggedIn ? `${authStore.userName} 담당자` : '로그인이 필요합니다' }}
+            </span>
+            <button type="button" class="layout-topbar-action">
+                <i class="pi pi-user" :style="{ color: authStore.isLoggedIn ? 'var(--primary-color)' : '' }"></i>
+            </button>
+        </div>
     </div>
 </template>
 

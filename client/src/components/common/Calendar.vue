@@ -3,7 +3,7 @@
         <!-- 헤더 -->
         <div class="calendar-header">
             <button @click="prevMonth">‹</button>
-            <span>{{ currentYear }}년 {{ currentMonth + 1 }}월</span>
+            <span class="calendar-title">{{ currentYear }}년 {{ currentMonth + 1 }}월</span>
             <button @click="nextMonth">›</button>
         </div>
 
@@ -131,65 +131,138 @@ export default {
 
 <style scoped>
 .calendar {
-    width: 320px;
-    background: white;
-    border-radius: 12px;
+    width: 100%;
+    max-width: 340px;
+    height: 330px;
+
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
     padding: 16px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
 }
 
+/* 상단 년/월 + 이동 버튼 */
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.calendar-title {
+    flex: 1;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
 }
 
 .calendar-header button {
-    background: none;
-    border: none;
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
     font-size: 18px;
+    font-weight: 600;
+    color: #374151;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.calendar-days,
-.calendar-dates {
+.calendar-header button:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+/* 요일 */
+.calendar-days {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
 }
 
 .day-label {
     text-align: center;
     font-size: 12px;
-    color: #888;
-    margin-bottom: 5px;
+    font-weight: 600;
+    color: #6b7280;
+    padding: 4px 0;
 }
 
+/* 날짜 그리드 */
+.calendar-dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    flex: 1;
+}
+
+/* 날짜 셀 */
 .date-cell {
-    height: 40px;
+    height: 34px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+
     cursor: pointer;
+    border: 1px solid transparent;
     border-radius: 8px;
-    transition: 0.2s;
+    box-sizing: border-box;
+    transition: all 0.18s ease;
 }
 
 .date-cell:hover {
-    background: #e6f0ff;
+    background: #f3f7ff;
+    border-color: #dbeafe;
+    color: #2563eb;
 }
 
+/* 오늘 날짜 */
 .date-cell.today {
-    border: 1px solid #3b82f6;
+    border-color: #03c75a; /* 네이버 느낌 포인트 */
+    color: #03c75a;
+    font-weight: 700;
 }
 
+/* 선택 날짜 */
 .date-cell.selected {
-    background: #3b82f6;
-    color: white;
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+    font-weight: 700;
 }
 
+/* 빈 칸 */
 .date-cell.empty {
     cursor: default;
+    background: transparent;
+}
+
+.date-cell.empty:hover {
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
 }
 </style>

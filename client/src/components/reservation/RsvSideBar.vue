@@ -1,83 +1,73 @@
 <template>
-    <div class="sidebar">
-        <!-- 헤더 -->
-        <div class="sidebar-header">
-            <h2>관리자</h2>
-        </div>
+    <aside class="rsv-sidebar">
+        <div class="sidebar-title">상담 메뉴</div>
 
-        <!-- 메뉴 -->
-        <nav class="menu">
-            <router-link v-for="item in menuList" :key="item.name" :to="item.path" class="menu-item" :class="{ active: isActive(item.path) }">
-                {{ item.label }}
-            </router-link>
+        <nav class="sidebar-menu">
+            <RouterLink to="/" class="menu-item" active-class="active"> 상담예약 관리 </RouterLink>
+
+            <RouterLink to="/" class="menu-item" active-class="active"> 상담일지 작성 </RouterLink>
+
+            <RouterLink to="/" class="menu-item" active-class="active"> 상담일지 관리 </RouterLink>
+
+            <RouterLink :to="{ name: 'managerSchedule' }" class="menu-item" active-class="active"> 상담시간 관리 </RouterLink>
         </nav>
-    </div>
+    </aside>
 </template>
 
-<script setup>
-import { useRoute } from 'vue-router';
+<script>
+import { RouterLink } from 'vue-router';
 
-const route = useRoute();
-
-// 👉 경로는 네가 맞게 수정하면 됨
-const menuList = [
-    { name: 'reservation', label: '상담예약 관리', path: '/reservation' },
-    { name: 'log-write', label: '상담일지 작성', path: '/log/write' },
-    { name: 'log-manage', label: '상담일지 관리', path: '/log/manage' },
-    { name: 'schedule', label: '상담일정 관리', path: '/ManagerSchedule' }
-];
-
-// 현재 경로와 비교해서 active 처리
-const isActive = (path) => {
-    return route.path === path;
+export default {
+    name: 'RsvSideBar',
+    components: {
+        RouterLink
+    }
 };
 </script>
 
 <style scoped>
-.sidebar {
+.rsv-sidebar {
     width: 220px;
-    height: 100vh;
-    background: #f4f8ff;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 15px;
+    min-height: 100%;
+    padding: 20px 16px;
+    background: #fff;
+    border-right: 1px solid #e5e7eb;
     box-sizing: border-box;
 }
 
-.sidebar-header {
-    margin-bottom: 30px;
-    padding-left: 10px;
-}
-
-.sidebar-header h2 {
+.sidebar-title {
+    margin-bottom: 16px;
+    padding: 0 4px;
     font-size: 18px;
-    color: #4a90e2;
+    font-weight: 700;
+    color: #111827;
 }
 
-.menu {
+.sidebar-menu {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
-/* 🔥 router-link 기본 스타일 제거 */
 .menu-item {
-    text-decoration: none;
-    color: #333;
+    display: block;
     padding: 12px 14px;
-    border-radius: 10px;
-    transition: 0.2s;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.18s ease;
 }
 
-/* hover */
 .menu-item:hover {
-    background: #e3ecff;
+    background: #f3f4f6;
+    color: #111827;
 }
 
-/* 활성 메뉴 */
 .menu-item.active {
-    background: #4a90e2;
-    color: white;
-    font-weight: bold;
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 700;
 }
 </style>
