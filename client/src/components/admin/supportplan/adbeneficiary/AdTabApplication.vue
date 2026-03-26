@@ -120,8 +120,8 @@ watch(
                 <tr>
                     <th>신청번호</th>
                     <th>작성자</th>
-                    <th>신청일자</th>
                     <th>대기단계</th>
+                    <th>신청일자</th>
                 </tr>
             </thead>
             <tbody>
@@ -131,8 +131,8 @@ watch(
                 <tr v-else v-for="app in applicationList" :key="app.id" class="clickable-row" @click="viewApplicationDetail(app.id)">
                     <td>{{ app.id }}</td>
                     <td>{{ app.writer }}</td>
-                    <td>{{ app.date }}</td>
                     <td>{{ app.priority_status }}</td>
+                    <td>{{ app.date }}</td>
                 </tr>
             </tbody>
         </table>
