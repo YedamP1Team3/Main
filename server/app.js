@@ -27,6 +27,8 @@ const infoRouter = require("./router/info_router.js");
 
 const adsupportPlan = require("./router/adsupport_router.js");
 
+const recipientRouter = require("./router/recipient_router.js");
+
 app.use("/abc", require("./router/noTouch_router.js"));
 
 app.use("/api", userRouter);
@@ -41,3 +43,4 @@ app.use("/adsupport", adsupportPlan);
 
 const resultPlan = require("./router/resultPlan_router.js");
 app.use("/resultPlan", resultPlan);
+app.use("/recipient", recipientRouter);

@@ -2,13 +2,15 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import { useSurveyStore } from '@/stores/useSurveyStore'; // 💡 스토어 가져오기
 
 const authStore = useAuthStore();
-const emit = defineEmits(['updateBeneId']);
+const surveyStore = useSurveyStore(); // 💡 스토어 초기화
+const emit = defineEmits(['updateBeneId', 'open-priority']); // 💡 팝업 이벤트를 위해 open-priority 추가
 
-const selectedBeneId = ref(''); // 사용자가 선택한 'ID' (v-model과 연결)
-const AdSupportList = ref([]); // 드롭다운에 뿌릴 '이름 목록'
-const selectedBene = ref({}); // 서버에서 받아온 '한 명의 상세 정보'
+const selectedBeneId = ref('');
+const AdSupportList = ref([]);
+const selectedBene = ref({});
 
 const fetchBeneDetail = async () => {
     if (!selectedBeneId.value) {
@@ -28,6 +30,7 @@ onMounted(async () => {
     AdSupportList.value = response.data;
 });
 </script>
+
 <template>
     <h3>지원자 정보</h3>
 
@@ -53,7 +56,8 @@ onMounted(async () => {
 
                     <th><label>대기단계</label></th>
                     <td>
-                        <input type="text" :value="selectedBene.priority_status || ''" readonly />
+                        <!-- 💡 핵심 수정: 영문 로컬 데이터 버리고, Pinia의 한글 번역 Getter를 연결하여 실시간 동기화 -->
+                        <input type="text" :value="surveyStore.priorityStatusKor" readonly class="clickable-input" @click="emit('open-priority')" />
                     </td>
                 </tr>
                 <tr>
@@ -74,6 +78,7 @@ onMounted(async () => {
         </table>
     </div>
 </template>
+
 <style scoped>
 /* 카드 전체 컨테이너 */
 .BfInfo {
@@ -152,5 +157,15 @@ td:last-child {
 select:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+.clickable-input {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clickable-input:hover {
+    border-color: #3b82f6 !important;
+    background-color: #f0f8ff !important;
+    box-shadow: inset 0 0 0 1px #3b82f6;
 }
 </style>

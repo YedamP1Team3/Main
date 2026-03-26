@@ -1,93 +1,37 @@
 <script setup>
-import { ref, watch } from 'vue';
-import axios from 'axios';
-import { useSurveyStore } from '@/stores/useSurveyStore';
-// ⭐️ 1. 방금 만든 모달 컴포넌트 가져오기
+import { watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useSurveyStore, PRIORITY_MAP } from '@/stores/useSurveyStore'; // 💡 한글 번역 맵 추가
 import ManagerAssignModal from './ManagerAssignModal.vue';
 
 const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
-const emit = defineEmits(['select-app', 'assign-manager']); // ⭐️ 이벤트 추가
+const emit = defineEmits(['select-app', 'assign-manager']);
+const surveyStore = useSurveyStore();
+
+// 💡 스토어에서 신청서 리스트를 직접 가져와 실시간 반응성(Reactivity) 확보
+const { application_list } = storeToRefs(surveyStore);
 
 const assignManager = () => {
     if (!props.beneId) {
         alert('지원 대상자를 먼저 선택해주세요.');
         return;
     }
-    if (applicationList.value.length === 0) {
+    if (application_list.value.length === 0) {
         alert('지원신청서가 1개 이상 작성된 대상자에게만 담당자를 배정할 수 있습니다.');
         return;
     }
-    // ⭐️ 모달 띄우는 대신 상위로 이벤트 던지기
     emit('assign-manager');
 };
 
-const applicationList = ref([]);
-const surveyStore = useSurveyStore();
-
-// ==========================================
-// ⭐️ 담당자 배정 모달 상태 및 데이터
-// ==========================================
-const showManagerModal = ref(false);
-const managerList = ref([]);
-const beneName = ref('');
-const currentManagerName = ref('');
-
-// (임시) 담당자 목록을 DB에서 불러오는 함수
-const fetchManagerList = async () => {
-    try {
-        // TODO: 실제 백엔드의 "role='manager'인 유저 목록" API 주소로 변경하세요.
-        // 예: [{ user_id: 'admin_01', user_name: '김담당' }, ...] 형태여야 합니다.
-        const res = await axios.get('http://localhost:3000/api/users/managers');
-        managerList.value = res.data.data || [];
-    } catch (error) {
-        console.error('담당자 목록 로드 실패:', error);
-    }
-};
-
-// ⭐️ 모달에서 '확인'을 누르고 넘어온 이벤트를 처리 (DB 업데이트)
-const handleConfirmAssign = async (managerId) => {
-    try {
-        // TODO: 선택된 managerId를 대상자(bene_id) 정보에 업데이트하는 API 주소로 변경하세요.
-        const payload = {
-            bene_id: props.beneId,
-            manager_id: managerId
-        };
-
-        // 예: PUT 요청으로 담당자 수정
-        const res = await axios.put(`http://localhost:3000/api/beneficiary/assign`, payload);
-
-        if (res.data.success || res.status === 200) {
-            alert('담당자 배정이 성공적으로 완료되었습니다.');
-            showManagerModal.value = false; // 모달 닫기
-
-            // TODO: 배정 완료 후, 상단의 '지원자 정보'나 현재 리스트를 새로고침하는 로직 추가
-            // await surveyStore.fetchBeneficiaryList();
-        } else {
-            alert('담당자 배정에 실패했습니다.');
-        }
-    } catch (error) {
-        console.error('담당자 배정 에러:', error);
-        alert('서버 통신 중 오류가 발생했습니다.');
-    }
-};
-
-// ==========================================
-// 기존 신청서 목록 조회 로직
-// ==========================================
-const fetchApplicationList = async (id) => {
-    if (!id) {
-        applicationList.value = [];
-        return;
-    }
-    try {
-        const response = await axios.get(`http://localhost:3000/survey/list/${id}`);
-        applicationList.value = response.data.data || [];
-    } catch (error) {
-        console.error('신청서 목록 로드 실패:', error);
-    }
+// 💡 영문을 한글로 번역하는 포맷터 함수 추가
+const formatPriority = (item) => {
+    if (item.progress_status === 'pending') return '대기';
+    if (!item.priority_status) return '미신청';
+    const lowerCode = String(item.priority_status).toLowerCase();
+    return PRIORITY_MAP[lowerCode] || item.priority_status;
 };
 
 const viewApplicationDetail = async (id) => {
@@ -96,10 +40,13 @@ const viewApplicationDetail = async (id) => {
     emit('select-app', id);
 };
 
+// 대상자가 바뀔 때 스토어의 리스트 갱신 액션만 호출
 watch(
     () => props.beneId,
     (newId) => {
-        fetchApplicationList(newId);
+        if (newId) {
+            surveyStore.fetchApplicationList(newId);
+        }
     },
     { immediate: true }
 );
@@ -107,7 +54,6 @@ watch(
 
 <template>
     <div class="application-container">
-        <!-- 기존 헤더 및 테이블 코드 (변경 없음) -->
         <div class="header-row">
             <h2>지원신청서 관리</h2>
             <div class="btn-group">
@@ -125,20 +71,19 @@ watch(
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="applicationList.length === 0">
+                <tr v-if="application_list.length === 0">
                     <td colspan="4" class="empty-msg">등록된 지원신청서가 없습니다.</td>
                 </tr>
-                <tr v-else v-for="app in applicationList" :key="app.id" class="clickable-row" @click="viewApplicationDetail(app.id)">
+                <tr v-else v-for="app in application_list" :key="app.id" class="clickable-row" @click="viewApplicationDetail(app.id)">
                     <td>{{ app.id }}</td>
                     <td>{{ app.writer }}</td>
-                    <td>{{ app.priority_status }}</td>
+                    <td class="status-text">{{ formatPriority(app) }}</td>
                     <td>{{ app.date }}</td>
                 </tr>
             </tbody>
         </table>
     </div>
 </template>
-
 <style scoped>
 /* 기존 스타일은 그대로 유지합니다 */
 .application-container {

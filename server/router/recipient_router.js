@@ -25,3 +25,5 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ success: false, message: "등록 실패" });
   }
 });
+
+module.exports = router;

@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue'; // 💡 watch 추가
+import { useSurveyStore } from '@/stores/useSurveyStore'; // 💡 스토어 연동
 import AdTabPlan from './AdTabPlan.vue';
 import AdTabApplication from './AdTabApplication.vue';
 
@@ -7,16 +8,28 @@ const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
-const emit = defineEmits(['select-plan', 'select-app', 'assign-manager']); // ⭐️ 추가
+const emit = defineEmits(['select-plan', 'select-app', 'assign-manager']);
 
 const currentTab = ref('Plan');
 const tabPlanRef = ref(null);
+const surveyStore = useSurveyStore(); // 💡 스토어 초기화
+
+// 💡 스토어의 대기단계 상태(progress_status) 변경을 감지하여 실시간으로 리스트 동기화
+watch(
+    () => surveyStore.priority_data.progress_status,
+    (newVal, oldVal) => {
+        // 상태가 실제로 변경되었을 때만 내부 데이터 리프레시
+        if (oldVal && newVal !== oldVal && tabPlanRef.value) {
+            tabPlanRef.value.fetchPlanList(props.beneId);
+        }
+    }
+);
 
 const handleSelectApp = (appId) => {
     emit('select-app', appId);
 };
 const handleAssignManager = () => {
-    emit('assign-manager'); // 위로 토스
+    emit('assign-manager');
 };
 
 const handleSelectPlan = (planId) => {
@@ -29,6 +42,7 @@ defineExpose({
     }
 });
 </script>
+
 <template>
     <div class="management-container">
         <nav class="tab-menu">

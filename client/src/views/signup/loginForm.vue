@@ -86,6 +86,7 @@ const handleLogin = async () => {
                 router.push('/BeneficiaryMain');
             } else if (userRole === 'FAMILY') {
                 alert(`${user.name}님 환영합니다 일반사용자 페이지로 이동합니다.`);
+                // router.push('/recipient');
                 router.push('/memberApplication');
             } else {
                 alert(`${user.name}님 환영합니다`);
