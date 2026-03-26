@@ -36,16 +36,41 @@ export const useSurveyStore = defineStore('survey', {
             if (state.priority_data.progress_status === 'pending') {
                 return '대기';
             }
-            const dbCode = state.selected_bene_detail?.priority_status;
-            if (!dbCode) return '미신청';
+
+            // 💡 [핵심 수정] 고정된 프로필이 아닌, 실시간 변하는 priority_data를 먼저 참조해야 합니다.
+            const dbCode = state.priority_data.priority_status || state.selected_bene_detail?.priority_status;
+
+            // 데이터가 없거나 'none'일 경우 미신청 처리
+            if (!dbCode || dbCode === 'none' || dbCode === '') return '미신청';
 
             const lowerCode = String(dbCode).toLowerCase();
             return PRIORITY_MAP[lowerCode] || dbCode;
         }
     },
-
     actions: {
+        // 💡 1. 대상자 상세 정보 로드 (실패 시에도 초기화 보장)
+        async fetchBeneficiaryDetail(beneId) {
+            if (!beneId) {
+                this.selected_bene_detail = {};
+                return;
+            }
+            try {
+                const res = await axios.get(`http://localhost:3000/abc/bene/${beneId}`);
+                this.selected_bene_detail = res.data;
+            } catch (error) {
+                console.error('상세 로드 실패:', error);
+                this.selected_bene_detail = {}; // 오류 시 확실한 초기화
+            }
+        },
+
+        // 💡 2. 대기단계 정보 로드 (잔상 완벽 제거)
         async fetchPriorityInfo(beneId) {
+            // ID가 없으면 바로 초기화
+            if (!beneId) {
+                this.priority_data = { progress_status: 'none', priority_status: '', rejection_reason: '', approval_date: null };
+                return;
+            }
+
             try {
                 const res = await axios.get(`http://localhost:3000/abc/priority/${beneId}`);
                 if (res.data && res.data.success && res.data.data) {
@@ -58,17 +83,44 @@ export const useSurveyStore = defineStore('survey', {
                         this.priority_data.rejection_reason = targetData.rejection_reason || '';
                         this.priority_data.approval_date = targetData.approval_date || null;
                     } else {
-                        this.priority_data.progress_status = 'none';
+                        // [핵심 수정] DB에 데이터가 없으면 확실하게 모든 필드를 빈 값으로 날려야 합니다.
+                        this.priority_data = { progress_status: 'none', priority_status: '', rejection_reason: '', approval_date: null };
                     }
                 } else {
-                    this.priority_data.progress_status = 'none';
+                    // [핵심 수정] 응답이 비정상일 때도 잔상 지우기
+                    this.priority_data = { progress_status: 'none', priority_status: '', rejection_reason: '', approval_date: null };
                 }
             } catch (error) {
                 console.error('대기단계 정보 로드 실패:', error);
-                this.priority_data.progress_status = 'none';
+                // [핵심 수정] 에러 발생 시 이전 사람의 데이터가 남지 않도록 덮어쓰기
+                this.priority_data = { progress_status: 'none', priority_status: '', rejection_reason: '', approval_date: null };
             }
         },
 
+        // 💡 3. 대상자 선택 액션 (가장 중요: 선택 즉시 기존 데이터 날리기)
+        async selectBeneficiary(beneId) {
+            this.selected_bene_id = beneId;
+            this.is_survey_visible = false;
+
+            // [핵심 해결 포인트] 다른 대상자를 선택하는 즉시 화면에 보일 수 있는 모든 기존 상태를 완벽히 초기화합니다.
+            this.selected_bene_detail = {};
+            this.application_list = [];
+            this.priority_data = {
+                progress_status: 'none',
+                priority_status: '',
+                rejection_reason: '',
+                approval_date: null
+            };
+
+            if (!beneId) return; // 선택 해제 시 여기서 종료
+
+            // 초기화된 깨끗한 도화지 상태에서 새로운 대상자 데이터를 병렬로 불러옴
+            await Promise.all([this.fetchBeneficiaryDetail(beneId), this.fetchApplicationList(beneId), this.fetchPriorityInfo(beneId)]);
+        },
+
+        // ===============================================
+        // 아래부터는 기존 액션 코드와 100% 동일하게 유지
+        // ===============================================
         async requestPriority(stageNameKor) {
             const dbCode = PRIORITY_MAP[stageNameKor];
             try {
@@ -97,8 +149,7 @@ export const useSurveyStore = defineStore('survey', {
                 });
 
                 if (res.data.success) {
-                    this.priority_data.progress_status = 'NONE';
-                    this.priority_data.priority_status = '';
+                    this.priority_data = { progress_status: 'none', priority_status: '', rejection_reason: '', approval_date: null };
                     await this.fetchBeneficiaryDetail(this.selected_bene_id);
                     await this.fetchApplicationList(this.selected_bene_id);
                     alert('신청이 취소되었습니다.');
@@ -131,34 +182,6 @@ export const useSurveyStore = defineStore('survey', {
             }
         },
 
-        async fetchBeneficiaryDetail(beneId) {
-            if (!beneId) return (this.selected_bene_detail = {});
-            try {
-                const res = await axios.get(`http://localhost:3000/abc/bene/${beneId}`);
-                this.selected_bene_detail = res.data;
-            } catch (error) {
-                console.error('상세 로드 실패:', error);
-            }
-        },
-
-        async selectBeneficiary(beneId) {
-            this.selected_bene_id = beneId;
-            this.is_survey_visible = false;
-
-            if (!beneId) {
-                this.selected_bene_detail = {};
-                this.application_list = [];
-                this.priority_data.progress_status = 'none';
-                this.priority_data.priority_status = '';
-                return;
-            }
-
-            this.selected_bene_detail = {};
-            this.priority_data.progress_status = 'none';
-
-            await Promise.all([this.fetchBeneficiaryDetail(beneId), this.fetchApplicationList(beneId), this.fetchPriorityInfo(beneId)]);
-        },
-
         async fetchApplicationList(beneId) {
             try {
                 const res = await axios.get(`http://localhost:3000/survey/list/${beneId}`);
@@ -176,13 +199,13 @@ export const useSurveyStore = defineStore('survey', {
         openSurvey() {
             this.is_view_mode = false;
             this.is_survey_visible = true;
-            this.view_app_id = null; // 💡 작성 시에는 초기화
+            this.view_app_id = null;
         },
 
         closeSurvey() {
             this.is_survey_visible = false;
             this.is_view_mode = false;
-            this.view_app_id = null; // 💡 닫을 때 초기화
+            this.view_app_id = null;
         },
 
         async loadApplicationView(appId) {
@@ -193,7 +216,7 @@ export const useSurveyStore = defineStore('survey', {
                     this.view_answers = res.data.data.answers;
                     this.is_view_mode = true;
                     this.is_survey_visible = true;
-                    this.view_app_id = appId; // 💡 [수정] 조회 시 식별할 수 있도록 저장
+                    this.view_app_id = appId;
                 }
             } catch (error) {
                 console.error('조회 로드 실패:', error);
@@ -201,7 +224,6 @@ export const useSurveyStore = defineStore('survey', {
             }
         },
 
-        // 💡 [추가] 신청서 삭제 액션
         async deleteApplication() {
             if (!this.view_app_id) return;
 
@@ -213,9 +235,8 @@ export const useSurveyStore = defineStore('survey', {
                 const res = await axios.delete(`http://localhost:3000/survey/application/${this.view_app_id}`);
                 if (res.data.success) {
                     alert('신청서가 삭제되었습니다.');
-                    this.closeSurvey(); // 화면 닫기
+                    this.closeSurvey();
 
-                    // 삭제 후 리스트 최신화
                     if (this.selected_bene_id) {
                         await this.fetchApplicationList(this.selected_bene_id);
                     }
@@ -235,7 +256,7 @@ export const useSurveyStore = defineStore('survey', {
             this.is_view_mode = false;
             this.view_survey_data = [];
             this.view_answers = {};
-            this.view_app_id = null; // 💡 초기화 포함
+            this.view_app_id = null;
             this.priority_data = {
                 progress_status: 'none',
                 priority_status: '',

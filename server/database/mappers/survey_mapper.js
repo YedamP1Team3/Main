@@ -78,40 +78,6 @@ const getVersions = async () => {
   }
 };
 
-const createNewVersion = async () => {
-  let conn = null;
-  try {
-    conn = await pool.getConnection();
-    await conn.beginTransaction();
-
-    // 1. 기존 모든 버전 비활성화
-    await conn.query(surveySql.deactivateVersions);
-
-    // 2. 새 버전 생성
-    // 🚨 [수정] [result] 대신 result로 받고, insertId가 어디에 있는지 확인합니다.
-    const result = await conn.query(
-      surveySql.insert_version || surveySql.insertNewVersion,
-    );
-
-    await conn.commit();
-
-    // 💡 MariaDB/MySQL용 안전한 insertId 추출
-    // 결과가 배열로 오면 첫 번째 요소에서, 객체로 오면 바로 insertId를 가져옵니다.
-    const insertId =
-      result.insertId ||
-      (result[0] && result[0].insertId) ||
-      result.affectedRows;
-
-    return insertId;
-  } catch (err) {
-    if (conn) await conn.rollback();
-    console.error("Mapper Error:", err);
-    throw err;
-  } finally {
-    if (conn) conn.release();
-  }
-};
-
 // ⭐️ [MEMBER용] 현재 활성화된(1) 버전 ID 딱 하나만 가져오는 함수 추가
 const getActiveVersionId = async () => {
   let conn = null;
@@ -212,13 +178,71 @@ const getApplicationList = async (beneId) => {
     const rows = await conn.query(surveySql.select_application_list_by_bene, [
       beneId,
     ]);
-    console.log(rows);
+    // console.log(rows);
     return rows; // 리스트 반환
   } finally {
     if (conn) conn.release();
   }
 };
 
+const deleteApplicationTransaction = async (appId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+    await conn.query(surveySql.delete_survey_answers, [appId]);
+    await conn.query(surveySql.delete_application, [appId]);
+    await conn.commit();
+    return true;
+  } catch (err) {
+    if (conn) await conn.rollback();
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// createNewVersion 함수를 덮어씌웁니다.
+const createNewVersion = async (targetVersionId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+
+    // 1. 기존 모든 버전 비활성화 (전체 FALSE)
+    await conn.query(surveySql.deactivateVersions);
+
+    // 2. 선택한 버전을 활성화 (TRUE)
+    if (targetVersionId) {
+      await conn.query(
+        surveySql.setActiveVersion ||
+          `UPDATE survey_version SET IS_ACTIVE = 1 WHERE VERSION_ID = ?`,
+        [targetVersionId],
+      );
+    }
+
+    // 3. 수정용 새 버전(FALSE) 생성
+    const result = await conn.query(
+      surveySql.insertNewDraftVersion ||
+        `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (0, NOW());`,
+    );
+
+    await conn.commit();
+
+    const insertId =
+      result.insertId ||
+      (result[0] && result[0].insertId) ||
+      result.affectedRows;
+    return insertId; // 새로 생성된 가장 큰 PK 반환
+  } catch (err) {
+    if (conn) await conn.rollback();
+    console.error("Mapper Error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+// module.exports 에 deleteApplicationTransaction 추가
 module.exports = {
   selectSurvey,
   insertItem,
@@ -235,4 +259,5 @@ module.exports = {
   getApplicationById,
   getAnswersByAppId,
   getApplicationList,
+  deleteApplicationTransaction,
 };

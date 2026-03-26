@@ -2,13 +2,14 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import { useSurveyStore } from '@/stores/useSurveyStore'; // 💡 스토어 가져오기
 
 const authStore = useAuthStore();
-// 수정됨: open-priority 이벤트 추가
-const emit = defineEmits(['updateBeneId', 'open-priority']);
+const surveyStore = useSurveyStore(); // 💡 스토어 초기화
+const emit = defineEmits(['updateBeneId', 'open-priority']); // 💡 팝업 이벤트를 위해 open-priority 추가
 
 const selectedBeneId = ref('');
-const beneficiaryList = ref([]);
+const AdSupportList = ref([]);
 const selectedBene = ref({});
 
 const fetchBeneDetail = async () => {
@@ -22,14 +23,17 @@ const fetchBeneDetail = async () => {
 };
 
 onMounted(async () => {
-    const userList = authStore.userId;
-    const response = await axios.get('http://localhost:3000/api/beneficiaries', { params: { user_id: userList } });
-    beneficiaryList.value = response.data;
+    const agencylist = authStore.agencyId;
+    const response = await axios.get('http://localhost:3000/adsupport/AdSupportList', {
+        params: { agency_id: agencylist }
+    });
+    AdSupportList.value = response.data;
 });
 </script>
 
 <template>
     <h3>지원자 정보</h3>
+
     <div class="BfInfo">
         <table>
             <tbody>
@@ -39,7 +43,7 @@ onMounted(async () => {
                         <select v-model="selectedBeneId" @change="fetchBeneDetail">
                             <option value="">지원자를 선택하세요</option>
                             <template v-if="authStore.userId">
-                                <option v-for="bene in beneficiaryList" :key="bene.bene_id" :value="bene.bene_id">
+                                <option v-for="bene in AdSupportList" :key="bene.bene_id" :value="bene.bene_id">
                                     {{ bene.bene_name }}
                                 </option>
                             </template>
@@ -51,9 +55,9 @@ onMounted(async () => {
                     </td>
 
                     <th><label>대기단계</label></th>
-                    <!-- 수정됨: Manager에서 클릭 가능하도록 속성 및 이벤트 추가 -->
                     <td>
-                        <input type="text" :value="selectedBene.priority_status || ''" readonly class="clickable-input" @click="emit('open-priority')" />
+                        <!-- 💡 핵심 수정: 영문 로컬 데이터 버리고, Pinia의 한글 번역 Getter를 연결하여 실시간 동기화 -->
+                        <input type="text" :value="surveyStore.priorityStatusKor" readonly class="clickable-input" @click="emit('open-priority')" />
                     </td>
                 </tr>
                 <tr>
@@ -74,6 +78,7 @@ onMounted(async () => {
         </table>
     </div>
 </template>
+
 <style scoped>
 /* 카드 전체 컨테이너 */
 .BfInfo {
@@ -153,11 +158,11 @@ select:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
-/* 추가된 코드만 작성 */
 .clickable-input {
     cursor: pointer;
     transition: all 0.2s;
 }
+
 .clickable-input:hover {
     border-color: #3b82f6 !important;
     background-color: #f0f8ff !important;
