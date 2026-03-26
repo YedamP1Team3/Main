@@ -2,14 +2,17 @@ const rsvMapper = require("../database/mappers/rsv_mapper.js");
 
 // 담당자 조회
 const getManagerSchedule = async (managerId, date) => {
-  let schedule = await rsvMapper.selectManagerSchedule(managerId, date);
+  const schedule = await rsvMapper.selectManagerSchedule(managerId, date);
 
-  // 데이터 없을 경우 처리 (선택)
-  if (!schedule) {
-    return null;
-  }
+  if (!schedule) return null;
 
-  return schedule;
+  // 🔥 추가
+  const occupied = await rsvMapper.selectAllOccupiedTimes(managerId, date);
+
+  return {
+    ...schedule,
+    occupied_times: occupied,
+  };
 };
 
 // timeSlot 선택 → 구간으로 합치기
@@ -94,7 +97,10 @@ const removeBlockedTimes = async (managerId, date, times) => {
       range.end_time,
     );
 
+    console.log("service.range : ", range);
+
     totalDeleted += count;
+    console.log("totalDeleted : ", totalDeleted);
   }
 
   // 🔥 삭제된 게 없으면 에러 처리

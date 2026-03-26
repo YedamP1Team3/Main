@@ -2,30 +2,53 @@
     <div class="timeslot-container">
         <!-- 헤더 -->
         <div class="header">
-            <h3>시간 선택</h3>
-            <p v-if="selectedDate">{{ selectedDate }}</p>
-            <p v-else>날짜를 먼저 선택하세요</p>
-        </div>
+            <div class="header-text">
+                <h3>시간 선택</h3>
+                <p v-if="selectedDate">{{ selectedDate }}</p>
+                <p v-else>날짜를 먼저 선택하세요</p>
+            </div>
 
-        <!-- 오전 / 오후 토글 -->
-        <div class="period-toggle">
-            <button :class="{ active: period === 'AM' }" @click="period = 'AM'">오전</button>
-            <button :class="{ active: period === 'PM' }" @click="period = 'PM'">오후</button>
+            <!-- 오전 / 오후 토글 -->
+            <div class="period-toggle">
+                <button :class="{ active: period === 'AM' }" @click="period = 'AM'">오전</button>
+                <button :class="{ active: period === 'PM' }" @click="period = 'PM'">오후</button>
+            </div>
         </div>
 
         <!-- 시간 리스트 -->
         <div class="time-grid">
-            <div v-for="time in timeSlots" :key="time" class="time-item" :class="{ selected: selectedTimes.includes(time) }" @click="toggleTime(time)">
-                {{ time }}
+            <div
+                v-for="slot in timeSlots"
+                :key="slot.time"
+                class="time-item"
+                :class="{
+                    selected: selectedTimes.includes(slot.time),
+                    blocked: slot.status === 'blocked',
+                    disabled: mode !== 'manager' && slot.status === 'blocked'
+                }"
+                @click="toggleTime(slot)"
+            >
+                {{ slot.time }}
             </div>
+        </div>
+
+        <!-- 예약불가 시간 요약 -->
+        <div v-if="mode === 'manager'" class="summary-box">
+            <h4>예약불가 시간</h4>
+
+            <ul v-if="filteredBlockedSummary.length > 0" class="summary-list">
+                <li v-for="(item, index) in filteredBlockedSummary" :key="index">{{ item }}</li>
+            </ul>
+
+            <p v-else class="summary-empty">등록된 예약불가 시간이 없습니다.</p>
         </div>
 
         <!-- 액션 버튼 -->
         <div class="action-buttons">
             <!-- 담당자 모드 -->
             <template v-if="mode === 'manager'">
-                <button class="available-btn" @click="handleManagerAction('available')">예약가능</button>
                 <button class="unavailable-btn" @click="handleManagerAction('unavailable')">예약불가</button>
+                <button class="available-btn" @click="handleManagerAction('available')">예약가능</button>
             </template>
 
             <!-- 보호자 모드 -->
@@ -39,6 +62,7 @@
 
 <script>
 import { ref, computed } from 'vue';
+import { toggleTimeHandler } from '@/utils/timeslot';
 
 export default {
     name: 'TimeSlot',
@@ -49,9 +73,13 @@ export default {
             type: Array,
             default: () => []
         },
+        blockedSummary: {
+            type: Array,
+            default: () => []
+        },
         mode: {
             type: String,
-            default: 'user'
+            default: 'manager'
         }
     },
 
@@ -64,15 +92,20 @@ export default {
         const timeSlots = computed(() => {
             if (!props.slots.length) return [];
 
-            return props.slots.filter((t) => (period.value === 'AM' ? t < '13:00' : t >= '14:00'));
+            return props.slots.filter((s) => (period.value === 'AM' ? s.time < '13:00' : s.time >= '14:00'));
         });
 
-        const toggleTime = (time) => {
-            if (selectedTimes.value.includes(time)) {
-                selectedTimes.value = selectedTimes.value.filter((t) => t !== time);
-            } else {
-                selectedTimes.value.push(time);
-            }
+        const filteredBlockedSummary = computed(() => {
+            if (!props.blockedSummary.length) return [];
+
+            return props.blockedSummary.filter((item) => {
+                const start = item.split(' ~ ')[0];
+                return period.value === 'AM' ? start < '13:00' : start >= '14:00';
+            });
+        });
+
+        const toggleTime = (slot) => {
+            selectedTimes.value = toggleTimeHandler(slot, selectedTimes.value, props.mode);
         };
 
         const handleManagerAction = (type) => {
@@ -108,6 +141,7 @@ export default {
             period,
             timeSlots,
             selectedTimes,
+            filteredBlockedSummary,
             toggleTime,
             handleManagerAction,
             handleUserAction
@@ -118,90 +152,262 @@ export default {
 
 <style scoped>
 .timeslot-container {
-    width: 320px;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
 }
 
 /* 헤더 */
 .header {
-    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.header-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.header h3 {
+    margin: 0 0 6px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.header p {
+    margin: 0;
+    font-size: 16px;
+    color: #6b7280;
+    font-weight: 500;
+    line-height: 1.3;
 }
 
 /* 오전/오후 */
 .period-toggle {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+    align-items: center;
+    gap: 6px; /* 버튼 간격 좁힘 */
+    flex-shrink: 0;
+    margin: 0;
 }
 
 .period-toggle button {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #3b82f6;
-    background: white;
-    color: #3b82f6;
+    min-width: 56px;
+    height: 32px; /* header p 16px 기준으로 밸런스 맞춤 */
+    padding: 0 12px;
+
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #374151;
     border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
     cursor: pointer;
+    transition: all 0.18s ease;
+    box-sizing: border-box;
+}
+
+.period-toggle button:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
 }
 
 .period-toggle button.active {
-    background: #3b82f6;
-    color: white;
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
 }
 
 /* 시간 grid */
 .time-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
 }
 
 .time-item {
-    padding: 10px;
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 8px;
     text-align: center;
-    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    background: #fff;
     border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-sizing: border-box;
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.18s ease;
 }
 
 .time-item:hover {
-    background: #e6f0ff;
+    background: #fee2e2;
+    border-color: #f87171;
+    color: #b91c1c;
 }
 
+/* 선택됨 */
 .time-item.selected {
-    background: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
+    background: #ef4444;
+    color: #fff;
+    border-color: #dc2626;
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-/* 버튼 */
+/* 예약불가 */
+.time-item.blocked {
+    background: #fff;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    font-weight: 600;
+}
+
+.time-item.blocked:hover {
+    background: #eff6ff; /* 연한 파랑 배경 */
+    border-color: #93c5fd; /* 연한 파랑 border */
+    color: #1d4ed8;
+}
+
+/* 예약불가 + 선택 */
+.time-item.blocked.selected {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+    font-weight: 700;
+}
+
+/* 비활성 */
+.time-item.disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    background: #f9fafb;
+    color: #9ca3af;
+}
+
+/* 하단 버튼 */
 .action-buttons {
     display: flex;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 18px;
+}
+
+.available-btn,
+.unavailable-btn {
+    flex: 1;
+    height: 42px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+/* 예약가능 */
+.available-btn {
+    background: #fff;
+    color: #2563eb;
+    border: 1px solid #1d4ed8;
+}
+
+.available-btn:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+/* 예약불가 */
+.unavailable-btn {
+    background: #fff;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+}
+
+.unavailable-btn:hover {
+    background: #fff5f5;
+    border-color: #f87171;
+}
+
+.summary-box {
+    margin-top: 18px;
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.summary-box h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.summary-list {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.summary-list li {
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.summary-empty {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.available-btn,
+.unavailable-btn {
+    flex: 1;
+    height: 42px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
 }
 
 .available-btn {
-    flex: 1;
-    padding: 10px;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+    background: #2563eb;
+    color: #fff;
+    border: 1px solid #2563eb;
+}
+
+.available-btn:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
 }
 
 .unavailable-btn {
-    flex: 1;
-    padding: 10px;
-    background: white;
-    color: #ef4444;
-    border: 1px solid #ef4444;
-    border-radius: 8px;
-    cursor: pointer;
+    background: #fff;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+}
+
+.unavailable-btn:hover {
+    background: #fff5f5;
+    border-color: #f87171;
 }
 </style>
