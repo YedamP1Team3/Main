@@ -7,6 +7,7 @@ import BeneficiaryInfo from '@/components/manager/supportplan/beneficiary/Benefi
 import BeneficiaryManagement from '@/components/manager/supportplan/beneficiary/BeneficiaryManagement.vue';
 import BeneficiaryNewPlan from '@/components/manager/supportplan/beneficiary/BeneficiaryNewPlan.vue';
 import BeneficiaryDetail from '@/components/manager/supportplan/beneficiary/BeneficiaryDetail.vue';
+import ResultNewPlan from '@/components/manager/supportplan/beneficiary/resultNewPlan.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
@@ -46,7 +47,7 @@ const reloadList = () => {
             </section>
 
             <section class="list-section">
-                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @newaddplan="viewMode = 'create'" />
+                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @newaddplan="viewMode = 'create'" @newresultplan="viewMode = 'resultCreate'" />
             </section>
         </aside>
 
@@ -56,6 +57,9 @@ const reloadList = () => {
             </div>
             <div v-if="viewMode === 'detail'" class="editor-container">
                 <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+            </div>
+            <div v-if="viewMode === 'resultCreate'" class="editor-container">
+                <ResultNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
         </main>
     </div>

@@ -29,6 +29,25 @@ router.put("/Return/:planId", async (req, res) => {
   res.send(result);
 });
 
+router.put("/Return/:planId", async (req, res) => {
+  let planNo = req.params.planId;
+  let target = req.body;
+  let result = await adminService.ReturnService(planNo, target);
+  res.send(result);
+});
+
+router.post("/rejectionHistory", async (req, res) => {
+  let target = req.body;
+  let result = await adminService.rejectionHistoryService(target);
+  res.send(result);
+});
+
+router.get("/rejectionList/:planId", async (req, res) => {
+  let target = req.params.planId;
+  let result = await adminService.rejectionListService(target);
+  res.send(result);
+});
+
 router.get("/AdSupportList", async (req, res) => {
   let agencyId = req.query.agency_id;
   let result = await adminService.AdSupportListService(agencyId);

@@ -1,5 +1,4 @@
 const userMapper = require("../database/mappers/user_mapper.js");
-const bcrypt = require("bcrypt");
 
 //전체 회원조회
 const findAll = async () => {

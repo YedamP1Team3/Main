@@ -38,3 +38,6 @@ app.use("/reserve", require("./router/rsv_router.js"));
 app.use("/survey", surveyRouter);
 
 app.use("/adsupport", adsupportPlan);
+
+const resultPlan = require("./router/resultPlan_router.js");
+app.use("/resultPlan", resultPlan);

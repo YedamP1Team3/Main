@@ -18,16 +18,32 @@ const ApprovalChangeService = async (planID) => {
   return resObj;
 };
 
-const ReturnService = async (planId, planDate) => {
-  let result = await adminMapper.ReturnMapper(planId, planDate);
+const ReturnService = async (planId) => {
+  let result = await adminMapper.ReturnMapper(planId);
   let resObj = {
     status: result.affectedRows > 0,
     target: {
       plan_no: planId,
-      planDate,
     },
   };
   return resObj;
+};
+
+const rejectionHistoryService = async (data) => {
+  const { plan_id, rejection_reason, manager_id } = data;
+  let insertDate = [plan_id, rejection_reason, manager_id];
+
+  let result = await adminMapper.rejectionHistoryMapper(insertDate);
+  let resObj = {
+    status: result.insertId > 0 ? "success" : "fail",
+    user_no: result.insertId,
+  };
+  return resObj;
+};
+
+const rejectionListService = async (planId) => {
+  let list = await adminMapper.rejectionListMapper(planId);
+  return list || [];
 };
 
 const AdSupportListService = async (agencyId) => {
@@ -47,5 +63,7 @@ module.exports = {
   AdDetailSupportPlanService,
   ApprovalChangeService,
   ReturnService,
+  rejectionHistoryService,
+  rejectionListService,
   AdSupportListService,
 };

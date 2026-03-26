@@ -42,20 +42,48 @@ const ApprovalChangeMapper = async (planID) => {
   }
 };
 
-const ReturnMapper = async (planId, planDate) => {
+//반려 업데이트
+const ReturnMapper = async (planId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let result = await conn.query(adminSql.Return, [
-      planDate.rejection_reason,
-      planId,
-    ]);
+    await conn.beginTransaction();
+    let result = await conn.query(adminSql.Return, [planId]);
     await conn.commit();
     return result;
   } catch (err) {
     console.log(err);
-    conn.rollback();
+    if (conn) await conn.rollback();
     return { affectedRows: 0, error: err.message };
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+//history insert
+const rejectionHistoryMapper = async (insertDate) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(adminSql.rejectionHistory, insertDate);
+    return rows;
+  } catch (err) {
+    console.error("이력 조회 중 오류:", err);
+    return { error: err.message };
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+//반려사유 리스트
+const rejectionListMapper = async (planId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(adminSql.rejectionList, [planId]);
+    return rows;
+  } catch (err) {
+    console.log(err);
   } finally {
     if (conn) conn.release();
   }
@@ -79,5 +107,7 @@ module.exports = {
   AdDetailSupportPlanMapper,
   ApprovalChangeMapper,
   ReturnMapper,
+  rejectionHistoryMapper,
+  rejectionListMapper,
   AdSupportListMapper,
 };

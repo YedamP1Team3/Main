@@ -1,12 +1,13 @@
 <script setup>
 import { ref } from 'vue';
 import TabPlan from './TabPlan.vue';
+import resultPlan from './resultPlan.vue';
 
 const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
-const emit = defineEmits(['newaddplan', 'select-plan']);
+const emit = defineEmits(['newaddplan', 'select-plan', 'newresultplan']);
 const currentTab = ref('Plan');
 const tabPlanRef = ref(null);
 
@@ -31,6 +32,7 @@ defineExpose({
 
         <div class="tab-content">
             <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @Newaddplan="emit('newaddplan')" @select-plan="handleSelectPlan" />
+            <resultPlan v-if="currentTab === 'Result'" ref="tabPlanRef" :beneId="beneId" @newresultplan="emit('newresultplan')" @select-plan="handleSelectPlan" />
         </div>
     </div>
 </template>
