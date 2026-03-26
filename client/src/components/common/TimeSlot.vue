@@ -47,8 +47,8 @@
         <div class="action-buttons">
             <!-- 담당자 모드 -->
             <template v-if="mode === 'manager'">
-                <button class="unavailable-btn" @click="handleManagerAction('unavailable')">예약불가</button>
-                <button class="available-btn" @click="handleManagerAction('available')">예약가능</button>
+                <button class="unavailable-btn" @click="handleManagerAction('unavailable')">예약차단</button>
+                <button class="available-btn" @click="handleManagerAction('available')">차단해제</button>
             </template>
 
             <!-- 보호자 모드 -->
