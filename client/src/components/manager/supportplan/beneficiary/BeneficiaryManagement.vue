@@ -3,14 +3,16 @@ import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSurveyStore, PRIORITY_MAP } from '@/stores/useSurveyStore'; // 💡 스토어 연결
 import TabPlan from './TabPlan.vue';
+import resultPlan from './resultPlan.vue';
 
 const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
+
 // 💡 상세 조회를 위한 'select-app' 이벤트 추가
-const emit = defineEmits(['newaddplan', 'select-plan', 'select-app']);
-const currentTab = ref('Application'); // 기본 탭을 지원신청서로 변경해도 좋습니다.
+const emit = defineEmits(['newaddplan', 'select-plan', 'select-app','newresultplan']]);
+const currentTab = ref('plan'); // 기본 탭을 지원신청서로 변경해도 좋습니다.
 const tabPlanRef = ref(null);
 
 const surveyStore = useSurveyStore();
@@ -81,6 +83,7 @@ defineExpose({
             </div>
 
             <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @Newaddplan="emit('newaddplan')" @select-plan="handleSelectPlan" />
+            <resultPlan v-if="currentTab === 'Result'" ref="tabPlanRef" :beneId="beneId" @newresultplan="emit('newresultplan')" @select-plan="handleSelectPlan" />
         </div>
     </div>
 </template>

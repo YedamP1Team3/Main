@@ -38,10 +38,30 @@ WHERE
 const Return = `
 UPDATE support_plan
 SET
-  rejection_reason = ?,
-  progress_state = '반려'
+  progress_state = '반려',
+  updated_at = NOW()
 WHERE
   plan_id =?
+`;
+
+const rejectionHistory = `
+INSERT INTO rejection_history (
+    plan_id, 
+    rejection_reason, 
+    manager_id, 
+    created_at
+) VALUES (?, ?, ?, NOW())`;
+
+const rejectionList = `
+SELECT 
+    h.history_id,
+    h.rejection_reason,
+    u.user_name AS manager_name,
+    DATE_FORMAT(h.created_at, '%Y-%m-%d %H:%i') AS created_at
+FROM rejection_history h
+LEFT JOIN user_info u ON h.manager_id = u.user_id
+WHERE h.plan_id = ?
+ORDER BY h.created_at DESC;
 `;
 
 const AdSupportList = `
@@ -59,5 +79,7 @@ module.exports = {
   AdDetailSupportPlan,
   ApprovalChange,
   Return,
+  rejectionHistory,
+  rejectionList,
   AdSupportList,
 };

@@ -7,6 +7,7 @@ import BeneficiaryInfo from '@/components/manager/supportplan/beneficiary/Benefi
 import BeneficiaryManagement from '@/components/manager/supportplan/beneficiary/BeneficiaryManagement.vue';
 import BeneficiaryNewPlan from '@/components/manager/supportplan/beneficiary/BeneficiaryNewPlan.vue';
 import BeneficiaryDetail from '@/components/manager/supportplan/beneficiary/BeneficiaryDetail.vue';
+import ResultNewPlan from '@/components/manager/supportplan/beneficiary/resultNewPlan.vue';
 // 💡 신청서 상세조회 뷰 임포트
 import ManagerSurveyView from '@/components/manager/supportplan/beneficiary/ManagerSurveyView.vue';
 // 💡 [추가] 대기단계 스위치 컴포넌트 임포트 (경로 확인 필요)
@@ -74,6 +75,7 @@ const reloadList = () => {
             </section>
 
             <section class="list-section">
+                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @newaddplan="viewMode = 'create'" @newresultplan="viewMode = 'resultCreate'" />
                 <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @select-app="handleAppDetail" @newaddplan="viewMode = 'create'" />
             </section>
         </aside>
@@ -85,6 +87,8 @@ const reloadList = () => {
             <div v-else-if="viewMode === 'detail'" class="editor-container">
                 <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
+            <div v-if="viewMode === 'resultCreate'" class="editor-container">
+                <ResultNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
 
             <div v-else-if="viewMode === 'app_detail'" class="editor-container">
                 <ManagerSurveyView @close="viewMode = 'empty'" />
