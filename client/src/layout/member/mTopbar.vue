@@ -85,7 +85,10 @@ const toggleAuth = async () => {
         </div>
 
         <div class="flex items-center gap-2">
-            <span v-if="authStore.isLoggedIn" class="font-bold mr-2 text-color">{{ userName }}님</span>
+<!--             <span v-if="authStore.isLoggedIn" class="font-bold mr-2 text-color">{{ userName }}님</span> -->
+            <span class="hidden sm:block font-medium text-color">
+                {{ authStore.isLoggedIn ? `${authStore.userName} 이용자님` : '로그인이 필요합니다' }}
+            </span>
             <button type="button" class="layout-topbar-action" @click="toggleAuth">
                 <i class="pi pi-sign-out" title="로그아웃"></i>
             </button>

@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useSurveyStore } from '@/stores/useSurveyStore';
+import { useSurveyStore, PRIORITY_MAP } from '@/stores/useSurveyStore';
 import TabPlan from './MemberTabPlan.vue';
 
 const surveyStore = useSurveyStore();
@@ -24,6 +24,19 @@ const handleTabChange = (tabName) => {
 // 자식(TabPlan)에서 특정 계획서를 클릭했을 때 부모로 토스
 const handleSelectPlan = (planId) => {
     emit('select-plan', planId);
+};
+
+// ⭐️ 2. 리스트의 영문 코드를 한글로 번역해 주는 함수 추가
+const formatPriority = (item) => {
+    console.log(item);
+    // 1. 진행 상태가 pending이면 무조건 '대기'
+    if (item.progress_status === 'pending') return '대기';
+    console.log(item);
+
+    // 2. 그 외에는 원래대로 번역
+    if (!item.priority_status) return '미신청';
+    const lowerCode = String(item.priority_status).toLowerCase();
+    return PRIORITY_MAP[lowerCode] || item.priority_status;
 };
 </script>
 
@@ -60,7 +73,7 @@ const handleSelectPlan = (planId) => {
                     <tr v-else v-for="item in application_list" :key="item.id" class="clickable-row" @click="surveyStore.loadApplicationView(item.id)">
                         <td>{{ item.writer }}</td>
                         <td>{{ item.bene_name }}</td>
-                        <td>{{ item.priority_status }}</td>
+                        <td>{{ formatPriority(item) }}</td>
                         <td>{{ item.date }}</td>
                     </tr>
                 </tbody>
