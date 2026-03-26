@@ -1,19 +1,13 @@
 <script setup>
-// 1. Vue 내장 함수
 import { ref, onMounted, computed } from 'vue';
-// 2. 외부 라이브러리 (Pinia)
 import { storeToRefs } from 'pinia';
-// 3. 로컬 스토어 및 기타
 import { useSurveyStore } from '@/stores/useSurveyStore';
 
 const surveyStore = useSurveyStore();
-// 스토어 상태를 반응형으로 추출
 const { my_beneficiaries, selected_bene_detail } = storeToRefs(surveyStore);
 
-// 지원자 선택 select 박스에 바인딩할 로컬 ID
 const localSelectedId = ref('');
 
-// 스토어에서 받아온 성별 코드(M/F)를 한글로 변환
 const formattedGender = computed(() => {
     const gender = selected_bene_detail.value?.gender;
     if (gender === 'M') return '남자';
@@ -21,13 +15,10 @@ const formattedGender = computed(() => {
     return '';
 });
 
-// 지원자 select 박스 변경 시 실행되는 함수
 const handleSelectChange = async () => {
-    // 스토어 액션을 호출하여 전역 상태(ID, 상세정보, 관련 신청 리스트 등) 업데이트
     await surveyStore.selectBeneficiary(localSelectedId.value);
 };
 
-// 컴포넌트 마운트 시 지원자 리스트가 없다면 최초 1회 로드
 onMounted(async () => {
     if (surveyStore.my_beneficiaries.length === 0) {
         await surveyStore.fetchBeneficiaryList();
@@ -36,7 +27,6 @@ onMounted(async () => {
 </script>
 
 <template>
-    <!-- 다중 루트 노드 에러(Fragment warning) 방지를 위한 래퍼 div -->
     <div class="beneficiary-info-container">
         <h3>지원자 정보</h3>
         <div class="BfInfo">
@@ -57,7 +47,10 @@ onMounted(async () => {
                         <td><input type="text" :value="selected_bene_detail.family_name || ''" readonly /></td>
 
                         <th><label>대기단계</label></th>
-                        <td><input type="text" :value="selected_bene_detail.priority_status || ''" readonly /></td>
+                        <!-- 수정됨: 클릭 이벤트 및 hover 클래스 제거 -->
+                        <td>
+                            <input type="text" :value="surveyStore.priorityStatusKor" readonly />
+                        </td>
                     </tr>
                     <tr>
                         <th><label>성별</label></th>
@@ -147,5 +140,17 @@ input[readonly] {
     color: #475569;
     background-color: #f8fafc;
     border-color: #e2e8f0;
+}
+
+/* ⭐️ 클릭 가능한 대기단계 인풋을 위한 마우스 오버(Hover) 효과 */
+.clickable-input {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clickable-input:hover {
+    border-color: #3b82f6 !important;
+    background-color: #f0f8ff !important; /* 살짝 파란빛을 띄게 해서 클릭 유도 */
+    box-shadow: inset 0 0 0 1px #3b82f6;
 }
 </style>

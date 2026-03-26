@@ -151,9 +151,10 @@ const getSurveyVersions = async () => {
  * 2. 새로운 버전 레코드 생성(IS_ACTIVE=1)
  */
 // 1. 함수가 정의되어 있는지 확인
-const makeNewSurveyVersion = async () => {
+// makeNewSurveyVersion이 파라미터를 받도록 수정합니다.
+const makeNewSurveyVersion = async (versionId) => {
   try {
-    return await surveyMapper.createNewVersion();
+    return await surveyMapper.createNewVersion(versionId);
   } catch (err) {
     throw new Error(err.message);
   }
@@ -243,6 +244,14 @@ const getApplicationListByBene = async (beneId) => {
     throw new Error(err.message);
   }
 };
+const deleteSurveyApplication = async (appId) => {
+  try {
+    return await surveyMapper.deleteApplicationTransaction(appId);
+  } catch (err) {
+    throw new Error("신청서 삭제 중 오류: " + err.message);
+  }
+};
+// module.exports 에 deleteSurveyApplication 추가
 
 module.exports = {
   getSurveyStructure,
@@ -256,4 +265,5 @@ module.exports = {
   submitSurveyResult,
   getApplicationDetail,
   getApplicationListByBene,
+  deleteSurveyApplication,
 };

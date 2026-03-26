@@ -1,24 +1,35 @@
 <script setup>
 import { ref } from 'vue';
+import { useSurveyStore } from '@/stores/useSurveyStore'; // 💡 스토어 연결 (동기화 용도)
 
-// 우리가 만든 컴포넌트들을 가져옵니다.
 import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
 import BeneficiaryInfo from '@/components/manager/supportplan/beneficiary/BeneficiaryInfo.vue';
 import BeneficiaryManagement from '@/components/manager/supportplan/beneficiary/BeneficiaryManagement.vue';
 import BeneficiaryNewPlan from '@/components/manager/supportplan/beneficiary/BeneficiaryNewPlan.vue';
 import BeneficiaryDetail from '@/components/manager/supportplan/beneficiary/BeneficiaryDetail.vue';
+// 💡 신청서 상세조회 뷰 임포트
+import ManagerSurveyView from '@/components/manager/supportplan/beneficiary/ManagerSurveyView.vue';
+// 💡 [추가] 대기단계 스위치 컴포넌트 임포트 (경로 확인 필요)
+import ManagerPrioritySwitch from '@/components/manager/supportplan/beneficiary/ManagerPrioritySwitch.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
 const viewMode = ref('empty');
-const managementRef = ref(null); //새로고침
+const managementRef = ref(null);
 const selectPlan = ref(null);
 
-//지원자를 새로 선택했을때
-const handleIdUpdate = (id, priorityId) => {
+const surveyStore = useSurveyStore(); // 💡 스토어 초기화
+
+const handleIdUpdate = async (id, priorityId) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
-    viewMode.value = 'empty'; //대상자가 바뀌면 입력창 닫음
+    viewMode.value = 'empty';
+    surveyStore.is_survey_visible = false;
+
+    // 💡 대상자 선택 시 스토어 강제 동기화 (오류 방지)
+    if (id) {
+        await surveyStore.selectBeneficiary(id);
+    }
 };
 
 const handleIdDetail = (planId) => {
@@ -26,7 +37,22 @@ const handleIdDetail = (planId) => {
     viewMode.value = 'detail';
 };
 
-// 저장후 새로고침 하는 함수
+// 💡 탭에서 신청서를 클릭했을 때 뷰 모드를 변경하는 함수
+const handleAppDetail = (appId) => {
+    viewMode.value = 'app_detail';
+};
+
+// 💡 [추가] 대기단계 모달 열기 로직
+const handleOpenPriority = async () => {
+    if (!selectedId.value) {
+        alert('지원자를 먼저 선택해주세요.');
+        return;
+    }
+    // 창을 열기 전, 최신 Priority 상태를 Store에 로드
+    await surveyStore.fetchPriorityInfo(selectedId.value);
+    viewMode.value = 'priority';
+};
+
 const reloadList = () => {
     if (managementRef.value) {
         managementRef.value.refreshTabPlan();
@@ -34,6 +60,7 @@ const reloadList = () => {
     viewMode.value = 'empty';
 };
 </script>
+
 <template>
     <header class="main-header">
         <JsTopbarmg />
@@ -42,11 +69,12 @@ const reloadList = () => {
     <div class="dashboard-container">
         <aside class="side-panel">
             <section class="info-section">
-                <BeneficiaryInfo @updateBeneId="handleIdUpdate" />
+                <!-- 💡 [수정] open-priority 이벤트 수신 대기 -->
+                <BeneficiaryInfo @updateBeneId="handleIdUpdate" @open-priority="handleOpenPriority" />
             </section>
 
             <section class="list-section">
-                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @newaddplan="viewMode = 'create'" />
+                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @select-app="handleAppDetail" @newaddplan="viewMode = 'create'" />
             </section>
         </aside>
 
@@ -54,8 +82,24 @@ const reloadList = () => {
             <div v-if="viewMode === 'create'" class="editor-container">
                 <BeneficiaryNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
-            <div v-if="viewMode === 'detail'" class="editor-container">
+            <div v-else-if="viewMode === 'detail'" class="editor-container">
                 <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+            </div>
+
+            <div v-else-if="viewMode === 'app_detail'" class="editor-container">
+                <ManagerSurveyView @close="viewMode = 'empty'" />
+            </div>
+
+            <!-- 💡 [추가] Manager 대기단계 설정 화면 -->
+            <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">
+                <ManagerPrioritySwitch @close="viewMode = 'empty'" />
+            </div>
+
+            <div v-else class="empty-state">
+                <div class="guide-box">
+                    <i class="pi pi-file"></i>
+                    <p>좌측 목록에서 항목을 선택해주세요.</p>
+                </div>
             </div>
         </main>
     </div>

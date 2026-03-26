@@ -32,9 +32,35 @@ const updateManagerAssign = `
         SET manager_id = ? 
         WHERE bene_id = ?
     `;
+
+const priorityList = `
+    SELECT 
+        priority_id, bene_id,
+        priority_status, progress_status, 
+        approval_date, rejection_reason 
+    FROM priority 
+    WHERE bene_id = ?
+`;
+
+const priorityPending = `
+    INSERT INTO priority (bene_id, priority_status, progress_status) 
+    VALUES (?, ?, 'pending')
+    ON DUPLICATE KEY UPDATE 
+        priority_status = ?, 
+        progress_status = 'pending',
+        rejection_reason = NULL
+`;
+
+const priorityCancel = `
+    DELETE FROM priority 
+    WHERE bene_id = ?
+`;
 module.exports = {
   BeneList,
   BeneById,
   getManagers,
   updateManagerAssign,
+  priorityList,
+  priorityPending,
+  priorityCancel,
 };

@@ -6,7 +6,7 @@ import JsTopbarad from '@/layout/manger/JsTopbarmg.vue';
 import AdSupportInfo from '@/components/admin/supportplan/adbeneficiary/AdSupportInfo.vue';
 import AdminManagement from '@/components/admin/supportplan/adbeneficiary/AdminManagement.vue';
 import AdplanDetail from '@/components/admin/supportplan/adbeneficiary/AdplanDetail.vue';
-import MemberSurvey from '@/components/member/m_application/MemberSurvey.vue';
+import adminsurvey from '@/components/admin/supportplan/adbeneficiary/AdminSurveyView.vue';
 import ManagerAssignView from '@/components/admin/supportplan/adbeneficiary/ManagerAssignModal.vue';
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
@@ -73,7 +73,7 @@ const reloadList = () => {
                 <AdplanDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
             <div v-else-if="viewMode === 'app_detail'" class="editor-container">
-                <MemberSurvey />
+                <adminsurvey @close="viewMode = 'empty'" />
             </div>
 
             <div v-else-if="viewMode === 'assign_manager'" class="editor-container">

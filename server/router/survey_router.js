@@ -94,12 +94,14 @@ router.delete("/delete-selected", async (req, res) => {
 });
 
 // routes/surveyRouter.js
+// POST 바디에서 versionId를 받아 Service로 넘깁니다.
 router.post("/version/new", async (req, res) => {
   try {
-    const newVersionId = await surveyService.makeNewSurveyVersion();
+    const { versionId } = req.body;
+    const newVersionId = await surveyService.makeNewSurveyVersion(versionId);
     res.status(200).json({ success: true, newVersionId });
   } catch (err) {
-    console.error("라우터 에러:", err); // 서버 터미널에 찍힌 이 로그를 확인해야 합니다.
+    console.error("라우터 에러:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
@@ -166,5 +168,12 @@ router.get("/list/:beneId", async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
+router.delete("/application/:appId", async (req, res) => {
+  try {
+    await surveyService.deleteSurveyApplication(req.params.appId);
+    res.status(200).json({ success: true, message: "삭제되었습니다." });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 module.exports = router;

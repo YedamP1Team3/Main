@@ -84,13 +84,22 @@ SELECT
     a.user_id AS writer, 
     b.bene_name, 
     DATE_FORMAT(a.created_at, '%Y.%m.%d') AS date,
-    p.priority_status
+    p.priority_status,
+    p.progress_status
 FROM application a
 LEFT JOIN beneficiary_info b ON a.bene_id = b.bene_id
-LEFT JOIN priority p ON a.app_id = p.app_id 
+-- ⭐️ 수정된 부분: a.app_id 가 아니라 a.bene_id 로 조인합니다!
+LEFT JOIN priority p ON a.bene_id = p.bene_id 
 WHERE a.bene_id = ?
 ORDER BY a.created_at DESC;
 `;
+
+const delete_survey_answers = `DELETE FROM survey_answer WHERE app_id = ?;`;
+const delete_application = `DELETE FROM application WHERE app_id = ?;`;
+
+// 기존 쿼리에 아래 두 줄을 추가/수정합니다.
+const setActiveVersion = `UPDATE survey_version SET IS_ACTIVE = 1 WHERE VERSION_ID = ?;`;
+const insertNewDraftVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (0, NOW());`;
 
 module.exports = {
   selectSurvey,
@@ -107,4 +116,6 @@ module.exports = {
   select_application_by_id,
   select_answers_by_app_id,
   select_application_list_by_bene,
+  delete_survey_answers,
+  delete_application,
 };
