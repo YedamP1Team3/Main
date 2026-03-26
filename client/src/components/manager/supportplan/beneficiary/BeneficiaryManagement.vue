@@ -9,9 +9,8 @@ const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
-
 // 💡 상세 조회를 위한 'select-app' 이벤트 추가
-const emit = defineEmits(['newaddplan', 'select-plan', 'select-app','newresultplan']]);
+const emit = defineEmits(['newaddplan', 'select-plan', 'select-app', 'newresultplan']);
 const currentTab = ref('plan'); // 기본 탭을 지원신청서로 변경해도 좋습니다.
 const tabPlanRef = ref(null);
 

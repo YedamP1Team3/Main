@@ -89,7 +89,7 @@ const reloadList = () => {
             </div>
             <div v-if="viewMode === 'resultCreate'" class="editor-container">
                 <ResultNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
-
+            </div>
             <div v-else-if="viewMode === 'app_detail'" class="editor-container">
                 <ManagerSurveyView @close="viewMode = 'empty'" />
             </div>
