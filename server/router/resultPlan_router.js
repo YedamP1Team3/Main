@@ -27,4 +27,38 @@ router.get("/supportList/:beneId", async (req, res) => {
   res.send(list);
 });
 
+router.get("/detailResultPlan/:resultId", async (req, res) => {
+  let target = req.params.resultId;
+  let result = await resultService.detailSupportResultService(target);
+  res.send(result);
+});
+
+router.delete("/supportResult/:resultId", async (req, res) => {
+  let resultNo = req.params.resultId;
+  let result = await resultService.supportResultService(resultNo);
+  res.send(result);
+});
+
+router.put("/supportResult/update/:id", async (req, res) => {
+  let { id } = req.params;
+  let { result_title, result_content, planIds } = req.body;
+  let result = await resultService.updateSupportResultService(
+    id,
+    { result_title, result_content },
+    planIds,
+  );
+  res.send(result);
+});
+
+router.put("/saveResult/update/:id", async (req, res) => {
+  let { id } = req.params;
+  let { result_title, result_content, planIds } = req.body;
+  let result = await resultService.updateSaveSaveService(
+    id,
+    { result_title, result_content },
+    planIds,
+  );
+  res.send(result);
+});
+
 module.exports = router;

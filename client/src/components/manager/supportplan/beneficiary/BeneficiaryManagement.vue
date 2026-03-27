@@ -10,7 +10,7 @@ const props = defineProps({
 });
 
 // 💡 상세 조회를 위한 'select-app' 이벤트 추가
-const emit = defineEmits(['newaddplan', 'select-plan', 'select-app', 'newresultplan']);
+const emit = defineEmits(['newaddplan', 'select-plan', 'select-result', 'select-app', 'newresultplan']);
 const currentTab = ref('plan'); // 기본 탭을 지원신청서로 변경해도 좋습니다.
 const tabPlanRef = ref(null);
 
@@ -21,6 +21,9 @@ const handleSelectPlan = (planId) => {
     emit('select-plan', planId);
 };
 
+const handleResultIdDetail = (resultId) => {
+    emit('select-result', resultId);
+};
 // 💡 리스트 클릭 시 실행 (스토어에 상세정보 세팅 후 뷰 모드 변경 알림)
 const viewApplicationDetail = async (appId) => {
     await surveyStore.loadApplicationView(appId);
@@ -82,7 +85,7 @@ defineExpose({
             </div>
 
             <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @Newaddplan="emit('newaddplan')" @select-plan="handleSelectPlan" />
-            <resultPlan v-if="currentTab === 'Result'" ref="tabPlanRef" :beneId="beneId" @newresultplan="emit('newresultplan')" @select-plan="handleSelectPlan" />
+            <resultPlan v-if="currentTab === 'Result'" ref="tabPlanRef" :beneId="beneId" @newresultplan="emit('newresultplan')" @select-result="handleResultIdDetail" />
         </div>
     </div>
 </template>

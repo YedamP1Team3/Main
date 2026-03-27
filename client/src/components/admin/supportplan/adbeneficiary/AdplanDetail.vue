@@ -1,9 +1,12 @@
 <script setup>
 import axios from 'axios';
 import { ref, watch } from 'vue';
-const emit = defineEmits(['refresh']);
+import { useAuthStore } from '@/stores/auth';
 
+const emit = defineEmits(['refresh']);
 const props = defineProps({ beneId: [String, Number], priorityId: [String, Number], planId: [String, Number] });
+
+const authStore = useAuthStore();
 
 const planDetail = ref({});
 const reasoninsert = ref(false);
@@ -65,7 +68,7 @@ const updatereturn = async (planId) => {
             const historyData = {
                 plan_id: planId,
                 rejection_reason: rejectReason.value,
-                manager_id: 'admin_test'
+                manager_id: authStore.userId
             };
             await axios.post(`http://localhost:3000/adsupport/rejectionHistory`, historyData);
 
