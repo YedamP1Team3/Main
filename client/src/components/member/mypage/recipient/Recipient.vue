@@ -83,9 +83,12 @@ const submitForm = async () => {
             return; // 함수 종료
         }
 
+        const genderCode = form.value.gender === '남성' ? 'M' : 'F';
+
         // 2. 서버로 보낼 최종 데이터 조립
         const sendData = {
             ...form.value, // 입력 폼의 모든 데이터 복사
+            gender: genderCode,
             family_id: userId // Pinia의 userId를 family_id 컬럼에 매칭
         };
 
