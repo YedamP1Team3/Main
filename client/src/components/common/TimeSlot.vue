@@ -316,7 +316,7 @@ export default {
     transition: all 0.18s ease;
 }
 
-/* 예약가능 */
+/* 차단해제 버튼 */
 .available-btn {
     background: #fff;
     color: #2563eb;
@@ -328,7 +328,7 @@ export default {
     border-color: #93c5fd;
 }
 
-/* 예약불가 */
+/* 예약차단 */
 .unavailable-btn {
     background: #fff;
     color: #dc2626;
