@@ -65,4 +65,47 @@ const checkIdAvailability = async (userId) => {
   }
 };
 
-module.exports = { userSignup, userLogin, checkIdAvailability };
+// 사용자 상세 정보 조회
+const getUserDetail = async (userId) => {
+  try {
+    const user = await infoMapper.selectUserById(userId);
+    if (user) {
+      // 보안을 위해 비밀번호는 제외하고 반환
+      const { password, ...userDetail } = user;
+      return userDetail;
+    }
+    return null;
+  } catch (err) {
+    console.error("상세조회 서비스 에러:", err);
+    throw err;
+  }
+};
+
+// 사용자 정보 업데이트
+const updateUser = async (data) => {
+  try {
+    const updateParams = [
+      data.name, // user_name
+      data.phone, // tel (DB 컬럼명 확인)
+      data.email, // email
+      data.postcode, // zip_code
+      data.address, // address
+      data.detailAddress, // detail_address
+      data.id, // user_id (WHERE 절)
+    ];
+
+    await infoMapper.updateUser(updateParams); // Mapper의 함수 호출
+    return { status: "success" };
+  } catch (err) {
+    console.error("업데이트 서비스 에러:", err);
+    throw err;
+  }
+};
+
+module.exports = {
+  userSignup,
+  userLogin,
+  checkIdAvailability,
+  getUserDetail,
+  updateUser,
+};

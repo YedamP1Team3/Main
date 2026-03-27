@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'; // 반응형 데이터 처리를 위한 ref
 import { useRouter } from 'vue-router'; // 페이지 이동을 위한 router
 import { useAuthStore } from '@/stores/auth';
+import axios from 'axios';
 
 const router = useRouter(); // 라우터 인스턴스 생성
 const authStore = useAuthStore();
@@ -37,28 +38,39 @@ const openPostcode = () => {
     }).open();
 };
 
-onMounted(() => {
-    // authStore.user에 로그인 정보가 들어있다고 가정
+onMounted(async () => {
     if (authStore.userId) {
-        // auth.js에 정의된 변수명과 1:1 매칭
-        memberForm.value.id = authStore.userId;
-        memberForm.value.name = authStore.userName;
-        memberForm.value.agencyName = authStore.agencyName;
-        memberForm.value.agencyRegion = authStore.userRegion; // 추가됨
-        memberForm.value.postcode = authStore.userZip;
-        memberForm.value.address = authStore.userAddr1;
-        memberForm.value.detailAddress = authStore.userAddr2;
-        memberForm.value.phone = authStore.userPhone; // 추가됨
-        memberForm.value.email = authStore.userEmail; // 추가됨
+        try {
+            // Pinia 대신 서버 DB에서 직접 조회
+            const response = await axios.get(`/info/user-detail/${authStore.userId}`);
+
+            console.log('전체 응답:', response);
+
+            console.log('서버에서 온 데이터: ', response.data);
+
+            const data = response.data;
+
+            memberForm.value.id = data.user_id;
+            memberForm.value.name = data.user_name;
+            memberForm.value.phone = data.phone;
+            memberForm.value.email = data.email;
+            memberForm.value.postcode = data.zip_code;
+            memberForm.value.address = data.address;
+            memberForm.value.detailAddress = data.detail_address;
+            memberForm.value.agencyName = data.agency_name;
+            memberForm.value.agencyRegion = data.region;
+        } catch (error) {
+            console.error('데이터 로드 실패:', error);
+            alert('정보를 불러오는 중 오류가 발생했습니다.');
+        }
     } else {
-        // 만약 로그인이 안 되어있는 상태로 접근을 한다면
-        alert('로그인 정보가 없습니다. 로그인을 해주세요');
+        alert('로그인 정보가 없습니다.');
         router.push({ name: 'loginForm' });
     }
 });
 
 // 정보 저장 로직
-const saveInfo = () => {
+const saveInfo = async () => {
     // 비밀번호 확인 로직 (기획서 2번 내용 준수)
     if (memberForm.value.newPassword !== memberForm.value.confirmPassword) {
         alert('새 비밀번호와 확인 값이 일치하지 않습니다.');
@@ -66,12 +78,14 @@ const saveInfo = () => {
     }
 
     try {
-        // 비어있는 비밀번호 값은 제외하고 API에 전송하거나 백엔드에서 빈 값일 경우 변경하지 않도록 처리
-        console.log('저장될 데이터:', memberForm.value);
-        alert('수정완료 !');
-        router.push({ name: 'myInfo' });
+        // 서버에 수정 요청 (PUT)
+        const response = await axios.put('/info/update-user', memberForm.value);
+        if (response.status === 200) {
+            alert('수정 완료 !');
+            router.push({ name: 'myInfo' });
+        }
     } catch (error) {
-        alert('저장 중 오류가 발생했습니다.');
+        alert('수정 중 오류가 발생했습니다.');
     }
 };
 </script>
