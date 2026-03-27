@@ -1,24 +1,60 @@
 <script setup>
-import { ref } from 'vue'; // 반응형 데이터 처리를 위한 ref
+import { ref, onMounted } from 'vue'; // 반응형 데이터 처리를 위한 ref
 import { useRouter } from 'vue-router'; // 페이지 이동을 위한 router
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter(); // 라우터 인스턴스 생성
+const authStore = useAuthStore();
 
 // 사용자 정보 데이터 객체 (소속 기관 필드 추가)
 const memberForm = ref({
-    name: '김태윤',
-    id: 'hong1',
+    name: '',
+    id: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    // 소속 기관 관련 데이터
-    agencyRegion: '대구', // 소속 지역
-    agencyName: 'ㅁㅁ 복지센터', // 소속 센터명
-    postcode: '13636',
-    address: '경기 성남시 분당구 판교역 4',
-    detailAddress: '104동 111호',
-    phone: '010-1111-2222',
-    email: 'hong1@naver.com'
+    agencyRegion: '',
+    agencyName: '',
+    postcode: '',
+    address: '',
+    detailAddress: '',
+    phone: '',
+    email: ''
+});
+
+// 카카오 주소 API 실행 함수
+const openPostcode = () => {
+    new window.daum.postcode({
+        oncomplete: (data) => {
+            let fullAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+
+            memberForm.value.address = fullAddr;
+            memberForm.value.postcode = data.zonecode;
+
+            const detailInput = document.querySelector('input[placeholder="상세주소를 입력하세요"]');
+            if (detailInput) detailInput.focus();
+        }
+    }).open();
+};
+
+onMounted(() => {
+    // authStore.user에 로그인 정보가 들어있다고 가정
+    if (authStore.userId) {
+        // auth.js에 정의된 변수명과 1:1 매칭
+        memberForm.value.id = authStore.userId;
+        memberForm.value.name = authStore.userName;
+        memberForm.value.agencyName = authStore.agencyName;
+        memberForm.value.agencyRegion = authStore.userRegion; // 추가됨
+        memberForm.value.postcode = authStore.userZip;
+        memberForm.value.address = authStore.userAddr1;
+        memberForm.value.detailAddress = authStore.userAddr2;
+        memberForm.value.phone = authStore.userPhone; // 추가됨
+        memberForm.value.email = authStore.userEmail; // 추가됨
+    } else {
+        // 만약 로그인이 안 되어있는 상태로 접근을 한다면
+        alert('로그인 정보가 없습니다. 로그인을 해주세요');
+        router.push({ name: 'loginForm' });
+    }
 });
 
 // 정보 저장 로직
@@ -28,155 +64,228 @@ const saveInfo = () => {
         alert('새 비밀번호와 확인 값이 일치하지 않습니다.');
         return;
     }
-    console.log('저장될 데이터:', memberForm.value);
-    alert('정보가 저장되었습니다.');
-    router.push({ name: 'myInfo' });
+
+    try {
+        // 비어있는 비밀번호 값은 제외하고 API에 전송하거나 백엔드에서 빈 값일 경우 변경하지 않도록 처리
+        console.log('저장될 데이터:', memberForm.value);
+        alert('수정완료 !');
+        router.push({ name: 'myInfo' });
+    } catch (error) {
+        alert('저장 중 오류가 발생했습니다.');
+    }
 };
 </script>
 
 <template>
     <div class="content-wrapper">
-        <div class="form-container surface-card shadow-2">
+        <div class="form-container">
             <h2 class="form-title">내 정보 수정</h2>
 
-            <div class="flex gap-2 mb-3">
-                <div class="input-set flex-1 mb-0">
-                    <label>이름</label>
-                    <input type="text" v-model="memberForm.name" class="p-inputtext p-inputtext-sm" />
-                </div>
-                <div class="input-set flex-1 mb-0">
-                    <label>아이디</label>
-                    <input type="text" v-model="memberForm.id" class="p-inputtext p-inputtext-sm" disabled />
-                </div>
-            </div>
-
-            <div class="surface-50 p-3 border-round mb-3 border-1 surface-border">
-                <h3 class="text-sm font-bold mb-3 text-teal-700">비밀번호 변경</h3>
-                <div class="input-set">
-                    <label class="text-primary">현재 비밀번호</label>
-                    <input type="password" v-model="memberForm.currentPassword" class="p-inputtext p-inputtext-sm" placeholder="기존 비밀번호를 입력하세요" />
-                </div>
-                <div class="flex gap-2">
-                    <div class="input-set flex-1 mb-0">
-                        <label>새 비밀번호</label>
-                        <input type="password" v-model="memberForm.newPassword" class="p-inputtext p-inputtext-sm" placeholder="새 비밀번호 입력" />
+            <form @submit.prevent="saveInfo">
+                <div class="form-grid">
+                    <div class="input-set">
+                        <label>이름</label>
+                        <input type="text" v-model="memberForm.name" class="p-inputtext p-inputtext-sm" />
                     </div>
-                    <div class="input-set flex-1 mb-0">
-                        <label>새 비밀번호 확인</label>
-                        <input type="password" v-model="memberForm.confirmPassword" class="p-inputtext p-inputtext-sm" placeholder="새 비밀번호 재입력" />
+                    <div class="input-set">
+                        <label>아이디</label>
+                        <input type="text" v-model="memberForm.id" class="p-inputtext p-inputtext-sm" disabled />
                     </div>
                 </div>
-            </div>
 
-            <div class="input-set">
-                <label>소속 기관 선택</label>
-                <div class="flex gap-2">
-                    <input type="text" v-model="memberForm.agencyRegion" class="p-inputtext p-inputtext-sm flex-1" placeholder="지역(예: 대구)" />
-                    <input type="text" v-model="memberForm.agencyName" class="p-inputtext p-inputtext-sm flex-2" placeholder="센터명(예: ㅁㅁ 복지센터)" />
-                </div>
-            </div>
+                <div class="password-section">
+                    <h3 class="sub-title">비밀번호 변경</h3>
+                    <div class="title-line"></div>
 
-            <div class="input-set">
-                <label>주소</label>
-                <div class="flex gap-2 mb-2">
-                    <input type="text" v-model="memberForm.postcode" class="p-inputtext p-inputtext-sm w-6rem" readonly />
-                    <button class="post-btn">우편번호 검색</button>
+                    <div class="password-flex-column">
+                        <div class="input-set">
+                            <label>현재 비밀번호</label>
+                            <input type="password" v-model="memberForm.currentPassword" class="p-inputtext p-inputtext-sm" placeholder="기존 비밀번호를 입력하세요" />
+                        </div>
+                        <div class="input-set">
+                            <label>새 비밀번호</label>
+                            <input type="password" v-model="memberForm.newPassword" class="p-inputtext p-inputtext-sm" placeholder="새 비밀번호 입력" />
+                        </div>
+                        <div class="input-set">
+                            <label>새 비밀번호 확인</label>
+                            <input type="password" v-model="memberForm.confirmPassword" class="p-inputtext p-inputtext-sm" placeholder="새 비밀번호 재입력" />
+                        </div>
+                    </div>
                 </div>
-                <input type="text" v-model="memberForm.address" class="p-inputtext p-inputtext-sm mb-2" readonly />
-                <input type="text" v-model="memberForm.detailAddress" class="p-inputtext p-inputtext-sm" placeholder="상세주소를 입력하세요" />
-            </div>
 
-            <div class="flex gap-2 mb-4">
-                <div class="input-set flex-1 mb-0">
-                    <label>전화번호</label>
-                    <input type="text" v-model="memberForm.phone" class="p-inputtext p-inputtext-sm" />
-                </div>
-                <div class="input-set flex-1 mb-0">
-                    <label>이메일 주소</label>
-                    <input type="email" v-model="memberForm.email" class="p-inputtext p-inputtext-sm" />
-                </div>
-            </div>
+                <h3 class="sub-title">추가 정보</h3>
+                <div class="title-line"></div>
 
-            <div class="btn-group gap-2">
-                <button class="p-button p-button-outlined p-button-secondary w-full p-button-sm justify-content-center border-round" @click="router.back()">취소</button>
-                <button class="submit-btn text-white border-round" @click="saveInfo">정보 저장</button>
-            </div>
+                <div class="form-grid">
+                    <div class="input-set full-width">
+                        <label>소속 기관</label>
+                        <div class="flex gap-2">
+                            <input type="text" v-model="memberForm.agencyRegion" class="p-inputtext p-inputtext-sm flex-1" placeholder="지역" />
+                            <input type="text" v-model="memberForm.agencyName" class="p-inputtext p-inputtext-sm flex-2" placeholder="센터명" />
+                        </div>
+                    </div>
+
+                    <div class="input-set full-width">
+                        <label>주소</label>
+                        <div class="address-group">
+                            <div class="flex gap-2 mb-2">
+                                <input type="text" v-model="memberForm.postcode" class="p-inputtext p-inputtext-sm w-6rem" readonly />
+                                <button type="button" class="post-btn" @click="openPostcode">우편번호 검색</button>
+                            </div>
+                            <input type="text" v-model="memberForm.address" class="p-inputtext p-inputtext-sm mb-2" readonly />
+                            <input type="text" v-model="memberForm.detailAddress" class="p-inputtext p-inputtext-sm" placeholder="상세주소를 입력하세요" />
+                        </div>
+                    </div>
+
+                    <div class="input-set">
+                        <label>전화번호</label>
+                        <input type="text" v-model="memberForm.phone" class="p-inputtext p-inputtext-sm" />
+                    </div>
+                    <div class="input-set">
+                        <label>이메일 주소</label>
+                        <input type="email" v-model="memberForm.email" class="p-inputtext p-inputtext-sm" />
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="cancel-btn" @click="router.back()">취소</button>
+                    <button type="submit" class="submit-btn">정보 저장</button>
+                </div>
+            </form>
         </div>
     </div>
 </template>
 
 <style scoped>
-/* 이전과 동일한 스타일 유지 */
+/* 1. 전체 배경 */
 .content-wrapper {
-    display: flex;
+    display: flex !important;
     justify-content: center;
+    align-items: flex-start;
     width: 100%;
-    padding: 20px 0;
-}
-.form-container {
-    width: 100%;
-    max-width: 500px;
-    padding: 2rem !important;
-    border-radius: 12px;
-}
-.form-title {
-    font-size: 1.4rem;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 1.8rem;
-    color: #334155;
-}
-.input-set {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 0.9rem;
-}
-.input-set label {
-    font-weight: 600;
-    margin-bottom: 0.4rem;
-    font-size: 0.9rem;
-    color: #475569;
-}
-.post-btn {
-    background: white;
-    border: 1px solid #10b981;
-    color: #10b981;
-    padding: 0 1rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.post-btn:hover {
-    background: #f0fdf4;
-}
-.btn-group {
-    display: flex;
-    justify-content: center;
-}
-.submit-btn {
-    width: 100%;
-    padding: 0.7rem;
-    font-size: 1rem;
-    font-weight: bold;
-    background-color: #10b981;
-    border: none;
-    cursor: pointer;
-}
-:deep(.p-inputtext-sm) {
-    padding: 0.5rem 0.75rem;
-}
-:deep(.p-inputtext:disabled) {
-    background-color: #f1f5f9;
-    border-color: #e2e8f0;
-    opacity: 0.8;
+    padding: 0px 0 30px 0;
+    background-color: #f8fafc;
 }
 
-/* 소속 기관의 비율 조절을 위한 클래스 */
-.flex-1 {
-    flex: 1;
+/* 2. 메인 카드 상자 */
+.content-wrapper .form-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 2rem !important;
+    border-radius: 16px !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
 }
-.flex-2 {
-    flex: 2;
+
+/* 3. 제목 스타일 */
+.content-wrapper .form-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+}
+
+/* ⭐ sub-title에서 border-bottom을 제거하여 중복 방지 */
+.content-wrapper .form-container .sub-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 2.5rem 0 0.5rem 0 !important;
+    color: #334155;
+    border-bottom: none !important; /* 기존 선 제거 */
+    padding-bottom: 0 !important;
+}
+
+/* ⭐ 새로 만든 물리적인 구분선 스타일 */
+.title-line {
+    width: 100%;
+    height: 2px;
+    background-color: #f1f5f9;
+    margin-bottom: 1.5rem;
+}
+
+/* 4. 그리드 및 입력창 레이아웃 */
+.content-wrapper .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.content-wrapper .input-set {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.content-wrapper label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+/* 5. 주소 및 비밀번호 영역 */
+.content-wrapper .address-group,
+.content-wrapper .password-flex-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+/* 우편번호 버튼 */
+.post-btn {
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #64748b;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+/* 6. 하단 버튼 그룹 */
+.content-wrapper .btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.content-wrapper .submit-btn,
+.content-wrapper .cancel-btn {
+    flex: 1;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.content-wrapper .submit-btn {
+    background-color: #10b981;
+    color: white;
+    border: none;
+}
+
+.content-wrapper .cancel-btn {
+    background-color: white;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+/* 7. PrimeVue 입력창 스타일 고정 */
+:deep(.p-inputtext) {
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 8px !important;
+    font-size: 0.9rem !important;
+}
+
+:deep(.p-inputtext:disabled) {
+    background-color: #f8fafc !important;
+    border-color: #f1f5f9 !important;
+    color: #94a3b8 !important;
 }
 </style>

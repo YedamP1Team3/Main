@@ -26,4 +26,23 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// 프론트에서 넘어온 aksen123 같은 ID를 받아 목록을 돌려줌
+router.get("/list/:family_id", async (req, res) => {
+  try {
+    const { family_id } = req.params; // URL 파라미터에서 ID 추출
+
+    // 서비스(service) 레이어에 DB 조회를 요청함
+    const result = await service.getRecipientList(family_id);
+
+    if (result.success) {
+      res.status(200).json(result); // DB 데이터 반환
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error("목록 조회 중 에러:", err);
+    res.status(500).json({ seccess: false, message: "목록 로드 실패" });
+  }
+});
+
 module.exports = router;

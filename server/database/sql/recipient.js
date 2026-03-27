@@ -5,4 +5,11 @@ module.exports = {
     (family_id, bene_name, disability_type, birth_date, gender, relationship, zip_code, address, reg_date)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `,
+
+  // 보호자 ID(family_id)에 해당하는 모든 대상자 정보를 가져옴
+  selectRecipientList: `
+    SELECT * FROM beneficiary_info
+    WHERE family_id = ?
+    ORDER BY reg_date DESC
+    `,
 };

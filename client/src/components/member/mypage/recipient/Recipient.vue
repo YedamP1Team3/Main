@@ -188,18 +188,18 @@ watch(
 </template>
 
 <style scoped>
-.content-wrapper {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    padding: 20px 0;
-    min-height: auto;
-}
 .form-container {
     width: 100%;
-    max-width: 500px;
+    max-width: 550px;
+    background-color: #ffffff;
     padding: 2rem !important;
     border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* 그림자 살짝 */
+
+    /* ⭐ 이중 스크롤 방지 핵심 설정 (중복 없이 한 번만) */
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
 }
 .form-title {
     font-size: 1.4rem;
@@ -286,5 +286,18 @@ watch(
 }
 .mt-2 {
     margin-top: 0.5rem;
+}
+
+/* 2. 상자를 감싸는 영역도 밖으로 내용이 나가게 허용합니다 */
+.content-wrapper {
+    display: flex !important; /* block 대신 flex 유지 */
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: flex-start; /* 내용이 길면 위에서부터 시작 */
+    width: 100%;
+    padding: 10px 0 40px 0;
+    min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important; /* 스크롤 방해 금지 */
+    background-color: #f8fafc;
 }
 </style>

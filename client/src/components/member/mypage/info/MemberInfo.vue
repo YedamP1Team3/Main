@@ -1,22 +1,54 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
+import axios from 'axios'; // 서버와 통신하기 위한 axios 라이브러리 임포트
 
 const router = useRouter();
 
 /* 1. 인증 스토어에서 로그인한 유저 정보 가져오기 */
 const authStore = useAuthStore();
-const { userName, userRole } = storeToRefs(authStore);
+const { userName, userId } = storeToRefs(authStore); // 내 대상자만 가져오기 위해 userId(family_id)를 추가로 추출
 
 /* 2. 지원대상자 더미 데이터 (나중에 DB 연결 시 API로 교체하세요!) */
-const recipients = ref([
-    { id: 1, name: '홍길동', birth: '1999-01-01', type: '지적장애', relation: '부모 | 남성' },
-    { id: 2, name: '홍길순', birth: '2001-12-12', type: 'ADHD', relation: '친족 | 여성' }
-]);
+// [수정] 기존의 더미데이터는 삭제하고 빈 배열([])로 초기화
+const recipients = ref([]);
 
-/* 3. 수정 페이지 이동 함수 (추후 구현) */
+// 서버에서 지원대상자 목록을 가져오는 함수
+const fetchRecipients = async () => {
+    try {
+        // 서버의 /recipient/list/유저ID 경로로 데이터를 요청함
+        const response = await axios.get(`http://localhost:3000/recipient/list/${userId.value}`);
+
+        if (response.data.success) {
+            // 성공 시 서버에서 받은 리스트(list)를 우리 화면의 recipients 변수에 담는다
+            recipients.value = response.data.list;
+        }
+    } catch (error) {
+        console.error('데이터 로드 실패:', error); // 에러 발생 시 콘솔에 내용을 출력
+    }
+};
+
+//  날짜 형식을 YYYY-MM-DD로 변환
+const formatDate = (dateString) => {
+    if (!dateString) return ''; // 데이터가 없으면 빈 문자열 반환
+
+    const date = new Date(dateString); // 문자열을 날짜 객체로 변환
+    const year = date.getFullYear(); // 연도 가져오기
+
+    // 월/일이 10보다 작을 때 앞에 '0'을 붙여서 2자리로 맞춤
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+
+    return `${year}-${month}-${day}`; // 최종 포맷 반환
+};
+
+onMounted(() => {
+    fetchRecipients(); // 컴포넌트가 마운트(장착)되면 위에서 만든 함수를 실행
+});
+
+/* 3. 수정 페이지 이동 함수  */
 const goToMemberEdit = () => {
     router.push({ name: 'myInfoEdit' }); // 내 정보 수정 페이지로 이동
 };
@@ -33,37 +65,32 @@ const goToAddRecipient = () => {
 <template>
     <div class="member-info-wrapper">
         <section class="card mb-6">
-            <div class="flex justify-content-between align-items-center mb-5">
+            <div class="section-header">
                 <h2 class="text-2xl font-bold m-0 text-900">기본 정보 확인</h2>
-                <button class="p-button p-button-outlined p-button-sm" style="margin-left: 10px" @click="goToMemberEdit">수정하기</button>
+                <button class="p-button p-button-outlined p-button-sm" @click="goToMemberEdit">수정하기</button>
             </div>
 
-            <div class="info-grid-container flex flex-wrap gap-4">
+            <div class="info-grid-container flex flex-wrap gap-4 mt-4">
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">이름</label>
                     <div class="p-inputtext surface-100 border-none">{{ userName }}</div>
                 </div>
-
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">아이디</label>
-                    <div class="p-inputtext surface-100 border-none">hong1</div>
+                    <div class="p-inputtext surface-100 border-none">{{ userId }}</div>
                 </div>
-
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">이메일</label>
                     <div class="p-inputtext surface-100 border-none">hong1@naver.com</div>
                 </div>
-
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">소속기관</label>
                     <div class="p-inputtext surface-100 border-none">ㅁㅁ복지센터</div>
                 </div>
-
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">가입날짜</label>
                     <div class="p-inputtext surface-100 border-none">2026.03.11</div>
                 </div>
-
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">전화번호</label>
                     <div class="p-inputtext surface-100 border-none">010-1111-2222</div>
@@ -71,26 +98,22 @@ const goToAddRecipient = () => {
             </div>
         </section>
 
-        <section class="mt-6">
-            <h2 class="text-2xl font-bold mb-4 text-900">지원대상자</h2>
+        <section class="card mt-6">
+            <div class="section-header">
+                <h2 class="text-2xl font-bold m-0 text-900">지원대상자</h2>
+                <button class="p-button p-button-outlined p-button-sm text-teal-600 border-teal-600" @click="goToAddRecipient"><i class="pi pi-plus mr-2"></i>추가하기</button>
+            </div>
 
-            <div class="recipient-list-scroll flex gap-4 pb-3">
-                <div v-for="person in recipients" :key="person.id" class="recipient-card card flex-shrink-0 p-4 shadow-1 border-1 surface-border flex-direction-row">
+            <div class="recipient-list-scroll mt-4">
+                <div v-for="person in recipients" :key="person.bene_id" class="recipient-card shadow-1">
                     <div class="recipient-info">
-                        <div class="text-xl font-bold mb-2 text-900">{{ person.name }}</div>
-                        <div class="text-sm text-600">{{ person.birth }}</div>
-                        <div class="text-sm text-600">{{ person.type }}</div>
-                        <div class="text-sm text-600">{{ person.relation }}</div>
+                        <div class="text-xl font-bold mb-2 text-900">{{ person.bene_name }}</div>
+                        <div class="text-sm text-600">{{ formatDate(person.birth_date) }}</div>
+                        <div class="text-sm text-600">{{ person.disability_type }}</div>
+                        <div class="text-sm text-600">{{ person.relationship }} | {{ person.gender === 'M' ? '남성' : '여성' }}</div>
                     </div>
                     <div class="recipient-action ml-auto">
-                        <button class="p-button p-button-text p-button-sm p-0 h-2rem text-teal-600" @click="goToRecipientEdit(person.id)">수정</button>
-                    </div>
-                </div>
-
-                <div class="recipient-card add-card card flex align-items-center justify-content-center cursor-pointer hover:surface-100 border-dashed border-2 surface-border" @click="goToAddRecipient">
-                    <div class="text-center">
-                        <i class="pi pi-plus text-400 mb-2" style="font-size: 2rem"></i>
-                        <div class="text-600 font-medium">새로운 대상자를 추가하세요</div>
+                        <button class="p-button p-button-text p-button-sm p-0 h-2rem text-teal-600" @click="goToRecipientEdit(person.bene_id)">수정</button>
                     </div>
                 </div>
             </div>
@@ -99,63 +122,92 @@ const goToAddRecipient = () => {
 </template>
 
 <style scoped>
-/* 본문 전체 여백 */
+/* 전체 컨테이너 */
 .member-info-wrapper {
     padding: 2rem;
-    max-width: 1200px; /* 본문이 너무 옆으로 퍼지지 않게 제한 */
-    margin: 0 auto; /* 중앙 정렬 */
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* ⭐ [상단] 정보 항목 스타일 (3열 배치) */
-.info-item {
-    flex: 1 1 calc(33.33% - 2rem); /* 부모 Gap을 고려하여 너비를 33.3%로 설정 */
-    min-width: 280px; /* 너무 좁아지면 줄바꿈 되게 최소 너비 보장 */
+/* 공통 카드 스타일 - 우선순위 강화 */
+.member-info-wrapper .card {
+    background: white !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+    border: none !important;
+    padding: 2rem !important;
 }
 
-/* 정보 확인 칸 디자인 (읽기 전용 느낌) */
-.p-inputtext {
-    padding: 0.85rem; /* 안쪽 여백을 기획안처럼 넉넉히 */
-    border-radius: 8px; /* 모서리 둥글게 */
-    font-size: 1rem; /* 글자 크기 */
-    display: flex; /* 내부 글자 정렬용 */
-    align-items: center; /* 세로 중앙 정렬 */
-    height: 48px; /* 기획안의 인풋박스 높이 느낌 */
-}
-
-/* ⭐ [하단] 스크롤 컨테이너 설정 */
-.recipient-list-scroll {
-    overflow-x: auto !important; /* 가로 스크롤 강제 활성화 */
-    -webkit-overflow-scrolling: touch; /* 아이폰 등에서 부드러운 스크롤 */
-    white-space: nowrap; /* 내용물이 줄바꿈 되지 않게 함 */
-}
-
-/* 지원대상자 카드 스타일 (가로 배치용) */
-.recipient-card {
-    width: 320px; /* 카드 가로 길이는 그대로 유지 */
-
-    /* 🥟 기존의 min-height 대신, 홍길동 카드 높이에 맞춰 height를 고정합니다. */
-    /* 사진상 홍길동 카드의 높이가 약 180px 정도 되어 보이네요. */
-    height: 180px;
-
-    display: flex; /* 내부 내용 가로 배치 유지 */
-    flex-direction: row;
-    align-items: flex-start; /* 위쪽 정렬 유지 */
-    gap: 1.5rem;
-
-    /* ⭐ 중요: 추가 카드가 이 높이를 오롯이 가지게 하기 위해 패딩을 조절합니다. */
-    box-sizing: border-box;
-    padding: 1.5rem;
-}
-
-/* 추가 버튼 카드 스타일 (점선 테두리) */
-.add-card {
-    background-color: #f8fafc; /* 연한 배경 */
-
-    /* 🥟 추가 카드는 내용이 중앙에 와야 예쁘므로 flex 설정을 덮어씁니다. */
+/* ⭐ 핵심: 제목과 버튼을 감싸는 헤더 영역에 밑줄 부여 */
+.member-info-wrapper .section-header {
     display: flex !important;
-    flex-direction: column !important; /* 세로 배치 */
-    justify-content: center !important; /* 세로 중앙 */
-    align-items: center !important; /* 가로 중앙 */
-    padding: 0 !important; /* 내부 패딩을 없애고 height로만 중앙 정렬 */
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding-bottom: 1rem !important;
+    border-bottom: 2px solid #f1f5f9 !important; /* 여기에 선을 그어야 버튼까지 포함됩니다 */
+    margin-bottom: 1.5rem !important;
+}
+
+/* 정보 항목 레이아웃 */
+.member-info-wrapper .info-item {
+    flex: 1 1 calc(33.33% - 2rem);
+    min-width: 280px;
+}
+
+.member-info-wrapper .p-inputtext {
+    padding: 0.85rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    height: 48px;
+    background-color: #f8fafc !important;
+}
+
+/* 버튼 줄바꿈 방지 및 스타일 */
+.member-info-wrapper .p-button-sm {
+    white-space: nowrap !important;
+    min-width: fit-content !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.85rem !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 지원대상자 그리드 (3열 고정) */
+.member-info-wrapper .recipient-list-scroll {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1.5rem !important;
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+/* 개별 카드 */
+.member-info-wrapper .recipient-card {
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 1.5rem !important;
+    background-color: #ffffff !important;
+    border: 1px solid #f1f5f9 !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease;
+}
+
+.member-info-wrapper .recipient-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+    border-color: #10b981 !important;
+}
+
+/* 스크롤바 커스텀 */
+.recipient-list-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+.recipient-list-scroll::-webkit-scrollbar-thumb {
+    background-color: #e2e8f0;
+    border-radius: 10px;
 }
 </style>
