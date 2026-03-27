@@ -17,4 +17,18 @@ module.exports = {
       throw err;
     }
   },
+
+  // familyId를 받아 DB에서 해당 사용자의 대상자 리스트를 가져옴
+  getRecipientList: async (familyId) => {
+    try {
+      // dao.execute를 사용하여 SQL 파일에 정의된 select 쿼리를 실행
+      // [주의] sql.selectRecipientList 같은 상수가 sql/recipient 파일에 정의되어 있어야 함
+      const rows = await dao.execute(sql.selectRecipientList, [familyId]);
+
+      return { success: true, list: rows }; // 조회된 결과 배열을 반환
+    } catch (err) {
+      console.error("Sercice GetList Error:", err);
+      throw err;
+    }
+  },
 };

@@ -16,6 +16,10 @@ export const useAuthStore = defineStore(
         const userAddr1 = ref(sessionStorage.getItem('userAddr1') || ''); // 기본주소
         const userAddr2 = ref(sessionStorage.getItem('userAddr2') || ''); // 상세주소
 
+        const userPhone = ref(sessionStorage.getItem('userPhone') || '');
+        const userEmail = ref(sessionStorage.getItem('userEmail') || '');
+        const userRegion = ref(sessionStorage.getItem('userRegion') || ''); // 지역명
+
         const isLoggedIn = computed(() => !!userId.value);
 
         //[Action] 데이터를 변경하는 함수
@@ -31,6 +35,11 @@ export const useAuthStore = defineStore(
             userAddr1.value = userData.address || '';
             userAddr2.value = userData.detail_address || '';
 
+            // 추가 정보 저장 (서버 데이터 필드명에 맞춰주세요)
+            userPhone.value = userData.phone || '';
+            userEmail.value = userData.email || '';
+            userRegion.value = userData.region || '';
+
             sessionStorage.setItem('userId', userData.user_id);
             sessionStorage.setItem('userName', userData.user_name);
             sessionStorage.setItem('userRole', userData.role);
@@ -41,6 +50,10 @@ export const useAuthStore = defineStore(
             sessionStorage.setItem('userZip', userZip.value);
             sessionStorage.setItem('userAddr1', userAddr1.value);
             sessionStorage.setItem('userAddr2', userAddr2.value);
+
+            sessionStorage.setItem('userPhone', userPhone.value);
+            sessionStorage.setItem('userEmail', userEmail.value);
+            sessionStorage.setItem('userRegion', userRegion.value);
         }
 
         function logout() {
@@ -60,6 +73,10 @@ export const useAuthStore = defineStore(
             userAddr1.value = '';
             userAddr2.value = '';
 
+            userPhone.value = '';
+            userEmail.value = '';
+            userRegion.value = '';
+
             sessionStorage.clear();
         }
         return {
@@ -71,6 +88,9 @@ export const useAuthStore = defineStore(
             userZip,
             userAddr1,
             userAddr2,
+            userPhone,
+            userEmail,
+            userRegion,
             isLoggedIn,
             login,
             logout

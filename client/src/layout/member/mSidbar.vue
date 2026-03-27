@@ -1,10 +1,12 @@
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
 
 const router = useRouter();
+const route = useRoute(); // 현재 경로 정보를 담은 객체
 
 const surveyStore = useSurveyStore();
 const { login_user_name } = storeToRefs(surveyStore);
@@ -42,11 +44,11 @@ const confirmWithdraw = () => {
             <hr class="mb-3 mx-3 border-top-1 surface-border" />
 
             <ul class="layout-menu list-none p-0 m-0">
-                <li class="menu-item px-4 py-3 cursor-pointer hover:surface-hover transition-colors" @click="navigateTo('myInfo')">
+                <li class="menu-item px-4 py-3 cursor-pointer hover:surface-hover transition-colors" :class="{ 'active-menu-link': route.name === 'myInfo' }" @click="navigateTo('myInfo')">
                     <span class="font-medium text-base">내 정보 관리</span>
                 </li>
 
-                <li class="menu-item px-4 py-3 cursor-pointer hover:surface-hover active-menu-link" @click="goToRecipientList">
+                <li class="menu-item px-4 py-3 cursor-pointer hover:surface-hover transition-colors" :class="{ 'active-menu-link': route.name === 'recipientList' }" @click="goToRecipientList">
                     <span class="font-medium text-base">지원대상자 추가</span>
                 </li>
             </ul>
