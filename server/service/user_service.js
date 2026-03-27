@@ -7,22 +7,22 @@ const findAll = async () => {
 };
 
 //지원자 조회
-const BeneficiaryList = async (managerId) => {
-  const list = await userMapper.selectBeneficiaryList(managerId);
+const getBeneficiariesNames = async (managerId) => {
+  const list = await userMapper.selectBeneficiariesNames(managerId);
   return list || [];
 };
 //지원제 상세조회
-const BeneficiaryDetail = async (id) => {
-  const detail = await userMapper.selectBeneficiaryById(id);
+const getBeneficiariesDetail = async (id) => {
+  const detail = await userMapper.selectBeneficiariesDetail(id);
   return detail || null;
 };
-
-const SupportPlan = async (beneId) => {
-  let list = await userMapper.selectSupportPlan(beneId);
+//지원자의 지원계획서
+const getSupportPlanList = async (beneId) => {
+  let list = await userMapper.selectSupportPlanList(beneId);
   return list || [];
 };
-
-const InsertSupportPlan = async (supportPlan) => {
+//지원계획서 생성
+const createSupportPlan = async (supportPlan) => {
   const {
     priority_id,
     manager_id,
@@ -40,7 +40,7 @@ const InsertSupportPlan = async (supportPlan) => {
     progress_state,
   ];
 
-  let result = await userMapper.insertSupportPlan(insertDate);
+  let result = await userMapper.createSupportPlan(insertDate);
 
   let resObj = {
     status: result.insertId > 0 ? "success" : "fail",
@@ -48,28 +48,28 @@ const InsertSupportPlan = async (supportPlan) => {
   };
   return resObj;
 };
-
-const provisionalPlan = async (beneId) => {
-  let list = await userMapper.provisionalPlan(beneId);
+//지원계획서 임시 조회
+const getSupportPlanTempList = async (beneId) => {
+  let list = await userMapper.selectSupportPlanTempList(beneId);
   return list || [];
 };
-
-const DetailSupportPlanService = async (planID) => {
-  let list = await userMapper.DetailSupportPlan(planID);
+//지원계획서상세조회
+const getSupportPlanDetail = async (planID) => {
+  let list = await userMapper.selectSupportPlanDetail(planID);
   return list || {};
 };
-
-const deleteSupportPlanService = async (planDelete) => {
-  let result = await userMapper.deleteSupportPlan(planDelete);
+//지원계획서삭제
+const removeSupportPlan = async (planDelete) => {
+  let result = await userMapper.removeSupportPlan(planDelete);
   let resObj = {
     status: result.affectedRows > 0 ? "success" : "fail",
     plan_no: planDelete,
   };
   return resObj;
 };
-
-const UpdateSupportPlanService = async (planId, planDate) => {
-  let result = await userMapper.UpdateSupportPlan(planId, planDate);
+//지원계획서승인신청
+const applySupportPlan = async (planId, planDate) => {
+  let result = await userMapper.applySupportPlan(planId, planDate);
   let resObj = {
     status: result.affectedRows > 0,
     target: {
@@ -79,9 +79,9 @@ const UpdateSupportPlanService = async (planId, planDate) => {
   };
   return resObj;
 };
-
-const provisionalUpdate = async (planId, planDate) => {
-  let result = await userMapper.provisionalUpdate(planId, planDate);
+//지원계획서업데이트(임시)
+const updateTempPlan = async (planId, planDate) => {
+  let result = await userMapper.updateTempPlan(planId, planDate);
   let resObj = {
     status: result.affectedRows > 0,
     target: {
@@ -94,13 +94,13 @@ const provisionalUpdate = async (planId, planDate) => {
 
 module.exports = {
   findAll,
-  BeneficiaryList,
-  BeneficiaryDetail,
-  SupportPlan,
-  InsertSupportPlan,
-  provisionalPlan,
-  DetailSupportPlanService,
-  deleteSupportPlanService,
-  UpdateSupportPlanService,
-  provisionalUpdate,
+  getBeneficiariesNames,
+  getBeneficiariesDetail,
+  getSupportPlanList,
+  createSupportPlan,
+  getSupportPlanTempList,
+  getSupportPlanDetail,
+  removeSupportPlan,
+  applySupportPlan,
+  updateTempPlan,
 };

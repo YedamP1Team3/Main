@@ -16,7 +16,7 @@ const rejectionLog = ref([]); // 반려 히스토리 저장용
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/api/detailSupportPlan/${id}`);
+        const response = await axios.get(`http://localhost:3000/api/support-plans/${id}`);
         planDetail.value = response.data;
 
         // 상태가 '반려'이거나 이력이 있을 수 있으므로 히스토리 조회
@@ -29,7 +29,7 @@ const fetchPlanDetail = async (id) => {
 const fetchRejectionHistory = async (id) => {
     try {
         // 관리자 때 만드신 그 API를 그대로 사용합니다.
-        const response = await axios.get(`http://localhost:3000/adsupport/rejectionList/${id}`);
+        const response = await axios.get(`http://localhost:3000/adsupport/admin/support-plan/${id}/rejection-history`);
         rejectionLog.value = Array.isArray(response.data) ? response.data : [];
     } catch (error) {
         console.error('이력 조회 실패', error);
@@ -40,7 +40,7 @@ const fetchRejectionHistory = async (id) => {
 const DeleteTemp = async (planId) => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`http://localhost:3000/api/deleteSupportPlan/${planId}`);
+        const response = await axios.delete(`http://localhost:3000/api/support-plans/${planId}`);
         if (response.data.status == 'success') {
             alert('삭제되었습니다');
             emit('refresh');
@@ -60,7 +60,7 @@ const Approval = async (planId) => {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
         };
-        const response = await axios.put(`http://localhost:3000/api/updateSupportPlan/${planId}`, updateData);
+        const response = await axios.put(`http://localhost:3000/api/support-plans/${planId}`, updateData);
         if (response.data.status == true) {
             alert('승인 신청되었습니다.');
             emit('refresh');
@@ -78,7 +78,7 @@ const SaveTemp = async (planId) => {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
         };
-        const response = await axios.put(`http://localhost:3000/api/provisionalUpdate/${planId}`, updateData);
+        const response = await axios.put(`http://localhost:3000/api/support-plans/${planId}/temp`, updateData);
         if (response.data.status == true) {
             alert('임시저장되었습니다');
             emit('refresh');

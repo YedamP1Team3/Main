@@ -8,7 +8,7 @@ const planDetail = ref({});
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/api/detailSupportPlan/${id}`);
+        const response = await axios.get(`http://localhost:3000/api/support-plans/${id}`);
         planDetail.value = response.data;
     } catch (error) {
         console.error(`에러`, error);
@@ -27,193 +27,115 @@ watch(
     <div class="BfnewPlan">
         <h2>지원계획서 조회</h2>
         <hr />
-        <div>
-            <span>{{ planDetail.progress_state }}</span>
+
+        <div class="plan-header">
+            <span class="status-badge">{{ planDetail.progress_state }}</span>
+            <span class="date-info">작성일: {{ planDetail.created_at }}</span>
         </div>
-        <div>
-            <label>작성일:</label>
-            <span>{{ planDetail.created_at }}</span>
-        </div>
-        <div class="form_BfnewPlan">
-            <label for="objective">지원목표</label>
-            <input id="objective" v-model="planDetail.plan_objective" readonly type="text" class="read-only" />
-        </div>
-        <div class="form_BfnewPlan">
-            <label for="content">계획내용</label>
-            <textarea id="content" v-model="planDetail.plan_content" rows="5" readonly class="read-only"></textarea>
-        </div>
-        <div class="form_BfnewPlan">
-            <label for="file">파일첨부</label>
-            <input type="text" placeholder="임시" readonly class="read-only" />
-        </div>
+
+        <table class="detail-table">
+            <colgroup>
+                <col style="width: 20%" />
+                <col style="width: 80%" />
+            </colgroup>
+            <tbody>
+                <tr>
+                    <th>지원목표</th>
+                    <td>{{ planDetail.plan_objective }}</td>
+                </tr>
+                <tr>
+                    <th>계획내용</th>
+                    <td class="content-cell">
+                        <div class="text-wrapper">{{ planDetail.plan_content }}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>파일첨부</th>
+                    <td class="file-cell">임시 (첨부파일 없음)</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </template>
 <style scoped>
-/* 1. 기본 레이아웃 및 폰트 */
 .BfnewPlan {
     max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
-    background-color: #ffffff;
-    font-family:
-        'Pretendard',
-        -apple-system,
-        sans-serif;
+    margin: 30px auto;
+    padding: 0 20px;
+    color: #333;
 }
 
 h2 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 8px;
-    letter-spacing: -0.05em;
-}
-
-hr {
-    border: none;
-    border-top: 2px solid #334155;
-    margin-bottom: 15px;
-}
-
-/* 상태 표시 배지 */
-.BfnewPlan > div:nth-child(3) span {
-    display: inline-block;
-    padding: 4px 12px;
-    background-color: #f1f5f9;
-    color: #475569;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    font-weight: 700;
-}
-
-/* 작성일 우측 정렬 */
-.BfnewPlan > div:nth-child(4) {
-    text-align: right;
-    margin-bottom: 20px;
-    color: #64748b;
-    font-size: 0.95rem;
-}
-
-/* 2. 테이블 형태의 폼 레이아웃 */
-.form_BfnewPlan {
-    display: flex;
-    border-bottom: 1px solid #e2e8f0;
-    border-left: 1px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
-}
-
-.form_BfnewPlan:nth-of-type(1) {
-    border-top: 1px solid #e2e8f0;
-}
-
-.form_BfnewPlan label {
-    width: 140px;
-    background-color: #f8fafc;
-    color: #475569;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    border-right: 1px solid #e2e8f0;
-    font-size: 0.9rem;
-}
-
-/* 입력창 및 텍스트 영역 */
-input[readonly],
-textarea[readonly],
-input[v-model],
-textarea[v-model] {
-    flex: 1;
-    border: none;
-    padding: 15px 20px;
-    font-size: 1rem;
-    color: #334155;
-    outline: none;
-    background-color: #ffffff;
-}
-
-textarea {
-    min-height: 180px;
-    line-height: 1.6;
-    resize: none;
-}
-
-/* 3. 버튼 영역 (클래스 직접 지정으로 꼬임 방지) */
-.BfnewPlan > div:nth-last-child(2) {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 30px;
+    font-size: 24px;
     margin-bottom: 10px;
 }
 
-/* 모든 버튼 공통 스타일 */
-.BfnewPlan button {
-    padding: 12px 24px;
-    border-radius: 30px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
+hr {
+    border: 0;
+    border-top: 2px solid #35495e;
+    margin-bottom: 20px;
 }
 
-/* 버튼별 고유 색상 (클래스명 기준) */
-.btn-approve {
-    background-color: #1e293b !important;
-    color: #ffffff !important;
+/* 상단 정보 스타일 */
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    align-items: center;
 }
 
-.btn-temp {
-    background-color: #f1f5f9 !important;
-    color: #475569 !important;
+.status-badge {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 14px;
 }
 
-.btn-delete {
-    background-color: #fff1f2 !important;
-    color: #e11d48 !important;
+.date-info {
+    font-size: 14px;
+    color: #666;
 }
 
-button:hover {
-    opacity: 0.8;
-    transform: translateY(-1px);
-}
-
-/* 4. 반려 사유 영역 (이미지 느낌 100% 재현) */
-.reason-area {
-    margin-top: 40px;
+/* 테이블 스타일 */
+.detail-table {
     width: 100%;
-    clear: both;
+    border-collapse: collapse;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    table-layout: fixed;
 }
 
-.reasonFont {
-    display: block;
-    color: #e11d48; /* 이미지의 붉은색 */
-    font-weight: 800;
-    font-size: 1.1rem;
-    margin-bottom: 12px;
+.detail-table th {
+    background-color: #f5f5f5; /* 담당자 화면과 동일한 회색 배경 */
+    border: 1px solid #ddd;
+    padding: 15px;
     text-align: left;
+    font-weight: bold;
 }
 
-.reasonText {
-    width: 100%;
-    min-height: 140px;
-    padding: 20px;
-    border: 1.5px solid #e2e8f0; /* 부드러운 테두리 */
-    border-radius: 12px; /* 이미지의 둥근 모서리 */
-    background-color: #ffffff;
-    color: #475569;
-    font-size: 1rem;
+.detail-table td {
+    border: 1px solid #ddd;
+    padding: 15px;
+    text-align: left;
+    background-color: #fff;
     line-height: 1.6;
-    resize: none;
-    outline: none;
-    box-sizing: border-box; /* 너비 100% 고정 핵심 */
 }
 
-/* readonly 상태에서도 깨끗한 흰색 유지 */
-.reasonText[readonly] {
-    background-color: #ffffff;
-    cursor: default;
+/* 계획내용 셀 높이 조절 */
+.content-cell {
+    height: 300px; /* 왼쪽 화면과 비슷한 높이 */
+    vertical-align: top;
+}
+
+.text-wrapper {
+    white-space: pre-wrap; /* 줄바꿈 유지 */
+    word-break: break-all;
+}
+
+.file-cell {
+    color: #999;
+    font-style: italic;
 }
 </style>

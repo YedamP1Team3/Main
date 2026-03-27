@@ -25,7 +25,7 @@ const fetchBeneDetail = async () => {
 
 onMounted(async () => {
     const userList = authStore.userId;
-    const response = await axios.get('http://localhost:3000/api/beneficiaries', { params: { user_id: userList } });
+    const response = await axios.get('http://localhost:3000/api/beneficiaries/names', { params: { user_id: userList } });
     beneficiaryList.value = response.data;
 });
 </script>
