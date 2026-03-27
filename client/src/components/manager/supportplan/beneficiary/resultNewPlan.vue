@@ -28,7 +28,7 @@ const Approval = async () => {
         selected_plans: selectedPlans.value
     };
     try {
-        const response = await axios.post('http://localhost:3000/resultPlan/newResult', target);
+        const response = await axios.post('http://localhost:3000/resultPlan/support-result', target);
         if (response.data.success) {
             alert('지원서가 입력되었습니다');
             emit('refresh');
@@ -53,7 +53,7 @@ const SaveTemp = async () => {
         selected_plans: selectedPlans.value
     };
     try {
-        const response = await axios.post('http://localhost:3000/resultPlan/newResult', target);
+        const response = await axios.post('http://localhost:3000/resultPlan/support-result', target);
         if (response.data.success) {
             alert('지원서가 입력되었습니다');
             emit('refresh');
@@ -97,7 +97,7 @@ const fetchSupportPlan = () => {
 };
 
 onMounted(async () => {
-    const response = await axios.get(`http://localhost:3000/resultPlan/supportList/${props.beneId}`);
+    const response = await axios.get(`http://localhost:3000/resultPlan/support-plans/approved/${props.beneId}`);
     supportList.value = response.data;
 });
 </script>
