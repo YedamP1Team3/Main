@@ -12,12 +12,14 @@ import ResultNewPlan from '@/components/manager/supportplan/beneficiary/resultNe
 import ManagerSurveyView from '@/components/manager/supportplan/beneficiary/ManagerSurveyView.vue';
 // 💡 [추가] 대기단계 스위치 컴포넌트 임포트 (경로 확인 필요)
 import ManagerPrioritySwitch from '@/components/manager/supportplan/beneficiary/ManagerPrioritySwitch.vue';
+import resultPlanDetail from '@/components/manager/supportplan/beneficiary/resultPlanDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
 const viewMode = ref('empty');
 const managementRef = ref(null);
 const selectPlan = ref(null);
+const selectResultId = ref(null);
 
 const surveyStore = useSurveyStore(); // 💡 스토어 초기화
 
@@ -36,6 +38,11 @@ const handleIdUpdate = async (id, priorityId) => {
 const handleIdDetail = (planId) => {
     selectPlan.value = planId;
     viewMode.value = 'detail';
+};
+
+const handleResultIdDetail = (resultId) => {
+    selectResultId.value = resultId;
+    viewMode.value = 'resultDetail';
 };
 
 // 💡 탭에서 신청서를 클릭했을 때 뷰 모드를 변경하는 함수
@@ -75,7 +82,15 @@ const reloadList = () => {
             </section>
 
             <section class="list-section">
-                <BeneficiaryManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @select-app="handleAppDetail" @newaddplan="viewMode = 'create'" @newresultplan="viewMode = 'resultCreate'" />
+                <BeneficiaryManagement
+                    ref="managementRef"
+                    :beneId="selectedId"
+                    @select-plan="handleIdDetail"
+                    @select-result="handleResultIdDetail"
+                    @select-app="handleAppDetail"
+                    @newaddplan="viewMode = 'create'"
+                    @newresultplan="viewMode = 'resultCreate'"
+                />
             </section>
         </aside>
 
@@ -92,7 +107,9 @@ const reloadList = () => {
             <div v-else-if="viewMode === 'app_detail'" class="editor-container">
                 <ManagerSurveyView @close="viewMode = 'empty'" />
             </div>
-
+            <div v-else-if="viewMode === 'resultDetail'" class="editor-container">
+                <resultPlanDetail :resultId="selectResultId" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+            </div>
             <!-- 💡 [추가] Manager 대기단계 설정 화면 -->
             <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">
                 <ManagerPrioritySwitch @close="viewMode = 'empty'" />

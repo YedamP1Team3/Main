@@ -29,7 +29,7 @@ const Approval = async () => {
     };
     try {
         const response = await axios.post('http://localhost:3000/resultPlan/newResult', target);
-        if (response.data.status === 'success') {
+        if (response.data.success) {
             alert('지원서가 입력되었습니다');
             emit('refresh');
         }
@@ -54,7 +54,7 @@ const SaveTemp = async () => {
     };
     try {
         const response = await axios.post('http://localhost:3000/resultPlan/newResult', target);
-        if (response.data.status === 'success') {
+        if (response.data.success) {
             alert('지원서가 입력되었습니다');
             emit('refresh');
         }
@@ -183,11 +183,6 @@ h2 {
     padding-bottom: 10px;
 }
 
-.date-section label {
-    font-weight: 600;
-    margin-right: 5px;
-}
-
 /* 2. 표 형식 레이아웃 */
 .form-container {
     border-top: 1px solid #e2e8f0;
@@ -214,10 +209,10 @@ h2 {
     flex-shrink: 0;
 }
 
-/* 입력 필드 */
-input[type='text'],
-textarea,
-.custom-select {
+/* 🌟 입력 필드 스타일 교정 (템플릿의 id/태그 기준) */
+.form_BfnewPlan input[type='text'],
+.form_BfnewPlan textarea,
+.form_BfnewPlan .custom-select {
     flex: 1;
     border: none;
     padding: 15px 20px;
@@ -225,15 +220,16 @@ textarea,
     color: #334155;
     outline: none;
     background-color: transparent;
+    width: 100%;
 }
 
-textarea {
+.form_BfnewPlan textarea {
     min-height: 200px;
     line-height: 1.6;
     resize: none;
 }
 
-/* 셀렉트 박스 그룹 */
+/* 3. 셀렉트 박스 및 플러스 버튼 영역 */
 .select-group {
     flex: 1;
     display: flex;
@@ -243,7 +239,7 @@ textarea {
 
 .custom-select {
     cursor: pointer;
-    appearance: none; /* 기본 화살표 숨김(선택사항) */
+    appearance: none;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")
         no-repeat right 15px center;
     background-size: 15px;
@@ -253,11 +249,14 @@ textarea {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    border: 1px solid #1e293b;
+    border: 1px solid #1e293b !important;
     background-color: #fff;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .btn-plus:hover {
@@ -265,11 +264,7 @@ textarea {
     color: #fff;
 }
 
-/* 3. 선택된 계획 태그 영역 */
-.selected-plans-row {
-    background-color: #fff;
-}
-
+/* 4. 선택된 계획 태그 영역 */
 .selected-plans-container {
     flex: 1;
     display: flex;
@@ -282,12 +277,12 @@ textarea {
 .plan-tag {
     display: flex;
     align-items: center;
-    background-color: #f1f5f9;
-    padding: 5px 12px;
+    background-color: #eff6ff; /* 사진처럼 살짝 푸른 빛 */
+    padding: 5px 15px;
     border-radius: 20px;
     font-size: 0.85rem;
-    color: #334155;
-    border: 1px solid #e2e8f0;
+    color: #1e40af;
+    border: 1px solid #dbeafe;
 }
 
 .btn-remove {
@@ -297,21 +292,24 @@ textarea {
     color: #ef4444;
     font-weight: bold;
     cursor: pointer;
+    padding: 0;
 }
 
-/* 4. 하단 버튼 */
+/* 5. 하단 버튼 디자인 (이미지 기준) */
+/* 5. 하단 버튼 디자인 (우측 정렬로 수정) */
 .action-buttons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-end; /* 중앙(center)에서 오른쪽(flex-end)으로 변경 */
     gap: 12px;
     margin-top: 30px;
+    padding-right: 5px; /* 표 끝 라인과 맞추기 위한 미세 조정 */
 }
 
 .btn-approve {
     padding: 12px 40px;
     background-color: #ffffff;
     color: #1e293b;
-    border: 1px solid #1e293b;
+    border: 1.5px solid #1e293b;
     border-radius: 30px;
     font-size: 1rem;
     font-weight: 800;
@@ -333,6 +331,7 @@ textarea {
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
 .btn-temp:hover {

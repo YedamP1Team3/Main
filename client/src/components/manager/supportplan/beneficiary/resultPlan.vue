@@ -6,7 +6,7 @@ const props = defineProps({
     beneId: [String, Number]
 });
 
-const emit = defineEmits(['newresultplan', 'select-plan', 'refresh']);
+const emit = defineEmits(['newresultplan', 'select-result', 'refresh']);
 const planList = ref([]);
 const showTemp = ref(false);
 
@@ -44,8 +44,8 @@ const savefile = () => {
     fetchPlanList(props.beneId);
 };
 
-const detailClick = (planId) => {
-    emit(`select-plan`, planId);
+const detailClick = (resultId) => {
+    emit('select-result', resultId);
 };
 
 defineExpose({ fetchPlanList });
@@ -75,7 +75,7 @@ watch(
                     <th>작성일자</th>
                     <th>상태</th>
                 </tr>
-                <tr v-for="(plan, index) in planList" :key="plan.result_group_id" @click="detailClick(plan.result_group_id)">
+                <tr v-for="(plan, index) in planList" :key="plan.result_id" @click="detailClick(plan.result_id)" class="clickable-row">
                     <td>{{ index + 1 }}</td>
                     <td>{{ plan.manager_id }}</td>
                     <td>{{ plan.result_title }}</td>
