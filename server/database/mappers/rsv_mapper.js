@@ -1,6 +1,37 @@
 const { pool } = require("../DAO.js");
 const rsvSql = require("../sql/rsv.js");
 
+// ACTIVE MANAGER 목록 조회
+const selectActiveManagers = async () => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(rsvSql.selectActiveManagers);
+    console.log("ACTIVE인 MANAGER 조회 : ", rows);
+    return rows;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// 스케줄 bulk insert
+const insertManagerSchedules = async (values) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const result = await conn.batch(rsvSql.insertManagerSchedules, values);
+    return result;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 const selectManagerSchedule = async (managerId, date) => {
   let conn = null;
   try {
@@ -83,4 +114,6 @@ module.exports = {
   insertBlockedTime,
   selectAllOccupiedTimes,
   deleteBlockedTime,
+  selectActiveManagers,
+  insertManagerSchedules,
 };

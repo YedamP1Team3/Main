@@ -1,13 +1,27 @@
-// 담당자 ID 조회
+// ACTIVE 상태의 MANAGER 전체 조회
+const selectActiveManagers = `
+  SELECT user_id
+  FROM user_info
+  WHERE role = 'MANAGER'
+  AND join_status = 'ACTIVE'
+`;
+
+// 다음 달 스케줄 bulk insert
+// UNIQUE(manager_id, work_date) 존재 전제
+const insertManagerSchedules = `
+  INSERT IGNORE INTO manager_schedules
+  (manager_id, work_date, work_start_time, work_end_time)
+  VALUES (?, ?, ?, ?)
+`;
+
+// 담당자 일정 조회
 const selectManagerSchedule = `
   SELECT 
     man_schedule_id,
     manager_id,
     work_date,
     work_start_time,
-    work_end_time,
-    break_start_time,
-    break_end_time
+    work_end_time
   FROM manager_schedules
   WHERE manager_id = ?
     AND work_date = ?
@@ -54,4 +68,6 @@ module.exports = {
   insertBlockedTime,
   selectAllOccupiedTimes,
   deleteBlockedTime,
+  selectActiveManagers,
+  insertManagerSchedules,
 };

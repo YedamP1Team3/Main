@@ -3,6 +3,20 @@ const router = express.Router();
 
 const rsvService = require("../service/rsv_service.js");
 
+// 다음 달 스케줄 수동 생성 테스트용
+router.post("/schedule/auto-generate", async (req, res) => {
+  try {
+    const result = await rsvService.generateNextMonthSchedules();
+
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
 // 담당자 ID 조회 () + 예약가능 시간 조회 (MANAGER_ID, WORK_DATE)
 router.get("/schedule", async (req, res) => {
   try {
