@@ -1,149 +1,224 @@
 <script setup>
-import { ref } from 'vue'; // Vue의 반응형 데이터 처리를 위한 ref import
-import { useRouter } from 'vue-router'; // 페이지 이동 처리를 위한 router import
+import { ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import axios from 'axios';
 
-const router = useRouter(); // 라우터 객체 생성
+const route = useRoute();
+const router = useRouter();
+const recipientId = route.params.id; // 수정할 대상자의 ID
 
-// 수정할 지원대상자의 기존 데이터 객체 (v-model 연결)
-const targetForm = ref({
-    name: '홍길동', // 대상자 성명 초기값
-    birth: '1950-01-01', // 생년월일 초기값
-    gender: '남성', // 성별 초기값
-    postcode: '12345', // 우편번호 초기값
-    address: '서울시 강남구 테헤란로 1', // 기본 주소 초기값
-    detailAddress: '101호', // 상세 주소 초기값
-    phone: '010-9999-8888', // 연락처 초기값
-    relation: '부모' // 관계 초기값
+const disabilityOptions = ['지체장애', '시각장애', '청각장애', '지적장애', '뇌병변장애', '기타'];
+const relations = ['부모', '배우자', '자녀', '친족', '후견인', '기타'];
+
+const form = ref({
+    name: '',
+    birth: '',
+    gender: '여성',
+    postcode: '', // 일반 이용자의 DB 주소로 채워질 예정
+    address: '', // 일반 이용자의 DB 주소로 채워질 예정
+    detailAddress: '', // 일반 이용자의 DB 주소로 채워질 예정
+    disabilityType: null,
+    relation: '부모',
+    relationEtc: ''
 });
 
-// 수정 완료 버튼 클릭 시 실행될 함수
-const updateTarget = () => {
-    console.log('수정된 데이터:', targetForm.value); // 수정된 데이터를 콘솔에 기록
-    alert('대상자 정보가 수정되었습니다.'); // 수정 완료 알림창 표시
-    router.push({ name: 'targetList' }); // 수정 후 대상자 목록 페이지로 이동
+watch(
+    () => form.value.relation,
+    (newVal) => {
+        if (newVal !== '기타') form.value.relationEtc = '';
+    }
+);
+
+onMounted(async () => {
+    try {
+        // 1. 수정할 대상자의 기본 정보 가져오기
+        const resTarget = await axios.get(`/api/recipient/${recipientId}`);
+        if (resTarget.data) {
+            const d = resTarget.data;
+            form.value.name = d.name;
+            form.value.birth = d.birth;
+            form.value.gender = d.gender === 'M' ? '남성' : '여성';
+            form.value.disabilityType = d.disability_type;
+            form.value.relation = d.relation;
+            form.value.relationEtc = d.relation_etc || '';
+        }
+
+        // 2. [핵심] 일반 이용자(본인)의 주소 정보를 가져와서 덮어쓰기
+        // MemberEdit.vue에서 사용했던 본인 정보 조회 API를 활용하세요.
+        const resUser = await axios.get('/api/info/user');
+        if (resUser.data) {
+            form.value.postcode = resUser.data.postcode;
+            form.value.address = resUser.data.address;
+            form.value.detailAddress = resUser.data.detail_address;
+        }
+    } catch (error) {
+        console.error('데이터 로드 실패:', error);
+    }
+});
+
+const updateRecipient = async () => {
+    try {
+        // [1번 적용] 서버가 인식할 수 있도록 '남성/여성' 문자열을 'M/F' 코드로 변환하여 전송
+        const payload = { ...form.value, gender: form.value.gender === '남성' ? 'M' : 'F' };
+
+        const response = await axios.put(`/api/recipient/${recipientId}`, payload);
+        if (response.data.success) {
+            alert('수정 완료!');
+            router.push('/mypage/info');
+        }
+    } catch (error) {
+        alert('수정 중 오류가 발생했습니다.');
+    }
+};
+// 주소 검색 API 연동 (기존 로직 사용)
+const openPostcode = () => {
+    new window.daum.Postcode({
+        oncomplete: (data) => {
+            form.value.postcode = data.zonecode;
+            form.value.address = data.address;
+        }
+    }).open();
 };
 </script>
 
 <template>
     <div class="content-wrapper">
         <div class="form-container surface-card shadow-2">
-            <h2 class="form-title">지원대상자 수정</h2>
+            <h5 class="form-title">지원대상자 정보 수정</h5>
 
-            <div class="flex gap-2 mb-3">
-                <div class="input-set flex-1 mb-0"><label>대상자 성명</label> <input type="text" v-model="targetForm.name" class="p-inputtext p-inputtext-sm" /></div>
-                <div class="input-set flex-1 mb-0"><label>생년월일</label> <input type="text" v-model="targetForm.birth" class="p-inputtext p-inputtext-sm" placeholder="YYYY-MM-DD" /></div>
-            </div>
-
-            <div class="flex gap-2 mb-3">
-                <div class="input-set flex-1 mb-0">
-                    <label>성별</label>
-                    <select v-model="targetForm.gender" class="p-inputtext p-inputtext-sm">
-                        <option value="남성">남성</option>
-                        <option value="여성">여성</option>
-                    </select>
+            <div class="p-fluid">
+                <div class="input-set">
+                    <label>대상자 성명</label>
+                    <InputText v-model="form.name" placeholder="실명을 입력하세요" class="p-inputtext-sm" />
                 </div>
-                <div class="input-set flex-1 mb-0"><label>관계</label> <input type="text" v-model="targetForm.relation" class="p-inputtext p-inputtext-sm" /></div>
-            </div>
 
-            <div class="input-set">
-                <label>주소</label>
-                <div class="flex gap-2 mb-2"><input type="text" v-model="targetForm.postcode" class="p-inputtext p-inputtext-sm w-6rem" readonly /> <button class="post-btn">우편번호 검색</button></div>
-                <input type="text" v-model="targetForm.address" class="p-inputtext p-inputtext-sm mb-2" readonly /> <input type="text" v-model="targetForm.detailAddress" class="p-inputtext p-inputtext-sm" placeholder="상세주소를 입력하세요" />
-            </div>
+                <div class="input-set">
+                    <label>생 년 월 일</label>
+                    <InputText v-model="form.birth" placeholder="예) 19900101" maxlength="8" class="p-inputtext-sm" />
+                </div>
 
-            <div class="input-set mb-4"><label>연락처</label> <input type="text" v-model="targetForm.phone" class="p-inputtext p-inputtext-sm" placeholder="010-0000-0000" /></div>
+                <div class="input-set">
+                    <label>성 별</label>
+                    <div class="flex gap-4 p-1">
+                        <div class="flex align-items-center">
+                            <RadioButton v-model="form.gender" inputId="f" value="여성" />
+                            <label for="f" class="ml-2 text-sm">여성</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <RadioButton v-model="form.gender" inputId="m" value="남성" />
+                            <label for="m" class="ml-2 text-sm">남성</label>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="btn-group gap-2">
-                <button class="p-button p-button-outlined p-button-secondary w-full p-button-sm border-round" @click="router.back()">취소</button>
-                <button class="submit-btn text-white border-round" @click="updateTarget">수정 완료</button>
+                <div class="input-set">
+                    <label>주소 <span class="text-xs text-primary">(회원 정보와 동일)</span></label>
+                    <InputText v-model="form.postcode" class="p-inputtext-sm w-8rem disabled-input mb-2" readonly />
+                    <InputText v-model="form.address" class="p-inputtext-sm mb-2 disabled-input" readonly />
+                    <InputText v-model="form.detailAddress" class="p-inputtext-sm disabled-input" readonly />
+                    <small class="mt-1 text-gray-500">* 주소 변경은 마이페이지 > 내 정보 관리 > 내 정보 수정에서 가능합니다.</small>
+                </div>
+
+                <div class="input-set">
+                    <label>장애유형</label>
+                    <Select v-model="form.disabilityType" :options="disabilityOptions" placeholder="선택하세요" class="p-select-sm" />
+                </div>
+
+                <div class="input-set">
+                    <label>대상자와의 관계</label>
+                    <div class="flex flex-wrap align-items-center gap-x-3 gap-y-2 p-1">
+                        <div v-for="rel in relations" :key="rel" class="flex align-items-center">
+                            <RadioButton v-model="form.relation" :inputId="rel" :value="rel" />
+                            <label :for="rel" class="ml-1 text-sm">{{ rel }}</label>
+                        </div>
+                        <InputText v-if="form.relation === '기타'" v-model="form.relationEtc" placeholder="직접 입력" class="p-inputtext-sm ml-2" style="width: 120px" />
+                    </div>
+                </div>
+
+                <div class="btn-group gap-3 mt-4">
+                    <Button label="취 소" class="p-button-secondary cancel-btn" @click="router.back()" />
+                    <Button label="수정 완료" class="p-button-success submit-btn" @click="updateRecipient" />
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-/* 화면 중앙 정렬 및 상하 여백 설정 */
 .content-wrapper {
-    display: flex; /* 자식 요소를 유연하게 배치 */
-    justify-content: center; /* 가로 중앙 정렬 */
-    width: 100%; /* 부모 너비 전체 사용 */
-    padding: 20px 0; /* 위아래 여백 20px */
+    display: flex !important;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding: 5px 0 40px 0; /* MemberEdit와 동일하게 위로 바짝 올림 */
+    background-color: #f8fafc;
 }
 
-/* 폼을 감싸는 카드 컨테이너 스타일 (너비 500px 고정) */
 .form-container {
-    width: 100%; /* 기본 너비 */
-    max-width: 500px; /* 최대 500px까지만 확장 */
-    padding: 2rem !important; /* 내부 여백 넉넉히 설정 */
-    border-radius: 12px; /* 모서리 둥글게 */
+    width: 100%;
+    max-width: 550px; /* 너비 통일 */
+    background-color: #ffffff;
+    padding: 1.2rem 2rem !important; /* 상단 여백 축소 버전 */
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-/* 제목 스타일 (중앙 정렬 및 색상 설정) */
 .form-title {
-    font-size: 1.4rem; /* 제목 글자 크기 */
-    font-weight: bold; /* 두껍게 */
-    text-align: center; /* 가운데 정렬 */
-    margin-bottom: 1.8rem; /* 아래 간격 */
-    color: #334155; /* 짙은 회색 */
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 1.2rem;
+    color: #334155;
 }
 
-/* 라벨과 입력창 세로 배치 세트 */
 .input-set {
-    display: flex; /* 유연한 배치 */
-    flex-direction: column; /* 위에서 아래로 정렬 */
-    margin-bottom: 0.9rem; /* 세트 간 간격 */
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.8rem;
 }
 
-/* 입력창 위 라벨 스타일 */
 .input-set label {
-    font-weight: 600; /* 약간 두껍게 */
-    margin-bottom: 0.4rem; /* 입력창과의 간격 */
-    font-size: 0.9rem; /* 크기 살짝 축소 */
-    color: #475569; /* 부드러운 회색 */
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    color: #475569;
 }
 
-/* 녹색 테두리의 우편번호 검색 버튼 */
-.post-btn {
-    background: white; /* 배경 흰색 */
-    border: 1px solid #10b981; /* 녹색 선 */
-    color: #10b981; /* 녹색 글자 */
-    padding: 0 1rem; /* 좌우 여백 */
-    border-radius: 6px; /* 모서리 둥글게 */
-    font-size: 0.85rem; /* 크기 축소 */
-    cursor: pointer; /* 손가락 모양 커서 */
-    transition: 0.2s; /* 부드러운 전환 효과 */
+/* 주소 등 읽기 전용 입력창 스타일 */
+.disabled-input {
+    background-color: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+    color: #64748b !important;
+    cursor: not-allowed !important;
 }
 
-/* 검색 버튼 마우스 오버 효과 */
-.post-btn:hover {
-    background: #f0fdf4; /* 연한 녹색 배경 */
-}
-
-/* 하단 버튼들을 묶어주는 그룹 */
 .btn-group {
-    display: flex; /* 가로 배치 */
-    justify-content: center; /* 중앙 정렬 */
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
 }
 
-/* 하단 메인 수정 버튼 (녹색 배경) */
+.submit-btn,
+.cancel-btn {
+    flex: 1;
+    padding: 0.6rem;
+    font-size: 0.95rem;
+    font-weight: bold;
+}
+
 .submit-btn {
-    width: 100%; /* 가로 꽉 채우기 */
-    padding: 0.7rem; /* 상하 패딩 */
-    font-size: 1rem; /* 기본 크기 */
-    font-weight: bold; /* 두껍게 */
-    background-color: #10b981; /* 배경 녹색 */
-    border: none; /* 테두리 제거 */
-    cursor: pointer; /* 손가락 모양 커서 */
+    background-color: #10b981 !important;
+    border: none;
 }
 
-/* PrimeVue 입력창 높이 슬림화 */
-:deep(.p-inputtext-sm) {
-    padding: 0.5rem 0.75rem; /* 좁은 패딩 적용 */
+/* PrimeVue 컴포넌트 내부 여백 미세 조정 */
+:deep(.p-inputtext-sm),
+:deep(.p-select-sm) {
+    padding: 0.4rem 0.7rem;
 }
 
-/* 비활성화 상태 입력창 색상 정의 */
-:deep(.p-inputtext:disabled) {
-    background-color: #f1f5f9; /* 연한 회색 배경 */
-    border-color: #e2e8f0; /* 연한 회색 테두리 */
+:deep(.p-radiobutton .p-radiobutton-box) {
+    width: 18px;
+    height: 18px;
 }
 </style>

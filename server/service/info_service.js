@@ -84,17 +84,36 @@ const getUserDetail = async (userId) => {
 // 사용자 정보 업데이트
 const updateUser = async (data) => {
   try {
-    const updateParams = [
-      data.name, // user_name
-      data.phone, // tel (DB 컬럼명 확인)
-      data.email, // email
-      data.postcode, // zip_code
-      data.address, // address
-      data.detailAddress, // detail_address
-      data.id, // user_id (WHERE 절)
-    ];
+    // [추가/수정 시작] 비밀번호 입력 여부에 따른 분기 처리 -------------------------
+    if (data.newPassword && data.newPassword.trim() !== "") {
+      // 1. 새 비밀번호가 있을 경우: 암호화 후 전용 Mapper 호출
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      const updateParams = [
+        data.name,
+        data.phone,
+        data.email,
+        data.postcode,
+        data.address,
+        data.detailAddress,
+        hashedPassword, // 암호화된 비밀번호 추가
+        data.id,
+      ];
+      await infoMapper.updateUserWithPassword(updateParams); // 비밀번호 포함 쿼리
+    } else {
+      // 2. 새 비밀번호가 없을 경우: 기존 정보만 수정 (기존 로직 유지)
+      const updateParams = [
+        data.name,
+        data.phone,
+        data.email,
+        data.postcode,
+        data.address,
+        data.detailAddress,
+        data.id,
+      ];
+      await infoMapper.updateUser(updateParams);
+    }
+    // [추가/수정 끝] --------------------------------------------------------
 
-    await infoMapper.updateUser(updateParams); // Mapper의 함수 호출
     return { status: "success" };
   } catch (err) {
     console.error("업데이트 서비스 에러:", err);

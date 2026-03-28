@@ -8,14 +8,23 @@ const cron = require("node-cron");
 const app = express();
 
 app.use(cors()); // 모든 요청 허용 (개발 단계)
-
 app.use(express.json());
 
-app.listen(process.env.PORT, () => {
-  console.log(
-    `서버가 http://localhost:${process.env.PORT} 에서 실행 중입니다.`,
-  );
-});
+const userRouter = require("./router/user_router.js");
+const surveyRouter = require("./router/survey_router.js");
+const adsupportPlan = require("./router/adsupport_router.js");
+const infoRouter = require("./router/info_router.js");
+const recipientRouter = require("./router/recipient_router.js");
+const resultPlan = require("./router/resultPlan_router.js");
+
+app.use("/abc", require("./router/noTouch_router.js"));
+app.use("/api", userRouter);
+app.use("/reserve", require("./router/rsv_router.js"));
+app.use("/survey", surveyRouter);
+app.use("/adsupport", adsupportPlan);
+app.use("/resultPlan", resultPlan);
+app.use("/info", infoRouter);
+app.use("/recipient", recipientRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcom!!");
@@ -40,30 +49,11 @@ cron.schedule(
   },
 );
 
-const userRouter = require("./router/user_router.js");
-const surveyRouter = require("./router/survey_router.js");
-
-const infoRouter = require("./router/info_router.js");
-
-const adsupportPlan = require("./router/adsupport_router.js");
-
-const recipientRouter = require("./router/recipient_router.js");
-
-app.use("/abc", require("./router/noTouch_router.js"));
-
-app.use("/api", userRouter);
-
-app.use("/info", infoRouter);
-
-app.use("/reserve", require("./router/rsv_router.js"));
-
-app.use("/survey", surveyRouter);
-
-app.use("/adsupport", adsupportPlan);
-
-const resultPlan = require("./router/resultPlan_router.js");
-app.use("/resultPlan", resultPlan);
-app.use("/recipient", recipientRouter);
+app.listen(process.env.PORT, () => {
+  console.log(
+    `서버가 http://localhost:${process.env.PORT} 에서 실행 중입니다.`,
+  );
+});
 
 // 민규가 매달 데이터 자동생성 (cron) 기능 썼기에, module.exports 추가작성된거로 추정
 module.exports = app;
