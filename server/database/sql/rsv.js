@@ -19,6 +19,7 @@ FROM beneficiary_info
 WHERE family_id = ?
 ORDER BY bene_name`;
 
+// -----------------------------------reservation REST--------------------------
 
 // -----------------------------------managerSchedule REST--------------------------
 
@@ -95,5 +96,5 @@ module.exports = {
   selectActiveManagers,
   insertManagerSchedules,
   getBeneficiariesByFamilyId,
-  getBeneficiaryManagerInfo
+  getBeneficiaryManagerInfo,
 };

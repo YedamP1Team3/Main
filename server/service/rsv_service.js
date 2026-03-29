@@ -1,56 +1,59 @@
-const rsvMapper = require("../database/mappers/rsv_mapper.js");
+const rsvMapper = require('../database/mappers/rsv_mapper.js');
 
-const resolveManagerId = async ({ loginUserId, loginUserRole, beneId }) => {
+const resolveManagerId = async ({ userId, userRole, beneId }) => {
   // 담당자면 본인 userId 그대로 사용
-  if (loginUserRole === "MANAGER") {
-    return loginUserId;
+  if (userRole === 'MANAGER') {
+    return userId;
   }
 
   // 보호자면 beneId로 담당자 조회
-  if (loginUserRole === "FAMILY") {
+  if (userRole === 'FAMILY') {
     if (!beneId) {
-      throw new Error("beneId 파라미터가 필요합니다.");
+      throw new Error('beneId 파라미터가 필요합니다.');
     }
 
-    const beneficiary = await rsvMapper.getBeneficiaryManagerInfo(beneId);
+    const beneficiaryRows = await rsvMapper.getBeneficiaryManagerInfo(beneId);
+
+    const beneficiary = beneficiaryRows[0];
 
     if (!beneficiary) {
-      throw new Error("지원대상자 정보를 찾을 수 없습니다.");
+      throw new Error('지원대상자 정보를 찾을 수 없습니다.');
     }
 
-    if (beneficiary.family_id !== loginUserId) {
-      throw new Error("해당 지원대상자 조회 권한이 없습니다.");
+    if (beneficiary.family_id !== userId) {
+      throw new Error('해당 지원대상자 조회 권한이 없습니다.');
     }
 
     if (!beneficiary.manager_id) {
-      throw new Error("배정된 담당자가 없습니다.");
+      throw new Error('배정된 담당자가 없습니다.');
     }
 
     return beneficiary.manager_id;
   }
 
-  throw new Error("manager_id를 조회할 수 없는 사용자 권한입니다.");
+  throw new Error('manager_id를 조회할 수 없는 사용자 권한입니다.');
 };
-
 
 const getBeneficiariesByFamilyId = async (familyId) => {
   return await rsvMapper.getBeneficiariesByFamilyId(familyId);
 };
+
+// -----------------------------------reservation REST--------------------------
 
 // -----------------------------------managerSchedule REST--------------------------
 
 // YYYY-MM-DD 포맷
 const formatDate = (date) => {
   const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 };
 
 // 다음 달 시작일 / 종료일 계산
 const getNextMonthRange = () => {
   const now = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }),
+    new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }),
   );
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -90,7 +93,7 @@ const generateNextMonthSchedules = async () => {
       success: true,
       inserted: 0,
       totalTarget: 0,
-      message: "ACTIVE 상태의 MANAGER가 없습니다.",
+      message: 'ACTIVE 상태의 MANAGER가 없습니다.',
     };
   }
 
@@ -101,7 +104,7 @@ const generateNextMonthSchedules = async () => {
       success: true,
       inserted: 0,
       totalTarget: 0,
-      message: "생성할 평일이 없습니다.",
+      message: '생성할 평일이 없습니다.',
     };
   }
 
@@ -109,7 +112,7 @@ const generateNextMonthSchedules = async () => {
 
   for (const manager of managers) {
     for (const workDate of weekdays) {
-      values.push([manager.user_id, workDate, "09:00:00", "18:00:00"]);
+      values.push([manager.user_id, workDate, '09:00:00', '18:00:00']);
     }
   }
 
@@ -118,7 +121,7 @@ const generateNextMonthSchedules = async () => {
       success: true,
       inserted: 0,
       totalTarget: 0,
-      message: "생성할 스케줄 데이터가 없습니다.",
+      message: '생성할 스케줄 데이터가 없습니다.',
     };
   }
 
@@ -128,7 +131,7 @@ const generateNextMonthSchedules = async () => {
     success: true,
     inserted: insertResult.affectedRows || 0,
     totalTarget: values.length,
-    message: "다음 달 평일 스케줄 자동 생성 완료",
+    message: '다음 달 평일 스케줄 자동 생성 완료',
   };
 };
 
@@ -156,13 +159,13 @@ const mergeTimes = (times) => {
   let prev = sorted[0];
 
   const add30Min = (time) => {
-    let [h, m] = time.split(":").map(Number);
+    let [h, m] = time.split(':').map(Number);
     m += 30;
     if (m >= 60) {
       m = 0;
       h += 1;
     }
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   };
 
   for (let i = 1; i < sorted.length; i++) {
@@ -203,7 +206,7 @@ const createBlockedTimes = async (managerId, date, times) => {
       const exEnd = new Date(ex.end_time).getTime();
 
       if (newStart < exEnd && newEnd > exStart) {
-        throw new Error("이미 예약 또는 차단된 시간입니다.");
+        throw new Error('이미 예약 또는 차단된 시간입니다.');
       }
     }
 
@@ -229,15 +232,15 @@ const removeBlockedTimes = async (managerId, date, times) => {
       range.end_time,
     );
 
-    console.log("service.range : ", range);
+    console.log('service.range : ', range);
 
     totalDeleted += count;
-    console.log("totalDeleted : ", totalDeleted);
+    console.log('totalDeleted : ', totalDeleted);
   }
 
   // 🔥 삭제된 게 없으면 에러 처리
   if (totalDeleted === 0) {
-    throw new Error("해당 시간에 해제할 예약불가 데이터가 없습니다.");
+    throw new Error('해당 시간에 해제할 예약불가 데이터가 없습니다.');
   }
 
   return totalDeleted;

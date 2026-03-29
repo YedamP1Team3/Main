@@ -7,17 +7,9 @@
 
         <div class="bene-select-row">
             <label for="bene-select">지원대상자</label>
-            <select
-                id="bene-select"
-                :value="selectedBeneId || ''"
-                @change="handleSelect"
-            >
+            <select id="bene-select" :value="selectedBeneId || ''" @change="handleSelect">
                 <option value="" disabled>지원대상자를 선택하세요</option>
-                <option
-                    v-for="bene in beneficiaries"
-                    :key="bene.bene_id"
-                    :value="bene.bene_id"
-                >
+                <option v-for="bene in beneficiaries" :key="bene.bene_id" :value="bene.bene_id">
                     {{ bene.bene_name }}
                 </option>
             </select>
@@ -45,9 +37,7 @@
             </div>
         </div>
 
-        <div v-else class="empty-message">
-            지원대상자를 선택하면 상세 정보가 표시됩니다.
-        </div>
+        <div v-else class="empty-message">지원대상자를 선택하면 상세 정보가 표시됩니다.</div>
     </section>
 </template>
 
@@ -68,17 +58,13 @@ const props = defineProps({
 const emit = defineEmits(['select-beneficiary']);
 
 const selectedBeneficiary = computed(() => {
-    return props.beneficiaries.find(
-        (bene) => String(bene.bene_id) === String(props.selectedBeneId)
-    ) || null;
+    return props.beneficiaries.find((bene) => String(bene.bene_id) === String(props.selectedBeneId)) || null;
 });
 
 const handleSelect = (event) => {
     const beneId = event.target.value;
 
-    const selected = props.beneficiaries.find(
-        (bene) => String(bene.bene_id) === String(beneId)
-    );
+    const selected = props.beneficiaries.find((bene) => String(bene.bene_id) === String(beneId));
 
     emit('select-beneficiary', selected || null);
 };
