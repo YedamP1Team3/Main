@@ -1,3 +1,27 @@
+const getBeneficiaryManagerInfo = `
+  SELECT
+    bene_id,
+    family_id,
+    manager_id
+  FROM beneficiary_info
+  WHERE bene_id = ?
+`;
+
+const getBeneficiariesByFamilyId = `SELECT 
+    bene_id,
+    manager_id,
+    bene_name,
+    relationship,
+    disability_type,
+    birth_date,
+    gender
+FROM beneficiary_info
+WHERE family_id = ?
+ORDER BY bene_name`;
+
+
+// -----------------------------------managerSchedule REST--------------------------
+
 // ACTIVE 상태의 MANAGER 전체 조회
 const selectActiveManagers = `
   SELECT user_id
@@ -70,4 +94,6 @@ module.exports = {
   deleteBlockedTime,
   selectActiveManagers,
   insertManagerSchedules,
+  getBeneficiariesByFamilyId,
+  getBeneficiaryManagerInfo
 };

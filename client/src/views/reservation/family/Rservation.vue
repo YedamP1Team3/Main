@@ -5,6 +5,13 @@
     <div class="layout-body">
         <RsvSideBar />
         <main class="layout-main">
+            <div class="reservation_container">
+                <BeneInfo
+                    :beneficiaries="beneficiaries"
+                    :selectedBeneId="selectedBeneId"
+                    @select-beneficiary="handleSelectBeneficiary"
+                />
+            </div>
             <div class="content row">
                 <Calendar v-model="selectedDate" />
                 <TimeSlot :selectedDate="selectedDate" :slots="slots" :blockedSummary="blockedSummary" mode="manager" @blockTimes="handleBlock" />
@@ -20,15 +27,19 @@ import TimeSlot from '@/components/common/TimeSlot.vue';
 
 import { getManagerSchedule } from '@/api/reservation/schedule';
 import { createBlockedTimes, deleteBlockedTimes } from '@/api/reservation/block';
+import { getBeneficiariesByFamilyId } from '@/api/reservation/beneInfo';
+
 import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
 import MTopbar from '@/layout/member/mTopbar.vue';
+import BeneInfo from '@/components/reservation/beneInfo.vue';
 
 export default {
     components: {
         Calendar,
         TimeSlot,
         MTopbar,
-        RsvSideBar
+        RsvSideBar,
+        BeneInfo
     },
 
     setup() {
@@ -163,13 +174,6 @@ export default {
 </script>
 
 <style scoped>
-/* .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 50px;
-    gap: 20px;
-} */
 
 .page {
     display: flex;
@@ -205,6 +209,16 @@ export default {
     overflow-y: auto;
 }
 
+.reservation-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
 .content.row {
     display: flex;
     flex-direction: row; /* 🔥 핵심 */
@@ -218,5 +232,11 @@ export default {
 
 .selected-date {
     font-size: 16px;
+}
+
+@media (max-width: 1100px) {
+    .content-row {
+        flex-direction: column;
+    }
 }
 </style>

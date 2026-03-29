@@ -3,6 +3,55 @@ const router = express.Router();
 
 const rsvService = require("../service/rsv_service.js");
 
+//담당자 ID 조회
+router.get("/manager-id", async (req, res) => {
+  try {
+    // 나중에는 로그인 정보로 대체
+    const loginUserId = req.user?.userId || "family_01";
+    const loginUserRole = req.user?.role || "FAMILY";
+
+    const { beneId } = req.query;
+
+    const managerId = await rsvService.resolveManagerId({
+      loginUserId,
+      loginUserRole,
+      beneId,
+    });
+
+    res.status(200).json({
+      success: true,
+      managerId,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+router.get('/beneficiaries', async (req, res) => {
+  try {
+    // const familyId = req.user.userId;
+    const familyId = 'sskk00';
+    // 또는 지금 테스트 단계면 const familyId = 'family_01';
+
+    const list = await rsvService.getBeneficiariesByFamilyId(familyId);
+
+    res.status(200).json({
+      success: true,
+      data: list
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
+
+// -----------------------------------managerSchedule REST--------------------------
+
 // 다음 달 스케줄 수동 생성 테스트용
 router.post("/schedule/auto-generate", async (req, res) => {
   try {

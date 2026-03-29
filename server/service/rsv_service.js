@@ -1,5 +1,44 @@
 const rsvMapper = require("../database/mappers/rsv_mapper.js");
 
+const resolveManagerId = async ({ loginUserId, loginUserRole, beneId }) => {
+  // 담당자면 본인 userId 그대로 사용
+  if (loginUserRole === "MANAGER") {
+    return loginUserId;
+  }
+
+  // 보호자면 beneId로 담당자 조회
+  if (loginUserRole === "FAMILY") {
+    if (!beneId) {
+      throw new Error("beneId 파라미터가 필요합니다.");
+    }
+
+    const beneficiary = await rsvMapper.getBeneficiaryManagerInfo(beneId);
+
+    if (!beneficiary) {
+      throw new Error("지원대상자 정보를 찾을 수 없습니다.");
+    }
+
+    if (beneficiary.family_id !== loginUserId) {
+      throw new Error("해당 지원대상자 조회 권한이 없습니다.");
+    }
+
+    if (!beneficiary.manager_id) {
+      throw new Error("배정된 담당자가 없습니다.");
+    }
+
+    return beneficiary.manager_id;
+  }
+
+  throw new Error("manager_id를 조회할 수 없는 사용자 권한입니다.");
+};
+
+
+const getBeneficiariesByFamilyId = async (familyId) => {
+  return await rsvMapper.getBeneficiariesByFamilyId(familyId);
+};
+
+// -----------------------------------managerSchedule REST--------------------------
+
 // YYYY-MM-DD 포맷
 const formatDate = (date) => {
   const y = date.getFullYear();
@@ -209,4 +248,6 @@ module.exports = {
   createBlockedTimes,
   removeBlockedTimes,
   generateNextMonthSchedules,
+  getBeneficiariesByFamilyId,
+  resolveManagerId,
 };
