@@ -1,11 +1,11 @@
 const { pool } = require("../DAO");
 const resultSql = require("../sql/result.js");
 
-const resultListMapper = async (beneId) => {
+const selectSupportResultList = async (beneId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(resultSql.resultList, [beneId]);
+    let rows = await conn.query(resultSql.selectSupportResultList, [beneId]);
     return rows;
   } catch (err) {
     console.log(err);
@@ -14,11 +14,11 @@ const resultListMapper = async (beneId) => {
   }
 };
 
-const saveResultListMapper = async (beneId) => {
+const selectSupportResultTempList = async (beneId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(resultSql.saveResultList, [beneId]);
+    let rows = await conn.query(resultSql.selectSupportResultTempList, [beneId]);
     return rows;
   } catch (err) {
     console.log(err);
@@ -27,11 +27,11 @@ const saveResultListMapper = async (beneId) => {
   }
 };
 
-const newResultMapper = async (newResult) => {
+const createSupportResult = async (newResult) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let result = await conn.query(resultSql.newResult, newResult);
+    let result = await conn.query(resultSql.createSupportResutl, newResult);
     return result;
   } catch (err) {
     console.log(err);
@@ -40,11 +40,11 @@ const newResultMapper = async (newResult) => {
   }
 };
 
-const listMappingMapper = async (mappingValues) => {
+const insertMapping = async (mappingValues) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    const result = await conn.batch(resultSql.listMapping, mappingValues);
+    const result = await conn.batch(resultSql.insertMapping, mappingValues);
     return result;
   } catch (err) {
     throw err;
@@ -53,11 +53,11 @@ const listMappingMapper = async (mappingValues) => {
   }
 };
 
-const supportListMapper = async (beneId) => {
+const selectApprovedPlanList = async (beneId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let result = await conn.query(resultSql.supportList, [beneId]);
+    let result = await conn.query(resultSql.selectApprovedPlanList, [beneId]);
     return result;
   } catch (err) {
     console.log(err);
@@ -66,11 +66,11 @@ const supportListMapper = async (beneId) => {
   }
 };
 
-const detailResultPlanMapper = async (result) => {
+const selectSupportResultDetail = async (result) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(resultSql.detailResultPlan, [result]);
+    let rows = await conn.query(resultSql.selectSupportResultDetail, [result]);
     return rows[0];
   } catch (err) {
     console.log(err);
@@ -79,11 +79,11 @@ const detailResultPlanMapper = async (result) => {
   }
 };
 
-const plusPlanListMapper = async (result) => {
+const selectLinkedPlanList = async (result) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(resultSql.plusPlanList, [result]);
+    let rows = await conn.query(resultSql.selectLinkedPlanList, [result]);
     return rows;
   } catch (err) {
     console.log(err);
@@ -92,11 +92,11 @@ const plusPlanListMapper = async (result) => {
   }
 };
 
-const supportResultMapper = async (resultId) => {
+const removeSupportResult = async (resultId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let result = await conn.query(resultSql.supportResult, resultId);
+    let result = await conn.query(resultSql.removeSupportResult, resultId);
     return result;
   } catch (err) {
     console.log(err);
@@ -105,26 +105,26 @@ const supportResultMapper = async (resultId) => {
   }
 };
 
-const deleteMappingMapper = async (resultId) => {
+const removeMapping = async (resultId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let result = await conn.query(resultSql.deleteMapping, resultId);
+    let result = await conn.query(resultSql.removeMapping, resultId);
     return result;
   } catch (err) {
-    console.error("deleteMappingMapper 에러:", err);
+    console.error("removeMapping 에러:", err);
     throw err;
   } finally {
     if (conn) conn.release();
   }
 };
 
-const updateResultPlanMapper = async (resultId, resultDate) => {
+const applySupportResult = async (resultId, resultDate) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
     await conn.beginTransaction();
-    let result = await conn.query(resultSql.updateResultPlan, [
+    let result = await conn.query(resultSql.applySupportResult, [
       resultDate.result_title,
       resultDate.result_content,
       resultId,
@@ -132,7 +132,7 @@ const updateResultPlanMapper = async (resultId, resultDate) => {
     await conn.commit();
     return result;
   } catch (err) {
-    console.error("updateResultPlanMapper 에러:", err);
+    console.error("applySupportResult 에러:", err);
     if (conn) await conn.rollback();
     throw err;
   } finally {
@@ -140,12 +140,12 @@ const updateResultPlanMapper = async (resultId, resultDate) => {
   }
 };
 
-const updateSavePlanMapper = async (resultId, resultDate) => {
+const updateTempSupportResult = async (resultId, resultDate) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
     await conn.beginTransaction();
-    let result = await conn.query(resultSql.updateSavePlan, [
+    let result = await conn.query(resultSql.updateTempSupportResult, [
       resultDate.result_title,
       resultDate.result_content,
       resultId,
@@ -153,7 +153,7 @@ const updateSavePlanMapper = async (resultId, resultDate) => {
     await conn.commit();
     return result;
   } catch (err) {
-    console.error("updateResultPlanMapper 에러:", err);
+    console.error("updateTempSupportResult 에러:", err);
     if (conn) await conn.rollback();
     throw err;
   } finally {
@@ -162,15 +162,15 @@ const updateSavePlanMapper = async (resultId, resultDate) => {
 };
 
 module.exports = {
-  resultListMapper,
-  saveResultListMapper,
-  newResultMapper,
-  listMappingMapper,
-  supportListMapper,
-  detailResultPlanMapper,
-  plusPlanListMapper,
-  supportResultMapper,
-  deleteMappingMapper,
-  updateResultPlanMapper,
-  updateSavePlanMapper,
+  selectSupportResultList,
+  selectSupportResultTempList,
+  createSupportResult,
+  insertMapping,
+  selectApprovedPlanList,
+  selectSupportResultDetail,
+  selectLinkedPlanList,
+  removeSupportResult,
+  removeMapping,
+  applySupportResult,
+  updateTempSupportResult,
 };

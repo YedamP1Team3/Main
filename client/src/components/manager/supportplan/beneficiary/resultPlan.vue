@@ -16,7 +16,7 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const url = showTemp.value ? `http://localhost:3000/resultPlan/saveResultList/${id}` : `http://localhost:3000/resultPlan/resultList/${id}`;
+        const url = showTemp.value ? `http://localhost:3000/resultPlan/beneficiaries/${id}/temp` : `http://localhost:3000/resultPlan/beneficiaries/${id}/support-result`;
         const response = await axios.get(url);
         planList.value = response.data || [];
     } catch (error) {

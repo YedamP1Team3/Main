@@ -3,7 +3,7 @@ const selectAllUser = `SELECT *
                       FROM survey_version; 
                       `;
 
-const BeneficiaryList = `
+const selectBeneficiariesNames = `
     SELECT 
         bene_id, 
         bene_name 
@@ -12,7 +12,7 @@ const BeneficiaryList = `
     ORDER BY bene_name ASC;
 `;
 
-const BeneficiaryById = `
+const selectBeneficiariesDetail = `
     SELECT 
         b.bene_id,
         b.bene_name,
@@ -27,7 +27,7 @@ const BeneficiaryById = `
     WHERE b.bene_id = ?
 `;
 
-const SupportPlan = `
+const selectSupportPlanList = `
     SELECT 
       plan_id, 
       bene_id, 
@@ -39,7 +39,7 @@ const SupportPlan = `
     WHERE bene_id = ? AND progress_state != '임시'
     ORDER BY plan_id ASC
 `;
-const insertSupportPlan = `
+const createSupportPlan = `
     INSERT INTO support_plan (
       priority_id,       
       manager_id,        
@@ -50,7 +50,7 @@ const insertSupportPlan = `
       created_at         
     ) VALUES (?, ?, ?, ?, ?, ?, CURDATE())
 `;
-const provisionalPlan = `
+const selectSupportPlanTempList = `
         SELECT 
       plan_id, 
       bene_id, 
@@ -63,7 +63,7 @@ const provisionalPlan = `
     ORDER BY plan_id ASC
  `;
 
-const DetailSupportPlan = `
+const selectSupportPlanDetail = `
   SELECT
     plan_id,
     plan_objective,
@@ -76,11 +76,11 @@ const DetailSupportPlan = `
   WHERE plan_id =?
 `;
 
-const deleteSupportPlan = `
+const removeSupportPlan = `
 DELETE FROM support_plan WHERE plan_id=?
 `;
 
-const UpdateSupportPlan = `
+const applySupportPlan = `
   UPDATE support_plan
   SET
     plan_objective =?,
@@ -91,7 +91,7 @@ const UpdateSupportPlan = `
     plan_id =?
 `;
 
-const provisionalUpdate = `
+const updateTempPlan = `
   UPDATE support_plan
   SET
     plan_objective =?,
@@ -104,13 +104,13 @@ const provisionalUpdate = `
 
 module.exports = {
   selectAllUser,
-  BeneficiaryList,
-  BeneficiaryById,
-  SupportPlan,
-  insertSupportPlan,
-  provisionalPlan,
-  DetailSupportPlan,
-  deleteSupportPlan,
-  UpdateSupportPlan,
-  provisionalUpdate,
+  selectBeneficiariesNames,
+  selectBeneficiariesDetail,
+  selectSupportPlanList,
+  createSupportPlan,
+  selectSupportPlanTempList,
+  selectSupportPlanDetail,
+  removeSupportPlan,
+  applySupportPlan,
+  updateTempPlan,
 };

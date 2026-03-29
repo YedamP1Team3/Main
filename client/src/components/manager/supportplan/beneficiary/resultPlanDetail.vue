@@ -22,12 +22,12 @@ const supportPlan = ref('');
 const fetchResultDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/resultPlan/detailResultPlan/${id}`);
+        const response = await axios.get(`http://localhost:3000/resultPlan/support-result/${id}`);
         resultDetail.value = response.data;
         selectedPlans.value = response.data.selected_plans || []; // ✅ 계획서 목록 추출
 
         // 상태가 '반려'이거나 이력이 있을 수 있으므로 히스토리 조회
-        fetchRejectionHistory(id);
+        // fetchRejectionHistory(id);
     } catch (error) {
         console.error(`에러`, error);
     }
@@ -36,22 +36,22 @@ const fetchResultDetail = async (id) => {
 const fetchAllSupportList = async () => {
     if (!props.beneId) return;
     try {
-        const response = await axios.get(`http://localhost:3000/resultPlan/supportList/${props.beneId}`);
+        const response = await axios.get(`http://localhost:3000/resultPlan/support-plans/approved/${props.beneId}`);
         supportList.value = response.data;
     } catch (error) {
         console.error('목록 로드 실패', error);
     }
 };
 
-const fetchRejectionHistory = async (id) => {
-    try {
-        // 관리자 때 만드신 그 API를 그대로 사용합니다.
-        const response = await axios.get(`http://localhost:3000/adsupport/rejectionList/${id}`);
-        rejectionLog.value = Array.isArray(response.data) ? response.data : [];
-    } catch (error) {
-        console.error('이력 조회 실패', error);
-    }
-};
+// const fetchRejectionHistory = async (id) => {
+//     try {
+//         // 관리자 때 만드신 그 API를 그대로 사용합니다.
+//         const response = await axios.get(`http://localhost:3000/adsupport/rejectionList/${id}`);
+//         rejectionLog.value = Array.isArray(response.data) ? response.data : [];
+//     } catch (error) {
+//         console.error('이력 조회 실패', error);
+//     }
+// };
 
 const Plus = () => {
     if (!supportPlan.value) {
@@ -78,7 +78,7 @@ const removePlan = (id) => {
 const deleteTemp = async (resultId) => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`http://localhost:3000/resultPlan/supportResult/${resultId}`);
+        const response = await axios.delete(`http://localhost:3000/resultPlan/support-result/${resultId}`);
         if (response.data.status == 'success') {
             alert('삭제되었습니다');
             emit('refresh');
@@ -100,7 +100,7 @@ const Approval = async (id) => {
             result_content: resultDetail.value.result_content,
             planIds: planIds
         };
-        const response = await axios.put(`http://localhost:3000/resultPlan/supportResult/update/${id}`, updateData);
+        const response = await axios.put(`http://localhost:3000/resultPlan/support-result/${id}`, updateData);
         if (response.data.status === 'success') {
             alert('승인 신청되었습니다.');
             emit('refresh');
@@ -122,7 +122,7 @@ const SaveTemp = async (id) => {
             result_content: resultDetail.value.result_content,
             planIds: planIds
         };
-        const response = await axios.put(`http://localhost:3000/resultPlan/saveResult/update/${id}`, updateData);
+        const response = await axios.put(`http://localhost:3000/resultPlan/support-result/${id}/temp`, updateData);
         if (response.data.status === 'success') {
             alert('임시저장되었습니다');
             emit('refresh');

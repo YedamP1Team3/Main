@@ -1,17 +1,17 @@
 const resultMapper = require("../database/mappers/result_mapper.js");
 
 //지원결과 리스트
-const resultListService = async (beneId) => {
-  let list = await resultMapper.resultListMapper(beneId);
+const getSupportResultList = async (beneId) => {
+  let list = await resultMapper.selectSupportResultList(beneId);
   return list || [];
 };
 
-const saveResultListService = async (beneId) => {
-  let list = await resultMapper.saveResultListMapper(beneId);
+const getSupportResultTempList = async (beneId) => {
+  let list = await resultMapper.selectSupportResultTempList(beneId);
   return list || [];
 };
 
-const newResultService = async (newResult) => {
+const createSupportResult = async (newResult) => {
   const {
     selected_plans,
     manager_id,
@@ -34,7 +34,7 @@ const newResultService = async (newResult) => {
   ];
 
   // 2. 결과서 본문 저장
-  const result = await resultMapper.newResultMapper(insertData);
+  const result = await resultMapper.createSupportResult(insertData);
   const newResultId = result.insertId;
 
   // 3. 매핑 테이블 저장 (선택된 계획서가 있을 때만)
@@ -43,20 +43,20 @@ const newResultService = async (newResult) => {
       newResultId,
       plan.plan_id,
     ]);
-    await resultMapper.listMappingMapper(mappingValues);
+    await resultMapper.insertMapping(mappingValues);
   }
 
   return { success: true, insertId: newResultId };
 };
 
-const supportListService = async (beneId) => {
-  let list = await resultMapper.supportListMapper(beneId);
+const getApprovedPlanList = async (beneId) => {
+  let list = await resultMapper.selectApprovedPlanList(beneId);
   return list || [];
 };
 
-const detailSupportResultService = async (resultID) => {
-  let resultInfo = await resultMapper.detailResultPlanMapper(resultID);
-  let planList = await resultMapper.plusPlanListMapper(resultID);
+const getSupportDetail = async (resultID) => {
+  let resultInfo = await resultMapper.selectSupportResultDetail(resultID);
+  let planList = await resultMapper.selectLinkedPlanList(resultID);
   // 3. 결과서 정보가 있을 때만 목록을 합쳐서 반환
   if (resultInfo) {
     // resultInfo 객체 안에 'selected_plans'라는 이름으로 목록을 쏙 넣어줍니다.
@@ -66,8 +66,8 @@ const detailSupportResultService = async (resultID) => {
   return {};
 };
 
-const supportResultService = async (resultId) => {
-  let result = await resultMapper.supportResultMapper(resultId);
+const removeSupportResult = async (resultId) => {
+  let result = await resultMapper.removeSupportResult(resultId);
   let resObj = {
     status: result.affectedRows > 0 ? "success" : "fail",
     result_no: resultId,
@@ -75,14 +75,14 @@ const supportResultService = async (resultId) => {
   return resObj;
 };
 
-const updateSupportResultService = async (resultId, resultDate, planIds) => {
+const applySupportResult = async (resultId, resultData, planIds) => {
   try {
-    await resultMapper.updateResultPlanMapper(resultId, resultDate);
-    await resultMapper.deleteMappingMapper(resultId);
+    await resultMapper.applySupportResult(resultId, resultData);
+    await resultMapper.removeMapping(resultId);
 
     if (planIds && planIds.length > 0) {
       const mappingValues = planIds.map((planId) => [resultId, planId]);
-      await resultMapper.listMappingMapper(mappingValues);
+      await resultMapper.insertMapping(mappingValues);
     }
     return { status: "success", message: "승인요청이 완료되었습니다" };
   } catch (err) {
@@ -91,14 +91,14 @@ const updateSupportResultService = async (resultId, resultDate, planIds) => {
   }
 };
 
-const updateSaveSaveService = async (resultId, resultDate, planIds) => {
+const updateTempSupportResult = async (resultId, resultData, planIds) => {
   try {
-    await resultMapper.updateSavePlanMapper(resultId, resultDate);
-    await resultMapper.deleteMappingMapper(resultId);
+    await resultMapper.updateTempSupportResult(resultId, resultData);
+    await resultMapper.removeMapping(resultId);
 
     if (planIds && planIds.length > 0) {
       const mappingValues = planIds.map((planId) => [resultId, planId]);
-      await resultMapper.listMappingMapper(mappingValues);
+      await resultMapper.insertMapping(mappingValues);
     }
     return { status: "success", message: "승인요청이 완료되었습니다" };
   } catch (err) {
@@ -108,12 +108,12 @@ const updateSaveSaveService = async (resultId, resultDate, planIds) => {
 };
 
 module.exports = {
-  resultListService,
-  saveResultListService,
-  newResultService,
-  supportListService,
-  detailSupportResultService,
-  supportResultService,
-  updateSupportResultService,
-  updateSaveSaveService,
+  getSupportResultList,
+  getSupportResultTempList,
+  createSupportResult,
+  getApprovedPlanList,
+  getSupportDetail,
+  removeSupportResult,
+  applySupportResult,
+  updateTempSupportResult,
 };
