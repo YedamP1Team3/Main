@@ -65,4 +65,66 @@ const checkIdAvailability = async (userId) => {
   }
 };
 
-module.exports = { userSignup, userLogin, checkIdAvailability };
+// 사용자 상세 정보 조회
+const getUserDetail = async (userId) => {
+  try {
+    const user = await infoMapper.selectUserById(userId);
+    if (user) {
+      // 보안을 위해 비밀번호는 제외하고 반환
+      const { password, ...userDetail } = user;
+      return userDetail;
+    }
+    return null;
+  } catch (err) {
+    console.error("상세조회 서비스 에러:", err);
+    throw err;
+  }
+};
+
+// 사용자 정보 업데이트
+const updateUser = async (data) => {
+  try {
+    // [추가/수정 시작] 비밀번호 입력 여부에 따른 분기 처리 -------------------------
+    if (data.newPassword && data.newPassword.trim() !== "") {
+      // 1. 새 비밀번호가 있을 경우: 암호화 후 전용 Mapper 호출
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      const updateParams = [
+        data.name,
+        data.phone,
+        data.email,
+        data.postcode,
+        data.address,
+        data.detailAddress,
+        hashedPassword, // 암호화된 비밀번호 추가
+        data.id,
+      ];
+      await infoMapper.updateUserWithPassword(updateParams); // 비밀번호 포함 쿼리
+    } else {
+      // 2. 새 비밀번호가 없을 경우: 기존 정보만 수정 (기존 로직 유지)
+      const updateParams = [
+        data.name,
+        data.phone,
+        data.email,
+        data.postcode,
+        data.address,
+        data.detailAddress,
+        data.id,
+      ];
+      await infoMapper.updateUser(updateParams);
+    }
+    // [추가/수정 끝] --------------------------------------------------------
+
+    return { status: "success" };
+  } catch (err) {
+    console.error("업데이트 서비스 에러:", err);
+    throw err;
+  }
+};
+
+module.exports = {
+  userSignup,
+  userLogin,
+  checkIdAvailability,
+  getUserDetail,
+  updateUser,
+};

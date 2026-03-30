@@ -62,8 +62,45 @@ const countUserId = async (userId) => {
   }
 };
 
+const updateUser = async (updateDataArray) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    // 마지막 detail_address=? 뒤에 쉼표(,)가 없어야 에러가 나지 않습니다.
+    const sql =
+      "UPDATE user_info SET user_name=?, tel=?, email=?, zip_code=?, address=?, detail_address=? WHERE user_id=?";
+    const result = await conn.query(sql, updateDataArray);
+    return result;
+  } catch (err) {
+    console.error("Mapper updateUser Error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// 비밀번호 포함 정보 수정
+const updateUserWithPassword = async (updateDataArray) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    // password=? 컬럼이 추가된 쿼리입니다.
+    const sql =
+      "UPDATE user_info SET user_name=?, tel=?, email=?, zip_code=?, address=?, detail_address=?, password=? WHERE user_id=?";
+    const result = await conn.query(sql, updateDataArray);
+    return result;
+  } catch (err) {
+    console.error("Mapper updateUserWithPassword Error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   insertUser,
   selectUserById,
   countUserId,
+  updateUser, // [등록 필수]
+  updateUserWithPassword, // [등록 필수]
 };

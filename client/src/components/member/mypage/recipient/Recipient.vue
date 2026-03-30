@@ -23,16 +23,26 @@ const form = ref({
     file: null // 첨부파일
 });
 
-onMounted(() => {
-    // [로그 확인 결과]
-    // zip_code -> 우편번호
-    // address -> 기본 주소
-    // detail_address -> 상세 주소
-
-    // authStore에 추가한 필드명으로 데이터를 가져옵니다.
-    if (authStore.userZip) form.value.zipCode = authStore.userZip;
-    if (authStore.userAddr1) form.value.addr1 = authStore.userAddr1;
-    if (authStore.userAddr2) form.value.addr2 = authStore.userAddr2;
+onMounted(async () => {
+    // [설명] 스토어에 이미 주소 정보가 있다면 바로 사용합니다.
+    if (authStore.userZip && authStore.userAddr1) {
+        form.value.zipCode = authStore.userZip;
+        form.value.addr1 = authStore.userAddr1;
+        form.value.addr2 = authStore.userAddr2;
+    } else if (authStore.userId) {
+        // 만약 스토어가 비어있다면(새로고침 등), 서버에서 직접 상세 정보를 가져옵니다.
+        try {
+            // 우리가 만든 전용 API를 통해 유저 상세 정보를 조회
+            const response = await axios.get(`/info/user-detail/${authStore.userId}`);
+            const user = response.data;
+            // DB 컬럼명에 맞춰 폼 데이터를 할당
+            form.value.zipCode = user.zip_code;
+            form.value.addr1 = user.address;
+            form.value.addr2 = user.detail_address;
+        } catch (error) {
+            console.error('주소 정보를 불러오지 못했습니다.', error);
+        }
+    }
 });
 
 // [옵션] 장애유형 리스트
@@ -147,11 +157,14 @@ watch(
                 </div>
 
                 <div class="input-set address-section">
-                    <label>서비스 제공 주소 <small class="notice ml-2">(회원 정보와 동일)</small></label>
+                    <label>주소 <small class="notice ml-2">(회원 정보와 동일)</small></label>
+
                     <div class="flex gap-2 mb-2">
                         <InputText v-model="form.zipCode" placeholder="우편번호" readonly class="p-inputtext-sm w-6rem disabled-input" />
                     </div>
+
                     <InputText v-model="form.addr1" placeholder="기본 주소" class="mb-2 p-inputtext-sm disabled-input" readonly />
+
                     <InputText v-model="form.addr2" placeholder="상세 주소" class="p-inputtext-sm disabled-input" readonly />
 
                     <p class="text-xs mt-2 text-500">※ 주소지는 본인 주소로 자동 설정되며, 마이페이지에서 변경 가능합니다.</p>
