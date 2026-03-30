@@ -146,4 +146,82 @@ router.post("/priority/cancel", async (req, res) => {
     });
   }
 });
+
+// 1. 관리자 승인 (POST) - 프론트엔드 호출 URL과 일치시켜야 함
+router.post("/admin/priority/approve", async (req, res) => {
+  const { bene_id } = req.body;
+
+  try {
+    await noTouch_service.adminApprovePriority(bene_id);
+    res
+      .status(200)
+      .json({ success: true, message: "관리자 승인이 완료되었습니다." });
+  } catch (error) {
+    console.error("관리자 승인 에러:", error);
+    if (error.message === "MISSING_PARAM") {
+      return res
+        .status(400)
+        .json({ success: false, message: "지원자 ID가 누락되었습니다." });
+    }
+    if (error.message === "NOT_FOUND") {
+      return res
+        .status(404)
+        .json({ success: false, message: "승인할 대상자를 찾을 수 없습니다." });
+    }
+    res
+      .status(500)
+      .json({ success: false, message: "서버 내부 오류가 발생했습니다." });
+  }
+});
+
+// 2. 관리자 반려 (POST) - 프론트엔드 호출 URL과 일치시켜야 함
+router.post("/admin/priority/reject", async (req, res) => {
+  const { bene_id, reason } = req.body;
+
+  try {
+    await noTouch_service.adminRejectPriority(bene_id, reason);
+    res
+      .status(200)
+      .json({ success: true, message: "관리자 반려 처리가 완료되었습니다." });
+  } catch (error) {
+    console.error("관리자 반려 에러:", error);
+    if (error.message === "MISSING_PARAM") {
+      return res.status(400).json({
+        success: false,
+        message: "지원자 ID 또는 반려 사유가 누락되었습니다.",
+      });
+    }
+    if (error.message === "NOT_FOUND") {
+      return res
+        .status(404)
+        .json({ success: false, message: "반려할 대상자를 찾을 수 없습니다." });
+    }
+    res
+      .status(500)
+      .json({ success: false, message: "서버 내부 오류가 발생했습니다." });
+  }
+});
+
+// [신규] 관리자 반려 히스토리 조회 API
+router.get("/admin/priority/reject-history/:bene_id", async (req, res) => {
+  const bene_id = req.params.bene_id;
+
+  try {
+    const historyData = await noTouch_service.getAdminRejectHistory(bene_id);
+    res.status(200).json({
+      success: true,
+      data: historyData, // 배열 형태로 과거 반려 이력이 쫙 내려갑니다
+    });
+  } catch (error) {
+    console.error("반려 히스토리 조회 에러:", error);
+    if (error.message === "MISSING_PARAM") {
+      return res
+        .status(400)
+        .json({ success: false, message: "지원자 ID가 누락되었습니다." });
+    }
+    res
+      .status(500)
+      .json({ success: false, message: "서버 내부 오류가 발생했습니다." });
+  }
+});
 module.exports = router;

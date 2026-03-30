@@ -43,8 +43,8 @@ onMounted(async () => {
                             </select>
                         </td>
 
-                        <th><label>보호자</label></th>
-                        <td><input type="text" :value="selected_bene_detail.family_name || ''" readonly /></td>
+                        <th><label>담당자</label></th>
+                        <td><input type="text" :value="selected_bene_detail.manager_name || ''" readonly /></td>
 
                         <th><label>대기단계</label></th>
                         <!-- 수정됨: 클릭 이벤트 및 hover 클래스 제거 -->

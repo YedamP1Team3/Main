@@ -8,7 +8,7 @@ const planDetail = ref({});
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/api/support-plans/${id}`);
+        const response = await axios.get(`api/api/support-plans/${id}`);
         planDetail.value = response.data;
     } catch (error) {
         console.error(`에러`, error);
