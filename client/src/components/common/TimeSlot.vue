@@ -22,9 +22,12 @@
                 :key="slot.time"
                 class="time-item"
                 :class="{
-                    selected: selectedTimes.includes(slot.time),
-                    blocked: slot.status === 'blocked',
-                    disabled: mode !== 'manager' && slot.status === 'blocked'
+                    selected: selectedTimes.includes(slot.time) && slot.status !== 'blocked',
+                    'selected-blocked': selectedTimes.includes(slot.time) && slot.status === 'blocked' && mode === 'manager',
+
+                    reserved: slot.status === 'reserved',
+                    blocked: slot.status === 'blocked' && mode === 'manager',
+                    unavailable: slot.status === 'reserved' || (slot.status === 'blocked' && mode !== 'manager')
                 }"
                 @click="toggleTime(slot)"
             >
@@ -251,6 +254,7 @@ export default {
     box-sizing: border-box;
     cursor: pointer;
     transition: all 0.18s ease;
+    user-select:;
 }
 
 .time-item:hover {
@@ -259,6 +263,22 @@ export default {
     color: #b91c1c;
 }
 
+/* 비활성 */
+.time-item.reserved,
+.time-item.unavailable {
+    cursor: not-allowed;
+    opacity: 0.55;
+    background: #f9fafb;
+    color: #9ca3af;
+}
+
+/* 회색처리된 슬롯은 hover 변화 없음 */
+.time-item.reserved:hover,
+.time-item.unavailable:hover {
+    background-color: #e0e0e0;
+    border-color: #cfcfcf;
+    color: #777;
+}
 /* 선택됨 */
 .time-item.selected {
     background: #ef4444;
@@ -274,6 +294,7 @@ export default {
     color: #dc2626;
     border: 1px solid #fca5a5;
     font-weight: 600;
+    cursor: pointer;
 }
 
 .time-item.blocked:hover {
@@ -288,14 +309,6 @@ export default {
     color: #fff;
     border-color: #2563eb;
     font-weight: 700;
-}
-
-/* 비활성 */
-.time-item.disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
-    background: #f9fafb;
-    color: #9ca3af;
 }
 
 /* 하단 버튼 */
