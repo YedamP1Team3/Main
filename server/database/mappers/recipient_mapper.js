@@ -1,28 +1,49 @@
 module.exports = {
+  // 기존 등록용 매퍼
   mapForInsert: (data, familyId) => {
-    // '기타' 선택 시 직접 입력값을, 아니면 라디오 값을 관계에 할당
     const finalRelation =
       data.relation === "기타" ? data.relationEtc : data.relation;
+    const fullAddress = `${data.address} ${data.detailAddress}`.trim();
 
-    // 기본 주소와 상세 주소를 공백으로 구분하여 하나로 합침
-    const fullAddress = `${data.addr1} ${data.addr2}`.trim();
-
-    // '19900101' -> '1990-01-01'로 변환하는 로직
     let formattedBirth = data.birth;
     if (data.birth && data.birth.length === 8) {
       formattedBirth = `${data.birth.substring(0, 4)}-${data.birth.substring(4, 6)}-${data.birth.substring(6, 8)}`;
     }
 
-    // SQL 쿼리의 ? 순서와 일치하는 배열 반환
     return [
-      familyId, // 보호자(유저) ID -> family_id
-      data.name, // 대상자 성명 -> bene_name
-      data.disabilityType, // 장애유형 -> disability_type
-      formattedBirth, // 변환된 날짜 적용
-      data.gender, // 성별 -> gender
-      finalRelation, // 관계 -> relationship
-      data.zipCode, // 우편번호 -> zip_code
-      fullAddress, // 주소 전체 -> address
+      familyId,
+      data.name,
+      data.disabilityType,
+      formattedBirth,
+      data.gender === "남성" ? "M" : "F",
+      finalRelation,
+      data.postcode, // Vue form의 변수명(postcode) 확인
+      fullAddress,
+    ];
+  },
+
+  // [수정 완료] 수정용 매퍼 (따로 분리)
+  mapForUpdate: (data, beneId) => {
+    const finalRelation =
+      data.relation === "기타" ? data.relationEtc : data.relation;
+    const fullAddress = `${data.address} ${data.detailAddress}`.trim();
+
+    let formattedBirth = data.birth;
+    if (data.birth && data.birth.length === 8) {
+      formattedBirth = `${data.birth.substring(0, 4)}-${data.birth.substring(4, 6)}-${data.birth.substring(6, 8)}`;
+    }
+
+    // SQL UPDATE 문의 ? 순서와 일치해야 함:
+    // SET bene_name=?, disability_type=?, birth_date=?, gender=?, relationship=?, zip_code=?, address=? WHERE bene_id=?
+    return [
+      data.name, // 1. bene_name
+      data.disabilityType, // 2. disability_type
+      formattedBirth, // 3. birth_date
+      data.gender === "남성" ? "M" : "F", // 4. gender
+      finalRelation, // 5. relationship
+      data.postcode, // 6. zip_code
+      fullAddress, // 7. address
+      beneId, // 8. WHERE bene_id = ?
     ];
   },
 };

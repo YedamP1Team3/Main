@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const recipientId = route.params.id; // 수정할 대상자의 ID
 
 const disabilityOptions = ['지체장애', '시각장애', '청각장애', '지적장애', '뇌병변장애', '기타'];
@@ -35,21 +37,38 @@ onMounted(async () => {
         const resTarget = await axios.get(`/api/recipient/${recipientId}`);
         if (resTarget.data) {
             const d = resTarget.data;
-            form.value.name = d.name;
-            form.value.birth = d.birth;
-            form.value.gender = d.gender === 'M' ? '남성' : '여성';
-            form.value.disabilityType = d.disability_type;
-            form.value.relation = d.relation;
-            form.value.relationEtc = d.relation_etc || '';
+            // DB 컬럼명에 맞춰서 매칭
+            form.value.name = d.bene_name || d.BENE_NAME;
+
+            // 날짜에 포함된 '-' 제거
+            const rawBirth = d.birth_date || d.BIRTH_DATE;
+            form.value.birth = rawBirth ? rawBirth.split('T')[0].replace(/-/g, '') : '';
+
+            const genderVal = d.gender || d.GENDER;
+            form.value.gender = genderVal === 'M' ? '남성' : '여성';
+            form.value.disabilityType = d.disability_type || d.DISABILITY_TYPE;
+
+            // [관계 로직 수정]
+            const relationOptions = ['부모', '배우자', '자녀', '친족', '후견인'];
+            if (relationOptions.includes(d.relationship)) {
+                form.value.relation = d.relationship;
+                form.value.relationEtc = '';
+            } else {
+                form.value.relation = '기타';
+                form.value.relationEtc = d.relationship;
+            }
         }
 
         // 2. [핵심] 일반 이용자(본인)의 주소 정보를 가져와서 덮어쓰기
         // MemberEdit.vue에서 사용했던 본인 정보 조회 API를 활용하세요.
-        const resUser = await axios.get('/api/info/user');
-        if (resUser.data) {
-            form.value.postcode = resUser.data.postcode;
-            form.value.address = resUser.data.address;
-            form.value.detailAddress = resUser.data.detail_address;
+        if (authStore.userId) {
+            const resUser = await axios.get(`/api/info/user-detail/${authStore.userId}`);
+            if (resUser.data) {
+                // MemberEdit.vue의 데이터 구조에 맞춰 할당
+                form.value.postcode = resUser.data.zip_code;
+                form.value.address = resUser.data.address;
+                form.value.detailAddress = resUser.data.detail_address;
+            }
         }
     } catch (error) {
         console.error('데이터 로드 실패:', error);

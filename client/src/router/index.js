@@ -1,9 +1,11 @@
 import sAdmin from '@/layout/sAdmin_layout/JsLayout.vue';
 import sakayLay from '@/layout/sakima_layout/AppLayout.vue';
 import memberLay from '@/layout/member/mLayout.vue';
+import managerTop from '@/layout/manger/JsTopbarmg.vue';
 // import memberSid from '@/layout/member/mSidbar.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { member } from './member.js';
+import { manager } from './manager.js';
 import { systemAdmin } from './s_admin.js';
 import { sakaiLayoutRoutes, sakaiStandaloneRoutes } from './sakai.js';
 
@@ -38,6 +40,13 @@ const router = createRouter({
             path: '/beneficiaryMain',
             name: 'beneficiaryMain',
             component: () => import('../views/beneficiary/BeneficiaryMain.vue')
+        },
+        {
+            path: '/manager',
+            // component: managerTop,
+            children: [
+                ...manager // 기관 담당자 관련 router (우선 마이페이지 관련만 있음)
+            ]
         },
         {
             // 로그인 페이지

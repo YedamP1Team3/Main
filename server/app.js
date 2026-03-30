@@ -18,6 +18,8 @@ const adsupportPlan = require("./router/adsupport_router.js");
 const infoRouter = require("./router/info_router.js");
 const recipientRouter = require("./router/recipient_router.js");
 const resultPlan = require("./router/resultPlan_router.js");
+const mgMyPageRouter = require("./router/mgmypage_router.js");
+const mgTargetRouter = require("./router/mgtargets_router.js");
 
 app.use("/abc", require("./router/noTouch_router.js"));
 app.use("/api", userRouter);
@@ -27,6 +29,8 @@ app.use("/adsupport", adsupportPlan);
 app.use("/resultPlan", resultPlan);
 app.use("/info", infoRouter);
 app.use("/recipient", recipientRouter);
+app.use("/mgmypage", mgMyPageRouter);
+app.use("/mgtargets", mgTargetRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcom!!");

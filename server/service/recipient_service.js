@@ -27,7 +27,28 @@ module.exports = {
 
       return { success: true, list: rows }; // 조회된 결과 배열을 반환
     } catch (err) {
-      console.error("Sercice GetList Error:", err);
+      console.error("Service GetList Error:", err);
+      throw err;
+    }
+  },
+
+  // 1명 정보 가져오기 서비스
+  getRecipientDetail: async (beneId) => {
+    try {
+      const rows = await dao.execute(sql.selectRecipientById, [beneId]);
+      return rows[0]; // 데이터 한 건 반환
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // 수정 서비스
+  updateRecipient: async (beneId, recipientData) => {
+    try {
+      const params = mapper.mapForUpdate(recipientData, beneId);
+      const result = await dao.execute(sql.updateRecipient, params);
+      return { success: result.affectedRows > 0 };
+    } catch (err) {
       throw err;
     }
   },
