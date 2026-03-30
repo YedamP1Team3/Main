@@ -141,7 +141,7 @@ watch(
                 <div v-for="(log, index) in rejectionLog" :key="index" class="history-card">
                     <div class="history-header">
                         <span class="history-user">검토자: {{ log.manager_name }}</span>
-                        <span class="history-date">{{ log.created_at }}</span>
+                        <span class="history-date">작성일: {{ log.created_at }}</span>
                     </div>
                     <div class="history-body"><strong>사유:</strong> {{ log.rejection_reason }}</div>
                 </div>
