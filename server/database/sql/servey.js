@@ -88,8 +88,11 @@ SELECT
     p.progress_status
 FROM application a
 LEFT JOIN beneficiary_info b ON a.bene_id = b.bene_id
--- ⭐️ 수정된 부분: a.app_id 가 아니라 a.bene_id 로 조인합니다!
-LEFT JOIN priority p ON a.bene_id = p.bene_id 
+LEFT JOIN priority p ON p.priority_id = (
+    SELECT MAX(priority_id) 
+    FROM priority 
+    WHERE bene_id = a.bene_id
+)
 WHERE a.bene_id = ?
 ORDER BY a.created_at DESC;
 `;

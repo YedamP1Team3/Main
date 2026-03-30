@@ -13,18 +13,20 @@ const selectBeneficiariesNames = `
 `;
 
 const selectBeneficiariesDetail = `
-    SELECT 
-        b.bene_id,
-        b.bene_name,
-        u.user_name AS family_name,
-        b.gender,
-        DATE_FORMAT(b.birth_date, '%Y-%m-%d') AS birth_date,
-        b.disability_type,
-        p.priority_status
-    FROM beneficiary_info b
-    LEFT JOIN user_info u ON b.family_id = u.user_id
-    LEFT JOIN priority p ON b.bene_id = p.bene_id
-    WHERE b.bene_id = ?
+SELECT 
+    b.bene_id,
+    b.bene_name,
+    u1.user_name AS family_name, -- 기존 가족 이름
+    u2.user_name AS manager_name, -- 매니저 아이디 기준 이름 추가
+    b.gender,
+    DATE_FORMAT(b.birth_date, '%Y-%m-%d') AS birth_date,
+    b.disability_type,
+    p.priority_status
+FROM beneficiary_info b
+LEFT JOIN user_info u1 ON b.family_id = u1.user_id   -- 가족 정보를 위한 조인
+LEFT JOIN user_info u2 ON b.manager_id = u2.user_id  -- 매니저 정보를 위한 조인 (추가된 부분)
+LEFT JOIN priority p ON b.bene_id = p.bene_id
+WHERE b.bene_id = ?
 `;
 
 const selectSupportPlanList = `

@@ -17,14 +17,14 @@ const fetchBeneDetail = async () => {
         selectedBene.value = {};
         return;
     }
-    const response = await axios.get(`http://localhost:3000/api/beneficiaries/${selectedBeneId.value}`);
+    const response = await axios.get(`api/api/beneficiaries/${selectedBeneId.value}`);
     selectedBene.value = response.data;
     emit('updateBeneId', selectedBeneId.value, response.data.priority_id);
 };
 
 onMounted(async () => {
     const agencylist = authStore.agencyId;
-    const response = await axios.get('http://localhost:3000/adsupport/admin/beneficiaries/names', {
+    const response = await axios.get('api/adsupport/admin/beneficiaries/names', {
         params: { agency_id: agencylist }
     });
     AdSupportList.value = response.data;
@@ -49,9 +49,9 @@ onMounted(async () => {
                             </template>
                         </select>
                     </td>
-                    <th><label>보호자</label></th>
+                    <th><label>담당자</label></th>
                     <td>
-                        <input type="text" :value="selectedBene.family_name || ''" readonly />
+                        <input type="text" :value="selectedBene.manager_name || ''" readonly />
                     </td>
 
                     <th><label>대기단계</label></th>

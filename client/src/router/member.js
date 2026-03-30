@@ -32,5 +32,10 @@ export const member = [
                 component: () => import('@/components/member/mypage/info/MemberEdit.vue')
             }
         ]
+    },
+    {
+        path: '/homepage',
+        name: 'mHomepage',
+        component: () => import('@/views/member/HomePage.vue')
     }
 ];

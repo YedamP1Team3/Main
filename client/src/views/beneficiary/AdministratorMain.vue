@@ -1,19 +1,21 @@
 <script setup>
 import { ref } from 'vue';
-import { useSurveyStore } from '@/stores/useSurveyStore'; // ⭐️ 스토어 가져오기
-// 우리가 만든 컴포넌트들을 가져옵니다.
+import { useSurveyStore } from '@/stores/useSurveyStore';
 import JsTopbarad from '@/layout/manger/JsTopbarmg.vue';
 import AdSupportInfo from '@/components/admin/supportplan/adbeneficiary/AdSupportInfo.vue';
 import AdminManagement from '@/components/admin/supportplan/adbeneficiary/AdminManagement.vue';
 import AdplanDetail from '@/components/admin/supportplan/adbeneficiary/AdplanDetail.vue';
 import adminsurvey from '@/components/admin/supportplan/adbeneficiary/AdminSurveyView.vue';
 import ManagerAssignView from '@/components/admin/supportplan/adbeneficiary/ManagerAssignModal.vue';
+
+// ⭐️ 새로 만든 관리자용 승인/반려 컴포넌트 임포트 (경로는 실제에 맞게 수정해주세요)
+import AdminPriorityManage from '@/components/admin/supportplan/adbeneficiary/AdminPriorityManage.vue';
 import adResultPlanDetail from '@/components/admin/supportplan/adbeneficiary/AdresultPlanDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
 const viewMode = ref('empty');
-const managementRef = ref(null); //새로고침
+const managementRef = ref(null);
 const selectPlan = ref(null);
 const surveyStore = useSurveyStore(); // ⭐️ 스토어 인스턴스
 const selectResult = ref(null);
@@ -22,17 +24,25 @@ const selectResult = ref(null);
 const handleIdUpdate = (id, priorityId) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
-    viewMode.value = 'empty'; // ⭐️ 우측 화면 닫기
-    surveyStore.is_survey_visible = false; // ⭐️ 신청서 스토어 화면도 강제 종료
+    viewMode.value = 'empty';
+    surveyStore.is_survey_visible = false;
+
+    // ⭐️ [핵심 수정] 관리자 화면에서도 지원자 선택 시 스토어 데이터를 강제 동기화해야 합니다!
+    // 이 코드가 없어서 클릭해야만 값이 바뀌는 버그가 발생했던 것입니다.
+    if (id) {
+        await surveyStore.selectBeneficiary(id);
+    } else {
+        surveyStore.clearStore();
+    }
 };
 
 const handleIdDetail = (planId) => {
     selectPlan.value = planId;
     viewMode.value = 'plan_detail';
 };
-// 3. 지원신청서 클릭 시
+
 const handleAppDetail = (appId) => {
-    viewMode.value = 'app_detail'; // ⭐️ 신청서 모드로 변경
+    viewMode.value = 'app_detail';
 };
 
 const handleResultDetail = (resultId) => {
@@ -42,25 +52,33 @@ const handleResultDetail = (resultId) => {
 
 // ⭐️ 2. 배정 화면 열기 함수
 const handleAssignManager = () => {
-    viewMode.value = 'assign_manager'; // 우측 화면 전환
+    viewMode.value = 'assign_manager';
 };
 
-// ⭐️ 3. 배정 성공 후 초기화 함수
 const handleAssignSuccess = async () => {
     alert('담당자 배정이 성공적으로 반영되었습니다.');
-    viewMode.value = 'empty'; // 완료 후 창 닫기
-    // 필요한 경우 대상자 리스트 새로고침
-    // await surveyStore.fetchBeneficiaryList();
+    viewMode.value = 'empty';
 };
 
-//저장후 새로고침 하는 함수
 const reloadList = () => {
     if (managementRef.value) {
         managementRef.value.refreshTabPlan();
     }
     viewMode.value = 'empty';
 };
+
+// ⭐️ 대기단계 입력창 클릭 시 호출되는 함수 추가
+const handleOpenPriority = async () => {
+    if (!selectedId.value) {
+        alert('지원자를 먼저 선택해주세요.');
+        return;
+    }
+    // 최신 대기단계 정보를 스토어에 업데이트 후 뷰 모드 전환
+    await surveyStore.fetchPriorityInfo(selectedId.value);
+    viewMode.value = 'priority';
+};
 </script>
+
 <template>
     <header class="main-header">
         <JsTopbarad />
@@ -69,7 +87,7 @@ const reloadList = () => {
     <div class="dashboard-container">
         <aside class="side-panel">
             <section class="info-section">
-                <AdSupportInfo @updateBeneId="handleIdUpdate" />
+                <AdSupportInfo @updateBeneId="handleIdUpdate" @open-priority="handleOpenPriority" />
             </section>
 
             <section class="list-section">
@@ -90,6 +108,10 @@ const reloadList = () => {
             </div>
             <div v-else-if="viewMode === 'result_detail'" class="editor-container">
                 <adResultPlanDetail :resultId="selectResult" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+            </div>
+
+            <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">
+                <AdminPriorityManage @close="viewMode = 'empty'" @refresh="reloadList" />
             </div>
 
             <div v-else class="empty-state">

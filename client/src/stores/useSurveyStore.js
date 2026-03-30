@@ -33,18 +33,19 @@ export const useSurveyStore = defineStore('survey', {
     }),
     getters: {
         priorityStatusKor: (state) => {
-            if (state.priority_data.progress_status === 'pending') {
-                return '대기';
-            }
-
-            // 💡 [핵심 수정] 고정된 프로필이 아닌, 실시간 변하는 priority_data를 먼저 참조해야 합니다.
+            const prog = state.priority_data.progress_status;
             const dbCode = state.priority_data.priority_status || state.selected_bene_detail?.priority_status;
 
-            // 데이터가 없거나 'none'일 경우 미신청 처리
+            // ⭐️ [핵심] 진행 상태에 따른 명확한 텍스트 분기
+            if (prog === 'pending') return '대기';
+            if (prog === 'rejected') return '반려됨'; // 반려 상태 명시
+
+            // DB 코드가 없으면 미신청
             if (!dbCode || dbCode === 'none' || dbCode === '') return '미신청';
 
+            // 승인 완료된 경우에만 해당 단계(긴급, 중점, 계획)를 보여줌
             const lowerCode = String(dbCode).toLowerCase();
-            return PRIORITY_MAP[lowerCode] || dbCode;
+            return PRIORITY_MAP[lowerCode] || '미신청';
         }
     },
     actions: {
@@ -55,7 +56,7 @@ export const useSurveyStore = defineStore('survey', {
                 return;
             }
             try {
-                const res = await axios.get(`http://localhost:3000/abc/bene/${beneId}`);
+                const res = await axios.get(`api/abc/bene/${beneId}`);
                 this.selected_bene_detail = res.data;
             } catch (error) {
                 console.error('상세 로드 실패:', error);
@@ -72,7 +73,7 @@ export const useSurveyStore = defineStore('survey', {
             }
 
             try {
-                const res = await axios.get(`http://localhost:3000/abc/priority/${beneId}`);
+                const res = await axios.get(`api/abc/priority/${beneId}`);
                 if (res.data && res.data.success && res.data.data) {
                     const dbData = res.data.data;
                     const targetData = Array.isArray(dbData) ? dbData[0] : dbData;
@@ -129,7 +130,7 @@ export const useSurveyStore = defineStore('survey', {
                     priority_status: dbCode,
                     progress_status: 'pending'
                 };
-                const res = await axios.post(`http://localhost:3000/abc/priority/request`, payload);
+                const res = await axios.post(`api/abc/priority/request`, payload);
 
                 if (res.data.success) {
                     await this.fetchPriorityInfo(this.selected_bene_id);
@@ -144,7 +145,7 @@ export const useSurveyStore = defineStore('survey', {
 
         async cancelPriority() {
             try {
-                const res = await axios.post(`http://localhost:3000/abc/priority/cancel`, {
+                const res = await axios.post(`api/abc/priority/cancel`, {
                     bene_id: this.selected_bene_id
                 });
 
@@ -165,13 +166,13 @@ export const useSurveyStore = defineStore('survey', {
             if (!authStore.isLoggedIn) return;
 
             try {
-                const res = await axios.get('http://localhost:3000/abc/bene');
+                const res = await axios.get('api/abc/bene');
                 const allList = res.data;
                 this.beneficiary_list = allList;
 
                 const filtered = [];
                 for (const bene of allList) {
-                    const detailRes = await axios.get(`http://localhost:3000/abc/bene/${bene.bene_id}`);
+                    const detailRes = await axios.get(`api/abc/bene/${bene.bene_id}`);
                     if (detailRes.data && detailRes.data.family_name === authStore.userName) {
                         filtered.push(bene);
                     }
@@ -184,7 +185,7 @@ export const useSurveyStore = defineStore('survey', {
 
         async fetchApplicationList(beneId) {
             try {
-                const res = await axios.get(`http://localhost:3000/survey/list/${beneId}`);
+                const res = await axios.get(`api/survey/list/${beneId}`);
                 if (res.data.success) {
                     this.application_list = res.data.data;
                 } else {
@@ -210,7 +211,7 @@ export const useSurveyStore = defineStore('survey', {
 
         async loadApplicationView(appId) {
             try {
-                const res = await axios.get(`http://localhost:3000/survey/result/${appId}`);
+                const res = await axios.get(`api/survey/result/${appId}`);
                 if (res.data.success) {
                     this.view_survey_data = res.data.data.survey_data.items;
                     this.view_answers = res.data.data.answers;
@@ -232,7 +233,7 @@ export const useSurveyStore = defineStore('survey', {
             }
 
             try {
-                const res = await axios.delete(`http://localhost:3000/survey/application/${this.view_app_id}`);
+                const res = await axios.delete(`api/survey/application/${this.view_app_id}`);
                 if (res.data.success) {
                     alert('신청서가 삭제되었습니다.');
                     this.closeSurvey();
