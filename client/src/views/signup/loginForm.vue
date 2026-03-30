@@ -67,7 +67,7 @@ const handleLogin = async () => {
 
     try {
         // 백엔드 서버(3000번 포트)로 요청 전송
-        const response = await axios.post('http://localhost:3000/info/login', {
+        const response = await axios.post('/info/login', {
             userId: form.userId,
             password: form.password
         });

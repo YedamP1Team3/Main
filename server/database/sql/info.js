@@ -13,14 +13,25 @@ const insertUser = `
         tel, 
         email, 
         created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    ) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
 `;
 
 const selectUserById = `
     SELECT * FROM user_info 
     WHERE user_id = ?
 `;
+
+// 정보 수정을 위한 업데이트 쿼리
+const updateUser = `
+    UPDATE user_info SET 
+        user_name = ?, tel = ?, email = ?, 
+        zip_code = ?, address = ?, detail_address = ?
+    WHERE user_id = ?
+`;
+
 module.exports = {
   insertUser,
   selectUserById,
+  updateUser,
 };

@@ -5,36 +5,90 @@
     <div class="layout-body">
         <RsvSideBar />
         <main class="layout-main">
-            <div class="content row">
-                <Calendar v-model="selectedDate" />
-                <TimeSlot :selectedDate="selectedDate" :slots="slots" :blockedSummary="blockedSummary" mode="manager" @blockTimes="handleBlock" />
+            <div class="reservation_container">
+                <BeneInfo :beneficiaries="beneficiaries" :selectedBeneId="selectedBeneId" @select-beneficiary="handleSelectBeneficiary" />
+                <div class="content row">
+                    <Calendar v-model="selectedDate" />
+                    <TimeSlot :selectedDate="selectedDate" :slots="slots" mode="family" @reserveTimes="handleReserve" />
+                </div>
             </div>
         </main>
     </div>
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import Calendar from '@/components/common/Calendar.vue';
 import TimeSlot from '@/components/common/TimeSlot.vue';
 
 import { getManagerSchedule } from '@/api/reservation/schedule';
-import { createBlockedTimes, deleteBlockedTimes } from '@/api/reservation/block';
+// import { createBlockedTimes, deleteBlockedTimes } from '@/api/reservation/block';
+import { getBeneficiariesByFamilyId, getManagerIdByBene } from '@/api/reservation/beneInfo';
+
 import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
 import MTopbar from '@/layout/member/mTopbar.vue';
+import BeneInfo from '@/components/reservation/beneInfo.vue';
 
 export default {
     components: {
         Calendar,
         TimeSlot,
         MTopbar,
-        RsvSideBar
+        RsvSideBar,
+        BeneInfo
     },
 
     setup() {
+        const selectedBene = ref(null);
+        const selectedBeneId = ref(null);
+        const beneficiaries = ref([]);
+        const managerId = ref(null);
+
         const selectedDate = ref(null);
         const slots = ref([]);
         const blockedSummary = ref([]);
+
+        onMounted(async () => {
+            try {
+                const res = await getBeneficiariesByFamilyId();
+                console.log('전체 응답 : ', res);
+                beneficiaries.value = res.data.data || [];
+            } catch (err) {
+                console.error('지원대상자 목록 조회 실패:', err);
+                beneficiaries.value = [];
+            }
+        });
+
+        const handleSelectBeneficiary = async (bene) => {
+            selectedBene.value = bene;
+            selectedBeneId.value = bene?.bene_id || null;
+
+            // 초기화
+            selectedDate.value = null;
+            slots.value = [];
+
+            // ❗ 선택 안 된 경우 방어
+            if (!bene?.bene_id) {
+                managerId.value = null;
+                return;
+            }
+
+            try {
+                const res = await getManagerIdByBene(bene.bene_id);
+
+                if (res.data.success) {
+                    managerId.value = res.data.managerId;
+
+                    console.log('담당자 ID:', managerId.value);
+                } else {
+                    console.warn('managerId 조회 실패');
+                    managerId.value = null;
+                }
+            } catch (err) {
+                console.error('managerId 조회 에러:', err);
+                managerId.value = null;
+            }
+        };
 
         const extractBlockedSummary = (schedule) => {
             const occupied = schedule.occupied_times || [];
@@ -48,26 +102,24 @@ export default {
         };
 
         // 🔥 날짜 변경 감지 → API 호출
-        watch(selectedDate, async (newDate) => {
-            if (!newDate) return;
+        watch([selectedDate, selectedBeneId], async ([date, beneId]) => {
+            if (!date || !beneId || !managerId.value) return;
 
             try {
-                const formattedDate = new Date(newDate).toISOString().slice(0, 10);
-                const res = await getManagerSchedule(formattedDate);
+                const formattedDate = new Date(date).toISOString().slice(0, 10);
 
-                // schedule이 배열일 가능성 대비
+                const res = await getManagerSchedule(formattedDate, managerId.value);
+
                 const schedule = res.data.schedule;
 
                 if (!schedule) {
                     slots.value = [];
-                    blockedSummary = [];
+                    blockedSummary.value = [];
                     return;
                 }
 
-                console.log('res.data.schedule : ', schedule);
                 slots.value = convertToSlots(schedule);
                 blockedSummary.value = extractBlockedSummary(schedule);
-                console.log('schedule : ', slots.value);
             } catch (err) {
                 console.error('스케줄 조회 실패:', err);
                 slots.value = [];
@@ -108,6 +160,25 @@ export default {
             }
 
             return result;
+        };
+
+        const handleReserve = async (data) => {
+            console.log('예약 요청: ', data);
+
+            try {
+                const payload = {
+                    beneId: selectedBeneId.value,
+                    date: data.date,
+                    times: data.times
+                };
+
+                await createReservation(payload);
+
+                alert('상담 신청 완료');
+            } catch (err) {
+                console.error(err);
+                alert('예약 실패');
+            }
         };
 
         // 차단 처리
@@ -153,24 +224,20 @@ export default {
         };
 
         return {
+            selectedBeneId,
+            beneficiaries,
             selectedDate,
             slots,
             blockedSummary,
-            handleBlock
+            handleBlock,
+            handleSelectBeneficiary,
+            handleReserve
         };
     }
 };
 </script>
 
 <style scoped>
-/* .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 50px;
-    gap: 20px;
-} */
-
 .page {
     display: flex;
     flex-direction: column;
@@ -205,6 +272,16 @@ export default {
     overflow-y: auto;
 }
 
+.reservation-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
 .content.row {
     display: flex;
     flex-direction: row; /* 🔥 핵심 */
@@ -218,5 +295,11 @@ export default {
 
 .selected-date {
     font-size: 16px;
+}
+
+@media (max-width: 1100px) {
+    .content-row {
+        flex-direction: column;
+    }
 }
 </style>

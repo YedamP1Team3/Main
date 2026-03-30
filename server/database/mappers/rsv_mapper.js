@@ -1,5 +1,38 @@
-const { pool } = require("../DAO.js");
-const rsvSql = require("../sql/rsv.js");
+const { pool } = require('../DAO.js');
+const rsvSql = require('../sql/rsv.js');
+
+const getBeneficiaryManagerInfo = async (beneId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(rsvSql.getBeneficiaryManagerInfo, [beneId]);
+    return rows;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const getBeneficiariesByFamilyId = async (familyId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(rsvSql.getBeneficiariesByFamilyId, [
+      familyId,
+    ]);
+    return rows;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+// -----------------------------------reservation REST--------------------------
+
+// -----------------------------------managerSchedule REST--------------------------
 
 // ACTIVE MANAGER 목록 조회
 const selectActiveManagers = async () => {
@@ -7,7 +40,7 @@ const selectActiveManagers = async () => {
   try {
     conn = await pool.getConnection();
     const rows = await conn.query(rsvSql.selectActiveManagers);
-    console.log("ACTIVE인 MANAGER 조회 : ", rows);
+    console.log('ACTIVE인 MANAGER 조회 : ', rows);
     return rows;
   } catch (err) {
     console.log(err);
@@ -116,4 +149,6 @@ module.exports = {
   deleteBlockedTime,
   selectActiveManagers,
   insertManagerSchedules,
+  getBeneficiariesByFamilyId,
+  getBeneficiaryManagerInfo,
 };

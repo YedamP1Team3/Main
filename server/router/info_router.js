@@ -64,4 +64,38 @@ router.get("/check-id/:userId", async (req, res) => {
   }
 });
 
+// 내 정보 수정을 위한 상세 데이터 조회 (GET)방식
+router.get("/user-detail/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const userDetail = await infoService.getUserDetail(userId);
+
+    if (userDetail) {
+      res.status(200).json(userDetail);
+    } else {
+      res.status(404).send({ message: "사용자를 찾을 수 없습니다." });
+    }
+  } catch (err) {
+    console.error("Fetch User Error:", err);
+    res.status(500).send({ message: "서버 오류" });
+  }
+});
+
+// 내 정보 수정 실행 (PUT)방식
+router.put("/update-user", async (req, res) => {
+  try {
+    const updateData = req.body;
+    const result = await infoService.updateUser(updateData);
+
+    if (result.status === "success") {
+      res.status(200).send({ message: "수정 완료 !" });
+    } else {
+      res.status(400).send({ message: "수정 실패." });
+    }
+  } catch (err) {
+    console.error("Update User Error:", err);
+    res.status(500).send({ message: "서버 오류" });
+  }
+});
+
 module.exports = router;
