@@ -1,9 +1,8 @@
 <script setup>
 import axios from 'axios';
 import { ref, watch, onMounted } from 'vue';
-import BeneficiaryDetail from './BeneficiaryDetail.vue';
 
-const emit = defineEmits(['refresh', 'uiChange']);
+const emit = defineEmits(['refresh', 'select-sub-plan']);
 const props = defineProps({
     beneId: [String, Number],
     priorityId: [String, Number],
@@ -11,9 +10,8 @@ const props = defineProps({
 });
 
 const resultDetail = ref({});
-const rejectionLog = ref([]); // 반려 히스토리 저장용
-const selectedPlans = ref([]); //연결된 지원계획서 목록 저장용
-const selectBeneficiary = ref(null);
+const rejectionLog = ref([]);
+const selectedPlans = ref([]);
 
 const supportList = ref([]);
 const supportPlan = ref('');
@@ -24,10 +22,7 @@ const fetchResultDetail = async (id) => {
     try {
         const response = await axios.get(`http://localhost:3000/resultPlan/support-result/${id}`);
         resultDetail.value = response.data;
-        selectedPlans.value = response.data.selected_plans || []; // ✅ 계획서 목록 추출
-
-        // 상태가 '반려'이거나 이력이 있을 수 있으므로 히스토리 조회
-        // fetchRejectionHistory(id);
+        selectedPlans.value = response.data.selected_plans || [];
     } catch (error) {
         console.error(`에러`, error);
     }
@@ -75,6 +70,11 @@ const Plus = () => {
 
 const removePlan = (id) => {
     selectedPlans.value = selectedPlans.value.filter((p) => p.plan_id !== id);
+};
+
+const selectSubPlan = (planId) => {
+    if (!planId) return;
+    emit('select-sub-plan', planId);
 };
 
 //2. 삭제 (임시/대기 상태일 때만)
@@ -137,20 +137,9 @@ const SaveTemp = async (id) => {
     }
 };
 
-const showPlanDetail = (planId) => {
-    if (selectBeneficiary.value === planId) {
-        selectBeneficiary.value = null;
-        emit('toggle-list', true);
-    } else {
-        selectBeneficiary.value = planId;
-        emit('toggle-list', false);
-    }
-};
-
 watch(
     () => props.resultId,
     (newId) => {
-        selectBeneficiary.value = null;
         fetchResultDetail(newId);
         fetchAllSupportList();
         fetchRejectionHistory(newId);
@@ -216,7 +205,7 @@ onMounted(() => {
                 <div class="input-wrapper plan-tags">
                     <div v-if="selectedPlans.length === 0" class="no-data">연결된 계획서가 없습니다.</div>
 
-                    <div v-for="plan in selectedPlans" :key="plan.plan_id" class="plan-tag-item" :class="{ 'active-tag': selectBeneficiary === plan.plan_id }" @click="showPlanDetail(plan.plan_id)">
+                    <div v-for="plan in selectedPlans" :key="plan.plan_id" class="plan-tag-item" @click="selectSubPlan(plan.plan_id)">
                         <span>{{ plan.plan_objective }}</span>
                         <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" type="button" class="btn-remove-tag" @click.stop="removePlan(plan.plan_id)">X</button>
                     </div>
@@ -229,16 +218,6 @@ onMounted(() => {
             <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" class="btn-temp" @click="SaveTemp(resultDetail.result_id)">임시 저장</button>
             <button v-if="['임시', '대기'].includes(resultDetail.progress_state) && rejectionLog.length === 0" class="btn-delete" @click="deleteTemp(resultDetail.result_id)">삭제</button>
         </div>
-
-        <transition name="fade">
-            <div v-if="selectBeneficiary" class="sub-plan-detail-container">
-                <div class="sub-detail-header">
-                    <h3>지원계획서 상세 내용</h3>
-                </div>
-                <hr class="sub-hr" />
-                <BeneficiaryDetail :planId="selectBeneficiary" :beneId="beneId" :isSubView="true" />
-            </div>
-        </transition>
 
         <div v-if="rejectionLog.length > 0" class="history-section">
             <h3 class="history-title">반려 사유 목록</h3>

@@ -75,7 +75,7 @@ watch(
                     <th>작성일자</th>
                     <th>상태</th>
                 </tr>
-                <tr v-for="(plan, index) in planList" :key="plan.result_id" @click="detailClick(plan.result_id)" class="clickable-row">
+                <tr v-for="plan in planList" :key="plan.result_id" @click="detailClick(plan.result_id)" class="clickable-row">
                     <td>{{ plan.result_id }}</td>
                     <td>{{ plan.manager_id }}</td>
                     <td>{{ plan.result_title }}</td>

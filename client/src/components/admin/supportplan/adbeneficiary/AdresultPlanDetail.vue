@@ -1,10 +1,9 @@
 <script setup>
 import axios from 'axios';
 import { ref, watch } from 'vue';
-import BeneficiaryDetail from '@/components/manager/supportplan/beneficiary/BeneficiaryDetail.vue';
 import { useAuthStore } from '@/stores/auth';
 
-const emit = defineEmits(['refresh']);
+const emit = defineEmits(['refresh', 'select-sub-plan']);
 const props = defineProps({
     beneId: [String, Number],
     priorityId: [String, Number],
@@ -16,7 +15,6 @@ const authStore = useAuthStore();
 const resultDetail = ref({});
 const rejectionLog = ref([]); // 반려 히스토리 저장용
 const selectedPlans = ref([]); //연결된 지원계획서 목록 저장용
-const selectBeneficiary = ref(null);
 
 const supportList = ref([]);
 const supportPlan = ref('');
@@ -68,6 +66,11 @@ const Approval = async (resultId) => {
     }
 };
 
+const selectSubPlan = (planId) => {
+    if (!planId) return;
+    emit('select-sub-plan', planId);
+};
+
 // 4. 반려사항
 const updateReturn = async (resultId) => {
     if (!rejectReason.value.trim()) {
@@ -96,19 +99,11 @@ const updateReturn = async (resultId) => {
     }
 };
 
-const showPlanDetail = (planId) => {
-    if (selectBeneficiary.value === planId) {
-        selectBeneficiary.value = null;
-    } else {
-        selectBeneficiary.value = planId;
-    }
-};
 
 watch(
     () => props.resultId,
     (newId) => {
         if (newId) {
-            selectBeneficiary.value = null;
             reasoninsert.value = false; // 창 닫기
             rejectReason.value = ''; // 글자 비우기
             fetchResultDetail(newId);
@@ -155,9 +150,8 @@ watch(
                 <div class="input-wrapper plan-tags">
                     <div v-if="selectedPlans.length === 0" class="no-data">연결된 계획서가 없습니다.</div>
 
-                    <div v-for="plan in selectedPlans" :key="plan.plan_id" class="plan-tag-item" :class="{ 'active-tag': selectBeneficiary === plan.plan_id }" @click="showPlanDetail(plan.plan_id)">
+                    <div v-for="plan in selectedPlans" :key="plan.plan_id" class="plan-tag-item" @click="selectSubPlan(plan.plan_id)">
                         <span>{{ plan.plan_objective }}</span>
-                        <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" type="button" class="btn-remove-tag" @click.stop="removePlan(plan.plan_id)">X</button>
                     </div>
                 </div>
             </div>
@@ -174,20 +168,10 @@ watch(
             <button class="btn-submit-reject" @click="updateReturn(resultDetail.result_id)">반려 확정</button>
         </div>
 
-        <transition name="fade">
-            <div v-if="selectBeneficiary" class="sub-plan-detail-container">
-                <div class="sub-detail-header">
-                    <h3>지원계획서 상세 내용</h3>
-                </div>
-                <hr class="sub-hr" />
-                <BeneficiaryDetail :planId="selectBeneficiary" :beneId="beneId" :isSubView="true" />
-            </div>
-        </transition>
-
         <div v-if="rejectionLog.length > 0" class="history-section">
             <h3 class="history-title">반려 사유 목록</h3>
             <div class="history-list">
-                <div v-for="(log, index) in rejectionLog" :key="index" class="history-card">
+                <div v-for="log in rejectionLog" :key="index" class="history-card">
                     <div class="history-header">
                         <span class="history-user">검토자: {{ log.manager_name }}</span>
                         <span class="history-date">작성일: {{ log.created_at }}</span>

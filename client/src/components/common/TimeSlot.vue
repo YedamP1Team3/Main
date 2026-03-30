@@ -1,68 +1,3 @@
-<template>
-    <div class="timeslot-container">
-        <!-- 헤더 -->
-        <div class="header">
-            <div class="header-text">
-                <h3>시간 선택</h3>
-                <p v-if="selectedDate">{{ selectedDate }}</p>
-                <p v-else>날짜를 먼저 선택하세요</p>
-            </div>
-
-            <!-- 오전 / 오후 토글 -->
-            <div class="period-toggle">
-                <button :class="{ active: period === 'AM' }" @click="period = 'AM'">오전</button>
-                <button :class="{ active: period === 'PM' }" @click="period = 'PM'">오후</button>
-            </div>
-        </div>
-
-        <!-- 시간 리스트 -->
-        <div class="time-grid">
-            <div
-                v-for="slot in timeSlots"
-                :key="slot.time"
-                class="time-item"
-                :class="{
-                    selected: selectedTimes.includes(slot.time) && slot.status !== 'blocked',
-                    'selected-blocked': selectedTimes.includes(slot.time) && slot.status === 'blocked' && mode === 'manager',
-
-                    reserved: slot.status === 'reserved',
-                    blocked: slot.status === 'blocked' && mode === 'manager',
-                    unavailable: slot.status === 'reserved' || (slot.status === 'blocked' && mode !== 'manager')
-                }"
-                @click="toggleTime(slot)"
-            >
-                {{ slot.time }}
-            </div>
-        </div>
-
-        <!-- 예약불가 시간 요약 -->
-        <div v-if="mode === 'manager'" class="summary-box">
-            <h4>예약불가 시간</h4>
-
-            <ul v-if="filteredBlockedSummary.length > 0" class="summary-list">
-                <li v-for="(item, index) in filteredBlockedSummary" :key="index">{{ item }}</li>
-            </ul>
-
-            <p v-else class="summary-empty">등록된 예약불가 시간이 없습니다.</p>
-        </div>
-
-        <!-- 액션 버튼 -->
-        <div class="action-buttons">
-            <!-- 담당자 모드 -->
-            <template v-if="mode === 'manager'">
-                <button class="unavailable-btn" @click="handleManagerAction('unavailable')">예약차단</button>
-                <button class="available-btn" @click="handleManagerAction('available')">차단해제</button>
-            </template>
-
-            <!-- 보호자 모드 -->
-            <template v-else>
-                <button class="available-btn" @click="handleUserAction">상담신청</button>
-                <button class="unavailable-btn" @click="$emit('cancelSelection')">취소</button>
-            </template>
-        </div>
-    </div>
-</template>
-
 <script>
 import { ref, computed } from 'vue';
 import { toggleTimeHandler } from '@/utils/timeslot';
@@ -152,6 +87,71 @@ export default {
     }
 };
 </script>
+
+<template>
+    <div class="timeslot-container">
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="header-text">
+                <h3>시간 선택</h3>
+                <p v-if="selectedDate">{{ selectedDate }}</p>
+                <p v-else>날짜를 먼저 선택하세요</p>
+            </div>
+
+            <!-- 오전 / 오후 토글 -->
+            <div class="period-toggle">
+                <button :class="{ active: period === 'AM' }" @click="period = 'AM'">오전</button>
+                <button :class="{ active: period === 'PM' }" @click="period = 'PM'">오후</button>
+            </div>
+        </div>
+
+        <!-- 시간 리스트 -->
+        <div class="time-grid">
+            <div
+                v-for="slot in timeSlots"
+                :key="slot.time"
+                class="time-item"
+                :class="{
+                    selected: selectedTimes.includes(slot.time) && slot.status !== 'blocked',
+                    'selected-blocked': selectedTimes.includes(slot.time) && slot.status === 'blocked' && mode === 'manager',
+
+                    reserved: slot.status === 'reserved',
+                    blocked: slot.status === 'blocked' && mode === 'manager',
+                    unavailable: slot.status === 'reserved' || (slot.status === 'blocked' && mode !== 'manager')
+                }"
+                @click="toggleTime(slot)"
+            >
+                {{ slot.time }}
+            </div>
+        </div>
+
+        <!-- 예약불가 시간 요약 -->
+        <div v-if="mode === 'manager'" class="summary-box">
+            <h4>예약불가 시간</h4>
+
+            <ul v-if="filteredBlockedSummary.length > 0" class="summary-list">
+                <li v-for="(item, index) in filteredBlockedSummary" :key="index">{{ item }}</li>
+            </ul>
+
+            <p v-else class="summary-empty">등록된 예약불가 시간이 없습니다.</p>
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="action-buttons">
+            <!-- 담당자 모드 -->
+            <template v-if="mode === 'manager'">
+                <button class="unavailable-btn" @click="handleManagerAction('unavailable')">예약차단</button>
+                <button class="available-btn" @click="handleManagerAction('available')">차단해제</button>
+            </template>
+
+            <!-- 보호자 모드 -->
+            <template v-else>
+                <button class="available-btn" @click="handleUserAction">상담신청</button>
+                <button class="unavailable-btn" @click="$emit('cancelSelection')">취소</button>
+            </template>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .timeslot-container {

@@ -53,14 +53,14 @@ const handleAuthAction = () => {
             </div>
         </div>
 
-       <div class="flex items-center gap-2 cursor-pointer" @click="handleAuthAction">
-        <span class="hidden sm:block font-medium text-color">
-            {{ authStore.isLoggedIn ? `${authStore.userName} 담당자` : '로그인이 필요합니다' }}
-        </span>
-        <button type="button" class="layout-topbar-action">
-            <i class="pi pi-user" :style="{ color: authStore.isLoggedIn ? 'var(--primary-color)' : '' }"></i>
-        </button>
-    </div>
+        <div class="flex items-center gap-2 cursor-pointer" @click="handleAuthAction">
+            <span class="hidden sm:block font-medium text-color">
+                {{ authStore.isLoggedIn ? `${authStore.userName} 담당자` : '로그인이 필요합니다' }}
+            </span>
+            <button type="button" class="layout-topbar-action">
+                <i class="pi pi-user" :style="{ color: authStore.isLoggedIn ? 'var(--primary-color)' : '' }"></i>
+            </button>
+        </div>
     </div>
 </template>
 

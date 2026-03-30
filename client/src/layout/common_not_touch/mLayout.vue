@@ -1,3 +1,8 @@
+<script setup>
+import mTopbar from './mTopbar.vue';
+// import JsFooter from './JsFooter.vue';
+</script>
+
 <template>
     <div class="member-layout-container">
         <mTopbar />
@@ -7,11 +12,6 @@
         </main>
     </div>
 </template>
-
-<script setup>
-import mTopbar from './mTopbar.vue';
-// import JsFooter from './JsFooter.vue';
-</script>
 
 <style scoped>
 .js-layout-container {

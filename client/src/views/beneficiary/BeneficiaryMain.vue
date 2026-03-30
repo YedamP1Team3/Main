@@ -67,6 +67,13 @@ const reloadList = () => {
     }
     viewMode.value = 'empty';
 };
+
+const handleSelectSubPlan = (planId) => {
+    if (!managementRef.value) return;
+    if (typeof managementRef.value.openSubPlan === 'function') {
+        managementRef.value.openSubPlan(planId);
+    }
+};
 </script>
 
 <template>
@@ -108,7 +115,7 @@ const reloadList = () => {
                 <ManagerSurveyView @close="viewMode = 'empty'" />
             </div>
             <div v-else-if="viewMode === 'resultDetail'" class="editor-container">
-                <resultPlanDetail :resultId="selectResultId" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+                <resultPlanDetail :resultId="selectResultId" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan" />
             </div>
             <!-- 💡 [추가] Manager 대기단계 설정 화면 -->
             <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">

@@ -1,3 +1,8 @@
+<script setup>
+import JsTopbar from './JsTopbar.vue';
+// import JsFooter from './JsFooter.vue';
+</script>
+
 <template>
     <div class="js-layout-container">
         <JsTopbar />
@@ -7,11 +12,6 @@
         </main>
     </div>
 </template>
-
-<script setup>
-import JsTopbar from './JsTopbar.vue';
-// import JsFooter from './JsFooter.vue';
-</script>
 
 <style scoped>
 .js-layout-container {

@@ -1,3 +1,17 @@
+<script setup>
+import { ref } from 'vue';
+
+const props = defineProps({ items: Array, selectedId: Number, isActive: Boolean });
+const emit = defineEmits(['select', 'add-item', 'delete-item']); // delete-item 추가
+const newItemName = ref('');
+
+const handleAdd = () => {
+    if (!newItemName.value.trim()) return;
+    emit('add-item', newItemName.value);
+    newItemName.value = '';
+};
+</script>
+
 <template>
     <div class="flex flex-col h-[40rem] bg-white shadow-md rounded-xl border border-slate-200 p-5">
         <div class="pb-4 shrink-0"><h5 class="font-bold text-xl text-slate-800">지원서 항목</h5></div>
@@ -26,20 +40,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-
-const props = defineProps({ items: Array, selectedId: Number, isActive: Boolean });
-const emit = defineEmits(['select', 'add-item', 'delete-item']); // delete-item 추가
-const newItemName = ref('');
-
-const handleAdd = () => {
-    if (!newItemName.value.trim()) return;
-    emit('add-item', newItemName.value);
-    newItemName.value = '';
-};
-</script>
 <style scoped>
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
