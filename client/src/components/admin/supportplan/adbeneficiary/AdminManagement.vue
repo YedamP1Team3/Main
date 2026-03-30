@@ -3,12 +3,13 @@ import { ref, watch } from 'vue'; // 💡 watch 추가
 import { useSurveyStore } from '@/stores/useSurveyStore'; // 💡 스토어 연동
 import AdTabPlan from './AdTabPlan.vue';
 import AdTabApplication from './AdTabApplication.vue';
+import adResultPlan from './adResultPlan.vue';
 
 const props = defineProps({
     beneId: { type: [String, Number] }
 });
 
-const emit = defineEmits(['select-plan', 'select-app', 'assign-manager']);
+const emit = defineEmits(['select-plan', 'select-app', 'assign-manager', 'select-result']);
 
 const currentTab = ref('Plan');
 const tabPlanRef = ref(null);
@@ -36,6 +37,10 @@ const handleSelectPlan = (planId) => {
     emit('select-plan', planId);
 };
 
+const handleSelectResult = (resultId) => {
+    emit('select-result', resultId);
+};
+
 defineExpose({
     refreshTabPlan: () => {
         if (tabPlanRef.value) tabPlanRef.value.fetchPlanList(props.beneId);
@@ -55,6 +60,7 @@ defineExpose({
         <div class="tab-content">
             <AdTabApplication v-if="currentTab === 'Application'" ref="tabAppRef" :beneId="beneId" @select-app="handleSelectApp" @assign-manager="handleAssignManager" />
             <AdTabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @select-plan="handleSelectPlan" />
+            <adResultPlan v-if="currentTab === 'Result'" ref="tabPlanRef" :beneId="beneId" @select-result="handleSelectResult" />
         </div>
     </div>
 </template>

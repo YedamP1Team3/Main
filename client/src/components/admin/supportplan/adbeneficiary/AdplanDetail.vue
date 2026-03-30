@@ -41,7 +41,7 @@ const startReject = () => {
 };
 
 const Approval = async (planId) => {
-    if (!confirm('수정하시겠습니까?')) return;
+    if (!confirm('승인하시겠습니까?')) return;
     try {
         const response = await axios.put(`http://localhost:3000/adsupport/admin/support-plan/${planId}/approval`);
         if (response.data.status == true) {

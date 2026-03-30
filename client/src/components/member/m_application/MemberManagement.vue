@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSurveyStore, PRIORITY_MAP } from '@/stores/useSurveyStore';
 import TabPlan from './MemberTabPlan.vue';
+import TabResult from './MemberTabResult.vue';
 
 const surveyStore = useSurveyStore();
 
@@ -10,7 +11,7 @@ const surveyStore = useSurveyStore();
 const { selected_bene_id, application_list } = storeToRefs(surveyStore);
 
 // ⭐️ 부모에게 보낼 이벤트 2가지 정의 (탭 변경, 계획서 선택)
-const emit = defineEmits(['select-plan', 'change-tab']);
+const emit = defineEmits(['select-plan', 'change-tab', 'select-result']);
 
 // 현재 탭 상태 (기본값 하나만 들어가야 함)
 const currentTab = ref('Application');
@@ -24,6 +25,10 @@ const handleTabChange = (tabName) => {
 // 자식(TabPlan)에서 특정 계획서를 클릭했을 때 부모로 토스
 const handleSelectPlan = (planId) => {
     emit('select-plan', planId);
+};
+
+const handleSelectResult = (resultId) => {
+    emit('select-result', resultId);
 };
 
 // ⭐️ 2. 리스트의 영문 코드를 한글로 번역해 주는 함수 추가
@@ -82,6 +87,9 @@ const formatPriority = (item) => {
 
         <div v-if="currentTab === 'Plan'" class="tab-content">
             <TabPlan ref="tabPlanRef" :beneId="selected_bene_id" @select-plan="handleSelectPlan" />
+        </div>
+        <div v-else-if="currentTab === 'Result'" class="tab-content">
+            <TabResult ref="tabPlanRef" :beneId="selected_bene_id" @select-result="handleSelectResult" />
         </div>
     </div>
 </template>

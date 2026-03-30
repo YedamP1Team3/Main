@@ -15,7 +15,7 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const response = await axios.get(`http://localhost:3000/api/beneficiaries/${id}/support-plan`);
+        const response = await axios.get(`api/api/beneficiaries/${id}/support-plan`);
         planList.value = response.data || [];
     } catch (error) {
         console.error('에러', error);

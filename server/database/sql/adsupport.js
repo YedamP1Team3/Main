@@ -74,6 +74,74 @@ WHERE u.agency_id = ?
 ORDER BY bene_name ASC;
 `;
 
+const selectSupportResultList = `
+    SELECT 
+        p.result_id,         
+        p.manager_id,        
+        p.result_title,      
+        DATE_FORMAT(p.created_at, '%Y-%m-%d') AS created_at, 
+        p.progress_state,    
+        p.bene_id,
+        u.user_name
+    FROM support_result p
+    INNER JOIN user_info u ON p.manager_id = u.user_id
+    WHERE bene_id = ? 
+      AND progress_state != '임시' 
+    ORDER BY p.result_id DESC       
+`;
+
+const selectSupportResultDetail = `
+  SELECT 
+    p.result_id,
+    p.result_title,
+    p.result_content,
+    p.progress_state,
+    DATE_FORMAT(p.created_at, '%Y-%m-%d') AS created_at,
+    p.manager_id,
+    p.rejection_reason,
+    u.user_name AS manager_name
+  FROM support_result p
+  LEFT JOIN user_info u ON p.manager_id = u.user_id 
+  WHERE p.result_id = ?
+`;
+
+const approveSupportResult = `
+UPDATE support_result
+SET
+  progress_state = '승인'
+WHERE
+  result_id =?
+`;
+
+const returnSupportResult = `
+UPDATE support_result
+SET
+  progress_state = '반려',
+  updated_at = NOW()
+WHERE
+  result_id =?
+`;
+
+const addResultRejectionHistory = `
+INSERT INTO resultrejection_history (
+    result_id, 
+    rejection_reason, 
+    manager_id, 
+    created_at
+) VALUES (?, ?, ?, NOW())`;
+
+const selectResultRejectionHistory = `
+SELECT 
+    h.history_id,
+    h.rejection_reason,
+    u.user_name AS manager_name,
+    DATE_FORMAT(h.created_at, '%Y-%m-%d %H:%i') AS created_at
+FROM resultrejection_history h
+LEFT JOIN user_info u ON h.manager_id = u.user_id
+WHERE h.result_id = ?
+ORDER BY h.created_at DESC;
+`;
+
 module.exports = {
   selectSupportPlanList,
   selectSupportPlanDetail,
@@ -82,5 +150,10 @@ module.exports = {
   addRejectionHistory,
   selectRejectionHistory,
   selectBeneficiariesNames,
+  selectSupportResultList,
+  selectSupportResultDetail,
+  approveSupportResult,
+  returnSupportResult,
+  addResultRejectionHistory,
+  selectResultRejectionHistory,
 };
-

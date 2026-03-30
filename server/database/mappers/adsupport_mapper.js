@@ -103,6 +103,98 @@ const selectBeneficiariesNames = async (agencyId) => {
   }
 };
 
+const selectSupportResultList = async (beneId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(adminSql.selectSupportResultList, [beneId]);
+    return rows;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectSupportResultDetail = async (planId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(adminSql.selectSupportResultDetail, [planId]);
+    return rows[0];
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const approveSupportResult = async (resultID) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+    let result = await conn.query(adminSql.approveSupportResult, [resultID]);
+    await conn.commit();
+    return result;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const returnSupportResult = async (resultId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+    let result = await conn.query(adminSql.returnSupportResult, [resultId]);
+    await conn.commit();
+    return result;
+  } catch (err) {
+    console.log(err);
+    if (conn) await conn.rollback();
+    return { affectedRows: 0, error: err.message };
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const addResultRejectionHistory = async (insertDate) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(
+      adminSql.addResultRejectionHistory,
+      insertDate,
+    );
+    return rows;
+  } catch (err) {
+    console.error("이력 조회 중 오류:", err);
+    return { error: err.message };
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+//반려사유 리스트
+const selectResultRejectionHistory = async (resultId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(adminSql.selectResultRejectionHistory, [
+      resultId,
+    ]);
+    return rows;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   selectSupportPlanList,
   selectSupportPlanDetail,
@@ -111,4 +203,10 @@ module.exports = {
   addRejectionHistory,
   selectRejectionHistory,
   selectBeneficiariesNames,
+  selectSupportResultList,
+  selectSupportResultDetail,
+  approveSupportResult,
+  returnSupportResult,
+  addResultRejectionHistory,
+  selectResultRejectionHistory,
 };
