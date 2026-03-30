@@ -3,7 +3,7 @@ import axios from 'axios';
 import { ref, watch, onMounted } from 'vue';
 import BeneficiaryDetail from './BeneficiaryDetail.vue';
 
-const emit = defineEmits(['refresh']);
+const emit = defineEmits(['refresh', 'uiChange']);
 const props = defineProps({
     beneId: [String, Number],
     priorityId: [String, Number],
@@ -43,15 +43,18 @@ const fetchAllSupportList = async () => {
     }
 };
 
-// const fetchRejectionHistory = async (id) => {
-//     try {
-//         // 관리자 때 만드신 그 API를 그대로 사용합니다.
-//         const response = await axios.get(`http://localhost:3000/adsupport/rejectionList/${id}`);
-//         rejectionLog.value = Array.isArray(response.data) ? response.data : [];
-//     } catch (error) {
-//         console.error('이력 조회 실패', error);
-//     }
-// };
+const fetchRejectionHistory = async (id) => {
+    if (!id) return;
+    try {
+        // 관리자용 API를 그대로 사용하여 해당 결과서의 이력을 가져옵니다.
+        const response = await axios.get(`api/adsupport/admin/support-result/${id}/rejection-history`);
+        // 데이터가 배열인지 확인 후 저장합니다.
+        rejectionLog.value = Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+        console.error('이력 조회 실패', error);
+        rejectionLog.value = [];
+    }
+};
 
 const Plus = () => {
     if (!supportPlan.value) {
@@ -137,8 +140,10 @@ const SaveTemp = async (id) => {
 const showPlanDetail = (planId) => {
     if (selectBeneficiary.value === planId) {
         selectBeneficiary.value = null;
+        emit('toggle-list', true);
     } else {
         selectBeneficiary.value = planId;
+        emit('toggle-list', false);
     }
 };
 
@@ -148,6 +153,7 @@ watch(
         selectBeneficiary.value = null;
         fetchResultDetail(newId);
         fetchAllSupportList();
+        fetchRejectionHistory(newId);
     },
     { immediate: true }
 );
@@ -431,16 +437,49 @@ h2 {
 }
 
 /* 반려 이력 */
+/* 반려 히스토리 섹션 (관리자용 디자인 계승) */
 .history-section {
-    margin-top: 40px;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 20px;
+    margin-top: 50px;
 }
+
+.history-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 15px;
+}
+
 .history-card {
-    background: #fff1f2;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #fecdd3;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 10px;
+    border-bottom: 1px dashed #cbd5e1;
+    padding-bottom: 8px;
+}
+
+.history-user {
+    font-weight: 700;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.history-date {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.history-body {
+    color: #334155;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
 }
 </style>

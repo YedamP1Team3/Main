@@ -224,4 +224,50 @@ td:last-child {
     font-weight: 600;
     color: #3b82f6; /* 기본적으로 포인트 컬러 적용 */
 }
+
+/* 반려 히스토리 섹션 (관리자용 디자인 계승) */
+.history-section {
+    margin-top: 50px;
+}
+
+.history-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 15px;
+}
+
+.history-card {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #cbd5e1;
+    padding-bottom: 8px;
+}
+
+.history-user {
+    font-weight: 700;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.history-date {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.history-body {
+    color: #334155;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+}
 </style>
