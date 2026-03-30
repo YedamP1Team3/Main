@@ -1,3 +1,72 @@
+<script setup>
+import { reactive } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth'; //pinia 스토어 불러오기
+
+// PrimeVue 컴포넌트 (main.js에 등록했다면 여기서 생략 가능)
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import Button from 'primevue/button';
+
+const router = useRouter();
+const authStore = useAuthStore(); // ★ 2. 스토어 사용 준비
+
+// 1. 데이터 상태 관리
+const form = reactive({
+    userId: '',
+    password: ''
+});
+
+// 2. 로그인 실행 로직
+const handleLogin = async () => {
+    // 유효성 검사
+    if (!form.userId || !form.password) {
+        alert('아이디와 비밀번호를 모두 입력해주세요.');
+        return;
+    }
+
+    try {
+        // 백엔드 서버(3000번 포트)로 요청 전송
+        const response = await axios.post('/api/info/login', {
+            userId: form.userId,
+            password: form.password
+        });
+
+        // 성공 시 처리
+        if (response.data) {
+            const user = response.data.user;
+            authStore.login(user);
+            const userRole = user.role.toUpperCase();
+
+            if (userRole === 'ADMIN') {
+                alert(`${user.name}님 환영합니다 관리자페이지로 이동합니다`);
+                router.push('/AdministratorMain');
+            } else if (userRole === 'MANAGER') {
+                alert(`${user.name}님 환영합니다 담당자페이지로 이동합니다`);
+                router.push('/BeneficiaryMain');
+            } else if (userRole === 'FAMILY') {
+                alert(`${user.name}님 환영합니다 일반사용자 페이지로 이동합니다.`);
+                // router.push('/recipient');
+                router.push('/memberApplication');
+            } else {
+                alert(`${user.name}님 환영합니다`);
+            }
+        }
+    } catch (error) {
+        // 상세 에러 메시지가 있으면 보여주고, 없으면 기본 메시지 출력
+        const errorMsg = error.response?.data?.message || '로그인 중 오류가 발생했습니다.';
+        alert(errorMsg);
+        console.error('Login Error:', error);
+    }
+};
+
+// 3. 페이지 이동 함수들
+const goToSignUp = () => router.push('/signup');
+const findId = () => alert('서비스 준비 중입니다.');
+const findPw = () => alert('서비스 준비 중입니다.');
+</script>
+
 <template>
     <div class="page-wrapper">
         <div class="login-container">
@@ -36,75 +105,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { reactive } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { useAuthStore } from '@/stores/auth'; //pinia 스토어 불러오기
-
-// PrimeVue 컴포넌트 (main.js에 등록했다면 여기서 생략 가능)
-import InputText from 'primevue/inputtext';
-import Password from 'primevue/password';
-import Button from 'primevue/button';
-
-const router = useRouter();
-const authStore = useAuthStore(); // ★ 2. 스토어 사용 준비
-
-// 1. 데이터 상태 관리
-const form = reactive({
-    userId: '',
-    password: ''
-});
-
-// 2. 로그인 실행 로직
-const handleLogin = async () => {
-    // 유효성 검사
-    if (!form.userId || !form.password) {
-        alert('아이디와 비밀번호를 모두 입력해주세요.');
-        return;
-    }
-
-    try {
-        // 백엔드 서버(3000번 포트)로 요청 전송
-        const response = await axios.post('/info/login', {
-            userId: form.userId,
-            password: form.password
-        });
-
-        // 성공 시 처리
-        if (response.data) {
-            const user = response.data.user;
-            authStore.login(user);
-            const userRole = user.role.toUpperCase();
-
-            if (userRole === 'ADMIN') {
-                alert(`${user.name}님 환영합니다 관리자페이지로 이동합니다`);
-                router.push('/AdministratorMain');
-            } else if (userRole === 'MANAGER') {
-                alert(`${user.name}님 환영합니다 담당자페이지로 이동합니다`);
-                router.push('/BeneficiaryMain');
-            } else if (userRole === 'FAMILY') {
-                alert(`${user.name}님 환영합니다 일반사용자 페이지로 이동합니다.`);
-                // router.push('/recipient');
-                router.push('/memberApplication');
-            } else {
-                alert(`${user.name}님 환영합니다`);
-            }
-        }
-    } catch (error) {
-        // 상세 에러 메시지가 있으면 보여주고, 없으면 기본 메시지 출력
-        const errorMsg = error.response?.data?.message || '로그인 중 오류가 발생했습니다.';
-        alert(errorMsg);
-        console.error('Login Error:', error);
-    }
-};
-
-// 3. 페이지 이동 함수들
-const goToSignUp = () => router.push('/signup');
-const findId = () => alert('서비스 준비 중입니다.');
-const findPw = () => alert('서비스 준비 중입니다.');
-</script>
 
 <style scoped>
 /* 페이지 중앙 정렬 레이아웃 */

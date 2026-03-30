@@ -12,4 +12,18 @@ module.exports = {
     WHERE family_id = ?
     ORDER BY reg_date DESC
     `,
+
+  // 대상자 1명의 정보를 가져오는 쿼리문
+  selectRecipientById: `
+    SELECT * FROM beneficiary_info
+    WHERE bene_id = ?
+    `,
+
+  // 대상자 정보를 수정하는 쿼리문
+  updateRecipient: `
+    UPDATE beneficiary_info
+    SET bene_name = ?, disability_type = ?, birth_date = ?, gender = ?, 
+        relationship = ?, zip_code = ?, address = ?
+    WHERE bene_id = ?
+    `,
 };

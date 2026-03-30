@@ -19,7 +19,7 @@ const recipients = ref([]);
 const fetchRecipients = async () => {
     try {
         // 서버의 /recipient/list/유저ID 경로로 데이터를 요청함
-        const response = await axios.get(`http://localhost:3000/recipient/list/${userId.value}`);
+        const response = await axios.get(`/api/recipient/list/${userId.value}`);
 
         if (response.data.success) {
             // 성공 시 서버에서 받은 리스트(list)를 우리 화면의 recipients 변수에 담는다

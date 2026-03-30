@@ -34,12 +34,23 @@ onMounted(async () => {
 });
 
 // 로그인/로그아웃 핸들러
-const toggleAuth = async () => {
+// const toggleAuth = async () => {
+//     if (authStore.isLoggedIn) {
+//         surveyStore.clearStore();
+//         authStore.logout();
+//         alert('로그아웃 되었습니다.');
+//         router.push('/login');
+//     } else {
+//         router.push('/login');
+//     }
+// };
+const toggleAuth = () => {
     if (authStore.isLoggedIn) {
-        surveyStore.clearStore();
-        authStore.logout();
-        alert('로그아웃 되었습니다.');
-        router.push('/login');
+        if (confirm('로그아웃 하시겠습니까?')) {
+            authStore.logout();
+            alert('로그아웃 되었습니다.');
+            router.push('/login');
+        }
     } else {
         router.push('/login');
     }

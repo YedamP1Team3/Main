@@ -33,7 +33,7 @@ onMounted(async () => {
         // 만약 스토어가 비어있다면(새로고침 등), 서버에서 직접 상세 정보를 가져옵니다.
         try {
             // 우리가 만든 전용 API를 통해 유저 상세 정보를 조회
-            const response = await axios.get(`/info/user-detail/${authStore.userId}`);
+            const response = await axios.get(`/api/info/user-detail/${authStore.userId}`);
             const user = response.data;
             // DB 컬럼명에 맞춰 폼 데이터를 할당
             form.value.zipCode = user.zip_code;
@@ -103,7 +103,7 @@ const submitForm = async () => {
         };
 
         // 3. 백엔드 API 호출 (경로 주의: /recipient/register 등... 서버 설정에 맞출 것)
-        const response = await axios.post('http://localhost:3000/recipient/register', sendData);
+        const response = await axios.post('/api/recipient/register', sendData);
 
         if (response.data.success) {
             // 서버 응답이 성공인 경우

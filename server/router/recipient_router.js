@@ -41,7 +41,27 @@ router.get("/list/:family_id", async (req, res) => {
     }
   } catch (err) {
     console.error("목록 조회 중 에러:", err);
-    res.status(500).json({ seccess: false, message: "목록 로드 실패" });
+    res.status(500).json({ success: false, message: "목록 로드 실패" });
+  }
+});
+
+// GET /api/recipient/:id (데이터 한 건 조회)
+router.get("/:id", async (req, res) => {
+  try {
+    const result = await service.getRecipientDetail(req.params.id);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ message: "데이터 로드 실패" });
+  }
+});
+
+// PUT /api/recipient/:id (데이터 수정)
+router.put("/:id", async (req, res) => {
+  try {
+    const result = await service.updateRecipient(req.params.id, req.body);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, message: "수정 실패" });
   }
 });
 
