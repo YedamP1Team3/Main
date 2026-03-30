@@ -1,25 +1,25 @@
 const adminMapper = require("../database/mappers/adsupport_mapper.js");
 
-const AdSupportPlanService = async (beneId) => {
-  let list = await adminMapper.AdSupportPlanMapper(beneId);
+const getSupportPlanList = async (beneId) => {
+  let list = await adminMapper.selectSupportPlanList(beneId);
   return list || [];
 };
 
-const AdDetailSupportPlanService = async (planID) => {
-  let list = await adminMapper.AdDetailSupportPlanMapper(planID);
+const getSupportPlanDetail = async (planID) => {
+  let list = await adminMapper.selectSupportPlanDetail(planID);
   return list || {};
 };
 
-const ApprovalChangeService = async (planID) => {
-  let result = await adminMapper.ApprovalChangeMapper(planID);
+const approveSupportPlan = async (planID) => {
+  let result = await adminMapper.approveSupportPlan(planID);
   let resObj = {
     status: result.affectedRows > 0,
   };
   return resObj;
 };
 
-const ReturnService = async (planId) => {
-  let result = await adminMapper.ReturnMapper(planId);
+const returnSupportPlan = async (planId) => {
+  let result = await adminMapper.returnSupportPlan(planId);
   let resObj = {
     status: result.affectedRows > 0,
     target: {
@@ -29,11 +29,11 @@ const ReturnService = async (planId) => {
   return resObj;
 };
 
-const rejectionHistoryService = async (data) => {
+const addRejectionHistory = async (data) => {
   const { plan_id, rejection_reason, manager_id } = data;
   let insertDate = [plan_id, rejection_reason, manager_id];
 
-  let result = await adminMapper.rejectionHistoryMapper(insertDate);
+  let result = await adminMapper.addRejectionHistory(insertDate);
   let resObj = {
     status: result.insertId > 0 ? "success" : "fail",
     user_no: result.insertId,
@@ -41,29 +41,30 @@ const rejectionHistoryService = async (data) => {
   return resObj;
 };
 
-const rejectionListService = async (planId) => {
-  let list = await adminMapper.rejectionListMapper(planId);
+const getRejectionHistory = async (planId) => {
+  let list = await adminMapper.selectRejectionHistory(planId);
   return list || [];
 };
 
-const AdSupportListService = async (agencyId) => {
+const getBeneficiariesNames = async (agencyId) => {
   let conn = null;
   try {
-    let list = await adminMapper.AdSupportListMapper(agencyId);
+    let list = await adminMapper.selectBeneficiariesNames(agencyId);
     return list || [];
   } catch (err) {
     console.log(err);
+    throw err;
   } finally {
     if (conn) conn.release();
   }
 };
 
 module.exports = {
-  AdSupportPlanService,
-  AdDetailSupportPlanService,
-  ApprovalChangeService,
-  ReturnService,
-  rejectionHistoryService,
-  rejectionListService,
-  AdSupportListService,
+  getSupportPlanList,
+  getSupportPlanDetail,
+  approveSupportPlan,
+  returnSupportPlan,
+  addRejectionHistory,
+  getRejectionHistory,
+  getBeneficiariesNames,
 };

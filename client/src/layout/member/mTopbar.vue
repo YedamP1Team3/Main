@@ -17,6 +17,10 @@ const { toggleDarkMode, isDarkTheme } = useLayout();
 const { userName } = storeToRefs(authStore);
 
 const naviToApply = () => router.push({ name: 'mApplication' });
+const naviToReserve = () => {
+    router.push({ name: 'reservation' });
+    console.log('상담예약 페이지로 이동합니다.');
+};
 
 // 지원대상자 추가 페이지로 이동 함수
 const goToRecipient = () => {
@@ -71,7 +75,7 @@ const toggleAuth = async () => {
                 <div class="a-name text-color font-medium">기관명</div>
                 <button type="button" class="p-link text-color font-medium">신청내역</button>
                 <button type="button" class="p-link text-color font-medium" @click="naviToApply">지원신청</button>
-                <button type="button" class="p-link text-color font-medium">상담예약</button>
+                <button type="button" class="p-link text-color font-medium" @click="naviToReserve">상담예약</button>
             </div>
         </div>
 
@@ -85,7 +89,7 @@ const toggleAuth = async () => {
         </div>
 
         <div class="flex items-center gap-2">
-<!--             <span v-if="authStore.isLoggedIn" class="font-bold mr-2 text-color">{{ userName }}님</span> -->
+            <!--             <span v-if="authStore.isLoggedIn" class="font-bold mr-2 text-color">{{ userName }}님</span> -->
             <span class="hidden sm:block font-medium text-color">
                 {{ authStore.isLoggedIn ? `${authStore.userName} 이용자님` : '로그인이 필요합니다' }}
             </span>

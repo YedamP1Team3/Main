@@ -7,6 +7,8 @@ const express = require("express");
 const cron = require("node-cron");
 const app = express();
 
+const rsvService = require("./service/rsv_service.js");
+
 app.use(cors()); // 모든 요청 허용 (개발 단계)
 app.use(express.json());
 

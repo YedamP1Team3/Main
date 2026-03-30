@@ -16,7 +16,7 @@ const rejectionLog = ref([]);
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/adsupport/AdDetailSupportPlan/${id}`);
+        const response = await axios.get(`http://localhost:3000/adsupport/admin/support-plan/${id}`);
         planDetail.value = response.data;
         rejectReason.value = '';
         reasoninsert.value = false;
@@ -28,7 +28,7 @@ const fetchPlanDetail = async (id) => {
 
 const fetchRejectionHistory = async (id) => {
     try {
-        const response = await axios.get(`http://localhost:3000/adsupport/rejectionList/${id}`);
+        const response = await axios.get(`http://localhost:3000/adsupport/admin/support-plan/${id}/rejection-history`);
         rejectionLog.value = response.data;
     } catch (error) {
         console.error('이력 조회 실패', error);
@@ -43,7 +43,7 @@ const startReject = () => {
 const Approval = async (planId) => {
     if (!confirm('수정하시겠습니까?')) return;
     try {
-        const response = await axios.put(`http://localhost:3000/adsupport/ApprovalChange/${planId}`);
+        const response = await axios.put(`http://localhost:3000/adsupport/admin/support-plan/${planId}/approval`);
         if (response.data.status == true) {
             alert('승인신청했습니다');
             emit('refresh');
@@ -63,14 +63,14 @@ const updatereturn = async (planId) => {
     }
     if (!confirm('반려하시겠습니까?')) return;
     try {
-        const updateRes = await axios.put(`http://localhost:3000/adsupport/Return/${planId}`);
+        const updateRes = await axios.put(`http://localhost:3000/adsupport/admin/support-plan/${planId}/return`);
         if (updateRes.data.status) {
             const historyData = {
                 plan_id: planId,
                 rejection_reason: rejectReason.value,
                 manager_id: authStore.userId
             };
-            await axios.post(`http://localhost:3000/adsupport/rejectionHistory`, historyData);
+            await axios.post(`http://localhost:3000/adsupport/admin/support-plan/rejection-history`, historyData);
 
             alert('반려 처리 및 이력이 저장되었습니다.');
             reasoninsert.value = false;

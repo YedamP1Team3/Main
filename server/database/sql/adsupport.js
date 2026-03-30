@@ -1,4 +1,4 @@
-const AdSupportPlan = `
+const selectSupportPlanList = `
 SELECT 
     p.plan_id, 
     p.bene_id, 
@@ -12,7 +12,7 @@ WHERE p.bene_id = ? AND p.progress_state != '임시'
 ORDER BY p.plan_id ASC;
 `;
 
-const AdDetailSupportPlan = `
+const selectSupportPlanDetail = `
   SELECT 
     p.plan_id,
     p.plan_objective,
@@ -27,7 +27,7 @@ const AdDetailSupportPlan = `
   WHERE p.plan_id = ?
 `;
 
-const ApprovalChange = `
+const approveSupportPlan = `
 UPDATE support_plan
 SET
   progress_state = '승인'
@@ -35,7 +35,7 @@ WHERE
   plan_id =?
 `;
 
-const Return = `
+const returnSupportPlan = `
 UPDATE support_plan
 SET
   progress_state = '반려',
@@ -44,7 +44,7 @@ WHERE
   plan_id =?
 `;
 
-const rejectionHistory = `
+const addRejectionHistory = `
 INSERT INTO rejection_history (
     plan_id, 
     rejection_reason, 
@@ -52,7 +52,7 @@ INSERT INTO rejection_history (
     created_at
 ) VALUES (?, ?, ?, NOW())`;
 
-const rejectionList = `
+const selectRejectionHistory = `
 SELECT 
     h.history_id,
     h.rejection_reason,
@@ -64,7 +64,7 @@ WHERE h.plan_id = ?
 ORDER BY h.created_at DESC;
 `;
 
-const AdSupportList = `
+const selectBeneficiariesNames = `
 SELECT 
     b.bene_name,
     b.bene_id
@@ -75,11 +75,12 @@ ORDER BY bene_name ASC;
 `;
 
 module.exports = {
-  AdSupportPlan,
-  AdDetailSupportPlan,
-  ApprovalChange,
-  Return,
-  rejectionHistory,
-  rejectionList,
-  AdSupportList,
+  selectSupportPlanList,
+  selectSupportPlanDetail,
+  approveSupportPlan,
+  returnSupportPlan,
+  addRejectionHistory,
+  selectRejectionHistory,
+  selectBeneficiariesNames,
 };
+
