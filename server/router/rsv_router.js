@@ -1,17 +1,17 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const rsvService = require('../service/rsv_service.js');
+const rsvService = require("../service/rsv_service.js");
 
 //담당자 ID 조회
-router.get('/manager-id', async (req, res) => {
+router.get("/manager-id", async (req, res) => {
   try {
     // 나중에는 로그인 정보로 대체
     const userId = req.headers.userid;
     const userRole = req.headers.role;
 
     const { beneId } = req.query;
-    console.log('router.userId, userRole, beneId : ', userId, userRole, beneId);
+    console.log("router.userId, userRole, beneId : ", userId, userRole, beneId);
 
     const managerId = await rsvService.resolveManagerId({
       userId,
@@ -31,7 +31,10 @@ router.get('/manager-id', async (req, res) => {
   }
 });
 
-router.get('/beneficiaries', async (req, res) => {
+// -----------------------------------reservation REST--------------------------
+
+// 보호자 -< 지원대상자 조회
+router.get("/beneficiaries", async (req, res) => {
   try {
     // const familyId = req.user.userId;
     const familyId = req.headers.userid;
@@ -53,10 +56,50 @@ router.get('/beneficiaries', async (req, res) => {
   }
 });
 
+// 상담예약 신청버튼
+router.post("/", async (req, res) => {
+  try {
+    const { beneId, managerId, date, times } = req.body;
+
+    if (
+      !beneId ||
+      !managerId ||
+      !date ||
+      !Array.isArray(times) ||
+      times.length === 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "beneId, managerId, date, times는 필수입니다.",
+      });
+    }
+
+    const result = await rsvService.createReservation(
+      beneId,
+      managerId,
+      date,
+      times,
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "상담 신청이 완료되었습니다.",
+      data: result,
+    });
+  } catch (err) {
+    console.error("상담 신청 실패:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message || "상담 신청 중 오류가 발생했습니다.",
+    });
+  }
+});
+
 // -----------------------------------managerSchedule REST--------------------------
 
 // 다음 달 스케줄 수동 생성 테스트용
-router.post('/schedule/auto-generate', async (req, res) => {
+router.post("/schedule/auto-generate", async (req, res) => {
   try {
     const result = await rsvService.generateNextMonthSchedules();
 
@@ -69,22 +112,21 @@ router.post('/schedule/auto-generate', async (req, res) => {
   }
 });
 
-// 담당자 ID 조회 () + 예약가능 시간 조회 (MANAGER_ID, WORK_DATE)
-router.get('/schedule', async (req, res) => {
+// 예약가능 시간 조회 (MANAGER_ID, WORK_DATE)
+router.get("/schedule", async (req, res) => {
   try {
     // (ex: ?date=2026-03-24)
-    const { date, managerId } = req.query;
-
-    console.log('담당자시간표router.req.query :', req.query);
+    const { managerId, date } = req.query;
 
     if (!date) {
       return res.status(400).json({
         success: false,
-        message: 'date 파라미터가 필요합니다.',
+        message: "date 파라미터가 필요합니다.",
       });
     }
 
     const schedule = await rsvService.getManagerSchedule(managerId, date);
+
     res.status(200).json({
       success: true,
       schedule,
@@ -98,16 +140,16 @@ router.get('/schedule', async (req, res) => {
 });
 
 // 담당자 일정조정(예약불가) (MANAGER_ID)
-router.post('/blocked-times', async (req, res) => {
+router.post("/blocked-times", async (req, res) => {
   try {
-    const managerId = 'manager_02';
+    const managerId = "manager_02";
 
     const { date, times } = req.body;
 
     if (!date || !times || times.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'date와 times가 필요합니다.',
+        message: "date와 times가 필요합니다.",
       });
     }
 
@@ -115,7 +157,7 @@ router.post('/blocked-times', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: '예약불가 시간 등록 완료',
+      message: "예약불가 시간 등록 완료",
     });
   } catch (err) {
     res.status(500).json({
@@ -126,15 +168,15 @@ router.post('/blocked-times', async (req, res) => {
 });
 
 // 예약 가능 처리 (예약불가 해제)
-router.delete('/unblock-times', async (req, res) => {
+router.delete("/unblock-times", async (req, res) => {
   try {
-    const managerId = 'manager_02';
+    const managerId = "manager_02";
     const { date, times } = req.body; // times: ["09:30", "10:00", ...]
 
     if (!date || !times || times.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'date와 times가 필요합니다.',
+        message: "date와 times가 필요합니다.",
       });
     }
 
@@ -142,7 +184,7 @@ router.delete('/unblock-times', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: '예약 가능 처리 완료',
+      message: "예약 가능 처리 완료",
       removed,
     });
   } catch (err) {

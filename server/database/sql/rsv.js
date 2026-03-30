@@ -20,6 +20,14 @@ WHERE family_id = ?
 ORDER BY bene_name`;
 
 // -----------------------------------reservation REST--------------------------
+const insertReservation = `
+  INSERT INTO reservations (
+    bene_id,
+    manager_id,
+    start_time,
+    end_time
+  ) VALUES (?, ?, ?, ?)
+`;
 
 // -----------------------------------managerSchedule REST--------------------------
 
@@ -50,6 +58,27 @@ const selectManagerSchedule = `
   FROM manager_schedules
   WHERE manager_id = ?
     AND work_date = ?
+`;
+
+const selectReservedTimes = `
+  SELECT
+    DATE_FORMAT(start_time, '%Y-%m-%d %H:%i:%s') AS start_time,
+    DATE_FORMAT(end_time, '%Y-%m-%d %H:%i:%s') AS end_time
+  FROM reservations
+  WHERE manager_id = ?
+    AND DATE(start_time) = ?
+    AND rsv_status IN ('REQUESTED', 'APPROVED')
+  ORDER BY start_time
+`;
+
+const selectBlockedTimes = `
+  SELECT
+    CONCAT(work_date, ' ', start_time) AS start_time,
+    CONCAT(work_date, ' ', end_time) AS end_time
+  FROM manager_blocked_times
+  WHERE manager_id = ?
+    AND work_date = ?
+  ORDER BY start_time
 `;
 
 const insertBlockedTime = `
@@ -90,9 +119,12 @@ const deleteBlockedTime = `
 
 module.exports = {
   selectManagerSchedule,
+  selectReservedTimes,
+  selectBlockedTimes,
   insertBlockedTime,
   selectAllOccupiedTimes,
   deleteBlockedTime,
+  insertReservation,
   selectActiveManagers,
   insertManagerSchedules,
   getBeneficiariesByFamilyId,
