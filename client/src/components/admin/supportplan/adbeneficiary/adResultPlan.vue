@@ -6,9 +6,9 @@ const props = defineProps({
     beneId: [String, Number]
 });
 
-const emit = defineEmits(['newresultplan', 'select-result', 'refresh']);
+const emit = defineEmits(['select-result', 'refresh']);
 const planList = ref([]);
-const showTemp = ref(false);
+//const showTemp = ref(false);
 
 const fetchPlanList = async (id) => {
     if (!id) {
@@ -16,36 +16,15 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const url = showTemp.value ? `http://localhost:3000/resultPlan/beneficiaries/${id}/temp` : `http://localhost:3000/resultPlan/beneficiaries/${id}/support-result`;
-        const response = await axios.get(url);
+        const response = await axios.get(`http://localhost:3000/adsupport/admin/beneficiaries/${id}/support-result`);
         planList.value = response.data || [];
     } catch (error) {
         console.error('에러', error);
     }
 };
 
-function addNewPlan() {
-    if (!props.beneId) {
-        alert('지원자를 클릭해주세요');
-        return;
-    }
-    if (!props.progress_state === '대기') {
-        alert('대기단계 지원계획서를 신청하지 못합니다');
-        return;
-    }
-    emit('newresultplan');
-}
-const savefile = () => {
-    if (!props.beneId) {
-        alert('지원자를 클릭해주세요');
-        return;
-    }
-    showTemp.value = !showTemp.value;
-    fetchPlanList(props.beneId);
-};
-
-const detailClick = (resultId) => {
-    emit('select-result', resultId);
+const detailClick = (planId) => {
+    emit('select-result', planId);
 };
 
 defineExpose({ fetchPlanList });
@@ -53,7 +32,6 @@ defineExpose({ fetchPlanList });
 watch(
     () => props.beneId,
     (newId) => {
-        showTemp.value = false;
         fetchPlanList(newId);
     },
     { immediate: true }
@@ -63,8 +41,6 @@ watch(
     <div>
         <div>
             <h2>지원결과서</h2>
-            <button @click="addNewPlan">+추가하기</button>
-            <button @click="savefile" :class="{ 'active-temp': showTemp }" class="btn-temp-check">{{ showTemp ? '일반 목록' : '임시저장' }}</button>
         </div>
         <table>
             <tbody>
@@ -75,9 +51,9 @@ watch(
                     <th>작성일자</th>
                     <th>상태</th>
                 </tr>
-                <tr v-for="(plan, index) in planList" :key="plan.result_id" @click="detailClick(plan.result_id)" class="clickable-row">
+                <tr v-for="plan in planList" :key="plan.plan_id" @click="detailClick(plan.result_id)">
                     <td>{{ plan.result_id }}</td>
-                    <td>{{ plan.manager_id }}</td>
+                    <td>{{ plan.user_name }}</td>
                     <td>{{ plan.result_title }}</td>
                     <td>{{ plan.created_at }}</td>
                     <td>{{ plan.progress_state }}</td>

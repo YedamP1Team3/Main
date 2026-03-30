@@ -10,15 +10,18 @@ import ManagerAssignView from '@/components/admin/supportplan/adbeneficiary/Mana
 
 // ⭐️ 새로 만든 관리자용 승인/반려 컴포넌트 임포트 (경로는 실제에 맞게 수정해주세요)
 import AdminPriorityManage from '@/components/admin/supportplan/adbeneficiary/AdminPriorityManage.vue';
+import adResultPlanDetail from '@/components/admin/supportplan/adbeneficiary/AdresultPlanDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
 const viewMode = ref('empty');
 const managementRef = ref(null);
 const selectPlan = ref(null);
-const surveyStore = useSurveyStore();
+const surveyStore = useSurveyStore(); // ⭐️ 스토어 인스턴스
+const selectResult = ref(null);
 
-const handleIdUpdate = async (id, priorityId) => {
+//지원자를 새로 선택했을때
+const handleIdUpdate = (id, priorityId) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
     viewMode.value = 'empty';
@@ -42,6 +45,12 @@ const handleAppDetail = (appId) => {
     viewMode.value = 'app_detail';
 };
 
+const handleResultDetail = (resultId) => {
+    selectResult.value = resultId;
+    viewMode.value = 'result_detail'; // 우측 화면 전환
+};
+
+// ⭐️ 2. 배정 화면 열기 함수
 const handleAssignManager = () => {
     viewMode.value = 'assign_manager';
 };
@@ -82,7 +91,7 @@ const handleOpenPriority = async () => {
             </section>
 
             <section class="list-section">
-                <AdminManagement ref="managementRef" :beneId="selectedId" @select-plan="handleIdDetail" @select-app="handleAppDetail" @assign-manager="handleAssignManager" @newaddplan="viewMode = 'create'" />
+                <AdminManagement ref="managementRef" :beneId="selectedId" @select-result="handleResultDetail" @select-plan="handleIdDetail" @select-app="handleAppDetail" @assign-manager="handleAssignManager" @newaddplan="viewMode = 'create'" />
             </section>
         </aside>
 
@@ -96,6 +105,9 @@ const handleOpenPriority = async () => {
 
             <div v-else-if="viewMode === 'assign_manager'" class="editor-container">
                 <ManagerAssignView :beneId="selectedId" @close="viewMode = 'empty'" @success="handleAssignSuccess" />
+            </div>
+            <div v-else-if="viewMode === 'result_detail'" class="editor-container">
+                <adResultPlanDetail :resultId="selectResult" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
 
             <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">

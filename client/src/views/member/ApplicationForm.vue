@@ -6,10 +6,12 @@ import BeneficiaryInfo from '@/components/member/m_application/m_BeneficiaryInfo
 import BeneficiaryManagement from '@/components/member/m_application/MemberManagement.vue';
 import SurveyApplicationForm from '@/components/member/m_application/MemberSurvey.vue';
 import MemberSupportDetail from '@/components/member/m_application/MemberSupportDetail.vue';
+import MemberResultDetail from '@/components/member/m_application/MemberResultDetail .vue';
 
 const surveyStore = useSurveyStore();
 const viewMode = ref('empty');
 const selectPlan = ref(null);
+const selectResult = ref(null);
 
 const handleTabChange = (tabName) => {
     viewMode.value = 'empty';
@@ -19,6 +21,11 @@ const handleTabChange = (tabName) => {
 const handleIdDetail = (planId) => {
     selectPlan.value = planId;
     viewMode.value = 'plan';
+};
+
+const handleIdResult = (resultId) => {
+    selectResult.value = resultId;
+    viewMode.value = 'result';
 };
 </script>
 
@@ -33,7 +40,7 @@ const handleIdDetail = (planId) => {
             </section>
 
             <section class="list-section">
-                <BeneficiaryManagement @change-tab="handleTabChange" @select-plan="handleIdDetail" />
+                <BeneficiaryManagement @change-tab="handleTabChange" @select-plan="handleIdDetail" @select-result="handleIdResult" />
             </section>
         </aside>
 
@@ -43,6 +50,9 @@ const handleIdDetail = (planId) => {
             </div>
             <div v-else-if="viewMode === 'survey' || surveyStore.is_survey_visible" class="editor-container">
                 <SurveyApplicationForm />
+            </div>
+            <div v-else-if="viewMode === 'result'" class="editor-container">
+                <MemberResultDetail :resultId="selectResult" />
             </div>
             <!-- 수정됨: priority 관련 화면 렌더링 삭제 -->
             <div v-else class="empty-state">

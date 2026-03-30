@@ -29,7 +29,7 @@ router.get("/beneficiaries/:beneId/support-plan", async (req, res) => {
 //지원계획서생성
 router.post("/support-plan", async (req, res) => {
   let target = req.body;
-  let result = await userService.createSupportResult(target);
+  let result = await userService.createSupportPlan(target);
   res.send(result);
 });
 //지원계획서임시 조회

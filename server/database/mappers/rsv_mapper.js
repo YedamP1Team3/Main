@@ -1,5 +1,5 @@
-const { pool } = require('../DAO.js');
-const rsvSql = require('../sql/rsv.js');
+const { pool } = require("../DAO.js");
+const rsvSql = require("../sql/rsv.js");
 
 const getBeneficiaryManagerInfo = async (beneId) => {
   let conn = null;
@@ -31,6 +31,24 @@ const getBeneficiariesByFamilyId = async (familyId) => {
   }
 };
 // -----------------------------------reservation REST--------------------------
+const insertReservation = async (beneId, managerId, startTime, endTime) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const result = await conn.query(rsvSql.insertReservation, [
+      beneId,
+      managerId,
+      startTime,
+      endTime,
+    ]);
+    return result;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
 
 // -----------------------------------managerSchedule REST--------------------------
 
@@ -40,7 +58,7 @@ const selectActiveManagers = async () => {
   try {
     conn = await pool.getConnection();
     const rows = await conn.query(rsvSql.selectActiveManagers);
-    console.log('ACTIVE인 MANAGER 조회 : ', rows);
+    console.log("ACTIVE인 MANAGER 조회 : ", rows);
     return rows;
   } catch (err) {
     console.log(err);
@@ -84,6 +102,40 @@ const selectManagerSchedule = async (managerId, date) => {
   }
 };
 
+const selectReservedTimes = async (managerId, date) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+
+    const rows = await conn.query(rsvSql.selectReservedTimes, [
+      managerId,
+      date,
+    ]);
+
+    return rows;
+  } catch (err) {
+    console.log("selectReservedTimes error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectBlockedTimes = async (managerId, date) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+
+    const rows = await conn.query(rsvSql.selectBlockedTimes, [managerId, date]);
+
+    return rows;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 const insertBlockedTime = async (managerId, date, startTime, endTime) => {
   let conn = null;
   try {
@@ -95,26 +147,6 @@ const insertBlockedTime = async (managerId, date, startTime, endTime) => {
       startTime,
       endTime,
     ]);
-  } catch (err) {
-    console.log(err);
-  } finally {
-    if (conn) conn.release();
-  }
-};
-
-const selectAllOccupiedTimes = async (managerId, date) => {
-  let conn = null;
-  try {
-    conn = await pool.getConnection();
-
-    const rows = await conn.query(rsvSql.selectAllOccupiedTimes, [
-      managerId,
-      date,
-      managerId,
-      date,
-    ]);
-
-    return rows;
   } catch (err) {
     console.log(err);
   } finally {
@@ -144,9 +176,11 @@ const deleteBlockedTime = async (managerId, date, startTime, endTime) => {
 
 module.exports = {
   selectManagerSchedule,
+  selectReservedTimes,
+  selectBlockedTimes,
   insertBlockedTime,
-  selectAllOccupiedTimes,
   deleteBlockedTime,
+  insertReservation,
   selectActiveManagers,
   insertManagerSchedules,
   getBeneficiariesByFamilyId,

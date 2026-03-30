@@ -22,8 +22,8 @@ import Calendar from '@/components/common/Calendar.vue';
 import TimeSlot from '@/components/common/TimeSlot.vue';
 
 import { getManagerSchedule } from '@/api/reservation/schedule';
-// import { createBlockedTimes, deleteBlockedTimes } from '@/api/reservation/block';
 import { getBeneficiariesByFamilyId, getManagerIdByBene } from '@/api/reservation/beneInfo';
+import { createReservation } from '@/api/reservation/reservation';
 
 import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
 import MTopbar from '@/layout/member/mTopbar.vue';
@@ -108,9 +108,10 @@ export default {
             try {
                 const formattedDate = new Date(date).toISOString().slice(0, 10);
 
-                const res = await getManagerSchedule(formattedDate, managerId.value);
+                const res = await getManagerSchedule(managerId.value, formattedDate);
 
                 const schedule = res.data.schedule;
+                console.log('schedule : ', schedule);
 
                 if (!schedule) {
                     slots.value = [];
@@ -127,15 +128,24 @@ export default {
             }
         });
 
-        // 🔥 근무시간 → 타임슬롯 변환
         const convertToSlots = (schedule) => {
             const result = [];
-            const occupied = schedule.occupied_times || [];
+            const reserved = schedule.reserved_times || [];
+            const blocked = schedule.blocked_times || [];
+
+            const isReserved = (time) => {
+                return reserved.some((r) => {
+                    const start = r.start_time.slice(11, 16); // "10:30"
+                    const end = r.end_time.slice(11, 16); // "11:00"
+
+                    return time >= start && time < end;
+                });
+            };
 
             const isBlocked = (time) => {
-                return occupied.some((o) => {
-                    const start = o.start_time.slice(11, 16); // "09:00"
-                    const end = o.end_time.slice(11, 16); // "10:00"
+                return blocked.some((b) => {
+                    const start = b.start_time.slice(11, 16); // "13:00"
+                    const end = b.end_time.slice(11, 16); // "14:00"
 
                     return time >= start && time < end;
                 });
@@ -147,14 +157,22 @@ export default {
             while (hour < endHour || (hour === endHour && minute < endMinute)) {
                 const time = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
 
+                let status = 'available';
+
+                if (isReserved(time)) {
+                    status = 'reserved';
+                } else if (isBlocked(time)) {
+                    status = 'blocked';
+                }
+
                 result.push({
                     time,
-                    status: isBlocked(time) ? 'blocked' : 'available'
+                    status
                 });
 
                 minute += 30;
                 if (minute === 60) {
-                    hour++;
+                    hour += 1;
                     minute = 0;
                 }
             }
@@ -162,64 +180,14 @@ export default {
             return result;
         };
 
-        const handleReserve = async (data) => {
-            console.log('예약 요청: ', data);
-
+        const handleReserve = async ({ date, times }) => {
             try {
-                const payload = {
-                    beneId: selectedBeneId.value,
-                    date: data.date,
-                    times: data.times
-                };
+                const res = await createReservation(selectedBeneId.value, managerId.value, date, times);
 
-                await createReservation(payload);
-
-                alert('상담 신청 완료');
+                alert(res.data.message || '상담 신청 완료');
             } catch (err) {
-                console.error(err);
-                alert('예약 실패');
-            }
-        };
-
-        // 차단 처리
-        const handleBlock = async (data) => {
-            console.log('차단 요청:', data);
-
-            try {
-                const { date, times, type } = data;
-
-                const payload = {
-                    date,
-                    times
-                };
-
-                console.log('API 요청:', payload);
-
-                // 예약가능 → 차단 해제
-                if (type === 'available') {
-                    await deleteBlockedTimes(payload);
-
-                    alert('예약가능으로 변경되었습니다.');
-                }
-
-                // 🔴 예약불가 → 차단 등록
-                else if (type === 'unavailable') {
-                    await createBlockedTimes(payload);
-
-                    alert('차단시간이 등록되었습니다.');
-                }
-
-                // 🔥 UI 갱신 (공통)
-                const res = await getManagerSchedule(date);
-                const raw = res.data.schedule;
-                const schedule = Array.isArray(raw) ? raw[0] : raw;
-
-                slots.value = convertToSlots(schedule);
-                blockedSummary.value = extractBlockedSummary(schedule);
-            } catch (err) {
-                console.error('처리 실패:', err);
-
-                alert(err.response?.data?.message || '처리 실패');
+                console.error('상담 신청 실패:', err);
+                alert(err.response?.data?.message || '상담 신청 실패');
             }
         };
 
@@ -229,7 +197,6 @@ export default {
             selectedDate,
             slots,
             blockedSummary,
-            handleBlock,
             handleSelectBeneficiary,
             handleReserve
         };
