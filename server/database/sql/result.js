@@ -1,4 +1,4 @@
-const resultList = `
+const selectSupportResultList = `
     SELECT 
         result_id,         
         manager_id,        
@@ -12,7 +12,7 @@ const resultList = `
     ORDER BY result_id DESC       
 `;
 
-const saveResultList = `
+const selectSupportResultTempList = `
     SELECT 
         result_id,         
         manager_id,        
@@ -26,7 +26,7 @@ const saveResultList = `
     ORDER BY result_id DESC       
 `;
 
-const newResult = `
+const createSupportResutl = `
 INSERT INTO support_result (
     plan_id,
     manager_id,
@@ -38,13 +38,13 @@ INSERT INTO support_result (
 ) VALUES (?,?,?,?,?,?, CURDATE())
 `;
 
-const listMapping = `
+const insertMapping = `
     INSERT INTO result_plan_mapping (
     result_id, plan_id
     ) VALUES (?,?)
 `;
 
-const supportList = `
+const selectApprovedPlanList = `
   SELECT
     plan_id,
     plan_objective
@@ -53,7 +53,7 @@ const supportList = `
   ORDER BY bene_id ASC;
 `;
 
-const detailResultPlan = `
+const selectSupportResultDetail = `
     select 
         result_id,
         result_title,
@@ -65,7 +65,7 @@ const detailResultPlan = `
     from support_result
     where result_id = ?
 `;
-const plusPlanList = `
+const selectLinkedPlanList = `
     select 
         p.plan_id,
         p.plan_objective,
@@ -75,15 +75,15 @@ const plusPlanList = `
     where m.result_id = ?
 `;
 
-const supportResult = `
+const removeSupportResult = `
 DELETE FROM support_result WHERE result_id=?
 `;
 
-const deleteMapping = `
+const removeMapping = `
 DELETE FROM result_plan_mapping WHERE result_id = ?
 `;
 
-const updateResultPlan = `
+const applySupportResult = `
   UPDATE support_result
   SET
     result_title =?,
@@ -94,7 +94,7 @@ const updateResultPlan = `
     result_id =?
 `;
 
-const updateSavePlan = `
+const updateTempSupportResult = `
   UPDATE support_result
   SET
     result_title =?,
@@ -106,15 +106,16 @@ const updateSavePlan = `
 `;
 
 module.exports = {
-  resultList,
-  saveResultList,
-  newResult,
-  supportList,
-  listMapping,
-  detailResultPlan,
-  plusPlanList,
-  supportResult,
-  deleteMapping,
-  updateResultPlan,
-  updateSavePlan,
+  selectSupportResultList,
+  selectSupportResultTempList,
+  createSupportResutl,
+  insertMapping,
+  selectApprovedPlanList,
+  selectSupportResultDetail,
+  selectLinkedPlanList,
+  removeSupportResult,
+  removeMapping,
+  applySupportResult,
+  updateTempSupportResult,
 };
+

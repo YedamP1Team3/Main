@@ -24,7 +24,7 @@ const fetchBeneDetail = async () => {
 
 onMounted(async () => {
     const agencylist = authStore.agencyId;
-    const response = await axios.get('http://localhost:3000/adsupport/AdSupportList', {
+    const response = await axios.get('http://localhost:3000/adsupport/admin/beneficiaries/names', {
         params: { agency_id: agencylist }
     });
     AdSupportList.value = response.data;

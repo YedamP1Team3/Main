@@ -1,11 +1,11 @@
 const { pool } = require("../DAO");
 const adminSql = require("../sql/adsupport.js");
 
-const AdSupportPlanMapper = async (beneId) => {
+const selectSupportPlanList = async (beneId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(adminSql.AdSupportPlan, [beneId]);
+    let rows = await conn.query(adminSql.selectSupportPlanList, [beneId]);
     return rows;
   } catch (err) {
     console.log(err);
@@ -14,11 +14,11 @@ const AdSupportPlanMapper = async (beneId) => {
   }
 };
 
-const AdDetailSupportPlanMapper = async (planId) => {
+const selectSupportPlanDetail = async (planId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(adminSql.AdDetailSupportPlan, [planId]);
+    let rows = await conn.query(adminSql.selectSupportPlanDetail, [planId]);
     return rows[0];
   } catch (err) {
     console.log(err);
@@ -27,28 +27,29 @@ const AdDetailSupportPlanMapper = async (planId) => {
   }
 };
 
-const ApprovalChangeMapper = async (planID) => {
+const approveSupportPlan = async (planID) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let result = await conn.query(adminSql.ApprovalChange, [planID]);
+    await conn.beginTransaction();
+    let result = await conn.query(adminSql.approveSupportPlan, [planID]);
     await conn.commit();
     return result;
   } catch (err) {
     console.log(err);
-    conn.rollback();
+    throw err;
   } finally {
     if (conn) conn.release();
   }
 };
 
 //반려 업데이트
-const ReturnMapper = async (planId) => {
+const returnSupportPlan = async (planId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
     await conn.beginTransaction();
-    let result = await conn.query(adminSql.Return, [planId]);
+    let result = await conn.query(adminSql.returnSupportPlan, [planId]);
     await conn.commit();
     return result;
   } catch (err) {
@@ -61,11 +62,11 @@ const ReturnMapper = async (planId) => {
 };
 
 //history insert
-const rejectionHistoryMapper = async (insertDate) => {
+const addRejectionHistory = async (insertDate) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    const rows = await conn.query(adminSql.rejectionHistory, insertDate);
+    const rows = await conn.query(adminSql.addRejectionHistory, insertDate);
     return rows;
   } catch (err) {
     console.error("이력 조회 중 오류:", err);
@@ -76,11 +77,11 @@ const rejectionHistoryMapper = async (insertDate) => {
 };
 
 //반려사유 리스트
-const rejectionListMapper = async (planId) => {
+const selectRejectionHistory = async (planId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(adminSql.rejectionList, [planId]);
+    let rows = await conn.query(adminSql.selectRejectionHistory, [planId]);
     return rows;
   } catch (err) {
     console.log(err);
@@ -89,11 +90,11 @@ const rejectionListMapper = async (planId) => {
   }
 };
 
-const AdSupportListMapper = async (agencyId) => {
+const selectBeneficiariesNames = async (agencyId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let row = await conn.query(adminSql.AdSupportList, [agencyId]);
+    let row = await conn.query(adminSql.selectBeneficiariesNames, [agencyId]);
     return row;
   } catch (err) {
     console.log(err);
@@ -103,11 +104,11 @@ const AdSupportListMapper = async (agencyId) => {
 };
 
 module.exports = {
-  AdSupportPlanMapper,
-  AdDetailSupportPlanMapper,
-  ApprovalChangeMapper,
-  ReturnMapper,
-  rejectionHistoryMapper,
-  rejectionListMapper,
-  AdSupportListMapper,
+  selectSupportPlanList,
+  selectSupportPlanDetail,
+  approveSupportPlan,
+  returnSupportPlan,
+  addRejectionHistory,
+  selectRejectionHistory,
+  selectBeneficiariesNames,
 };
