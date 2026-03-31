@@ -144,6 +144,10 @@ router.post("/blocked-times", async (req, res) => {
   try {
     const { managerId, date, times } = req.body;
 
+    console.log("managerId : ", managerId);
+    console.log("date : ", date);
+    console.log("times : ", times);
+
     if (!date || !times || times.length === 0) {
       return res.status(400).json({
         success: false,

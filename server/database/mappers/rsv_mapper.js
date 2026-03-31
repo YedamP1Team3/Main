@@ -58,7 +58,6 @@ const selectActiveManagers = async () => {
   try {
     conn = await pool.getConnection();
     const rows = await conn.query(rsvSql.selectActiveManagers);
-    console.log("ACTIVE인 MANAGER 조회 : ", rows);
     return rows;
   } catch (err) {
     console.log(err);
@@ -114,7 +113,7 @@ const selectReservedTimes = async (managerId, date) => {
 
     return rows;
   } catch (err) {
-    console.log("selectReservedTimes error:", err);
+    console.log(err);
     throw err;
   } finally {
     if (conn) conn.release();
