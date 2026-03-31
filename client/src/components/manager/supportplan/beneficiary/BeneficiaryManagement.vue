@@ -25,8 +25,8 @@ const handleSelectPlan = (planId) => {
     emit('select-plan', planId);
 };
 
-const handleResultIdDetail = (resultId) => {
-    emit('select-result', resultId);
+const handleResultIdDetail = (data) => {
+    emit('select-result', data);
 };
 
 const handleSelectSubPlan = (planId) => {

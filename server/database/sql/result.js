@@ -39,22 +39,9 @@ INSERT INTO support_result (
 `;
 
 const createTempResult = `
-INSERT INTO result_draft (
-    plan_id,
-    manager_id,
-    bene_id,
-    result_title,
-    result_content,
-    selected_plan_ids,
-    progress_state,
-    created_at
-) VALUES (?,?,?,?,?,?,?, CURDATE())
-`;
-
-const insertMapping = `
-    INSERT INTO result_plan_mapping (
-    result_id, plan_id
-    ) VALUES (?,?)
+    INSERT INTO result_draft (
+        plan_id, manager_id, bene_id, result_title, result_content, progress_state, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, NOW())
 `;
 
 const selectApprovedPlanList = `
@@ -118,6 +105,35 @@ const updateTempSupportResult = `
     result_id =?
 `;
 
+const selectSupportResultTempDetail = `
+    SELECT 
+        result_draft_id AS result_id, 
+        result_title,
+        result_content,
+        selected_plan_ids,  
+        progress_state,
+        DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at,
+        manager_id,
+        bene_id
+    FROM result_draft
+    WHERE result_draft_id = ?
+`;
+
+const selectTempMappingPlans = `
+    SELECT plan_id FROM result_draft_mapping WHERE result_draft_id = ?
+`;
+
+const insertMapping = `
+    INSERT INTO result_plan_mapping (
+    result_id, plan_id
+    ) VALUES (?,?)
+`;
+
+const insertTempMapping = `
+    INSERT INTO result_draft_mapping (result_draft_id, plan_id) 
+    VALUES (?, ?)
+`;
+
 module.exports = {
   selectSupportResultList,
   selectSupportResultTempList,
@@ -131,4 +147,7 @@ module.exports = {
   removeMapping,
   applySupportResult,
   updateTempSupportResult,
+  selectSupportResultTempDetail,
+  selectTempMappingPlans,
+  insertTempMapping,
 };

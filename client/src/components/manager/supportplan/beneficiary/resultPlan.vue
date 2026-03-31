@@ -3,7 +3,8 @@ import { ref, watch } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
-    beneId: [String, Number]
+    beneId: [String, Number],
+    progress_state: String
 });
 
 const emit = defineEmits(['newresultplan', 'select-result', 'refresh']);
@@ -16,7 +17,7 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const url = showTemp.value ? `http://localhost:3000/resultPlan/beneficiaries/${id}/temp` : `http://localhost:3000/resultPlan/beneficiaries/${id}/support-result`;
+        const url = showTemp.value ? `api/resultPlan/beneficiaries/${id}/temp` : `api/resultPlan/beneficiaries/${id}/support-result`;
         const response = await axios.get(url);
         planList.value = response.data || [];
     } catch (error) {
@@ -45,9 +46,9 @@ const savefile = () => {
 };
 
 const detailClick = (plan) => {
+    const id = showTemp.value ? plan.result_draft_id : plan.result_id;
     emit('select-result', {
-        // showTemp 상태에 따라 적절한 ID를 planId라는 이름으로 포장
-        resultId: showTemp.value ? plan.result_draft_id : plan.result_id,
+        resultId: id,
         isTemp: showTemp.value
     });
 };
