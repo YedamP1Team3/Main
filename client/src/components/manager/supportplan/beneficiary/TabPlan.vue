@@ -44,8 +44,12 @@ const savefile = () => {
     fetchPlanList(props.beneId);
 };
 
-const detailClick = (planId) => {
-    emit(`select-plan`, planId);
+const detailClick = (plan) => {
+    emit('select-plan', {
+        // showTemp 상태에 따라 적절한 ID를 planId라는 이름으로 포장
+        planId: showTemp.value ? plan.plan_draft_id : plan.plan_id,
+        isTemp: showTemp.value
+    });
 };
 
 defineExpose({ fetchPlanList });
@@ -75,8 +79,8 @@ watch(
                     <th>작성일자</th>
                     <th>상태</th>
                 </tr>
-                <tr v-for="plan in planList" :key="plan.plan_id" @click="detailClick(plan.plan_id)">
-                    <td>{{ plan.plan_id }}</td>
+                <tr v-for="plan in planList" :key="showTemp ? plan.plan_draft_id : plan.plan_id" @click="detailClick(plan)">
+                    <td>{{ showTemp ? plan.plan_draft_id : plan.plan_id }}</td>
                     <td>{{ plan.manager_id }}</td>
                     <td>{{ plan.plan_objective }}</td>
                     <td>{{ plan.created_at }}</td>

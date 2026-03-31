@@ -53,7 +53,7 @@ const SaveTemp = async () => {
         selected_plans: selectedPlans.value
     };
     try {
-        const response = await axios.post('http://localhost:3000/resultPlan/support-result', target);
+        const response = await axios.post('api/resultPlan/temp-result', target);
         if (response.data.success) {
             alert('지원서가 입력되었습니다');
             emit('refresh');

@@ -32,6 +32,13 @@ router.post("/support-plan", async (req, res) => {
   let result = await userService.createSupportPlan(target);
   res.send(result);
 });
+//지원계획서임시생성
+router.post("/temp-plan", async (req, res) => {
+  let target = req.body;
+  let result = await userService.createTempPlan(target);
+  res.send(result);
+});
+
 //지원계획서임시 조회
 router.get("/beneficiaries/:beneId/support-plans/temp", async (req, res) => {
   let target = req.params.beneId;
@@ -44,10 +51,22 @@ router.get("/support-plans/:planId", async (req, res) => {
   let result = await userService.getSupportPlanDetail(target);
   res.send(result);
 });
+//임시지원계획서상세조회
+router.get("/temp-plans/:planId", async (req, res) => {
+  let target = req.params.planId;
+  let result = await userService.getTempPlanDetail(target);
+  res.send(result);
+});
 //지원계획서삭제
 router.delete("/support-plans/:planId", async (req, res) => {
   let planNo = req.params.planId;
   let result = await userService.removeSupportPlan(planNo);
+  res.send(result);
+});
+//임시지원계획서 삭제
+router.delete("/temp-plans/:planDraftId", async (req, res) => {
+  let planNo = req.params.planDraftId;
+  let result = await userService.removeTempPlan(planNo);
   res.send(result);
 });
 //지원계획서 승인요청 업데이트
@@ -58,10 +77,17 @@ router.put("/support-plans/:planId", async (req, res) => {
   res.send(result);
 });
 //지원계획서업데이트(임시)
-router.put("/support-plans/:planId/temp", async (req, res) => {
-  let planNo = req.params.planId;
+router.put("/temp-plans/:planDraftId", async (req, res) => {
+  let planDraftId = req.params.planDraftId;
   let target = req.body;
-  let result = await userService.updateTempPlan(planNo, target);
+  let result = await userService.updateTempPlan(planDraftId, target);
+  res.send(result);
+});
+
+//지원계획서임시 승락
+router.post("/temp-plans/approve", async (req, res) => {
+  let target = req.body;
+  let result = await userService.approveTempPlan(target);
   res.send(result);
 });
 

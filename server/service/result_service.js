@@ -49,6 +49,37 @@ const createSupportResult = async (newResult) => {
   return { success: true, insertId: newResultId };
 };
 
+const createTempResult = async (newResult) => {
+  const {
+    selected_plans,
+    manager_id,
+    bene_id,
+    result_title,
+    result_content,
+    progress_state,
+  } = newResult;
+
+  const mainPlanId = selected_plans?.[0]?.plan_id || null;
+  // 1. 계획서 ID들을 문자열로 변환 (예: "71,72,85")
+  const allPlanIds = selected_plans?.map((p) => p.plan_id).join(",") || null;
+
+  const insertData = [
+    mainPlanId,
+    manager_id,
+    bene_id,
+    result_title,
+    result_content,
+    allPlanIds,
+    progress_state || "임시",
+  ];
+
+  // 2. 결과서 본문 저장
+  const result = await resultMapper.createTempResult(insertData);
+  const newResultId = result.insertId;
+
+  return { success: true, insertId: newResultId };
+};
+
 const getApprovedPlanList = async (beneId) => {
   let list = await resultMapper.selectApprovedPlanList(beneId);
   return list || [];
@@ -111,6 +142,7 @@ module.exports = {
   getSupportResultList,
   getSupportResultTempList,
   createSupportResult,
+  createTempResult,
   getApprovedPlanList,
   getSupportDetail,
   removeSupportResult,

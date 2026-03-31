@@ -20,6 +20,12 @@ router.post("/support-result", async (req, res) => {
   let result = await resultService.createSupportResult(target);
   res.send(result);
 });
+router.post("/temp-result", async (req, res) => {
+  let target = req.body;
+  let result = await resultService.createTempResult(target);
+  res.send(result);
+});
+
 //지원결과서 생성에 지원계획서 목록리스트 열기
 router.get("/support-plans/approved/:beneId", async (req, res) => {
   let target = req.params.beneId;

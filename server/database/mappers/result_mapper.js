@@ -18,7 +18,9 @@ const selectSupportResultTempList = async (beneId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let rows = await conn.query(resultSql.selectSupportResultTempList, [beneId]);
+    let rows = await conn.query(resultSql.selectSupportResultTempList, [
+      beneId,
+    ]);
     return rows;
   } catch (err) {
     console.log(err);
@@ -31,7 +33,20 @@ const createSupportResult = async (newResult) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-    let result = await conn.query(resultSql.createSupportResutl, newResult);
+    let result = await conn.query(resultSql.createSupportResult, newResult);
+    return result;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const createTempResult = async (newResult) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(resultSql.createTempResult, newResult);
     return result;
   } catch (err) {
     console.log(err);
@@ -173,4 +188,5 @@ module.exports = {
   removeMapping,
   applySupportResult,
   updateTempSupportResult,
+  createTempResult,
 };
