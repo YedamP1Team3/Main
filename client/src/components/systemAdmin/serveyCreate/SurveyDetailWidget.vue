@@ -1,3 +1,44 @@
+<script setup>
+import { ref } from 'vue';
+
+const props = defineProps({
+    details: Array,
+    selectedItemName: String,
+    selectedSubItemName: String,
+    selectedItemId: Number,
+    selectedSubItemId: Number,
+    isActive: Boolean
+});
+
+const emit = defineEmits(['add-detail', 'delete-selected']);
+const showInput = ref(false);
+const newTitle = ref('');
+const selectedItems = ref([]);
+
+// ⭐️ 체크박스는 오직 Detail(질문) 영역만 통제하도록 수정
+const toggleAll = () => {
+    if (selectedItems.value.length > 0) selectedItems.value = [];
+    else {
+        selectedItems.value = props.details?.map((d) => 'detail-' + d.id) || [];
+    }
+};
+
+const handleDelete = () => {
+    if (selectedItems.value.length === 0) return alert('삭제할 질문을 선택해주세요.');
+    if (confirm('선택한 질문을 삭제하시겠습니까?')) {
+        emit('delete-selected', selectedItems.value);
+        selectedItems.value = [];
+    }
+};
+
+const handleSubmit = () => {
+    if (!newTitle.value.trim()) return;
+    emit('add-detail', newTitle.value);
+    newTitle.value = '';
+    showInput.value = false;
+};
+</script>
+
 <template>
     <div class="card bg-white shadow-xl rounded-2xl h-[40rem] flex flex-col border border-slate-100 overflow-hidden">
         <div class="bg-slate-50 border-b p-5 shrink-0">
@@ -42,47 +83,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-
-const props = defineProps({
-    details: Array,
-    selectedItemName: String,
-    selectedSubItemName: String,
-    selectedItemId: Number,
-    selectedSubItemId: Number,
-    isActive: Boolean
-});
-
-const emit = defineEmits(['add-detail', 'delete-selected']);
-const showInput = ref(false);
-const newTitle = ref('');
-const selectedItems = ref([]);
-
-// ⭐️ 체크박스는 오직 Detail(질문) 영역만 통제하도록 수정
-const toggleAll = () => {
-    if (selectedItems.value.length > 0) selectedItems.value = [];
-    else {
-        selectedItems.value = props.details?.map((d) => 'detail-' + d.id) || [];
-    }
-};
-
-const handleDelete = () => {
-    if (selectedItems.value.length === 0) return alert('삭제할 질문을 선택해주세요.');
-    if (confirm('선택한 질문을 삭제하시겠습니까?')) {
-        emit('delete-selected', selectedItems.value);
-        selectedItems.value = [];
-    }
-};
-
-const handleSubmit = () => {
-    if (!newTitle.value.trim()) return;
-    emit('add-detail', newTitle.value);
-    newTitle.value = '';
-    showInput.value = false;
-};
-</script>
 <style scoped>
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;

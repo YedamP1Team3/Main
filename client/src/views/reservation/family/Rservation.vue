@@ -1,21 +1,3 @@
-<template>
-    <header class="layout-header">
-        <MTopbar />
-    </header>
-    <div class="layout-body">
-        <RsvSideBar />
-        <main class="layout-main">
-            <div class="reservation_container">
-                <BeneInfo :beneficiaries="beneficiaries" :selectedBeneId="selectedBeneId" @select-beneficiary="handleSelectBeneficiary" />
-                <div class="content row">
-                    <Calendar v-model="selectedDate" />
-                    <TimeSlot :selectedDate="selectedDate" :slots="slots" mode="family" @reserveTimes="handleReserve" />
-                </div>
-            </div>
-        </main>
-    </div>
-</template>
-
 <script>
 import { ref, watch, onMounted } from 'vue';
 import Calendar from '@/components/common/Calendar.vue';
@@ -203,6 +185,24 @@ export default {
     }
 };
 </script>
+
+<template>
+    <header class="layout-header">
+        <MTopbar />
+    </header>
+    <div class="layout-body">
+        <RsvSideBar />
+        <main class="layout-main">
+            <div class="reservation_container">
+                <BeneInfo :beneficiaries="beneficiaries" :selectedBeneId="selectedBeneId" @select-beneficiary="handleSelectBeneficiary" />
+                <div class="content row">
+                    <Calendar v-model="selectedDate" />
+                    <TimeSlot :selectedDate="selectedDate" :slots="slots" mode="family" @reserveTimes="handleReserve" />
+                </div>
+            </div>
+        </main>
+    </div>
+</template>
 
 <style scoped>
 .page {

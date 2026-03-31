@@ -1,3 +1,14 @@
+<script>
+import { RouterLink } from 'vue-router';
+
+export default {
+    name: 'RsvSideBar',
+    components: {
+        RouterLink
+    }
+};
+</script>
+
 <template>
     <aside class="rsv-sidebar">
         <div class="sidebar-title">상담 메뉴</div>
@@ -13,17 +24,6 @@
         </nav>
     </aside>
 </template>
-
-<script>
-import { RouterLink } from 'vue-router';
-
-export default {
-    name: 'RsvSideBar',
-    components: {
-        RouterLink
-    }
-};
-</script>
 
 <style scoped>
 .rsv-sidebar {

@@ -104,6 +104,18 @@ const updateTempPlan = `
     plan_id =?
 `;
 
+// const createTempPlan = `
+//     INSERT INTO plan_draft (
+//       priority_id,
+//       manager_id,
+//       bene_id,
+//       plan_objective,
+//       plan_content,
+//       progress_state,
+//       created_at
+//     ) VALUES (?, ?, ?, ?, ?, ?, CURDATE())
+// `;
+
 module.exports = {
   selectAllUser,
   selectBeneficiariesNames,

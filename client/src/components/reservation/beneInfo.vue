@@ -1,3 +1,32 @@
+<script setup>
+import { computed } from 'vue';
+
+const props = defineProps({
+    beneficiaries: {
+        type: Array,
+        default: () => []
+    },
+    selectedBeneId: {
+        type: [Number, String, null],
+        default: null
+    }
+});
+
+const emit = defineEmits(['select-beneficiary']);
+
+const selectedBeneficiary = computed(() => {
+    return props.beneficiaries.find((bene) => String(bene.bene_id) === String(props.selectedBeneId)) || null;
+});
+
+const handleSelect = (event) => {
+    const beneId = event.target.value;
+
+    const selected = props.beneficiaries.find((bene) => String(bene.bene_id) === String(beneId));
+
+    emit('select-beneficiary', selected || null);
+};
+</script>
+
 <template>
     <section class="bene-info-card">
         <div class="bene-header">
@@ -40,35 +69,6 @@
         <div v-else class="empty-message">지원대상자를 선택하면 상세 정보가 표시됩니다.</div>
     </section>
 </template>
-
-<script setup>
-import { computed } from 'vue';
-
-const props = defineProps({
-    beneficiaries: {
-        type: Array,
-        default: () => []
-    },
-    selectedBeneId: {
-        type: [Number, String, null],
-        default: null
-    }
-});
-
-const emit = defineEmits(['select-beneficiary']);
-
-const selectedBeneficiary = computed(() => {
-    return props.beneficiaries.find((bene) => String(bene.bene_id) === String(props.selectedBeneId)) || null;
-});
-
-const handleSelect = (event) => {
-    const beneId = event.target.value;
-
-    const selected = props.beneficiaries.find((bene) => String(bene.bene_id) === String(beneId));
-
-    emit('select-beneficiary', selected || null);
-};
-</script>
 
 <style scoped>
 .bene-info-card {
