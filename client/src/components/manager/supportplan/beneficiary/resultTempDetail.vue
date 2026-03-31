@@ -33,7 +33,7 @@ const fetchResultDetail = async (id) => {
 const fetchAllSupportList = async () => {
     if (!props.beneId) return;
     try {
-        const response = await axios.get(`http://localhost:3000/resultPlan/support-plans/approved/${props.beneId}`);
+        const response = await axios.get(`api/resultPlan/support-plans/approved/${props.beneId}`);
         supportList.value = response.data;
     } catch (error) {
         console.error('목록 로드 실패', error);
@@ -83,7 +83,7 @@ const selectSubPlan = (planId) => {
 const deleteTemp = async (resultId) => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`http://localhost:3000/resultPlan/support-result/${resultId}`);
+        const response = await axios.delete(`api/resultPlan/temp-result/${resultId}`);
         if (response.data.status == 'success') {
             alert('삭제되었습니다');
             emit('refresh');
@@ -100,12 +100,14 @@ const Approval = async (id) => {
     if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
     try {
         const planIds = selectedPlans.value.map((plan) => plan.plan_id);
-        const updateData = {
+        const target = {
+            manager_id: authStore.userId, 
+            bene_id: props.beneId,        
             result_title: resultDetail.value.result_title,
             result_content: resultDetail.value.result_content,
             planIds: planIds
         };
-        const response = await axios.put(`http://localhost:3000/resultPlan/support-result/${id}`, updateData);
+        const response = await axios.post(`api/resultPlan/temp-result/${id}/apply`, target);
         if (response.data.status === 'success') {
             alert('승인 신청되었습니다.');
             emit('refresh');

@@ -73,7 +73,14 @@ router.delete("/temp-plans/:planDraftId", async (req, res) => {
 router.put("/support-plans/:planId", async (req, res) => {
   let planNo = req.params.planId;
   let target = req.body;
-  let result = await userService.applySupportPlan(planNo, target);
+  let result = await userService.resubmitSupportPlan(planNo, target);
+  res.send(result);
+});
+//지원계획서 임시저장 업데이트
+router.put("/support-plans/:planId/save", async (req, res) => {
+  let planNo = req.params.planId;
+  let target = req.body;
+  let result = await userService.rejectSupportPlan(planNo, target);
   res.send(result);
 });
 //지원계획서업데이트(임시)

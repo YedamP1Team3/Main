@@ -79,8 +79,16 @@ const removeSupportResult = `
 DELETE FROM support_result WHERE result_id=?
 `;
 
+const removeTempResult = `
+DELETE FROM result_draft WHERE result_draft_id=?
+`;
+
 const removeMapping = `
 DELETE FROM result_plan_mapping WHERE result_id = ?
+`;
+
+const removeTempMapping = `
+DELETE FROM result_draft_mapping WHERE result_draft_id = ?
 `;
 
 const applySupportResult = `
@@ -93,16 +101,16 @@ const applySupportResult = `
   WHERE
     result_id =?
 `;
-
+//임시저장업데이트
 const updateTempSupportResult = `
-  UPDATE support_result
+  UPDATE result_draft
   SET
     result_title =?,
     result_content =?,
     progress_state ='임시',
     updated_at = NOW()
   WHERE
-    result_id =?
+    result_draft_id =?
 `;
 
 const selectSupportResultTempDetail = `
@@ -134,6 +142,39 @@ const insertTempMapping = `
     VALUES (?, ?)
 `;
 
+const selectLinkedTempList =
+`SELECT 
+        p.plan_id,
+        p.plan_objective,
+        p.plan_content
+    FROM result_draft_mapping m
+    JOIN support_plan p ON m.plan_id = p.plan_id
+    WHERE m.result_draft_id = ?
+`;
+
+// 1. 관리자가 반려할 때: 상태를 '반려/수정중'으로 변경
+const rejectSupportResult = `
+    UPDATE support_result 
+    SET 
+        progress_state = '반려/수정중', 
+        rejection_reason = ?, 
+        result_content = ?,
+        updated_at = NOW() 
+    WHERE result_id = ?
+`;
+
+// 2. 작성자가 수정한 후 다시 올릴 때: 상태를 '반려/재승인'으로 변경
+const resubmitSupportResult = `
+    UPDATE support_result 
+    SET 
+        result_title = ?, 
+        result_content = ?, 
+        progress_state = '반려/재승인', 
+        rejection_reason = NULL, -- 재승인 시 이전 반려 사유는 비워줍니다.
+        updated_at = NOW() 
+    WHERE result_id = ?
+`;
+
 module.exports = {
   selectSupportResultList,
   selectSupportResultTempList,
@@ -150,4 +191,9 @@ module.exports = {
   selectSupportResultTempDetail,
   selectTempMappingPlans,
   insertTempMapping,
+  selectLinkedTempList,
+  removeTempResult,
+  removeTempMapping,
+  rejectSupportResult,
+  resubmitSupportResult
 };

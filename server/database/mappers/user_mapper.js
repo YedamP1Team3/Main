@@ -146,12 +146,12 @@ const removeTempPlan = async (planDelete) => {
   }
 };
 //지원계획서 승인요청
-const applySupportPlan = async (planId, planDate) => {
+const resubmitSupportPlan= async (planId, planDate) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
     await conn.beginTransaction();
-    let result = await conn.query(userSql.applySupportPlan, [
+    let result = await conn.query(userSql.resubmitSupportPlan, [
       planDate.plan_objective,
       planDate.plan_content,
       planId,
@@ -165,6 +165,27 @@ const applySupportPlan = async (planId, planDate) => {
     if (conn) conn.release();
   }
 };
+
+const rejectSupportPlan = async (planId, planDate) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+    let result = await conn.query(userSql.rejectSupportPlan, [
+      planDate.plan_objective,
+      planDate.plan_content,
+      planId,
+    ]);
+    await conn.commit();
+    return result;
+  } catch (err) {
+    console.log(err);
+    if (conn) await conn.rollback();
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 //지원계획서업데이트(임시)
 const updateTempPlan = async (planDraftId, planDate) => {
   console.log("매퍼로 들어온 데이터:", planDate);
@@ -199,6 +220,7 @@ module.exports = {
   selectTempPlanDetail,
   removeSupportPlan,
   removeTempPlan,
-  applySupportPlan,
+  resubmitSupportPlan,
+  rejectSupportPlan,
   updateTempPlan,
 };

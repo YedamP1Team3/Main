@@ -56,7 +56,7 @@ watch(
                     <td>{{ plan.user_name }}</td>
                     <td>{{ plan.result_title }}</td>
                     <td>{{ plan.created_at }}</td>
-                    <td>{{ plan.progress_state }}</td>
+                    <td>{{ plan.progress_state === '반려/수정중' ? '반려' : plan.progress_state }}</td>
                 </tr>
             </tbody>
         </table>

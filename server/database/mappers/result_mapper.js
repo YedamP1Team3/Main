@@ -120,11 +120,38 @@ const removeSupportResult = async (resultId) => {
   }
 };
 
+const removeTempResult = async (resultId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(resultSql.removeTempResult, resultId);
+    return result;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 const removeMapping = async (resultId) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
     let result = await conn.query(resultSql.removeMapping, resultId);
+    return result;
+  } catch (err) {
+    console.error("removeMapping 에러:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const removeTempMapping = async (resultId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(resultSql.removeTempMapping, resultId);
     return result;
   } catch (err) {
     console.error("removeMapping 에러:", err);
@@ -209,6 +236,41 @@ const insertTempMapping = async (draftId, planIds) => {
   }
 };
 
+const selectLinkedTempList = async (draftId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(resultSql.selectLinkedTempList, [draftId]);
+    return rows;
+  } catch (err) {
+    console.error("임시 매핑 목록 조회 에러:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// 반려 처리 (반려/수정중)
+const rejectSupportResult = async (title, content, resultId) => {
+  let conn = await pool.getConnection();
+  try {
+    return await conn.query(resultSql.rejectSupportResult, [title, content, resultId]);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// 재승인 처리 (반려/재승인)
+const resubmitSupportResult = async (resultId, updateData) => {
+  let conn = await pool.getConnection();
+  try {
+    const { title, content } = updateData;
+    return await conn.query(resultSql.resubmitSupportResult, [title, content, resultId]);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   selectSupportResultList,
   selectSupportResultTempList,
@@ -224,4 +286,9 @@ module.exports = {
   createTempResult,
   selectSupportResultTempDetail,
   insertTempMapping,
+  selectLinkedTempList,
+  removeTempResult,
+  removeTempMapping,
+  rejectSupportResult,
+  resubmitSupportResult
 };
