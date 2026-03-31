@@ -3,6 +3,7 @@ import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSurveyStore, PRIORITY_MAP } from '@/stores/useSurveyStore'; // 💡 스토어 연결
 import TabPlan from './TabPlan.vue';
+import TabPlanDetail from './TabPlanDetail.vue';
 import resultPlan from './resultPlan.vue';
 
 const props = defineProps({
@@ -14,19 +15,30 @@ const emit = defineEmits(['newaddplan', 'select-plan', 'select-result', 'select-
 const currentTab = ref('plan'); // 기본 탭을 지원신청서로 변경해도 좋습니다.
 const tabPlanRef = ref(null);
 
-const isListVisible = ref(true);
-const selectedResultId = ref(null);
-
 const surveyStore = useSurveyStore();
 const { application_list } = storeToRefs(surveyStore);
+
+const leftMode = ref('list'); // 'list' | 'plan'
+const selectedSubPlanId = ref(null);
 
 const handleSelectPlan = (planId) => {
     emit('select-plan', planId);
 };
 
-const handleResultIdDetail = (resultId) => {
-    selectedResultId.value = resultId;
-    emit('select-result', resultId);
+const handleResultIdDetail = (data) => {
+    emit('select-result', data);
+};
+
+const handleSelectSubPlan = (planId) => {
+    if (!planId) return;
+    selectedSubPlanId.value = planId;
+    leftMode.value = 'plan';
+    currentTab.value = 'Result';
+};
+
+const handleCloseSubPlan = () => {
+    leftMode.value = 'list';
+    selectedSubPlanId.value = null;
 };
 // 💡 리스트 클릭 시 실행 (스토어에 상세정보 세팅 후 뷰 모드 변경 알림)
 const viewApplicationDetail = async (appId) => {
@@ -42,16 +54,27 @@ const formatPriority = (item) => {
     return PRIORITY_MAP[lowerCode] || item.priority_status;
 };
 
-watch(currentTab, () => {
-    isListVisible.value = true;
-    selectedResultId.value = null;
-});
-
 defineExpose({
     refreshTabPlan: () => {
         if (tabPlanRef.value) tabPlanRef.value.fetchPlanList(props.beneId);
-    }
+    },
+    openSubPlan: handleSelectSubPlan,
+    closeSubPlan: handleCloseSubPlan
 });
+
+watch(
+    () => props.beneId,
+    () => {
+        handleCloseSubPlan();
+    }
+);
+
+watch(
+    () => currentTab.value,
+    (tab) => {
+        if (tab !== 'Result') handleCloseSubPlan();
+    }
+);
 </script>
 
 <template>
@@ -94,18 +117,10 @@ defineExpose({
             </div>
 
             <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @Newaddplan="emit('newaddplan')" @select-plan="handleSelectPlan" />
-            <resultPlan v-if="currentTab === 'Result'" ref="tabPlanRef" :beneId="beneId" @newresultplan="emit('newresultplan')" @select-result="handleResultIdDetail" />
-        </div>
-        <div v-if="selectedResultId" :class="{ 'full-content': !isListVisible }" class="detail-side">
-            <resultPlanDetail
-                :resultId="selectedResultId"
-                :beneId="beneId"
-                @toggle-list="(val) => (isListVisible = val)"
-                @refresh="
-                    selectedResultId = null;
-                    isListVisible = true;
-                "
-            />
+            <div v-if="currentTab === 'Result'">
+                <resultPlan v-if="leftMode === 'list'" ref="tabPlanRef" :beneId="beneId" @newresultplan="emit('newresultplan')" @select-result="handleResultIdDetail" />
+                <TabPlanDetail v-else-if="leftMode === 'plan'" :planId="selectedSubPlanId" @close="handleCloseSubPlan" />
+            </div>
         </div>
     </div>
 </template>

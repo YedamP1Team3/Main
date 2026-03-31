@@ -11,22 +11,22 @@ const selectSupportResultList = `
       AND progress_state != '임시' 
     ORDER BY result_id DESC       
 `;
-
+//임시저장 리스트
 const selectSupportResultTempList = `
     SELECT 
-        result_id,         
+        result_draft_id,         
         manager_id,        
         result_title,      
         DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at, 
         progress_state,    
         bene_id
-    FROM support_result
+    FROM result_draft
     WHERE bene_id = ? 
       AND progress_state = '임시' 
-    ORDER BY result_id DESC       
+    ORDER BY result_draft_id DESC       
 `;
 
-const createSupportResutl = `
+const createSupportResult = `
 INSERT INTO support_result (
     plan_id,
     manager_id,
@@ -38,10 +38,10 @@ INSERT INTO support_result (
 ) VALUES (?,?,?,?,?,?, CURDATE())
 `;
 
-const insertMapping = `
-    INSERT INTO result_plan_mapping (
-    result_id, plan_id
-    ) VALUES (?,?)
+const createTempResult = `
+    INSERT INTO result_draft (
+        plan_id, manager_id, bene_id, result_title, result_content, progress_state, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, NOW())
 `;
 
 const selectApprovedPlanList = `
@@ -105,10 +105,40 @@ const updateTempSupportResult = `
     result_id =?
 `;
 
+const selectSupportResultTempDetail = `
+    SELECT 
+        result_draft_id AS result_id, 
+        result_title,
+        result_content,
+        selected_plan_ids,  
+        progress_state,
+        DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at,
+        manager_id,
+        bene_id
+    FROM result_draft
+    WHERE result_draft_id = ?
+`;
+
+const selectTempMappingPlans = `
+    SELECT plan_id FROM result_draft_mapping WHERE result_draft_id = ?
+`;
+
+const insertMapping = `
+    INSERT INTO result_plan_mapping (
+    result_id, plan_id
+    ) VALUES (?,?)
+`;
+
+const insertTempMapping = `
+    INSERT INTO result_draft_mapping (result_draft_id, plan_id) 
+    VALUES (?, ?)
+`;
+
 module.exports = {
   selectSupportResultList,
   selectSupportResultTempList,
-  createSupportResutl,
+  createSupportResult,
+  createTempResult,
   insertMapping,
   selectApprovedPlanList,
   selectSupportResultDetail,
@@ -117,5 +147,7 @@ module.exports = {
   removeMapping,
   applySupportResult,
   updateTempSupportResult,
+  selectSupportResultTempDetail,
+  selectTempMappingPlans,
+  insertTempMapping,
 };
-

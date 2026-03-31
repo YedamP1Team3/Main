@@ -67,6 +67,18 @@ const createSupportPlan = async (supportPlan) => {
     if (conn) conn.release();
   }
 };
+
+const createTempPlan = async (supportPlan) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(userSql.createTempPlan, supportPlan);
+    return result;
+  } catch (err) {
+  } finally {
+    if (conn) conn.release();
+  }
+};
 //지원계회서임시조회
 const selectSupportPlanTempList = async (beneId) => {
   let conn = null;
@@ -93,12 +105,39 @@ const selectSupportPlanDetail = async (planId) => {
     if (conn) conn.release();
   }
 };
+
+const selectTempPlanDetail = async (planId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(userSql.selectTempPlanDetail, [planId]);
+    return rows[0];
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 //지원계획서삭제
 const removeSupportPlan = async (planDelete) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
     let result = await conn.query(userSql.removeSupportPlan, planDelete);
+    return result;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (conn) conn.release();
+  }
+};
+//임시지원계획서 삭제
+const removeTempPlan = async (planDelete) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(userSql.removeTempPlan, planDelete);
     return result;
   } catch (err) {
     console.log(err);
@@ -121,13 +160,13 @@ const applySupportPlan = async (planId, planDate) => {
     return result;
   } catch (err) {
     console.log(err);
-    if(conn) await conn.rollback();
+    if (conn) await conn.rollback();
   } finally {
     if (conn) conn.release();
   }
 };
 //지원계획서업데이트(임시)
-const updateTempPlan = async (planId, planDate) => {
+const updateTempPlan = async (planDraftId, planDate) => {
   console.log("매퍼로 들어온 데이터:", planDate);
   let conn = null;
   try {
@@ -136,13 +175,13 @@ const updateTempPlan = async (planId, planDate) => {
     let result = await conn.query(userSql.updateTempPlan, [
       planDate.plan_objective,
       planDate.plan_content,
-      planId,
+      planDraftId,
     ]);
     await conn.commit();
     return result;
   } catch (err) {
     console.log(err);
-   if(conn) await conn.rollback();
+    if (conn) await conn.rollback();
   } finally {
     if (conn) conn.release();
   }
@@ -154,9 +193,12 @@ module.exports = {
   selectBeneficiariesDetail,
   selectSupportPlanList,
   createSupportPlan,
+  createTempPlan,
   selectSupportPlanTempList,
   selectSupportPlanDetail,
+  selectTempPlanDetail,
   removeSupportPlan,
+  removeTempPlan,
   applySupportPlan,
   updateTempPlan,
 };

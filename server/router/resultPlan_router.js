@@ -20,6 +20,13 @@ router.post("/support-result", async (req, res) => {
   let result = await resultService.createSupportResult(target);
   res.send(result);
 });
+//임시지원결과서생성
+router.post("/temp-result", async (req, res) => {
+  let target = req.body;
+  let result = await resultService.createTempResult(target);
+  res.send(result);
+});
+
 //지원결과서 생성에 지원계획서 목록리스트 열기
 router.get("/support-plans/approved/:beneId", async (req, res) => {
   let target = req.params.beneId;
@@ -58,6 +65,12 @@ router.put("/support-result/:id/temp", async (req, res) => {
     { result_title, result_content },
     planIds,
   );
+  res.send(result);
+});
+//임시지원결과서 임시조회
+router.get("/temp-result/:resultId", async (req, res) => {
+  let target = req.params.resultId;
+  let result = await resultService.getSupportTempDetail(target);
   res.send(result);
 });
 

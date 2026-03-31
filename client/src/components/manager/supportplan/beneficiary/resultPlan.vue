@@ -3,7 +3,8 @@ import { ref, watch } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
-    beneId: [String, Number]
+    beneId: [String, Number],
+    progress_state: String
 });
 
 const emit = defineEmits(['newresultplan', 'select-result', 'refresh']);
@@ -16,7 +17,7 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const url = showTemp.value ? `http://localhost:3000/resultPlan/beneficiaries/${id}/temp` : `http://localhost:3000/resultPlan/beneficiaries/${id}/support-result`;
+        const url = showTemp.value ? `api/resultPlan/beneficiaries/${id}/temp` : `api/resultPlan/beneficiaries/${id}/support-result`;
         const response = await axios.get(url);
         planList.value = response.data || [];
     } catch (error) {
@@ -44,8 +45,12 @@ const savefile = () => {
     fetchPlanList(props.beneId);
 };
 
-const detailClick = (resultId) => {
-    emit('select-result', resultId);
+const detailClick = (plan) => {
+    const id = showTemp.value ? plan.result_draft_id : plan.result_id;
+    emit('select-result', {
+        resultId: id,
+        isTemp: showTemp.value
+    });
 };
 
 defineExpose({ fetchPlanList });
@@ -75,8 +80,8 @@ watch(
                     <th>작성일자</th>
                     <th>상태</th>
                 </tr>
-                <tr v-for="plan in planList" :key="plan.result_id" @click="detailClick(plan.result_id)" class="clickable-row">
-                    <td>{{ plan.result_id }}</td>
+                <tr v-for="plan in planList" :key="showTemp ? plan.result_draft_id : plan.result_id" @click="detailClick(plan)" class="clickable-row">
+                    <td>{{ showTemp ? plan.result_draft_id : plan.result_id }}</td>
                     <td>{{ plan.manager_id }}</td>
                     <td>{{ plan.result_title }}</td>
                     <td>{{ plan.created_at }}</td>

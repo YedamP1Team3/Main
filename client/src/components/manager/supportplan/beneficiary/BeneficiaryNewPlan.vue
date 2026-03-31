@@ -42,7 +42,6 @@ const SaveTemp = async () => {
         return;
     }
     const target = {
-        priority_id: props.priorityId,
         manager_id: authStore.userId,
         bene_id: props.beneId,
         plan_objective: planObjective.value,
@@ -50,7 +49,7 @@ const SaveTemp = async () => {
         progress_state: '임시'
     };
     try {
-        const response = await axios.post('http://localhost:3000/api/support-plan', target);
+        const response = await axios.post('api/api/temp-plan', target);
         if (response.data) {
             alert('지원서가 입력되었습니다');
             emit('refresh');

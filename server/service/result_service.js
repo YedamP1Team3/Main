@@ -49,6 +49,39 @@ const createSupportResult = async (newResult) => {
   return { success: true, insertId: newResultId };
 };
 
+const createTempResult = async (newResult) => {
+  const { selected_plans, manager_id, bene_id, result_title, result_content } =
+    newResult;
+
+  // 1. 본문 데이터 준비
+  const mainPlanId = selected_plans?.[0]?.plan_id || null;
+  const insertData = [
+    mainPlanId,
+    manager_id,
+    bene_id,
+    result_title,
+    result_content,
+    "임시",
+  ];
+
+  try {
+    // 2. 본문 저장
+    const result = await resultMapper.createTempResult(insertData);
+    const newResultId = result.insertId;
+
+    // 3. 매핑 저장 (plan_id들만 추출해서 전달)
+    if (newResultId && selected_plans?.length > 0) {
+      const planIds = selected_plans.map((p) => p.plan_id); // [71, 72...] 형태
+      await resultMapper.insertTempMapping(newResultId, planIds);
+    }
+
+    return { success: true, insertId: newResultId };
+  } catch (err) {
+    console.error("임시저장 서비스 에러:", err);
+    throw err;
+  }
+};
+
 const getApprovedPlanList = async (beneId) => {
   let list = await resultMapper.selectApprovedPlanList(beneId);
   return list || [];
@@ -107,13 +140,38 @@ const updateTempSupportResult = async (resultId, resultData, planIds) => {
   }
 };
 
+const getSupportTempDetail = async (resultId) => {
+  try {
+    // 1. 임시 테이블에서 데이터 가져오기
+    let resultInfo = await resultMapper.selectSupportResultTempDetail(resultId);
+
+    if (resultInfo) {
+      // 2. 매핑 데이터 처리: "71,72" -> [71, 72]
+      if (resultInfo.selected_plan_ids) {
+        // 쉼표로 분리 후 숫자로 변환
+        const planIds = resultInfo.selected_plan_ids.split(",").map(Number);
+        resultInfo.selected_plans = planIds;
+      } else {
+        resultInfo.selected_plans = [];
+      }
+      return resultInfo;
+    }
+    return {};
+  } catch (err) {
+    console.error("임시저장 상세조회 서비스 에러:", err);
+    throw err;
+  }
+};
+
 module.exports = {
   getSupportResultList,
   getSupportResultTempList,
   createSupportResult,
+  createTempResult,
   getApprovedPlanList,
   getSupportDetail,
   removeSupportResult,
   applySupportResult,
   updateTempSupportResult,
+  getSupportTempDetail,
 };

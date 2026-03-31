@@ -13,6 +13,8 @@ import ManagerSurveyView from '@/components/manager/supportplan/beneficiary/Mana
 // 💡 [추가] 대기단계 스위치 컴포넌트 임포트 (경로 확인 필요)
 import ManagerPrioritySwitch from '@/components/manager/supportplan/beneficiary/ManagerPrioritySwitch.vue';
 import resultPlanDetail from '@/components/manager/supportplan/beneficiary/resultPlanDetail.vue';
+import BeneficiaryTempDetail from '@/components/manager/supportplan/beneficiary/BeneficiaryTempDetail.vue';
+import resultTempDetail from '@/components/manager/supportplan/beneficiary/resultTempDetail.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);
@@ -35,14 +37,21 @@ const handleIdUpdate = async (id, priorityId) => {
     }
 };
 
-const handleIdDetail = (planId) => {
-    selectPlan.value = planId;
-    viewMode.value = 'detail';
+const handleIdDetail = (data) => {
+    // data가 객체 { planId, isTemp } 형태면 ID만 추출, 아니면 data 자체를 ID로 사용
+    const id = data && typeof data === 'object' ? data.planId : data;
+    const isTemp = data && typeof data === 'object' ? data.isTemp : false;
+
+    selectPlan.value = id;
+    viewMode.value = isTemp ? 'tempDetail' : 'detail';
 };
 
-const handleResultIdDetail = (resultId) => {
-    selectResultId.value = resultId;
-    viewMode.value = 'resultDetail';
+const handleResultIdDetail = (data) => {
+    const id = data && typeof data === 'object' ? data.resultId : data;
+    const isTemp = data && typeof data === 'object' ? data.isTemp : false;
+
+    selectResultId.value = id;
+    viewMode.value = isTemp ? 'resultTempDetail' : 'resultDetail';
 };
 
 // 💡 탭에서 신청서를 클릭했을 때 뷰 모드를 변경하는 함수
@@ -108,6 +117,10 @@ const handleSelectSubPlan = (planId) => {
             <div v-else-if="viewMode === 'detail'" class="editor-container">
                 <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
+
+            <div v-else-if="viewMode === 'tempDetail'" class="editor-container">
+                <BeneficiaryTempDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+            </div>
             <div v-else-if="viewMode === 'resultCreate'" class="editor-container">
                 <ResultNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
             </div>
@@ -116,6 +129,9 @@ const handleSelectSubPlan = (planId) => {
             </div>
             <div v-else-if="viewMode === 'resultDetail'" class="editor-container">
                 <resultPlanDetail :resultId="selectResultId" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan" />
+            </div>
+            <div v-else-if="viewMode === 'resultTempDetail'" class="editor-container">
+                <resultTempDetail :resultId="selectResultId" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan" />
             </div>
             <!-- 💡 [추가] Manager 대기단계 설정 화면 -->
             <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">
