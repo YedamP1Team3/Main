@@ -111,7 +111,6 @@ export default {
                 const res = await getManagerSchedule(managerId.value, formattedDate);
 
                 const schedule = res.data.schedule;
-                console.log('schedule : ', schedule);
 
                 if (!schedule) {
                     slots.value = [];

@@ -21,7 +21,7 @@ const surveyStore = useSurveyStore(); // ⭐️ 스토어 인스턴스
 const selectResult = ref(null);
 
 //지원자를 새로 선택했을때
-const handleIdUpdate = (id, priorityId) => {
+const handleIdUpdate = async (id, priorityId) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
     viewMode.value = 'empty';

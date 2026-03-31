@@ -17,11 +17,14 @@
 import { ref, watch } from 'vue';
 import Calendar from '@/components/common/Calendar.vue';
 import TimeSlot from '@/components/common/TimeSlot.vue';
+import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
+import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
 
 import { getManagerSchedule } from '@/api/reservation/schedule';
 import { createBlockedTimes, deleteBlockedTimes } from '@/api/reservation/block';
-import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
-import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
+
+import { useAuthStore } from '@/stores/auth';
+import { storeToRefs } from 'pinia';
 
 export default {
     components: {
@@ -32,14 +35,19 @@ export default {
     },
 
     setup() {
+        const authStore = useAuthStore();
+        const { userId } = storeToRefs(authStore);
+
         const selectedDate = ref(null);
         const slots = ref([]);
         const blockedSummary = ref([]);
 
-        const extractBlockedSummary = (schedule) => {
-            const occupied = schedule.occupied_times || [];
+        const managerId = userId;
 
-            return occupied.map((item) => {
+        const extractBlockedSummary = (schedule) => {
+            const blocked = schedule.blocked_times || [];
+
+            return blocked.map((item) => {
                 const start = item.start_time.slice(11, 16);
                 const end = item.end_time.slice(11, 16);
 
@@ -53,14 +61,14 @@ export default {
 
             try {
                 const formattedDate = new Date(newDate).toISOString().slice(0, 10);
-                const res = await getManagerSchedule(formattedDate);
+                const res = await getManagerSchedule(managerId.value, formattedDate);
 
                 // schedule이 배열일 가능성 대비
                 const schedule = res.data.schedule;
 
                 if (!schedule) {
                     slots.value = [];
-                    blockedSummary = [];
+                    blockedSummary.value = [];
                     return;
                 }
 
@@ -78,12 +86,22 @@ export default {
         // 🔥 근무시간 → 타임슬롯 변환
         const convertToSlots = (schedule) => {
             const result = [];
-            const occupied = schedule.occupied_times || [];
+            const reserved = schedule.reserved_times || [];
+            const blocked = schedule.blocked_times || [];
+
+            const isReserved = (time) => {
+                return reserved.some((r) => {
+                    const start = r.start_time.slice(11, 16); // "10:30"
+                    const end = r.end_time.slice(11, 16); // "11:00"
+
+                    return time >= start && time < end;
+                });
+            };
 
             const isBlocked = (time) => {
-                return occupied.some((o) => {
-                    const start = o.start_time.slice(11, 16); // "09:00"
-                    const end = o.end_time.slice(11, 16); // "10:00"
+                return blocked.some((b) => {
+                    const start = b.start_time.slice(11, 16); // "13:00"
+                    const end = b.end_time.slice(11, 16); // "14:00"
 
                     return time >= start && time < end;
                 });
@@ -95,14 +113,22 @@ export default {
             while (hour < endHour || (hour === endHour && minute < endMinute)) {
                 const time = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
 
+                let status = 'available';
+
+                if (isReserved(time)) {
+                    status = 'reserved';
+                } else if (isBlocked(time)) {
+                    status = 'blocked';
+                }
+
                 result.push({
                     time,
-                    status: isBlocked(time) ? 'blocked' : 'available'
+                    status
                 });
 
                 minute += 30;
                 if (minute === 60) {
-                    hour++;
+                    hour += 1;
                     minute = 0;
                 }
             }
@@ -115,9 +141,10 @@ export default {
             console.log('차단 요청:', data);
 
             try {
-                const { date, times, type } = data;
+                const { managerId, date, times, type } = data;
 
                 const payload = {
+                    managerId,
                     date,
                     times
                 };
@@ -125,14 +152,14 @@ export default {
                 console.log('API 요청:', payload);
 
                 // 예약가능 → 차단 해제
-                if (type === 'available') {
+                if (type === 'blocked') {
                     await deleteBlockedTimes(payload);
 
                     alert('예약가능으로 변경되었습니다.');
                 }
 
                 // 🔴 예약불가 → 차단 등록
-                else if (type === 'unavailable') {
+                else if (type === 'available') {
                     await createBlockedTimes(payload);
 
                     alert('차단시간이 등록되었습니다.');

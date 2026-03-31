@@ -165,18 +165,13 @@ const generateNextMonthSchedules = async () => {
 // 담당자 조회
 const getManagerSchedule = async (managerId, date) => {
   const schedule = await rsvMapper.selectManagerSchedule(managerId, date);
-  console.log("service.schedule : ", schedule);
 
   if (!schedule) return null;
 
   // 🔥 추가
   const reserved = await rsvMapper.selectReservedTimes(managerId, date);
 
-  console.log("service.reserved : ", reserved);
-
   const blocked = await rsvMapper.selectBlockedTimes(managerId, date);
-
-  console.log("service.blocked : ", blocked);
 
   return {
     ...schedule,
