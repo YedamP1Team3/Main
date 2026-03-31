@@ -114,7 +114,7 @@ const handleSelectSubPlan = (planId) => {
                 <ManagerAssignView :beneId="selectedId" @close="viewMode = 'empty'" @success="handleAssignSuccess" />
             </div>
             <div v-else-if="viewMode === 'result_detail'" class="editor-container">
-                <adResultPlanDetail :resultId="selectResult" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan"/>
+                <adResultPlanDetail :resultId="selectResult" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan" />
             </div>
 
             <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">

@@ -1,28 +1,36 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useSurveyStore, PRIORITY_MAP } from '@/stores/useSurveyStore';
+import { useSurveyStore } from '@/stores/useSurveyStore';
 import TabPlan from './MemberTabPlan.vue';
 import TabResult from './MemberTabResult.vue';
 
-const surveyStore = useSurveyStore();
+const ACTIVE_APPLICATION_STATUSES = new Set(['대기', '진행중', '진행 중']);
 
-// 스토어에서 '선택된 지원자 ID'와 '신청서 리스트 데이터' 추출
-const { selected_bene_id, application_list } = storeToRefs(surveyStore);
+const props = defineProps({
+    // 바깥 화면(ApplicationForm)에서 처음 열 탭을 제어할 수 있게 열어둔 prop
+    activeTab: {
+        type: String,
+        default: 'Application'
+    }
+});
 
-// ⭐️ 부모에게 보낼 이벤트 2가지 정의 (탭 변경, 계획서 선택)
 const emit = defineEmits(['select-plan', 'change-tab', 'select-result']);
 
-// 현재 탭 상태 (기본값 하나만 들어가야 함)
+const surveyStore = useSurveyStore();
+const { selected_bene_id, application_list } = storeToRefs(surveyStore);
+
 const currentTab = ref('Application');
 
-// ⭐️ 탭 클릭 시 실행될 함수: 탭 상태를 바꾸고 부모에게도 알림
+const hasActiveApplication = computed(() => {
+    return application_list.value.some((item) => ACTIVE_APPLICATION_STATUSES.has(item.app_status));
+});
+
 const handleTabChange = (tabName) => {
     currentTab.value = tabName;
     emit('change-tab', tabName);
 };
 
-// 자식(TabPlan)에서 특정 계획서를 클릭했을 때 부모로 토스
 const handleSelectPlan = (planId) => {
     emit('select-plan', planId);
 };
@@ -31,18 +39,13 @@ const handleSelectResult = (resultId) => {
     emit('select-result', resultId);
 };
 
-// ⭐️ 2. 리스트의 영문 코드를 한글로 번역해 주는 함수 추가
-const formatPriority = (item) => {
-    console.log(item);
-    // 1. 진행 상태가 pending이면 무조건 '대기'
-    if (item.progress_status === 'pending') return '대기';
-    console.log(item);
-
-    // 2. 그 외에는 원래대로 번역
-    if (!item.priority_status) return '미신청';
-    const lowerCode = String(item.priority_status).toLowerCase();
-    return PRIORITY_MAP[lowerCode] || item.priority_status;
-};
+watch(
+    () => props.activeTab,
+    (newTab) => {
+        currentTab.value = newTab || 'Application';
+    },
+    { immediate: true }
+);
 </script>
 
 <template>
@@ -57,45 +60,51 @@ const formatPriority = (item) => {
         <div v-if="currentTab === 'Application'" class="tab-content">
             <div class="content-header">
                 <h3>지원 신청서</h3>
-                <button class="btn-add" :disabled="!selected_bene_id" @click="surveyStore.openSurvey()">+ 추가하기</button>
+                <!-- 대기/진행중 신청서가 이미 있으면 중복 신청을 막는다. -->
+                <button class="btn-add" :disabled="!selected_bene_id || hasActiveApplication" @click="surveyStore.openSurvey()">
+                    {{ hasActiveApplication ? '진행 중인 신청서 존재' : '+ 추가하기' }}
+                </button>
             </div>
 
             <table class="list-table">
                 <thead>
                     <tr>
                         <th>작성자</th>
-                        <th>지원자</th>
-                        <th>대기단계</th>
+                        <th>지원대상자</th>
+                        <th>신청단계</th>
                         <th>작성일자</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-if="application_list.length === 0">
                         <td colspan="4" class="empty-msg">
-                            {{ selected_bene_id ? '등록된 신청서가 없습니다.' : '지원자를 먼저 선택해주세요.' }}
+                            {{ selected_bene_id ? '등록된 신청서가 없습니다.' : '지원대상자를 먼저 선택해주세요.' }}
                         </td>
                     </tr>
+
                     <tr v-else v-for="item in application_list" :key="item.id" class="clickable-row" @click="surveyStore.loadApplicationView(item.id)">
                         <td>{{ item.writer }}</td>
                         <td>{{ item.bene_name }}</td>
-                        <td>{{ formatPriority(item) }}</td>
+                        <td>
+                            <span class="status-badge">{{ item.app_status || '대기' }}</span>
+                        </td>
                         <td>{{ item.date }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div v-if="currentTab === 'Plan'" class="tab-content">
-            <TabPlan ref="tabPlanRef" :beneId="selected_bene_id" @select-plan="handleSelectPlan" />
+        <div v-else-if="currentTab === 'Plan'" class="tab-content">
+            <TabPlan :beneId="selected_bene_id" @select-plan="handleSelectPlan" />
         </div>
+
         <div v-else-if="currentTab === 'Result'" class="tab-content">
-            <TabResult ref="tabPlanRef" :beneId="selected_bene_id" @select-result="handleSelectResult" />
+            <TabResult :beneId="selected_bene_id" @select-result="handleSelectResult" />
         </div>
     </div>
 </template>
 
 <style scoped>
-/* 기존 스타일 그대로 유지 (생략하지 않고 복붙하시면 됩니다) */
 .management-container {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
@@ -104,12 +113,14 @@ const formatPriority = (item) => {
     overflow: hidden;
     margin-top: 20px;
 }
+
 .tab-menu {
     display: flex;
     padding: 0 10px;
     background-color: #ffffff;
     border-bottom: 1px solid #f1f5f9;
 }
+
 .tab-menu button {
     position: relative;
     padding: 15px 20px;
@@ -121,9 +132,11 @@ const formatPriority = (item) => {
     cursor: pointer;
     transition: color 0.2s;
 }
+
 .tab-menu button.active {
     color: #3b82f6;
 }
+
 .tab-menu button.active::after {
     content: '';
     position: absolute;
@@ -133,20 +146,24 @@ const formatPriority = (item) => {
     height: 2px;
     background-color: #3b82f6;
 }
+
 .tab-content {
     padding: 20px;
 }
+
 .content-header {
     display: flex;
     align-items: center;
     gap: 15px;
     margin-bottom: 20px;
 }
+
 .content-header h3 {
     margin: 0;
     font-size: 1.1rem;
     color: #1e293b;
 }
+
 .btn-add {
     padding: 4px 10px;
     font-size: 0.8rem;
@@ -156,19 +173,23 @@ const formatPriority = (item) => {
     border-radius: 4px;
     cursor: pointer;
 }
+
 .btn-add:hover:not(:disabled) {
     background-color: #f1f5f9;
 }
+
 .btn-add:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
+
 .list-table {
     width: 100%;
     border-collapse: collapse;
     text-align: center;
     font-size: 0.9rem;
 }
+
 .list-table th {
     padding: 10px;
     font-weight: 600;
@@ -176,20 +197,24 @@ const formatPriority = (item) => {
     border-top: 1px solid #cbd5e1;
     border-bottom: 1px solid #cbd5e1;
 }
+
 .list-table td {
     padding: 12px 10px;
     color: #334155;
     border-bottom: 1px solid #e2e8f0;
 }
+
 .empty-msg {
     padding: 30px !important;
     color: #94a3b8 !important;
     text-align: center;
 }
+
 .clickable-row {
     cursor: pointer;
     transition: background-color 0.2s;
 }
+
 .clickable-row:hover {
     background-color: #f8fafc;
 }

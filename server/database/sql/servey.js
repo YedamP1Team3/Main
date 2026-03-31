@@ -66,7 +66,7 @@ const insert_survey_answer = `
 `;
 // [조회] 3. 특정 신청서 마스터 정보 가져오기 (버전 ID 확인용)
 const select_application_by_id = `
-  SELECT app_id, version_id, bene_id, user_id, DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
+  SELECT app_id, version_id, bene_id, user_id, app_status, DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
   FROM application 
   WHERE app_id = ?;
 `;
@@ -85,7 +85,8 @@ SELECT
     b.bene_name, 
     DATE_FORMAT(a.created_at, '%Y.%m.%d') AS date,
     p.priority_status,
-    p.progress_status
+    p.progress_status,
+    a.app_status  /* ⭐️ 화면 출력을 위해 추가 */
 FROM application a
 LEFT JOIN beneficiary_info b ON a.bene_id = b.bene_id
 LEFT JOIN priority p ON p.priority_id = (
@@ -104,6 +105,27 @@ const delete_application = `DELETE FROM application WHERE app_id = ?;`;
 const setActiveVersion = `UPDATE survey_version SET IS_ACTIVE = 1 WHERE VERSION_ID = ?;`;
 const insertNewDraftVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (0, NOW());`;
 
+// [추가] 1. 진행 중인 신청서 개수 확인 (중복 방지)
+const check_active_application = `
+  SELECT COUNT(*) as cnt 
+  FROM application 
+  WHERE bene_id = ? AND app_status IN ('대기', '진행중');
+`;
+
+// [추가] 2. 신청서 현재 상태 확인 (수정/삭제 방어용)
+const select_application_status = `
+  SELECT app_status 
+  FROM application 
+  WHERE app_id = ?;
+`;
+
+// [추가] 3. 대기단계 승인 처리 시 상태 업데이트 (요구사항 2)
+const update_status_inprogress = `
+  UPDATE application 
+  SET app_status = '진행중' 
+  WHERE app_id = ? AND app_status = '대기';
+`;
+
 module.exports = {
   selectSurvey,
   insert_item,
@@ -121,4 +143,8 @@ module.exports = {
   select_application_list_by_bene,
   delete_survey_answers,
   delete_application,
+  //구조 변경
+  check_active_application,
+  select_application_status,
+  update_status_inprogress,
 };

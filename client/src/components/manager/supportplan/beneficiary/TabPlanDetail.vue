@@ -55,31 +55,32 @@ watch(
         <div v-else-if="planDetail.plan_id" class="detail-content">
             <table class="detail-table">
                 <tbody>
-                <tr>
-                    <th>계획번호</th>
-                    <td>{{ planDetail.plan_id }}</td>
-                    <th>작성일자</th>
-                    <td>{{ planDetail.create_date }}</td>
-                </tr>
-                <tr>
-                    <th>담당자 ID</th>
-                    <td>{{ planDetail.manager_id }}</td>
-                    <th>진행상태</th>
-                    <td>
-                        <span :class="'status-badge ' + planDetail.progress_state">
-                            {{ planDetail.progress_state }}
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <th>지원목표</th>
-                    <td colspan="3">{{ planDetail.plan_objective }}</td>
-                </tr>
-                <tr>
-                    <th>세부내용</th>
-                    <td colspan="3" class="content-text">{{ planDetail.plan_content }}</td>
-                </tr>
-           </tbody> </table>
+                    <tr>
+                        <th>계획번호</th>
+                        <td>{{ planDetail.plan_id }}</td>
+                        <th>작성일자</th>
+                        <td>{{ planDetail.create_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>담당자 ID</th>
+                        <td>{{ planDetail.manager_id }}</td>
+                        <th>진행상태</th>
+                        <td>
+                            <span :class="'status-badge ' + planDetail.progress_state">
+                                {{ planDetail.progress_state }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>지원목표</th>
+                        <td colspan="3">{{ planDetail.plan_objective }}</td>
+                    </tr>
+                    <tr>
+                        <th>세부내용</th>
+                        <td colspan="3" class="content-text">{{ planDetail.plan_content }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <div v-else class="empty-msg">상세 정보가 존재하지 않습니다.</div>

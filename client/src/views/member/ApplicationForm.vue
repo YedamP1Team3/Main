@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 
 import BeneficiaryInfo from '@/components/member/m_application/m_BeneficiaryInfo.vue';
@@ -9,24 +10,65 @@ import MemberSupportDetail from '@/components/member/m_application/MemberSupport
 import MemberResultDetail from '@/components/member/m_application/MemberResultDetail .vue';
 
 const surveyStore = useSurveyStore();
-const viewMode = ref('empty');
-const selectPlan = ref(null);
-const selectResult = ref(null);
+const route = useRoute();
 
-const handleTabChange = (tabName) => {
+// 오른쪽 메인 영역이 지금 무엇을 보여주는지 관리한다.
+const viewMode = ref('empty');
+const selectedPlanId = ref(null);
+const selectedResultId = ref(null);
+const activeTab = ref('Application');
+
+const resolveTabName = (tab) => {
+    if (tab === 'Plan' || tab === 'Result' || tab === 'Consult') {
+        return tab;
+    }
+
+    return 'Application';
+};
+
+const resetRightPanel = () => {
     viewMode.value = 'empty';
     surveyStore.is_survey_visible = false;
 };
 
-const handleIdDetail = (planId) => {
-    selectPlan.value = planId;
+const handleTabChange = (tabName) => {
+    activeTab.value = tabName;
+    resetRightPanel();
+};
+
+const handleSelectPlan = (planId) => {
+    selectedPlanId.value = planId;
     viewMode.value = 'plan';
 };
 
-const handleIdResult = (resultId) => {
-    selectResult.value = resultId;
+const handleSelectResult = (resultId) => {
+    selectedResultId.value = resultId;
     viewMode.value = 'result';
 };
+
+// 홈 이력표에서 beneId/tab을 넘겨주면
+// 이 화면은 해당 대상자를 자동 선택하고 원하는 탭을 연다.
+const applyRouteState = async () => {
+    const beneId = route.query.beneId;
+    activeTab.value = resolveTabName(route.query.tab);
+    resetRightPanel();
+
+    if (!beneId) {
+        return;
+    }
+
+    if (surveyStore.my_beneficiaries.length === 0) {
+        await surveyStore.fetchBeneficiaryList();
+    }
+
+    if (String(surveyStore.selected_bene_id || '') !== String(beneId)) {
+        await surveyStore.selectBeneficiary(beneId);
+    }
+};
+
+watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
+    immediate: true
+});
 </script>
 
 <template>
@@ -35,30 +77,33 @@ const handleIdResult = (resultId) => {
     <div class="dashboard-container">
         <aside class="side-panel">
             <section class="info-section">
-                <!-- 수정됨: 불필요한 이벤트 리스너 제거 -->
+                <!-- 현재 선택된 지원대상자의 기본 정보 -->
                 <BeneficiaryInfo />
             </section>
 
             <section class="list-section">
-                <BeneficiaryManagement @change-tab="handleTabChange" @select-plan="handleIdDetail" @select-result="handleIdResult" />
+                <!-- 신청서/계획서/결과서 목록과 탭 전환 -->
+                <BeneficiaryManagement :active-tab="activeTab" @change-tab="handleTabChange" @select-plan="handleSelectPlan" @select-result="handleSelectResult" />
             </section>
         </aside>
 
         <main class="main-content">
             <div v-if="viewMode === 'plan'" class="editor-container">
-                <MemberSupportDetail :planId="selectPlan" />
+                <MemberSupportDetail :planId="selectedPlanId" />
             </div>
+
             <div v-else-if="viewMode === 'survey' || surveyStore.is_survey_visible" class="editor-container">
                 <SurveyApplicationForm />
             </div>
+
             <div v-else-if="viewMode === 'result'" class="editor-container">
-                <MemberResultDetail :resultId="selectResult" />
+                <MemberResultDetail :resultId="selectedResultId" />
             </div>
-            <!-- 수정됨: priority 관련 화면 렌더링 삭제 -->
+
             <div v-else class="empty-state">
                 <div class="guide-box">
                     <i class="pi pi-file"></i>
-                    <p>좌측 목록에서 항목을 선택해주세요.</p>
+                    <p>왼쪽 목록에서 항목을 선택해주세요.</p>
                 </div>
             </div>
         </main>
@@ -66,7 +111,6 @@ const handleIdResult = (resultId) => {
 </template>
 
 <style scoped>
-/* 1. 헤더 스타일 */
 .main-header {
     width: 100%;
     height: 64px;
@@ -77,7 +121,6 @@ const handleIdResult = (resultId) => {
     z-index: 100;
 }
 
-/* 2. 대시보드 전체 컨테이너 */
 .dashboard-container {
     display: flex;
     width: 100%;
@@ -86,7 +129,6 @@ const handleIdResult = (resultId) => {
     overflow: hidden;
 }
 
-/* 🟢 왼쪽 사이드 패널 (600px 고정, 내부 스크롤) */
 .side-panel {
     flex: 0 0 600px;
     background-color: #f8fafc;
@@ -103,24 +145,21 @@ const handleIdResult = (resultId) => {
     width: 100%;
 }
 
-/* 🔵 오른쪽 메인 콘텐츠 영역 */
 .main-content {
     flex: 1;
     background-color: #ffffff;
     padding: 40px;
     overflow-y: auto;
     display: flex;
-    flex-direction: column; /* 중앙 정렬을 위해 추가 */
+    flex-direction: column;
 }
 
-/* 작성창 컨테이너 (2번째 파일 스타일 차용) */
 .editor-container {
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
 }
 
-/* 빈 화면 가이드 스타일 (2번째 파일 스타일 차용) */
 .empty-state {
     height: 100%;
     display: flex;

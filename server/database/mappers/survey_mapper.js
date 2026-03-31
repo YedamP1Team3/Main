@@ -242,6 +242,37 @@ const createNewVersion = async (targetVersionId) => {
     if (conn) conn.release();
   }
 };
+
+// [추가] 활성화된 신청서 체크 (중복 방어)
+const checkActiveApplication = async (beneId) => {
+  const result = await pool.query(surveySql.check_active_application, [beneId]);
+  // 💡 드라이버(mysql2 등)에 따른 이중 배열 엣지 케이스 방어
+  const rows =
+    Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result;
+  return rows[0]?.cnt || 0;
+};
+
+// [추가] 신청서 상태 조회 (삭제 방어)
+const getApplicationStatus = async (appId) => {
+  const result = await pool.query(surveySql.select_application_status, [appId]);
+  const rows =
+    Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result;
+  return rows.length > 0 ? rows[0] : null;
+};
+
+// [추가] 상태를 '진행중'으로 업데이트
+const updateApplicationToInProgress = async (appId) => {
+  const result = await pool.query(surveySql.update_status_inprogress, [appId]);
+  return result.affectedRows || result[0]?.affectedRows;
+};
+const updateApplicationsToInProgressByBene = async (beneId) => {
+  const query = surveySql.update_status_inprogress.replace(
+    "WHERE app_id = ?",
+    "WHERE bene_id = ?",
+  );
+  const result = await pool.query(query, [beneId]);
+  return result.affectedRows || result[0]?.affectedRows;
+};
 // module.exports 에 deleteApplicationTransaction 추가
 module.exports = {
   selectSurvey,
@@ -260,4 +291,9 @@ module.exports = {
   getAnswersByAppId,
   getApplicationList,
   deleteApplicationTransaction,
+  //구조 변경
+  checkActiveApplication,
+  getApplicationStatus,
+  updateApplicationToInProgress,
+  updateApplicationsToInProgressByBene,
 };

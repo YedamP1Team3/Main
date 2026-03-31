@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 
 const surveyStore = useSurveyStore();
-const { my_beneficiaries, selected_bene_detail } = storeToRefs(surveyStore);
+const { my_beneficiaries, selected_bene_detail, selected_bene_id } = storeToRefs(surveyStore);
 
 const localSelectedId = ref('');
 
@@ -24,6 +24,14 @@ onMounted(async () => {
         await surveyStore.fetchBeneficiaryList();
     }
 });
+
+watch(
+    selected_bene_id,
+    (newId) => {
+        localSelectedId.value = newId || '';
+    },
+    { immediate: true }
+);
 </script>
 
 <template>

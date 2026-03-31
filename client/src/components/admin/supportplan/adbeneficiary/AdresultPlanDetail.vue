@@ -99,7 +99,6 @@ const updateReturn = async (resultId) => {
     }
 };
 
-
 watch(
     () => props.resultId,
     (newId) => {
