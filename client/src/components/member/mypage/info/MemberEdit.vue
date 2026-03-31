@@ -83,7 +83,7 @@ const saveInfo = async () => {
         // [수정] 응답 데이터가 존재하거나 success 관련 필드가 하나라도 true라면 실행
         if (response.data && (response.data.status === 'success' || response.data.success || response.status === 200)) {
             alert('수정 완료 !');
-            router.push('/mypage/info');
+            router.push({ name: 'myInfo' });
         } else {
             // 응답은 왔으나 조건에 맞지 않는 경우
             console.warn('응답 조건 미달:', response.data);
@@ -103,7 +103,7 @@ const saveInfo = async () => {
         <div class="card form-container shadow-2">
             <h5 class="form-title">내 정보 수정</h5>
 
-            <div class="p-fluid">
+            <form @submit.prevent="saveInfo" class="p-fluid">
                 <div class="input-set">
                     <label>이름</label>
                     <InputText v-model="memberForm.name" class="p-inputtext-sm" />
@@ -111,7 +111,7 @@ const saveInfo = async () => {
 
                 <div class="input-set">
                     <label>아이디</label>
-                    <InputText v-model="memberForm.id" class="p-inputtext-sm disabled-input" disabled />
+                    <InputText v-model="memberForm.id" class="p-inputtext-sm disabled-input" disabled autocomplete="username" />
                 </div>
 
                 <div class="password-section mt-4">
@@ -120,15 +120,15 @@ const saveInfo = async () => {
 
                     <div class="input-set">
                         <label>현재 비밀번호</label>
-                        <InputText type="password" v-model="memberForm.currentPassword" placeholder="기존 비밀번호를 입력하세요" class="p-inputtext-sm" />
+                        <InputText type="password" v-model="memberForm.currentPassword" autocomplete="current-password" placeholder="기존 비밀번호를 입력하세요" class="p-inputtext-sm" />
                     </div>
                     <div class="input-set">
                         <label>새 비밀번호</label>
-                        <InputText type="password" v-model="memberForm.newPassword" placeholder="새 비밀번호 입력" class="p-inputtext-sm" />
+                        <InputText type="password" v-model="memberForm.newPassword" autocomplete="new-password" placeholder="새 비밀번호 입력" class="p-inputtext-sm" />
                     </div>
                     <div class="input-set">
                         <label>새 비밀번호 확인</label>
-                        <InputText type="password" v-model="memberForm.confirmPassword" placeholder="새 비밀번호 재입력" class="p-inputtext-sm" />
+                        <InputText type="password" v-model="memberForm.confirmPassword" autocomplete="new-password" placeholder="새 비밀번호 재입력" class="p-inputtext-sm" />
                     </div>
                 </div>
 
@@ -166,10 +166,10 @@ const saveInfo = async () => {
                 </div>
 
                 <div class="btn-group gap-3">
-                    <Button label="취 소" class="p-button-secondary cancel-btn" @click="router.back()" />
-                    <Button label="정보 저장" class="p-button-success submit-btn" @click="saveInfo" />
+                    <Button label="취 소" type="button" class="p-button-secondary cancel-btn" @click="router.back()" />
+                    <Button label="정보 저장" type="submit" class="p-button-success submit-btn" />
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </template>

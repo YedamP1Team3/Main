@@ -83,7 +83,7 @@ const updateRecipient = async () => {
         const response = await axios.put(`/api/recipient/${recipientId}`, payload);
         if (response.data.success) {
             alert('수정 완료!');
-            router.push('/mypage/info');
+            router.push({ name: 'myInfo' });
         }
     } catch (error) {
         alert('수정 중 오류가 발생했습니다.');

@@ -1,4 +1,3 @@
-// database/mappers/mgmypage_mapper.js
 const DAO = require("../DAO");
 const sql = require("../sql/mgmypage");
 
@@ -30,6 +29,36 @@ class MgMyPageMapper {
       throw error;
     }
   }
-}
+
+  // ⭐ 3. 담당자 정보 수정 (클래스 내부로 이동 완료)
+  async updateManagerProfile(userData) {
+    try {
+      // 위에서 정의한 updateData의 키값들과 일치해야 합니다.
+      const {
+        user_name,
+        email,
+        tel,
+        postcode,
+        address,
+        detailAddress,
+        userId, // id가 아니라 userId로 받아야 합니다.
+      } = userData;
+
+      const result = await DAO.execute(sql.updateManagerProfile, [
+        user_name,
+        email,
+        tel,
+        postcode,
+        address,
+        detailAddress,
+        userId, // SQL WHERE 절의 ?에 들어갈 값
+      ]);
+      return result;
+    } catch (error) {
+      console.error("Mapper Error:", error);
+      throw error;
+    }
+  }
+} // <--- 클래스를 닫는 중괄호가 모든 함수 아래에 있어야 합니다.
 
 module.exports = new MgMyPageMapper();

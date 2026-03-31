@@ -83,6 +83,24 @@ const onFileSelect = (event) => {
 
 // [함수] 서버로 데이터 전송 (등록 버튼 클릭 시)
 const submitForm = async () => {
+    if (!form.value.name.trim()) {
+        alert('대상자 성명을 입력해 주세요.');
+        return;
+    }
+    if (!form.value.birth || form.value.birth.length !== 8) {
+        alert('생년월일 8자리를 정확히 입력해 주세요. (예: 19900101)');
+        return;
+    }
+    if (!form.value.disabilityType) {
+        alert('장애유형을 선택해 주세요.');
+        return;
+    }
+    // 관계가 '기타'인데 상세 내용을 적지 않은 경우도 체크 (선택 사항)
+    if (form.value.relation === '기타' && !form.value.relationEtc.trim()) {
+        alert('관계를 직접 입력해 주세요.');
+        return;
+    }
+
     try {
         // 1. Pinia 스토어에서 로그인된 유저 ID 확인
         const userId = authStore.userId;
@@ -139,17 +157,17 @@ watch(
 
             <div class="p-fluid">
                 <div class="input-set">
-                    <label>대상자 성명</label>
+                    <label>대상자 성명 <small class="text-red-500">* 필수</small></label>
                     <InputText v-model="form.name" placeholder="실명을 입력하세요" class="p-inputtext-sm" />
                 </div>
 
                 <div class="input-set">
-                    <label>생 년 월 일</label>
+                    <label>생 년 월 일 <small class="text-red-500">* 필수</small></label>
                     <InputText v-model="form.birth" placeholder="예) 19900101" maxlength="8" class="p-inputtext-sm" />
                 </div>
 
                 <div class="input-set">
-                    <label>성 별</label>
+                    <label>성 별 <small class="text-red-500">* 필수</small></label>
                     <div class="flex gap-4 p-1">
                         <div class="flex align-items-center"><RadioButton v-model="form.gender" inputId="f" value="여성" /><label for="f" class="ml-2 text-sm">여성</label></div>
                         <div class="flex align-items-center"><RadioButton v-model="form.gender" inputId="m" value="남성" /><label for="m" class="ml-2 text-sm">남성</label></div>
@@ -171,12 +189,12 @@ watch(
                 </div>
 
                 <div class="input-set">
-                    <label>장애유형</label>
+                    <label>장애유형 <small class="text-red-500">* 필수</small></label>
                     <Select v-model="form.disabilityType" :options="disabilityOptions" placeholder="선택하세요" class="p-select-sm" />
                 </div>
 
                 <div class="input-set">
-                    <label>대상자와의 관계</label>
+                    <label>대상자와의 관계 <small class="text-red-500">* 필수</small></label>
                     <div class="flex flex-wrap align-items-center gap-x-3 gap-y-2 p-1">
                         <div v-for="rel in relations" :key="rel" class="flex align-items-center">
                             <RadioButton v-model="form.relation" :inputId="rel" :value="rel" />
