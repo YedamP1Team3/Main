@@ -86,7 +86,7 @@ const goToProfile = () => {
 
         <div class="flex items-center gap-2">
             <span class="hidden sm:block font-medium text-color">
-                {{ isLoggedIn ? `${userName}담당자님` : '로그인이 필요합니다' }}
+                {{ isLoggedIn ? `${userName}관리자님` : '로그인이 필요합니다' }}
             </span>
 
             <button type="button" class="layout-topbar-action" @click="toggleAuth">
