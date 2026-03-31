@@ -39,9 +39,10 @@ const handleSearch = () => {
                 </div>
             </div>
             <div class="form-group">
-                <label>진행 상태</label>
+                <label>대기 단계</label>
                 <select v-model="searchFilter.status">
                     <option value="전체">전체</option>
+                    <option value="pending">미신청</option>
                     <option value="pending">대기</option>
                     <option value="approved">승인</option>
                     <option value="rejected">반려</option>
@@ -79,6 +80,7 @@ const handleSearch = () => {
 }
 .search-sidebar {
     flex: 0 0 280px; /* 너비 280px 고정, 줄어들거나 늘어나지 않음 */
+    height: fit-content;
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -114,6 +116,13 @@ const handleSearch = () => {
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     font-size: 0.95rem;
+}
+.form-group input[type='text']:focus,
+.form-group input[type='date']:focus,
+.form-group select:focus {
+    outline: none; /* 브라우저 기본 테두리 제거 */
+    border-color: #3b82f6; /* 내가 원하는 색상 */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); /* 살짝 퍼지는 광채 효과 (현업 포인트) */
 }
 
 /* 날짜 입력칸 가로 정렬 */
