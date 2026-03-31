@@ -2,14 +2,14 @@
 import { ref, watch, onMounted } from 'vue';
 import Calendar from '@/components/common/Calendar.vue';
 import TimeSlot from '@/components/common/TimeSlot.vue';
+import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
+import MTopbar from '@/layout/member/mTopbar.vue';
+import BeneInfo from '@/components/reservation/beneInfo.vue';
+import RsvTable from '@/components/common/RsvTable.vue';
 
 import { getManagerSchedule } from '@/api/reservation/schedule';
 import { getBeneficiariesByFamilyId, getManagerIdByBene } from '@/api/reservation/beneInfo';
 import { createReservation } from '@/api/reservation/reservation';
-
-import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
-import MTopbar from '@/layout/member/mTopbar.vue';
-import BeneInfo from '@/components/reservation/beneInfo.vue';
 
 export default {
     components: {
@@ -17,7 +17,8 @@ export default {
         TimeSlot,
         MTopbar,
         RsvSideBar,
-        BeneInfo
+        BeneInfo,
+        RsvTable
     },
 
     setup() {
@@ -166,9 +167,35 @@ export default {
                 const res = await createReservation(selectedBeneId.value, managerId.value, date, times);
 
                 alert(res.data.message || '상담 신청 완료');
+
+                const scheduleRes = await getManagerSchedule(managerId.value, date);
+                const schedule = scheduleRes.data.schedule;
+
+                if (!schedule) {
+                    slots.value = [];
+                    blockedSummary.value = [];
+                    return;
+                }
+
+                slots.value = convertToSlots(schedule);
+                blockedSummary.value = extractBlockedSummary(schedule);
             } catch (err) {
                 console.error('상담 신청 실패:', err);
                 alert(err.response?.data?.message || '상담 신청 실패');
+            }
+        };
+
+        const handleActionClick = ({ action, row }) => {
+            if (action === 'cancel') {
+                // 상담신청 취소 API
+            }
+
+            if (action === 'process') {
+                // 승인/반려 모달 열기
+            }
+
+            if (action === 'writeLog') {
+                // 일지작성 페이지 이동 or 모달 열기
             }
         };
 
@@ -179,27 +206,31 @@ export default {
             slots,
             blockedSummary,
             handleSelectBeneficiary,
-            handleReserve
+            handleReserve,
+            handleActionClick
         };
     }
 };
 </script>
 
 <template>
-    <header class="layout-header">
-        <MTopbar />
-    </header>
-    <div class="layout-body">
-        <RsvSideBar />
-        <main class="layout-main">
-            <div class="reservation_container">
-                <BeneInfo :beneficiaries="beneficiaries" :selectedBeneId="selectedBeneId" @select-beneficiary="handleSelectBeneficiary" />
-                <div class="content row">
-                    <Calendar v-model="selectedDate" />
-                    <TimeSlot :selectedDate="selectedDate" :slots="slots" mode="family" @reserveTimes="handleReserve" />
+    <div class="page">
+        <header class="layout-header">
+            <MTopbar />
+        </header>
+        <div class="layout-body">
+            <RsvSideBar />
+            <main class="layout-main">
+                <div class="reservation-container">
+                    <BeneInfo :beneficiaries="beneficiaries" :selectedBeneId="selectedBeneId" @select-beneficiary="handleSelectBeneficiary" />
+                    <div class="content-row">
+                        <Calendar v-model="selectedDate" />
+                        <TimeSlot :selectedDate="selectedDate" :slots="slots" mode="family" @reserveTimes="handleReserve" />
+                    </div>
+                    <RsvTable :columns="managerColumns" :rows="reservationList" emptyMessage="예약 내역이 없습니다." @action-click="handleActionClick" />
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
 </template>
 
@@ -248,7 +279,7 @@ export default {
     gap: 28px;
 }
 
-.content.row {
+.content-row {
     display: flex;
     flex-direction: row; /* 🔥 핵심 */
     justify-content: center;

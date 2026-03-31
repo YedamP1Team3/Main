@@ -30,13 +30,10 @@ export default {
         const managerId = userId;
 
         const extractBlockedSummary = (schedule) => {
-            const blocked = schedule.blocked_times || [];
+            const summary = schedule.blocked_summary || [];
 
-            return blocked.map((item) => {
-                const start = item.start_time.slice(11, 16);
-                const end = item.end_time.slice(11, 16);
-
-                return `${start} ~ ${end}`;
+            return summary.map((item) => {
+                return `${item.start_time} ~ ${item.end_time}`;
             });
         };
 
@@ -123,43 +120,38 @@ export default {
 
         // 차단 처리
         const handleBlock = async (data) => {
-            console.log('차단 요청:', data);
-
             try {
-                const { managerId, date, times, type } = data;
+                const { date, times, type } = data;
 
                 const payload = {
-                    managerId,
+                    managerId: managerId.value,
                     date,
                     times
                 };
 
-                console.log('API 요청:', payload);
-
-                // 예약가능 → 차단 해제
-                if (type === 'blocked') {
+                if (type === 'available') {
                     await deleteBlockedTimes(payload);
-
                     alert('예약가능으로 변경되었습니다.');
-                }
-
-                // 🔴 예약불가 → 차단 등록
-                else if (type === 'available') {
+                } else if (type === 'unavailable') {
                     await createBlockedTimes(payload);
-
                     alert('차단시간이 등록되었습니다.');
                 }
+                console.log('payload : ', payload);
+                console.log('data : ', data);
 
-                // 🔥 UI 갱신 (공통)
-                const res = await getManagerSchedule(date);
-                const raw = res.data.schedule;
-                const schedule = Array.isArray(raw) ? raw[0] : raw;
+                const res = await getManagerSchedule(managerId.value, date);
+                const schedule = res.data.schedule;
+
+                if (!schedule) {
+                    slots.value = [];
+                    blockedSummary.value = [];
+                    return;
+                }
 
                 slots.value = convertToSlots(schedule);
                 blockedSummary.value = extractBlockedSummary(schedule);
             } catch (err) {
                 console.error('처리 실패:', err);
-
                 alert(err.response?.data?.message || '처리 실패');
             }
         };
@@ -175,29 +167,23 @@ export default {
 </script>
 
 <template>
-    <header class="layout-header">
-        <JsTopbarmg />
-    </header>
-    <div class="layout-body">
-        <RsvSideBar />
-        <main class="layout-main">
-            <div class="content row">
-                <Calendar v-model="selectedDate" />
-                <TimeSlot :selectedDate="selectedDate" :slots="slots" :blockedSummary="blockedSummary" mode="manager" @blockTimes="handleBlock" />
-            </div>
-        </main>
+    <div calss="page">
+        <header class="layout-header">
+            <JsTopbarmg />
+        </header>
+        <div class="layout-body">
+            <RsvSideBar />
+            <main class="layout-main">
+                <div class="content row">
+                    <Calendar v-model="selectedDate" />
+                    <TimeSlot :selectedDate="selectedDate" :slots="slots" :blockedSummary="blockedSummary" mode="manager" @blockTimes="handleBlock" />
+                </div>
+            </main>
+        </div>
     </div>
 </template>
 
 <style scoped>
-/* .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 50px;
-    gap: 20px;
-} */
-
 .page {
     display: flex;
     flex-direction: column;
@@ -245,5 +231,12 @@ export default {
 
 .selected-date {
     font-size: 16px;
+}
+
+@media (max-width: 1100px) {
+    .content.row {
+        flex-direction: column;
+        align-items: center;
+    }
 }
 </style>

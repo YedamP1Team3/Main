@@ -170,13 +170,21 @@ const getManagerSchedule = async (managerId, date) => {
 
   // 🔥 추가
   const reserved = await rsvMapper.selectReservedTimes(managerId, date);
+  console.log("service.reserved : ", reserved);
 
   const blocked = await rsvMapper.selectBlockedTimes(managerId, date);
+  console.log("service.blocked : ", blocked);
+
+  const blockedSummary = blocked.map((item) => ({
+    start_time: item.start_time.slice(11, 16),
+    end_time: item.end_time.slice(11, 16),
+  }));
 
   return {
     ...schedule,
     reserved_times: reserved,
     blocked_times: blocked,
+    blocked_summary: blockedSummary,
   };
 };
 
@@ -262,10 +270,7 @@ const removeBlockedTimes = async (managerId, date, times) => {
       range.end_time,
     );
 
-    console.log("service.range : ", range);
-
     totalDeleted += count;
-    console.log("totalDeleted : ", totalDeleted);
   }
 
   // 🔥 삭제된 게 없으면 에러 처리
