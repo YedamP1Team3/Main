@@ -26,6 +26,10 @@ const toggleAuth = () => {
     }
 };
 
+const goToPlan = () => {
+    router.push({ name: 'beneficiaryMain' });
+};
+
 const goToSchedule = () => {
     router.push({ name: 'managerSchedule' });
 };
@@ -72,7 +76,7 @@ const goToProfile = () => {
 
             <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
                 <button type="button" class="p-link text-color font-medium">신청내역</button>
-                <button type="button" class="p-link text-color font-medium">지원계획</button>
+                <button type="button" class="p-link text-color font-medium" @click="goToPlan">지원계획</button>
                 <button type="button" class="p-link text-color font-medium" @click="goToSchedule">상담관리</button>
             </div>
         </div>

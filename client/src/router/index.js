@@ -6,6 +6,7 @@ import managerTop from '@/layout/manger/JsTopbarmg.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { member } from './member.js';
 import { manager } from './manager.js';
+import { admin } from './admin.js';
 import { systemAdmin } from './s_admin.js';
 import { sakaiLayoutRoutes, sakaiStandaloneRoutes } from './sakai.js';
 
@@ -46,6 +47,13 @@ const router = createRouter({
             // component: managerTop,
             children: [
                 ...manager // 기관 담당자 관련 router (우선 마이페이지 관련만 있음)
+            ]
+        },
+        {
+            path: '/admin',
+            // component: managerTop,
+            children: [
+                ...admin // 기관 담당자 관련 router (우선 마이페이지 관련만 있음)
             ]
         },
         {

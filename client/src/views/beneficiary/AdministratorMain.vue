@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useSurveyStore } from '@/stores/useSurveyStore';
-import JsTopbarad from '@/layout/manger/JsTopbarmg.vue';
+import JsTopbarad from '@/layout/admin/JsTopbarad.vue';
 import AdSupportInfo from '@/components/admin/supportplan/adbeneficiary/AdSupportInfo.vue';
 import AdminManagement from '@/components/admin/supportplan/adbeneficiary/AdminManagement.vue';
 import AdplanDetail from '@/components/admin/supportplan/adbeneficiary/AdplanDetail.vue';

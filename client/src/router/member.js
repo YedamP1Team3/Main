@@ -12,22 +12,22 @@ export const member = [
         redirect: { name: 'myInfo' },
         children: [
             {
-                path: 'recipient',
+                path: '/recipient',
                 name: 'recipientList',
                 component: () => import('@/components/member/mypage/recipient/Recipient.vue')
             },
             {
-                path: 'recipient/edit/:id',
+                path: '/recipient/edit/:id',
                 name: 'recipientEdit',
                 component: () => import('@/components/member/mypage/info/RecipientEdit.vue')
             },
             {
-                path: 'info',
+                path: '/info',
                 name: 'myInfo',
                 component: () => import('@/components/member/mypage/info/MemberInfo.vue')
             },
             {
-                path: 'info/edit',
+                path: '/info/edit',
                 name: 'myInfoEdit',
                 component: () => import('@/components/member/mypage/info/MemberEdit.vue')
             }
