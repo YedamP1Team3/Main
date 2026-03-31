@@ -31,7 +31,7 @@ const goToPlan = () => {
 };
 
 const goToSchedule = () => {
-    router.push({ name: 'managerSchedule' });
+    router.push({ name: 'schedule' });
 };
 
 // [추가] 마이페이지 또는 프로필 이동용 (필요 시)
