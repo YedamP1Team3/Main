@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import SearchSidebar from '@/layout/member/SearchSidebar.vue';
-import HistoryTable from '@/components/member/m_application/HistoryTable.vue';
+import HistoryTable from '@/components/member/homepage/HistoryTable.vue';
 
 const filters = ref({
     startDate: '',

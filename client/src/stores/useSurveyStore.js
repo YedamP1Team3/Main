@@ -135,6 +135,7 @@ export const useSurveyStore = defineStore('survey', {
             try {
                 const res = await axios.get(`/api/recipient/list/${authStore.userId}`);
                 const list = res.data?.success ? res.data.list || [] : [];
+                console.log(res.data.list);
 
                 this.beneficiary_list = list;
                 this.my_beneficiaries = list;

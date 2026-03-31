@@ -2,8 +2,8 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { PRIORITY_MAP, useSurveyStore } from '@/stores/useSurveyStore';
-import { useAuthStore } from '@/stores/auth';
+import { PRIORITY_MAP, useSurveyStore } from '@/stores/useSurveyStore'; // PRIORITY_MAP = 대기단계 정보, useSurveyStore = 지원자 정보 등
+import { useAuthStore } from '@/stores/auth'; // 로그인한 사람의 정보
 
 const props = defineProps({
     filters: {
@@ -26,6 +26,7 @@ const surveyStore = useSurveyStore();
 const historyRows = ref([]);
 const isLoading = ref(false);
 
+// 대기단계 진행 상태값 한글로 변경 함수
 const normalizePriorityLabel = (priorityData) => {
     const progressStatus = String(priorityData?.progress_status || '').toLowerCase();
     const priorityStatus = String(priorityData?.priority_status || '').toLowerCase();
@@ -48,6 +49,7 @@ const resolveStatusCode = (priorityData) => {
     return 'all';
 };
 
+// 지원계획서,결과서 단수 개수로 판단 하는 함수
 const resolveProgressLabel = ({ applications, plans, results }) => {
     if (results.length > 0) return '결과서 등록';
     if (plans.length > 0) return '계획서 등록';
@@ -70,7 +72,9 @@ const normalizeDateForCompare = (value) => {
     return String(value).replace(/\./g, '-');
 };
 
+// 지원대상자 조건 검색용 함수
 const filteredRows = computed(() => {
+    // 1차로 소문자,띄워쓰기 제거
     const beneName = props.filters?.beneName?.trim().toLowerCase() || '';
     const managerName = props.filters?.managerName?.trim().toLowerCase() || '';
     const startDate = props.filters?.startDate || '';
@@ -78,9 +82,10 @@ const filteredRows = computed(() => {
     const status = props.filters?.status || 'all';
     const progress = props.filters?.progress || 'all';
 
+    // 2차 조건 검색시 -> 조건이 x나 일치하는 조건 걸러내기
     return historyRows.value.filter((item) => {
         const rowDate = normalizeDateForCompare(item.startDate);
-        const matchedBeneName = !beneName || item.name.toLowerCase().includes(beneName);
+        const matchedBeneName = !beneName || item.name.toLowerCase().includes(beneName); // !benename = 사용자가 입력을 안했을 경우 , 했으면 includes()함수로 일치하는것
         const matchedManagerName =
             !managerName ||
             String(item.manager || '')
@@ -95,6 +100,7 @@ const filteredRows = computed(() => {
     });
 });
 
+//지원대상자의 데이터 값 넣기
 const fetchHistoryRows = async () => {
     if (!authStore.userId) {
         historyRows.value = [];
@@ -104,7 +110,7 @@ const fetchHistoryRows = async () => {
     isLoading.value = true;
 
     try {
-        await surveyStore.fetchBeneficiaryList();
+        await surveyStore.fetchBeneficiaryList(); // 지원대상자 정보 불러오기
 
         const beneficiaries = surveyStore.my_beneficiaries || [];
 
@@ -152,6 +158,7 @@ const fetchHistoryRows = async () => {
     }
 };
 
+// 보기 클릭시 이동 함수
 const goToManagementView = async (beneId, tab) => {
     await surveyStore.fetchBeneficiaryList();
     await surveyStore.selectBeneficiary(beneId);
@@ -159,12 +166,14 @@ const goToManagementView = async (beneId, tab) => {
     await router.push({
         name: 'mApplication',
         query: {
+            // 이동후 지원신청서 or 지원계획서 구분 용도
             beneId: String(beneId),
             tab
         }
     });
 };
 
+// 불러오기
 onMounted(fetchHistoryRows);
 </script>
 
@@ -189,6 +198,7 @@ onMounted(fetchHistoryRows);
                 </tr>
             </thead>
             <tbody>
+                <!-- 인덱스 값 배정 -> 순서나 위치 바꿔도 값이 따라감 -->
                 <tr v-for="item in filteredRows" :key="item.beneId">
                     <td>{{ item.no }}</td>
                     <td>{{ item.name }}</td>
