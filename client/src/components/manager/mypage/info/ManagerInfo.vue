@@ -55,7 +55,7 @@ onMounted(() => {
 });
 
 const goToEditPage = () => {
-    router.push({ name: 'managerEdit', params: { id: props.id } });
+    router.push({ name: 'managerInfoedit', params: { id: props.id } });
 };
 </script>
 

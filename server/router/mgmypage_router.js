@@ -23,4 +23,20 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.put("/update", async (req, res) => {
+  try {
+    const userData = req.body; // 프론트에서 보낸 memberForm.value 데이터
+
+    if (!userData || !userData.userId) {
+      return res.status(400).json({ message: "사용자 ID가 필요합니다." });
+    }
+
+    const result = await mgMyPageService.updateMyPageData(userData);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Router Error (update):", error);
+    res.status(500).json({ message: "수정 중 오류 발생" });
+  }
+});
+
 module.exports = router;

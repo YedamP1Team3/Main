@@ -9,11 +9,47 @@ const router = useRouter();
 
 /* 1. 인증 스토어에서 로그인한 유저 정보 가져오기 */
 const authStore = useAuthStore();
-const { userName, userId } = storeToRefs(authStore); // 내 대상자만 가져오기 위해 userId(family_id)를 추가로 추출
+const { userId } = storeToRefs(authStore); // 내 대상자만 가져오기 위해 userId(family_id)를 추가로 추출
 
 /* 2. 지원대상자 더미 데이터 (나중에 DB 연결 시 API로 교체하세요!) */
 // [수정] 기존의 더미데이터는 삭제하고 빈 배열([])로 초기화
 const recipients = ref([]);
+const userInfo = ref({
+    userId: '',
+    userName: '',
+    userEmail: '',
+    organization: '',
+    phone: '',
+    joinDate: ''
+});
+
+//  날짜 형식을 YYYY-MM-DD로 변환
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+    return `${year}-${month}-${day}`; // 1990-01-01 형식
+};
+
+const fetchMyDetail = async () => {
+    try {
+        // 수정페이지에서 썼던 API와 동일하거나 유사한 상세조회 API 호출
+        const response = await axios.get(`/api/info/user-detail/${userId.value}`);
+        const data = response.data;
+
+        // 서버에서 받은 데이터를 화면용 변수에 할당
+        userInfo.value.userId = data.user_id;
+        userInfo.value.userName = data.user_name;
+        userInfo.value.userEmail = data.email;
+        userInfo.value.organization = data.agency_name; // 혹은 data.region + data.agency_name
+        userInfo.value.phone = data.tel;
+        userInfo.value.joinDate = formatDate(data.created_at); // DB 컬럼명에 맞춰 수정
+    } catch (error) {
+        console.error('데이터 조회 실패:', error);
+    }
+};
 
 // 서버에서 지원대상자 목록을 가져오는 함수
 const fetchRecipients = async () => {
@@ -30,22 +66,9 @@ const fetchRecipients = async () => {
     }
 };
 
-//  날짜 형식을 YYYY-MM-DD로 변환
-const formatDate = (dateString) => {
-    if (!dateString) return ''; // 데이터가 없으면 빈 문자열 반환
-
-    const date = new Date(dateString); // 문자열을 날짜 객체로 변환
-    const year = date.getFullYear(); // 연도 가져오기
-
-    // 월/일이 10보다 작을 때 앞에 '0'을 붙여서 2자리로 맞춤
-    const month = ('0' + (date.getMonth() + 1)).slice(-2);
-    const day = ('0' + date.getDate()).slice(-2);
-
-    return `${year}-${month}-${day}`; // 최종 포맷 반환
-};
-
 onMounted(() => {
-    fetchRecipients(); // 컴포넌트가 마운트(장착)되면 위에서 만든 함수를 실행
+    fetchMyDetail(); // 페이지 로드 시 DB 데이터 조회
+    fetchRecipients(); // 기존 지원대상자 조회
 });
 
 /* 3. 수정 페이지 이동 함수  */
@@ -73,27 +96,27 @@ const goToAddRecipient = () => {
             <div class="info-grid-container flex flex-wrap gap-4 mt-4">
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">이름</label>
-                    <div class="p-inputtext surface-100 border-none">{{ userName }}</div>
+                    <div class="p-inputtext surface-100 border-none">{{ userInfo.userName }}</div>
                 </div>
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">아이디</label>
-                    <div class="p-inputtext surface-100 border-none">{{ userId }}</div>
+                    <div class="p-inputtext surface-100 border-none">{{ userInfo.userId }}</div>
                 </div>
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">이메일</label>
-                    <div class="p-inputtext surface-100 border-none">hong1@naver.com</div>
+                    <div class="p-inputtext surface-100 border-none">{{ userInfo.userEmail }}m</div>
                 </div>
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">소속기관</label>
-                    <div class="p-inputtext surface-100 border-none">ㅁㅁ복지센터</div>
+                    <div class="p-inputtext surface-100 border-none">ㅁㅁ 복지기관</div>
                 </div>
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">가입날짜</label>
-                    <div class="p-inputtext surface-100 border-none">2026.03.11</div>
+                    <div class="p-inputtext surface-100 border-none">{{ userInfo.joinDate }}</div>
                 </div>
                 <div class="info-item">
                     <label class="font-semibold text-sm text-600 block mb-2">전화번호</label>
-                    <div class="p-inputtext surface-100 border-none">010-1111-2222</div>
+                    <div class="p-inputtext surface-100 border-none">{{ userInfo.phone }}</div>
                 </div>
             </div>
         </section>

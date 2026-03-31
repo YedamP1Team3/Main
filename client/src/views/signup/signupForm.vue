@@ -49,7 +49,7 @@ const checkId = async () => {
     }
 
     try {
-        const response = await axios.get(`http://localhost:3000/info/check-id/${form.userId}`);
+        const response = await axios.get(`/api/info/check-id/${form.userId}`);
         if (response.data.isAvailable) {
             isIdDuplicated.value = false;
             idCheckMessage.value = '사용 가능한 아이디입니다.'; // '(테스트)' 문구 삭제
@@ -114,7 +114,7 @@ const submit = async () => {
     };
 
     try {
-        const response = await axios.post('http://localhost:3000/info/signup', signupData);
+        const response = await axios.post('/api/info/signup', signupData);
         alert(response.data.message);
         router.push('/login');
     } catch (error) {
