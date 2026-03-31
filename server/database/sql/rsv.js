@@ -19,7 +19,7 @@ FROM beneficiary_info
 WHERE family_id = ?
 ORDER BY bene_name`;
 
-// -----------------------------------reservation REST--------------------------
+// -----------------------------------reservation API--------------------------
 const insertReservation = `
   INSERT INTO reservations (
     bene_id,
@@ -29,7 +29,28 @@ const insertReservation = `
   ) VALUES (?, ?, ?, ?)
 `;
 
-// -----------------------------------managerSchedule REST--------------------------
+const selectFamilyReservations = `
+  SELECT
+    r.rsv_id,
+    r.bene_id,
+    b.bene_name,
+    b.disability_type,
+    DATE_FORMAT(r.start_time, '%Y-%m-%d %H:%i:%s') AS start_time,
+    DATE_FORMAT(r.end_time, '%Y-%m-%d %H:%i:%s') AS end_time,
+    r.rsv_status
+  FROM reservations r
+  INNER JOIN beneficiary_info b
+    ON r.bene_id = b.bene_id
+  WHERE b.family_id = ?
+  ORDER BY r.start_time DESC
+`;
+
+const deleteReservation = `
+  DELETE FROM reservations
+  WHERE rsv_id = ?
+`;
+
+// -----------------------------------managerSchedule API--------------------------
 
 // ACTIVE 상태의 MANAGER 전체 조회
 const selectActiveManagers = `
@@ -117,6 +138,41 @@ const deleteBlockedTime = `
         )
     `;
 
+// -----------------------------------manageReservation API--------------------------
+
+const selectBeneReservations = `
+SELECT
+    r.rsv_id,
+    b.bene_name,
+    b.disability_type,
+    r.start_time,
+    r.end_time,
+    r.rsv_status
+FROM reservations r
+JOIN beneficiary_info b
+    ON r.bene_id = b.bene_id
+WHERE b.family_id = ?
+ORDER BY r.start_time DESC
+`;
+
+const selectManagerReservations = `
+SELECT
+    r.rsv_id,
+    u.user_name AS family_name,
+    b.bene_name,
+    b.disability_type,
+    r.start_time,
+    r.end_time,
+    r.rsv_status
+FROM reservations r
+JOIN beneficiary_info b
+    ON r.bene_id = b.bene_id
+JOIN user_info u
+    ON b.family_id = u.user_id
+WHERE r.manager_id = ?
+ORDER BY r.start_time DESC
+`;
+
 module.exports = {
   selectManagerSchedule,
   selectReservedTimes,
@@ -125,8 +181,12 @@ module.exports = {
   selectAllOccupiedTimes,
   deleteBlockedTime,
   insertReservation,
+  selectFamilyReservations,
+  deleteReservation,
   selectActiveManagers,
   insertManagerSchedules,
   getBeneficiariesByFamilyId,
   getBeneficiaryManagerInfo,
+  selectBeneReservations,
+  selectManagerReservations,
 };

@@ -14,13 +14,13 @@ export default {
         <div class="sidebar-title">상담 메뉴</div>
 
         <nav class="sidebar-menu">
-            <RouterLink to="/" class="menu-item" active-class="active"> 상담예약 관리 </RouterLink>
+            <RouterLink to="{name: 'managereservation'}" class="menu-item" active-class="active"> 상담예약 관리 </RouterLink>
 
             <RouterLink to="/" class="menu-item" active-class="active"> 상담일지 작성 </RouterLink>
 
             <RouterLink to="/" class="menu-item" active-class="active"> 상담일지 관리 </RouterLink>
 
-            <RouterLink :to="{ name: 'managerSchedule' }" class="menu-item" active-class="active"> 상담시간 관리 </RouterLink>
+            <RouterLink :to="{ name: 'schedule' }" class="menu-item" active-class="active"> 상담시간 관리 </RouterLink>
         </nav>
     </aside>
 </template>

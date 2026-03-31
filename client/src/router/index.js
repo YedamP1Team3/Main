@@ -74,9 +74,14 @@ const router = createRouter({
             component: () => import('../views/Dashboard.vue')
         },
         {
-            path: '/ManagerSchedule',
-            name: 'managerSchedule',
+            path: '/Schedule',
+            name: 'schedule',
             component: () => import('../views/reservation/manager/ManagerSchedule.vue')
+        },
+        {
+            path: '/manageReservation',
+            name: 'managereservation',
+            component: () => import('../views/reservation/manager/ManageReservation.vue')
         },
         {
             path: '/reservation',

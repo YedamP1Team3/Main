@@ -1,5 +1,5 @@
-const { pool } = require("../DAO.js");
-const rsvSql = require("../sql/rsv.js");
+const { pool } = require('../DAO.js');
+const rsvSql = require('../sql/rsv.js');
 
 const getBeneficiaryManagerInfo = async (beneId) => {
   let conn = null;
@@ -30,7 +30,7 @@ const getBeneficiariesByFamilyId = async (familyId) => {
     if (conn) conn.release();
   }
 };
-// -----------------------------------reservation REST--------------------------
+// -----------------------------------reservation API--------------------------
 const insertReservation = async (beneId, managerId, startTime, endTime) => {
   let conn = null;
   try {
@@ -50,7 +50,35 @@ const insertReservation = async (beneId, managerId, startTime, endTime) => {
   }
 };
 
-// -----------------------------------managerSchedule REST--------------------------
+const selectFamilyReservations = async (userId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(rsvSql.selectFamilyReservations, [userId]);
+    return rows;
+  } catch (err) {
+    console.error('selectFamilyReservations mapper 에러:', err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const deleteReservation = async (rsvId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const result = await conn.query(rsvSql.deleteReservation, [rsvId]);
+    return result;
+  } catch (err) {
+    console.error('deleteReservation mapper 에러:', err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// -----------------------------------managerSchedule API--------------------------
 
 // ACTIVE MANAGER 목록 조회
 const selectActiveManagers = async () => {
@@ -173,6 +201,36 @@ const deleteBlockedTime = async (managerId, date, startTime, endTime) => {
   }
 };
 
+const selectBeneReservations = async (userId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(rsvSql.selectBeneReservations, [userId]);
+    return rows;
+  } catch (err) {
+    console.error('selectBeneReservations error:', err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectManagerReservations = async (managerId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(rsvSql.selectManagerReservations, [
+      managerId,
+    ]);
+    return rows;
+  } catch (err) {
+    console.error('selectManagerReservations error:', err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   selectManagerSchedule,
   selectReservedTimes,
@@ -180,8 +238,12 @@ module.exports = {
   insertBlockedTime,
   deleteBlockedTime,
   insertReservation,
+  selectFamilyReservations,
+  deleteReservation,
   selectActiveManagers,
   insertManagerSchedules,
   getBeneficiariesByFamilyId,
   getBeneficiaryManagerInfo,
+  selectBeneReservations,
+  selectManagerReservations,
 };
