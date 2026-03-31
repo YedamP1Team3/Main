@@ -10,7 +10,7 @@ const authStore = useAuthStore();
 const { userName, userId, userRole } = storeToRefs(authStore);
 
 const navigateTo = (routeName) => {
-    if (routeName === 'managerInfo') {
+    if (routeName === 'admininfo') {
         router.push({
             name: routeName,
             params: { id: userId.value }
@@ -50,11 +50,11 @@ const confirmWithdraw = () => {
             <hr class="mb-3 mx-3 border-top-1 surface-border" />
 
             <ul class="layout-menu list-none p-0 m-0">
-                <li class="menu-item px-4 py-3 cursor-pointer hover:surface-hover transition-colors" :class="{ 'active-menu-link': route.name === 'managerInfo' }" @click="navigateTo('admininfo')">
+                <li class="menu-item px-4 py-3 cursor-pointer hover:surface-hover transition-colors" :class="{ 'active-menu-link': route.name === 'admininfo' }" @click="navigateTo('admininfo')">
                     <span class="font-medium text-base">내 정보 관리</span>
                 </li>
 
-                <li class="menu-item px-4 py-3 cursor-pointer hover:surface-hover transition-colors" :class="{ 'active-menu-link': route.name === 'managerBeneficiaryList' }" @click="goToCenterInfo">
+                <li class="menu-item px-4 py-3 cursor-pointer hover:surface-hover transition-colors" :class="{ 'active-menu-link': route.name === 'admincenterinfo' }" @click="goToCenterInfo">
                     <span class="font-medium text-base">기관 정보</span>
                 </li>
             </ul>

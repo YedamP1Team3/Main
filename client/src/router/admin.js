@@ -3,7 +3,7 @@ export const admin = [
         path: '/mypage',
         name: 'adpagemain',
         component: () => import('@/views/AdMypage/AdMypageForm.vue'),
-        redirect: { name: 'admininfo' },
+        redirect: { name: 'admincenterinfo' },
         children: [
             {
                 path: '/ad-info/:id',

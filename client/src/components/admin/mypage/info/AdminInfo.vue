@@ -22,22 +22,22 @@ const adminData = reactive({
     email: 'syougaisenta@naver.com'
 });
 
-onMounted(async () => {
-    if (userId.value) {
-        try {
-            // 현재 로그인한 userId를 파라미터로 서버에 정보 요청
-            const response = await axios.get(`/api/admin/info/${userId.value}`);
+// onMounted(async () => {
+//     if (userId.value) {
+//         try {
+//             // 현재 로그인한 userId를 파라미터로 서버에 정보 요청
+//             const response = await axios.get(`/api/admin/info/${userId.value}`);
 
-            if (response.data) {
-                // 서버에서 받은 데이터로 adminData 객체 업데이트
-                Object.assign(adminData, response.data);
-            }
-        } catch (error) {
-            console.error('관리자 정보를 불러오는 중 오류 발생:', error);
-            alert('정보를 불러오지 못했습니다.');
-        }
-    }
-});
+//             if (response.data) {
+//                 // 서버에서 받은 데이터로 adminData 객체 업데이트
+//                 Object.assign(adminData, response.data);
+//             }
+//         } catch (error) {
+//             console.error('관리자 정보를 불러오는 중 오류 발생:', error);
+//             alert('정보를 불러오지 못했습니다.');
+//         }
+//     }
+// });
 
 // 비밀번호 폼
 const passwordForm = reactive({
