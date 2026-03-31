@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 
 const surveyStore = useSurveyStore();
-const { view_survey_data, view_answers } = storeToRefs(surveyStore);
+const { view_survey_data, view_answers, view_app_status } = storeToRefs(surveyStore);
 </script>
 
 <template>
@@ -33,8 +33,8 @@ const { view_survey_data, view_answers } = storeToRefs(surveyStore);
         </div>
 
         <div class="submit-box">
-            <!-- 💡 [추가] 삭제 버튼 바인딩 -->
-            <button class="btn-danger" @click="surveyStore.deleteApplication()">삭제</button>
+            <!-- 💡 [요구사항 3] 상태가 '대기'일 때만 삭제 버튼 렌더링 (v-if) -->
+            <button v-if="view_app_status === '대기'" class="btn-danger" @click="surveyStore.deleteApplication()">삭제</button>
             <button class="btn-secondary" @click="surveyStore.closeSurvey()">닫기</button>
         </div>
     </div>

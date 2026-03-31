@@ -16,6 +16,7 @@ const surveyStore = useSurveyStore();
 const { toggleDarkMode, isDarkTheme } = useLayout();
 const { userName } = storeToRefs(authStore);
 
+const naviToHome = () => router.push({ name: 'mHomepage' });
 const naviToApply = () => router.push({ name: 'mApplication' });
 const naviToReserve = () => {
     router.push({ name: 'reservation' });
@@ -84,7 +85,7 @@ const toggleAuth = () => {
 
             <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
                 <div class="a-name text-color font-medium">기관명</div>
-                <button type="button" class="p-link text-color font-medium">신청내역</button>
+                <button type="button" class="p-link text-color font-medium" @click="naviToHome">신청내역</button>
                 <button type="button" class="p-link text-color font-medium" @click="naviToApply">지원신청</button>
                 <button type="button" class="p-link text-color font-medium" @click="naviToReserve">상담예약</button>
             </div>
