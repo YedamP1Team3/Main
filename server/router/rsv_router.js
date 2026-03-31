@@ -142,9 +142,7 @@ router.get("/schedule", async (req, res) => {
 // 담당자 일정조정(예약불가) (MANAGER_ID)
 router.post("/blocked-times", async (req, res) => {
   try {
-    const managerId = "manager_02";
-
-    const { date, times } = req.body;
+    const { managerId, date, times } = req.body;
 
     if (!date || !times || times.length === 0) {
       return res.status(400).json({
@@ -170,8 +168,8 @@ router.post("/blocked-times", async (req, res) => {
 // 예약 가능 처리 (예약불가 해제)
 router.delete("/unblock-times", async (req, res) => {
   try {
-    const managerId = "manager_02";
-    const { date, times } = req.body; // times: ["09:30", "10:00", ...]
+    const { managerId, date, times } = req.body; // times: ["09:30", "10:00", ...]
+    console.log("예약해제.date : ", date);
 
     if (!date || !times || times.length === 0) {
       return res.status(400).json({
