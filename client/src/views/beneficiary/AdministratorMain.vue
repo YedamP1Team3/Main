@@ -77,6 +77,13 @@ const handleOpenPriority = async () => {
     await surveyStore.fetchPriorityInfo(selectedId.value);
     viewMode.value = 'priority';
 };
+
+const handleSelectSubPlan = (planId) => {
+    if (!managementRef.value) return;
+    if (typeof managementRef.value.openSubPlan === 'function') {
+        managementRef.value.openSubPlan(planId);
+    }
+};
 </script>
 
 <template>
@@ -107,7 +114,7 @@ const handleOpenPriority = async () => {
                 <ManagerAssignView :beneId="selectedId" @close="viewMode = 'empty'" @success="handleAssignSuccess" />
             </div>
             <div v-else-if="viewMode === 'result_detail'" class="editor-container">
-                <adResultPlanDetail :resultId="selectResult" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+                <adResultPlanDetail :resultId="selectResult" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan"/>
             </div>
 
             <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">

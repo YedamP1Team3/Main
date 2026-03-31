@@ -1,56 +1,3 @@
-<template>
-    <div class="bg-slate-50 min-h-screen pt-[5rem] px-4 pb-8 md:px-6">
-        <div class="flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-            <div class="flex items-center gap-3">
-                <label class="font-bold text-slate-700">조사지 버전 선택:</label>
-                <select v-model="selectedVersionId" @change="handleVersionChange" class="border rounded-lg p-2 bg-slate-50 font-medium outline-none focus:ring-2 focus:ring-blue-500">
-                    <option v-for="ver in versionList" :key="ver.VERSION_ID" :value="ver.VERSION_ID">
-                        버전 {{ ver.VERSION_ID }}
-                        {{ ver.IS_ACTIVE === 1 ? '(현재 활성 TRUE)' : ver.VERSION_ID === maxVersionId ? '(새 조사지 FALSE)' : '' }}
-                    </option>
-                </select>
-            </div>
-
-            <button @click="handleApplyVersion" class="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-600 transition-colors shadow-md">현재 버전 적용 및 새 조사지 생성</button>
-        </div>
-
-        <div class="grid grid-cols-12 gap-4 md:gap-6">
-            <div class="col-span-12 lg:col-span-3">
-                <SurveyItemWidget
-                    :items="surveyData"
-                    :selectedId="selectedItemId"
-                    :isActive="isEditableVersion"
-                    @select="
-                        (id) => {
-                            selectedItemId = id;
-                            selectedSubItemId = null;
-                        }
-                    "
-                    @add-item="handleAddItem"
-                    @delete-item="handleDeleteItem"
-                />
-            </div>
-
-            <div class="col-span-12 lg:col-span-3">
-                <SurveySubItemWidget :subItems="currentSubItems" :selectedId="selectedSubItemId" :isActive="isEditableVersion" @select="(id) => (selectedSubItemId = id)" @add-sub-item="handleAddSubItem" @delete-sub-item="handleDeleteSubItem" />
-            </div>
-
-            <div class="col-span-12 lg:col-span-6">
-                <SurveyDetailWidget
-                    :details="currentDetails"
-                    :selectedItemName="selectedItemName"
-                    :selectedSubItemName="selectedSubItemName"
-                    :selectedItemId="selectedItemId"
-                    :selectedSubItemId="selectedSubItemId"
-                    :isActive="isEditableVersion"
-                    @add-detail="handleAddDetail"
-                    @delete-selected="handleDeleteSelected"
-                />
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
@@ -181,3 +128,56 @@ onMounted(async () => {
     if (selectedVersionId.value) fetchSurveyData(selectedVersionId.value);
 });
 </script>
+
+<template>
+    <div class="bg-slate-50 min-h-screen pt-[5rem] px-4 pb-8 md:px-6">
+        <div class="flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div class="flex items-center gap-3">
+                <label class="font-bold text-slate-700">조사지 버전 선택:</label>
+                <select v-model="selectedVersionId" @change="handleVersionChange" class="border rounded-lg p-2 bg-slate-50 font-medium outline-none focus:ring-2 focus:ring-blue-500">
+                    <option v-for="ver in versionList" :key="ver.VERSION_ID" :value="ver.VERSION_ID">
+                        버전 {{ ver.VERSION_ID }}
+                        {{ ver.IS_ACTIVE === 1 ? '(현재 활성 TRUE)' : ver.VERSION_ID === maxVersionId ? '(새 조사지 FALSE)' : '' }}
+                    </option>
+                </select>
+            </div>
+
+            <button @click="handleApplyVersion" class="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-600 transition-colors shadow-md">현재 버전 적용 및 새 조사지 생성</button>
+        </div>
+
+        <div class="grid grid-cols-12 gap-4 md:gap-6">
+            <div class="col-span-12 lg:col-span-3">
+                <SurveyItemWidget
+                    :items="surveyData"
+                    :selectedId="selectedItemId"
+                    :isActive="isEditableVersion"
+                    @select="
+                        (id) => {
+                            selectedItemId = id;
+                            selectedSubItemId = null;
+                        }
+                    "
+                    @add-item="handleAddItem"
+                    @delete-item="handleDeleteItem"
+                />
+            </div>
+
+            <div class="col-span-12 lg:col-span-3">
+                <SurveySubItemWidget :subItems="currentSubItems" :selectedId="selectedSubItemId" :isActive="isEditableVersion" @select="(id) => (selectedSubItemId = id)" @add-sub-item="handleAddSubItem" @delete-sub-item="handleDeleteSubItem" />
+            </div>
+
+            <div class="col-span-12 lg:col-span-6">
+                <SurveyDetailWidget
+                    :details="currentDetails"
+                    :selectedItemName="selectedItemName"
+                    :selectedSubItemName="selectedSubItemName"
+                    :selectedItemId="selectedItemId"
+                    :selectedSubItemId="selectedSubItemId"
+                    :isActive="isEditableVersion"
+                    @add-detail="handleAddDetail"
+                    @delete-selected="handleDeleteSelected"
+                />
+            </div>
+        </div>
+    </div>
+</template>

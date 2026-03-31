@@ -1,9 +1,10 @@
 <script setup>
-import { ref, watch } from 'vue'; // 💡 watch 추가
-import { useSurveyStore } from '@/stores/useSurveyStore'; // 💡 스토어 연동
+import { ref, watch } from 'vue';
+import { useSurveyStore } from '@/stores/useSurveyStore';
 import AdTabPlan from './AdTabPlan.vue';
 import AdTabApplication from './AdTabApplication.vue';
 import adResultPlan from './adResultPlan.vue';
+import TabPlanDetail from '@/components/manager/supportplan/beneficiary/TabPlanDetail.vue';
 
 const props = defineProps({
     beneId: { type: [String, Number] }
@@ -15,16 +16,20 @@ const currentTab = ref('Plan');
 const tabPlanRef = ref(null);
 const surveyStore = useSurveyStore(); // 💡 스토어 초기화
 
-// 💡 스토어의 대기단계 상태(progress_status) 변경을 감지하여 실시간으로 리스트 동기화
-watch(
-    () => surveyStore.priority_data.progress_status,
-    (newVal, oldVal) => {
-        // 상태가 실제로 변경되었을 때만 내부 데이터 리프레시
-        if (oldVal && newVal !== oldVal && tabPlanRef.value) {
-            tabPlanRef.value.fetchPlanList(props.beneId);
-        }
-    }
-);
+const leftMode = ref('list'); // 'list' | 'plan'
+const selectedSubPlanId = ref(null);
+
+const handleSelectSubPlan = (planId) => {
+    if (!planId) return;
+    selectedSubPlanId.value = planId;
+    leftMode.value = 'plan';
+    currentTab.value = 'Result';
+};
+
+const handleCloseSubPlan = () => {
+    leftMode.value = 'list';
+    selectedSubPlanId.value = null;
+};
 
 const handleSelectApp = (appId) => {
     emit('select-app', appId);
@@ -41,11 +46,37 @@ const handleSelectResult = (resultId) => {
     emit('select-result', resultId);
 };
 
+watch(
+    () => surveyStore.priority_data.progress_status,
+    (newVal, oldVal) => {
+        // 상태가 실제로 변경되었을 때만 내부 데이터 리프레시
+        if (oldVal && newVal !== oldVal && tabPlanRef.value) {
+            tabPlanRef.value.fetchPlanList(props.beneId);
+        }
+    }
+);
+
+watch(
+    () => props.beneId,
+    () => {
+        handleCloseSubPlan();
+    }
+);
 defineExpose({
     refreshTabPlan: () => {
         if (tabPlanRef.value) tabPlanRef.value.fetchPlanList(props.beneId);
-    }
+    },
+    openSubPlan: handleSelectSubPlan,
+    closeSubPlan: handleCloseSubPlan
 });
+
+watch(
+    () => currentTab.value,
+    (tab) => {
+        if (tab !== 'Result') handleCloseSubPlan();
+    }
+);
+
 </script>
 
 <template>
@@ -60,7 +91,10 @@ defineExpose({
         <div class="tab-content">
             <AdTabApplication v-if="currentTab === 'Application'" ref="tabAppRef" :beneId="beneId" @select-app="handleSelectApp" @assign-manager="handleAssignManager" />
             <AdTabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @select-plan="handleSelectPlan" />
-            <adResultPlan v-if="currentTab === 'Result'" ref="tabPlanRef" :beneId="beneId" @select-result="handleSelectResult" />
+            <div v-if="currentTab === 'Result'">
+                <adResultPlan v-if="leftMode === 'list'" ref="tabPlanRef" :beneId="beneId" @select-result="handleSelectResult" />
+                <TabPlanDetail v-else-if="leftMode === 'plan'" :planId="selectedSubPlanId" @close="handleCloseSubPlan" />
+            </div>
         </div>
     </div>
 </template>

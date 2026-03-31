@@ -1,38 +1,3 @@
-<template>
-    <div class="calendar">
-        <!-- 헤더 -->
-        <div class="calendar-header">
-            <button @click="prevMonth">‹</button>
-            <span class="calendar-title">{{ currentYear }}년 {{ currentMonth + 1 }}월</span>
-            <button @click="nextMonth">›</button>
-        </div>
-
-        <!-- 요일 -->
-        <div class="calendar-days">
-            <div v-for="day in days" :key="day" class="day-label">
-                {{ day }}
-            </div>
-        </div>
-
-        <!-- 날짜 -->
-        <div class="calendar-dates">
-            <div
-                v-for="date in calendarDates"
-                :key="date.fullDate"
-                class="date-cell"
-                :class="{
-                    today: isToday(date),
-                    selected: isSelected(date),
-                    empty: !date.day
-                }"
-                @click="selectDate(date)"
-            >
-                {{ date.day }}
-            </div>
-        </div>
-    </div>
-</template>
-
 <script>
 import { ref, computed } from 'vue';
 
@@ -128,6 +93,41 @@ export default {
     }
 };
 </script>
+
+<template>
+    <div class="calendar">
+        <!-- 헤더 -->
+        <div class="calendar-header">
+            <button @click="prevMonth">‹</button>
+            <span class="calendar-title">{{ currentYear }}년 {{ currentMonth + 1 }}월</span>
+            <button @click="nextMonth">›</button>
+        </div>
+
+        <!-- 요일 -->
+        <div class="calendar-days">
+            <div v-for="day in days" :key="day" class="day-label">
+                {{ day }}
+            </div>
+        </div>
+
+        <!-- 날짜 -->
+        <div class="calendar-dates">
+            <div
+                v-for="date in calendarDates"
+                :key="date.fullDate"
+                class="date-cell"
+                :class="{
+                    today: isToday(date),
+                    selected: isSelected(date),
+                    empty: !date.day
+                }"
+                @click="selectDate(date)"
+            >
+                {{ date.day }}
+            </div>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .calendar {

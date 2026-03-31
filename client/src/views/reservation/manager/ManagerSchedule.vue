@@ -1,18 +1,3 @@
-<template>
-    <header class="layout-header">
-        <JsTopbarmg />
-    </header>
-    <div class="layout-body">
-        <RsvSideBar />
-        <main class="layout-main">
-            <div class="content row">
-                <Calendar v-model="selectedDate" />
-                <TimeSlot :selectedDate="selectedDate" :slots="slots" :blockedSummary="blockedSummary" mode="manager" @blockTimes="handleBlock" />
-            </div>
-        </main>
-    </div>
-</template>
-
 <script>
 import { ref, watch } from 'vue';
 import Calendar from '@/components/common/Calendar.vue';
@@ -60,7 +45,7 @@ export default {
 
                 if (!schedule) {
                     slots.value = [];
-                    blockedSummary = [];
+                    blockedSummary.value = [];
                     return;
                 }
 
@@ -161,6 +146,21 @@ export default {
     }
 };
 </script>
+
+<template>
+    <header class="layout-header">
+        <JsTopbarmg />
+    </header>
+    <div class="layout-body">
+        <RsvSideBar />
+        <main class="layout-main">
+            <div class="content row">
+                <Calendar v-model="selectedDate" />
+                <TimeSlot :selectedDate="selectedDate" :slots="slots" :blockedSummary="blockedSummary" mode="manager" @blockTimes="handleBlock" />
+            </div>
+        </main>
+    </div>
+</template>
 
 <style scoped>
 /* .container {

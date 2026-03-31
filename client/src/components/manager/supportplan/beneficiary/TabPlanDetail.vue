@@ -18,7 +18,7 @@ const fetchPlanDetail = async (id) => {
     isLoading.value = true;
     try {
         // ✅ API 주소 주의: 서버 포트(3000)와 경로를 명확히 작성
-        const response = await axios.get(`http://localhost:3000/api/support-plan/${id}`);
+        const response = await axios.get(`http://localhost:3000/api/support-plans/${id}`);
 
         // 데이터가 배열로 올 경우를 대비해 첫 번째 항목 선택
         if (Array.isArray(response.data)) {
@@ -54,6 +54,7 @@ watch(
 
         <div v-else-if="planDetail.plan_id" class="detail-content">
             <table class="detail-table">
+                <tbody>
                 <tr>
                     <th>계획번호</th>
                     <td>{{ planDetail.plan_id }}</td>
@@ -78,7 +79,7 @@ watch(
                     <th>세부내용</th>
                     <td colspan="3" class="content-text">{{ planDetail.plan_content }}</td>
                 </tr>
-            </table>
+           </tbody> </table>
         </div>
 
         <div v-else class="empty-msg">상세 정보가 존재하지 않습니다.</div>
