@@ -1,28 +1,22 @@
-// sql/servey.js
-
-// [조회] 설문 구조 전체 조회
-// 실무 팁: DB에서 조회할 때부터 컬럼명을 철저히 소문자로 지정합니다.
-// 이렇게 하면 Node.js로 데이터가 넘어올 때 무조건 소문자 키(row.item_id)로 떨어지므로
-// 불필요한 대소문자 구분 방어 코드를 작성할 필요가 없어집니다.
+// 기존 selectSurvey 쿼리 수정: WHERE v.IS_ACTIVE = 1 을 삭제하고 VERSION_ID 조건으로 변경
 const selectSurvey = `
 SELECT 
-    v.version_id,    
-    i.item_id, 
-    i.item_name, 
-    i.display_order AS item_display_order, 
-    s.sub_item_id, 
-    s.sub_item_name, 
-    d.detail_id, 
-    d.question_text
+    v.VERSION_ID,    
+    i.ITEM_ID, 
+    i.ITEM_NAME, 
+    i.DISPLAY_ORDER, 
+    s.SUB_ITEM_ID, 
+    s.SUB_ITEM_NAME, 
+    d.DETAIL_ID, 
+    d.QUESTION_TEXT
 FROM survey_version v
-LEFT JOIN survey_item i ON v.version_id = i.version_id
-LEFT JOIN survey_sub_item s ON i.item_id = s.item_id
-LEFT JOIN survey_detail d ON s.sub_item_id = d.sub_item_id
-WHERE v.version_id = ?  /* 사용자가 입력한 값은 무조건 ? 로 받아서 SQL 인젝션을 원천 차단합니다. */
-ORDER BY i.display_order, s.display_order, d.display_order;
+LEFT JOIN survey_item i ON v.VERSION_ID = i.VERSION_ID
+LEFT JOIN survey_sub_item s ON i.ITEM_ID = s.ITEM_ID
+LEFT JOIN survey_detail d ON s.SUB_ITEM_ID = d.SUB_ITEM_ID
+WHERE v.VERSION_ID = ?  /* 이 부분이 핵심입니다! */
+ORDER BY i.DISPLAY_ORDER, s.DISPLAY_ORDER, d.DISPLAY_ORDER;
 `;
 
-// [저장] 설문 대분류(Item) 추가
 const insert_item = `
 INSERT INTO survey_item (item_name, version_id, display_order)
 SELECT 
@@ -33,67 +27,57 @@ FROM survey_item
 WHERE version_id = ?; 
 `;
 
-// [저장] 설문 중분류(SubItem) 추가
 const insert_subitem = `
-INSERT INTO survey_sub_item (sub_item_name, item_id, display_order)
-SELECT ?, ?, IFNULL(MAX(display_order), 0) + 1 
-FROM survey_sub_item
-WHERE item_id = ?;
-`;
+    INSERT INTO survey_sub_item (sub_item_name, item_id, display_order)
+    SELECT ?, ?, IFNULL(MAX(display_order), 0) + 1 
+    FROM survey_sub_item
+    WHERE item_id = ?
+  `;
 
-// [저장] 설문 상세 질문(Detail) 추가
 const insert_detail = `
-INSERT INTO survey_detail (question_text, sub_item_id, display_order)
-SELECT ?, ?, IFNULL(MAX(display_order), 0) + 1 
-FROM survey_detail AS temp
-WHERE sub_item_id = ?;
-`;
+    INSERT INTO survey_detail (question_text, sub_item_id, display_order)
+    SELECT ?, ?, IFNULL(MAX(display_order), 0) + 1 
+    FROM survey_detail AS temp
+    WHERE sub_item_id = ?
+  `;
 
-// [조회] 설문 버전 목록 조회
 const selectVersionList = `
-SELECT version_id, is_active, DATE_FORMAT(create_date, '%Y-%m-%d') as create_date 
-FROM survey_version 
-ORDER BY version_id DESC;
+  SELECT VERSION_ID, IS_ACTIVE, DATE_FORMAT(CREATE_DATE, '%Y-%m-%d') as CREATE_DATE 
+  FROM survey_version 
+  ORDER BY VERSION_ID DESC;
 `;
 
-// [수정] 모든 버전 비활성화
-const deactivateVersions = `UPDATE survey_version SET is_active = 0 WHERE is_active = 1;`;
+const deactivateVersions = `UPDATE survey_version SET IS_ACTIVE = 0 WHERE IS_ACTIVE = 1;`;
+const insertNewVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (1, NOW());`;
 
-// [저장] 새로운 활성 버전 생성
-const insertNewVersion = `INSERT INTO survey_version (is_active, create_date) VALUES (1, NOW());`;
+const memberSurvey =
+  "SELECT VERSION_ID FROM survey_version WHERE IS_ACTIVE = 1";
 
-// [조회] 멤버용 현재 활성화된 버전 확인
-const memberSurvey = `SELECT version_id FROM survey_version WHERE is_active = 1;`;
-
-// [저장] 지원신청서 마스터 정보
+// [수정] 1. 지원신청서(application) 마스터 저장
 const insert_application = `
-INSERT INTO application (version_id, bene_id, user_id, created_at) 
-VALUES (?, ?, ?, NOW());
+  INSERT INTO application (version_id, bene_id, user_id, created_at) 
+  VALUES (?, ?, ?, NOW());
 `;
 
-// [저장] 조사지 상세 답변
-// 실무 팁: mariadb 드라이버의 conn.batch()를 사용하면, 이 한 줄짜리 쿼리로도
-// 수십 개의 답변 배열을 한 번의 네트워크 통신으로 DB에 밀어 넣을 수 있습니다(Bulk Insert).
+// [수정] 2. 조사지답변(survey_answer) 상세 저장
 const insert_survey_answer = `
-INSERT INTO survey_answer (answer_value, detail_id, app_id) 
-VALUES (?, ?, ?);
+  INSERT INTO survey_answer (answer_value, detail_id, app_id) 
+  VALUES (?, ?, ?);
 `;
-
-// [조회] 신청서 마스터 정보 단건 조회
+// [조회] 3. 특정 신청서 마스터 정보 가져오기 (버전 ID 확인용)
 const select_application_by_id = `
-SELECT app_id, version_id, bene_id, user_id, app_status, DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
-FROM application 
-WHERE app_id = ?;
+  SELECT app_id, version_id, bene_id, user_id, app_status, DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
+  FROM application 
+  WHERE app_id = ?;
 `;
 
-// [조회] 특정 신청서의 상세 답변 전체 조회
+// [조회] 4. 특정 신청서의 상세 답변 모두 가져오기
 const select_answers_by_app_id = `
-SELECT detail_id, answer_value 
-FROM survey_answer 
-WHERE app_id = ?;
+  SELECT detail_id, answer_value 
+  FROM survey_answer 
+  WHERE app_id = ?;
 `;
-
-// [조회] 특정 대상자의 신청서 목록
+// [목록 조회] 5. 특정 대상자(bene_id)의 신청서 목록 가져오기
 const select_application_list_by_bene = `
 SELECT 
     a.app_id AS id, 
@@ -102,7 +86,7 @@ SELECT
     DATE_FORMAT(a.created_at, '%Y.%m.%d') AS date,
     p.priority_status,
     p.progress_status,
-    a.app_status
+    a.app_status  /* ⭐️ 화면 출력을 위해 추가 */
 FROM application a
 LEFT JOIN beneficiary_info b ON a.bene_id = b.bene_id
 LEFT JOIN priority p ON p.priority_id = (
@@ -114,33 +98,32 @@ WHERE a.bene_id = ?
 ORDER BY a.created_at DESC;
 `;
 
-// [삭제] 신청서 연관 데이터 일괄 삭제용 쿼리들
 const delete_survey_answers = `DELETE FROM survey_answer WHERE app_id = ?;`;
 const delete_application = `DELETE FROM application WHERE app_id = ?;`;
 
-// [수정/저장] 버전 관리용
-const setActiveVersion = `UPDATE survey_version SET is_active = 1 WHERE version_id = ?;`;
-const insertNewDraftVersion = `INSERT INTO survey_version (is_active, create_date) VALUES (0, NOW());`;
+// 기존 쿼리에 아래 두 줄을 추가/수정합니다.
+const setActiveVersion = `UPDATE survey_version SET IS_ACTIVE = 1 WHERE VERSION_ID = ?;`;
+const insertNewDraftVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (0, NOW());`;
 
-// [조회] 대상자의 활성화된(대기, 진행중) 신청서 개수 카운트
+// [추가] 1. 진행 중인 신청서 개수 확인 (중복 방지)
 const check_active_application = `
-SELECT COUNT(*) as cnt 
-FROM application 
-WHERE bene_id = ? AND app_status IN ('대기', '진행중');
+  SELECT COUNT(*) as cnt 
+  FROM application 
+  WHERE bene_id = ? AND app_status IN ('대기', '진행중');
 `;
 
-// [조회] 신청서의 현재 상태 확인 (함부로 삭제하지 못하게 방어)
+// [추가] 2. 신청서 현재 상태 확인 (수정/삭제 방어용)
 const select_application_status = `
-SELECT app_status 
-FROM application 
-WHERE app_id = ?;
+  SELECT app_status 
+  FROM application 
+  WHERE app_id = ?;
 `;
 
-// [수정] 신청서 상태를 '진행중'으로 변경
+// [추가] 3. 대기단계 승인 처리 시 상태 업데이트 (요구사항 2)
 const update_status_inprogress = `
-UPDATE application 
-SET app_status = '진행중' 
-WHERE app_id = ? AND app_status = '대기';
+  UPDATE application 
+  SET app_status = '진행중' 
+  WHERE app_id = ? AND app_status = '대기';
 `;
 
 module.exports = {
@@ -151,6 +134,7 @@ module.exports = {
   selectVersionList,
   deactivateVersions,
   insertNewVersion,
+  // member용
   memberSurvey,
   insert_application,
   insert_survey_answer,
@@ -159,9 +143,8 @@ module.exports = {
   select_application_list_by_bene,
   delete_survey_answers,
   delete_application,
+  //구조 변경
   check_active_application,
   select_application_status,
   update_status_inprogress,
-  setActiveVersion,
-  insertNewDraftVersion,
 };

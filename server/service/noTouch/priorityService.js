@@ -16,7 +16,11 @@ const requestPriority = async (beneId, priorityStatus) => {
     throw new Error("MISSING_PARAM");
   }
 
-  await noTouchMapper.insertPriorityHistory(beneId, priorityStatus, "pending");
+  await noTouchMapper.insertPriorityHistory(
+    beneId,
+    priorityStatus,
+    "pending",
+  );
 
   return true;
 };
