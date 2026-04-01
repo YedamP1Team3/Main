@@ -9,6 +9,7 @@ const props = defineProps({ beneId: [String, Number], priorityId: [String, Numbe
 const authStore = useAuthStore();
 
 const planDetail = ref({});
+const attachments = ref([]);
 const reasoninsert = ref(false);
 const rejectReason = ref('');
 const rejectionLog = ref([]);
@@ -16,8 +17,9 @@ const rejectionLog = ref([]);
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`api/adsupport/admin/support-plan/${id}`);
-        planDetail.value = response.data;
+        const response = await axios.get(`/api/adsupport/admin/support-plan/${id}`);
+        planDetail.value = response.data.plan || {};
+        attachments.value = response.data.files || [];
         rejectReason.value = '';
         reasoninsert.value = false;
         fetchRejectionHistory(id);
@@ -26,9 +28,28 @@ const fetchPlanDetail = async (id) => {
     }
 };
 
+const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(ext)) return '🖼️';
+    const iconMap = {
+        pdf: '📕',
+        xlsx: '📗',
+        xls: '📗',
+        docx: '📘',
+        doc: '📘',
+        hwp: '📝'
+    };
+    return iconMap[ext] || '📄';
+};
+
+const downloadFile = (file) => {
+    const url = `/api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
+    window.location.href = url;
+};
+
 const fetchRejectionHistory = async (id) => {
     try {
-        const response = await axios.get(`api/adsupport/admin/support-plan/${id}/rejection-history`);
+        const response = await axios.get(`/api/adsupport/admin/support-plan/${id}/rejection-history`);
         rejectionLog.value = response.data.map((log) => ({
             ...log,
             isOpen: false
@@ -50,7 +71,7 @@ const startReject = () => {
 const Approval = async (planId) => {
     if (!confirm('승인하시겠습니까?')) return;
     try {
-        const response = await axios.put(`api/adsupport/admin/support-plan/${planId}/approval`);
+        const response = await axios.put(`/api/adsupport/admin/support-plan/${planId}/approval`);
         if (response.data.status == true) {
             alert('승인신청했습니다');
             emit('refresh');
@@ -70,7 +91,7 @@ const updatereturn = async (planId) => {
     }
     if (!confirm('반려하시겠습니까?')) return;
     try {
-        const updateRes = await axios.put(`api/adsupport/admin/support-plan/${planId}/return`);
+        const updateRes = await axios.put(`/api/adsupport/admin/support-plan/${planId}/return`);
         if (updateRes.data.status) {
             const historyData = {
                 plan_id: planId,
@@ -79,7 +100,7 @@ const updatereturn = async (planId) => {
                 rejection_reason: rejectReason.value,
                 manager_id: authStore.userId
             };
-            await axios.post(`api/adsupport/admin/support-plan/rejection-history`, historyData);
+            await axios.post(`/api/adsupport/admin/support-plan/rejection-history`, historyData);
 
             alert('반려 처리 및 이력이 저장되었습니다.');
             reasoninsert.value = false;
@@ -126,7 +147,12 @@ watch(
             <div class="form-row">
                 <label>파일첨부</label>
                 <div class="content-box file-box">
-                    <span v-if="planDetail.file_name" class="file-link">{{ planDetail.file_name }}</span>
+                    <ul v-if="attachments.length > 0" class="file_list">
+                        <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
+                            <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
+                            <span class="file_name">{{ file.origin_name }}</span>
+                        </li>
+                    </ul>
                     <span v-else class="no-file">첨부된 파일이 없습니다.</span>
                 </div>
             </div>
@@ -294,7 +320,50 @@ watch(
 /* 파일 첨부 영역 */
 .file-box {
     color: #64748b;
+    padding: 10px 20px !important;
 }
+
+.file_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.file_item {
+    display: flex;
+    align-items: center;
+    background-color: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+    max-width: 250px;
+}
+
+.file_item.clickable:hover {
+    background-color: #e2e8f0;
+    border-color: #cbd5e1;
+    cursor: pointer;
+}
+
+.file_icon {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+.file_name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .no-file {
     color: #94a3b8;
     font-style: italic;

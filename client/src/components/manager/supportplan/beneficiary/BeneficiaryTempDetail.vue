@@ -12,13 +12,16 @@ const props = defineProps({
 });
 
 const tempDetail = ref({});
+const attachments = ref([]);
+const selectedFiles = ref([]);
 
 // 1. 상세 정보
 const fetchTempDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`api/api/temp-plans/${id}`);
-        tempDetail.value = response.data;
+        const response = await axios.get(`/api/temp-plans/${id}`);
+        tempDetail.value = response.data || {};
+        attachments.value = response.data?.files || [];
     } catch (error) {
         console.error(`에러`, error);
     }
@@ -28,7 +31,7 @@ const fetchTempDetail = async (id) => {
 const DeleteTemp = async (planDraftId) => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`http://localhost:3000/api/temp-plans/${planDraftId}`);
+        const response = await axios.delete(`/api/temp-plans/${planDraftId}`);
         if (response.data.status == 'success') {
             alert('삭제되었습니다');
             emit('refresh');
@@ -40,9 +43,75 @@ const DeleteTemp = async (planDraftId) => {
     }
 };
 
+const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(ext)) {
+        return '🖼️';
+    }
+
+    const iconMap = {
+        pdf: '📕',
+        xlsx: '📗',
+        xls: '📗',
+        docx: '📘',
+        doc: '📘',
+        hwp: '📝'
+    };
+
+    return iconMap[ext] || '📄';
+};
+
+const uploadSelectedFiles = async (planDraftId) => {
+    if (!planDraftId) return false;
+    if (selectedFiles.value.length === 0) return true;
+
+    const formData = new FormData();
+    selectedFiles.value.forEach((file) => {
+        formData.append('files', file);
+    });
+
+    const response = await axios.post(`/api/temp-plans/${planDraftId}/files`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    if (response.data?.status !== 'success') return false;
+    selectedFiles.value = [];
+    return true;
+};
+
+const deleteExistingFile = async (fileId) => {
+    const planDraftId = tempDetail.value?.plan_draft_id;
+    if (!planDraftId || !fileId) return;
+    if (!confirm('이 파일을 삭제하시겠습니까?')) return;
+    try {
+        const response = await axios.delete(`/api/temp-plans/${planDraftId}/files/${fileId}`);
+        if (response.data?.status === 'success') {
+            await fetchTempDetail(planDraftId);
+        } else {
+            alert('파일 삭제에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('파일 삭제 중 오류 발생', error);
+        alert('파일 삭제 중 오류가 발생했습니다.');
+    }
+};
+
 // 3. 승인 신청 (수정 후 재신청)
 const Approval = async (planDraftId) => {
     if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
+    if (!planDraftId) return;
+    try {
+        const uploaded = await uploadSelectedFiles(planDraftId);
+        if (!uploaded) {
+            alert('파일 업로드에 실패했습니다.');
+            return;
+        }
+    } catch (error) {
+        console.error('파일 업로드 중 오류 발생', error);
+        alert('파일 업로드 중 오류가 발생했습니다.');
+        return;
+    }
     const target = {
         priority_id: props.priorityId,
         manager_id: authStore.userId,
@@ -50,12 +119,11 @@ const Approval = async (planDraftId) => {
         plan_objective: tempDetail.value.plan_objective,
         plan_content: tempDetail.value.plan_content,
         progress_state: '대기',
-        // 💡 삭제를 위해 임시 ID를 추가로 보냅니다.
-        plan_draft_id: tempDetail.value.plan_draft_id
+        plan_draft_id: planDraftId
     };
 
     try {
-        const response = await axios.post(`api/api/temp-plans/approve`, target);
+        const response = await axios.post(`/api/temp-plans/approve`, target);
         if (response.data.status === 'success') {
             alert('승인 신청되었습니다.');
             emit('refresh');
@@ -69,18 +137,39 @@ const Approval = async (planDraftId) => {
 const SaveTemp = async (planDraftId) => {
     if (!confirm('내용을 저장하시겠습니까?')) return;
     try {
+        const uploaded = await uploadSelectedFiles(planDraftId);
+        if (!uploaded) {
+            alert('파일 업로드에 실패했습니다.');
+            return;
+        }
         const updateData = {
             plan_objective: tempDetail.value.plan_objective,
             plan_content: tempDetail.value.plan_content
         };
-        const response = await axios.put(`http://localhost:3000/api/temp-plans/${planDraftId}`, updateData);
+        const response = await axios.put(`/api/temp-plans/${planDraftId}`, updateData);
         if (response.data.status == true) {
+            await fetchTempDetail(planDraftId);
             alert('임시저장되었습니다');
             emit('refresh');
         }
     } catch (error) {
         console.error('오류 발생', error);
     }
+};
+
+const handleFileChange = (event) => {
+    const newFiles = Array.from(event.target.files);
+    selectedFiles.value = [...selectedFiles.value, ...newFiles];
+    event.target.value = '';
+};
+
+const removeFile = (index) => {
+    selectedFiles.value.splice(index, 1);
+};
+
+const downloadFile = (file) => {
+    const url = `/api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
+    window.location.href = url;
 };
 
 watch(
@@ -119,7 +208,27 @@ watch(
             <div class="form-row">
                 <label>파일첨부</label>
                 <div class="input-wrapper">
-                    <input type="text" placeholder="첨부된 파일이 없습니다." readonly class="content-input gray-bg" />
+                    <div class="file_input_container">
+                        <input type="file" ref="fileInput" multiple @change="handleFileChange" @click.stop accept=".pdf, .png, .jpg, .jpeg, .xlsx, .xls, .docx, .doc, .hwp" style="display: none" />
+                        <button v-if="['임시', '반려'].includes(tempDetail.progress_state)" type="button" class="btn_file_select" @click="$refs.fileInput.click()">파일 선택하기</button>
+
+                        <ul v-if="attachments.length > 0" class="file_list">
+                            <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
+                                <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
+                                <span class="file_name">{{ file.origin_name }}</span>
+                                <button v-if="['임시', '반려'].includes(tempDetail.progress_state)" type="button" class="btn_remove" @click.stop="deleteExistingFile(file.file_id)">✕</button>
+                            </li>
+                        </ul>
+                        <div v-else class="no-attachments">첨부된 파일이 없습니다.</div>
+
+                        <ul v-if="selectedFiles.length > 0" class="file_list">
+                            <li v-for="(file, index) in selectedFiles" :key="index" class="file_item">
+                                <span class="file_icon">{{ getFileIcon(file.name) }}</span>
+                                <span class="file_name">{{ file.name }}</span>
+                                <button type="button" class="btn_remove" @click="removeFile(index)">✕</button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -214,6 +323,107 @@ watch(
 .input-wrapper {
     flex: 1;
     display: flex;
+}
+
+.file_input_container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 15px;
+}
+
+.btn_file_select {
+    width: fit-content;
+    padding: 8px 16px;
+    background-color: #fff;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn_file_select:hover {
+    background-color: #eff6ff;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+}
+
+.file_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.file_item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    min-width: 200px;
+    transition: all 0.2s;
+}
+
+.file_item:hover {
+    border-color: #2563eb;
+    background-color: #f8fafc;
+}
+
+.file_icon {
+    font-size: 1.2rem;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.file_name {
+    flex: 1;
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn_remove {
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn_remove:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.no-attachments {
+    padding: 5px 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.clickable {
+    cursor: pointer;
 }
 
 .content-input,
@@ -324,5 +534,46 @@ button:hover {
     line-height: 1.6;
     font-size: 0.95rem;
     white-space: pre-wrap;
+}
+
+.download-list {
+    list-style: none;
+    padding: 12px 15px;
+    margin: 0;
+    width: 100%;
+}
+
+.download-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    background-color: #f1f5f9;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.download-item:hover {
+    background-color: #e2e8f0;
+    text-decoration: underline;
+    color: #2563eb;
+}
+
+.download-item i {
+    margin-right: 10px;
+    color: #64748b;
+}
+
+.file-name-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    flex: 1;
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-left: 10px;
 }
 </style>

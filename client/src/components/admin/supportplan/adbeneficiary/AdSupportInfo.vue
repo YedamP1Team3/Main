@@ -17,14 +17,14 @@ const fetchBeneDetail = async () => {
         selectedBene.value = {};
         return;
     }
-    const response = await axios.get(`api/api/beneficiaries/${selectedBeneId.value}`);
+    const response = await axios.get(`/api/beneficiaries/${selectedBeneId.value}`);
     selectedBene.value = response.data;
     emit('updateBeneId', selectedBeneId.value, response.data.priority_id);
 };
 
 onMounted(async () => {
     const agencylist = authStore.agencyId;
-    const response = await axios.get('api/adsupport/admin/beneficiaries/names', {
+    const response = await axios.get('/api/adsupport/admin/beneficiaries/names', {
         params: { agency_id: agencylist }
     });
     AdSupportList.value = response.data;
