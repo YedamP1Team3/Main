@@ -111,12 +111,23 @@ const removeTempPlan = `
 DELETE FROM plan_draft WHERE plan_draft_id=?
 `;
 
-const applySupportPlan = `
+const resubmitSupportPlan = `
   UPDATE support_plan
   SET
     plan_objective =?,
     plan_content =?,
-    progress_state ='대기',
+    progress_state ='반려/재승인',
+    updated_at = NOW()
+  WHERE
+    plan_id =?
+`;
+
+const rejectSupportPlan = `
+  UPDATE support_plan
+  SET
+    plan_objective =?,
+    plan_content =?,
+    progress_state ='반려/수정중',
     updated_at = NOW()
   WHERE
     plan_id =?
@@ -144,6 +155,7 @@ module.exports = {
   selectTempPlanDetail,
   removeSupportPlan,
   removeTempPlan,
-  applySupportPlan,
+  resubmitSupportPlan,
+  rejectSupportPlan,
   updateTempPlan,
 };
