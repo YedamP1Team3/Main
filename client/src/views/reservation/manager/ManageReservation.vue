@@ -1,34 +1,158 @@
-<script>
-
-import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
-import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
-import RsvTable from '@/components/common/RsvTable.vue';
-
-export default {
-    components: {
-        JsTopbarmg,
-        RsvSideBar,
-        RsvTable,
-    },
-
-    setup() {
-    }
-</script>
-
 <template>
     <div class="page">
         <header class="layout-header">
             <JsTopbarmg />
         </header>
+
         <div class="layout-body">
             <RsvSideBar />
+
             <main class="layout-main">
-                <div class="reservation-container">
-                    <RsvTable :columns="reservationColumns" :rows="reservationRows" rowKey="rsv_id" emptyMessage="상담 신청 내역이 없습니다." @action-click="handleTableActionClick" />
+                <div class="reservation-manage-container">
+                    <h2 class="page-title">예약 관리</h2>
+
+                    <RsvTable :columns="columns" :rows="reservations" @action-click="handleActionClick" />
                 </div>
             </main>
         </div>
+
+        <RsvProcessModal :visible="isProcessModalOpen" :reservation="selectedReservation" @close="closeProcessModal" @confirm="handleProcessConfirm" />
     </div>
 </template>
 
-<style scoped></style>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+
+import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
+import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
+import RsvTable from '@/components/common/RsvTable.vue';
+import RsvProcessModal from '@/components/reservation/RsvProcessModal.vue';
+
+import { useAuthStore } from '@/stores/auth';
+import { getManagerReservations, processReservation } from '@/api/reservation/reservation';
+
+const authStore = useAuthStore();
+const { userId } = storeToRefs(authStore);
+
+const reservations = ref([]);
+const isProcessModalOpen = ref(false);
+const selectedReservation = ref(null);
+
+const columns = [
+    { key: 'family_name', label: '보호자명' },
+    { key: 'bene_name', label: '지원대상자명' },
+    { key: 'disability_type', label: '장애유형' },
+    { key: 'reservation_date', label: '예약날짜' },
+    { key: 'reservation_time', label: '예약시간' },
+    { key: 'rsv_status', label: '예약상태', type: 'status' },
+    { key: 'process', label: '처리', type: 'action', action: 'process' },
+    { key: 'write_log', label: '일지작성', type: 'action', action: 'writeLog' }
+];
+
+const formatReservationRow = (item) => {
+    const [reservationDate = '', startClockRaw = ''] = (item.start_time || '').split(' ');
+    const [, endClockRaw = ''] = (item.end_time || '').split(' ');
+
+    const startClock = startClockRaw.slice(0, 5);
+    const endClock = endClockRaw.slice(0, 5);
+
+    return {
+        ...item,
+        reservation_date: reservationDate,
+        reservation_time: `${startClock} ~ ${endClock}`
+    };
+};
+
+const fetchReservations = async () => {
+    try {
+        if (!userId.value) return;
+
+        const res = await getManagerReservations(userId.value);
+        const list = res.data.reservations || [];
+
+        reservations.value = list.map(formatReservationRow);
+    } catch (err) {
+        console.error('담당자 예약 목록 조회 실패:', err);
+        alert(err.response?.data?.message || '예약 목록 조회 실패');
+    }
+};
+
+const openProcessModal = (row) => {
+    selectedReservation.value = row;
+    isProcessModalOpen.value = true;
+};
+
+const closeProcessModal = () => {
+    isProcessModalOpen.value = false;
+    selectedReservation.value = null;
+};
+
+const handleProcessConfirm = async ({ rsvId, decision, rejectReason }) => {
+    try {
+        await processReservation(rsvId, decision, rejectReason);
+
+        alert(decision === 'APPROVED' ? '예약이 승인되었습니다.' : '예약이 반려되었습니다.');
+
+        closeProcessModal();
+        await fetchReservations();
+    } catch (err) {
+        console.error('예약 처리 실패:', err);
+        alert(err.response?.data?.message || '예약 처리 실패');
+    }
+};
+
+const handleActionClick = ({ action, row }) => {
+    if (action === 'process') {
+        openProcessModal(row);
+        return;
+    }
+
+    if (action === 'writeLog') {
+        console.log('일지작성 클릭:', row);
+        // 다음 단계: 일지작성 페이지 이동 또는 모달 연결
+    }
+};
+
+onMounted(() => {
+    fetchReservations();
+});
+</script>
+
+<style scoped>
+.page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.layout-header {
+    height: 70px;
+    flex-shrink: 0;
+}
+
+.layout-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.layout-main {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+
+.reservation-manage-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+</style>
