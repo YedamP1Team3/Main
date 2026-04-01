@@ -88,6 +88,9 @@ const getSupportResultDetail = async (resultId) => {
 };
 
 const approveSupportResult = async (resultId) => {
+  // 결과서 승인 시점은 "이번 지원 사이클 종료"로 본다.
+  // 실제 연쇄 업데이트(신청서 완료, priority 미신청 리셋)는
+  // mapper 트랜잭션 안에서 같이 처리해 중간 상태가 남지 않게 한다.
   let result = await adminMapper.approveSupportResult(resultId);
   let resObj = {
     status: result.affectedRows > 0,
