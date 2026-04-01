@@ -112,13 +112,13 @@ watch(
             <div class="form-row">
                 <label for="objective">지원목표</label>
                 <div class="input-wrapper">
-                    <input id="objective" v-model="planDetail.plan_objective" :readonly="!['임시', '반려'].includes(planDetail.progress_state)" type="text" class="content-input" />
+                    <input id="objective" v-model="planDetail.plan_objective" :readonly="!['반려/수정중', '반려'].includes(planDetail.progress_state)" type="text" class="content-input" />
                 </div>
             </div>
             <div class="form-row">
                 <label for="content">계획내용</label>
                 <div class="input-wrapper">
-                    <textarea id="content" v-model="planDetail.plan_content" rows="8" :readonly="!['임시', '반려'].includes(planDetail.progress_state)" class="content-textarea"></textarea>
+                    <textarea id="content" v-model="planDetail.plan_content" rows="8" :readonly="!['반려/수정중', '반려'].includes(planDetail.progress_state)" class="content-textarea"></textarea>
                 </div>
             </div>
             <div class="form-row">

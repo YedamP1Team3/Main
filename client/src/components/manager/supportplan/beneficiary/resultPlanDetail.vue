@@ -167,14 +167,14 @@ onMounted(() => {
             <div class="form-row">
                 <label for="objective">지원목표</label>
                 <div class="input-wrapper">
-                    <input id="objective" v-model="resultDetail.result_title" :readonly="!['임시', '반려'].includes(resultDetail.progress_state)" type="text" class="content-input" />
+                    <input id="objective" v-model="resultDetail.result_title" :readonly="!['반려/수정중', '반려'].includes(resultDetail.progress_state)" type="text" class="content-input" />
                 </div>
             </div>
 
             <div class="form-row">
                 <label for="content">계획내용</label>
                 <div class="input-wrapper">
-                    <textarea id="content" v-model="resultDetail.result_content" rows="8" :readonly="!['임시', '반려'].includes(resultDetail.progress_state)" class="content-textarea"></textarea>
+                    <textarea id="content" v-model="resultDetail.result_content" rows="8" :readonly="!['반려/수정중', '반려'].includes(resultDetail.progress_state)" class="content-textarea"></textarea>
                 </div>
             </div>
 
