@@ -1,82 +1,90 @@
 <script setup>
-import { ref, onMounted } from 'vue'; // 반응형 데이터 처리를 위한 ref
-import { useRouter } from 'vue-router'; // 페이지 이동을 위한 router
-import { useAuthStore } from '@/stores/auth';
-import axios from 'axios';
-import { manager } from '@/router/manager';
+// 외부 라이브러리나 다른 파일에서 필요한 기능들을 불러오는 단계입니다.
+import { ref, onMounted } from 'vue'; // Vue에서 반응형 데이터(ref)와 화면이 뜰 때 실행할 함수(onMounted)를 가져옵니다.
+import { useRouter } from 'vue-router'; // 페이지 이동을 제어하는 라우터 기능을 가져옵니다.
+import { useAuthStore } from '@/stores/auth'; // 로그인 상태(ID 등)를 관리하는 저장소(Pinia 등)를 가져옵니다.
+import axios from 'axios'; // 서버와 통신하기 위한 도구인 axios를 가져옵니다. (http)
+import { manager } from '@/router/manager'; // 매니저 관련 라우트 정보를 가져옵니다 (여기선 직접 사용되지 않음).
 
-const router = useRouter(); // 라우터 인스턴스 생성
-const authStore = useAuthStore();
+const router = useRouter(); // 페이지 이동을 위해 라우터 인스턴스를 생성합니다.
+const authStore = useAuthStore(); // 로그인된 사용자 정보를 사용하기 위해 스토어를 실행합니다.
 
-// 사용자 정보 데이터 객체 (소속 기관 필드 추가)
+// 화면에 입력될 데이터들을 저장하는 바구니를 만드는 단계입니다.
+// 관리자 정보를 담을 반응형 객체입니다. input 태그들과 연결될 데이터들입니다.
 const managerForm = ref({
-    name: '',
-    id: '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-    agencyRegion: '',
-    agencyName: '',
-    postcode: '',
-    address: '',
-    detailAddress: '',
-    phone: '',
-    email: ''
+    name: '', // 이름
+    id: '', // 아이디
+    currentPassword: '', // 현재 비밀번호
+    newPassword: '', // 새 비밀번호
+    confirmPassword: '', // 새 비밀번호 확인
+    agencyRegion: '', // 기관 지역
+    agencyName: '', // 기관명
+    postcode: '', // 우편번호
+    address: '', // 주소
+    detailAddress: '', // 상세주소
+    phone: '', // 전화번호
+    email: '' // 이메일
 });
 
-// 카카오 주소 API 실행 함수
+// 카카오(Daum) 주소 API를 사용하여 주소를 검색하는 기능입니다.
 const openPostcode = () => {
     new window.daum.Postcode({
+        // 카카오 주소찾기 팝업을 실행합니다.
         oncomplete: (data) => {
+            // 사용자가 주소를 선택했을 때 실행되는 함수입니다.
+            // 도로명 주소(R)인지 지번 주소인지 확인하여 변수에 담습니다.
             let fullAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
 
-            managerForm.value.address = fullAddr;
-            managerForm.value.postcode = data.zonecode;
+            managerForm.value.address = fullAddr; // 선택한 주소를 입력창 데이터에 넣습니다.
+            managerForm.value.postcode = data.zonecode; // 우편번호를 데이터에 넣습니다.
 
+            // 상세주소를 입력하는 칸을 찾아 자동으로 커서(포커스)를 옮겨줍니다.
             const detailInput = document.querySelector('input[placeholder="상세주소를 입력하세요"]');
             if (detailInput) detailInput.focus();
         }
     }).open();
 };
 
+// 페이지가 처음 화면에 나타날 때(컴포넌트가 마운트될 때) 실행되는 코드입니다.
 onMounted(async () => {
     if (authStore.userId) {
+        // 로그인한 사용자의 ID가 있는지 확인합니다.
         try {
-            // [설명] API 호출 시 '/api' 프록시 경로를 확인하여 호출합니다.
+            // 서버에 해당 ID의 프로필 정보를 달라고 요청(GET)합니다.
             const response = await axios.get(`/api/mgmypage/${authStore.userId}`);
-            const data = response.data.profile;
+            const data = response.data.profile; // 서버에서 받아온 정보를 변수에 저장합니다.
 
-            // 서버 SQL의 별칭(AS)과 managerForm의 필드명을 매칭합니다.
-            managerForm.value.name = data.name; // SQL: user_name AS name
-            managerForm.value.id = data.userId; // SQL: user_id AS userId
-            managerForm.value.phone = data.phone; // SQL: tel AS phone
-            managerForm.value.email = data.email; // SQL: email AS email
-
-            // 주소 관련 데이터 (SQL에 추가하셨는지 확인 필요)
+            // 서버에서 받은 데이터를 화면에 보여줄 바구니(managerForm)에 하나씩 옮겨 담습니다.
+            managerForm.value.name = data.name;
+            managerForm.value.id = data.userId;
+            managerForm.value.phone = data.phone;
+            managerForm.value.email = data.email;
             managerForm.value.postcode = data.zip_code || '';
             managerForm.value.address = data.address || '';
             managerForm.value.detailAddress = data.detail_address || '';
-
-            // 소속 기관 (SQL: agency_id AS institution)
             managerForm.value.agencyName = data.institution || '';
         } catch (error) {
+            // 데이터를 가져오는데 실패했을 경우 에러 메시지를 띄웁니다.
             console.error('담당자 데이터 로드 실패:', error);
             alert('정보를 불러오는 중 오류가 발생했습니다.');
         }
     } else {
+        // 로그인 정보가 없다면 경고창을 띄우고 로그인 페이지로 보냅니다.
         alert('로그인 정보가 없습니다.');
         router.push({ name: 'loginForm' });
     }
 });
 
-// 정보 저장 로직
+// '저장' 버튼을 눌렀을 때 실행되는 수정 로직입니다.
 const saveInfo = async () => {
+    // 1차 검사: 새 비밀번호와 확인용 비밀번호가 똑같은지 확인합니다.
     if (managerForm.value.newPassword !== managerForm.value.confirmPassword) {
         alert('새 비밀번호와 확인 값이 일치하지 않습니다.');
-        return;
+        return; // 일치하지 않으면 여기서 함수를 종료합니다.
     }
 
     try {
+        // 서버로 보낼 데이터를 정리합니다. (서버가 요구하는 형식에 맞춰 이름을 맞춤)
         const updateData = {
             userId: managerForm.value.id,
             user_name: managerForm.value.name,
@@ -85,18 +93,20 @@ const saveInfo = async () => {
             postcode: managerForm.value.postcode,
             address: managerForm.value.address,
             detailAddress: managerForm.value.detailAddress,
-            // 필요 시 비밀번호도 포함
             currentPassword: managerForm.value.currentPassword,
             newPassword: managerForm.value.newPassword
         };
 
+        // 서버에 수정 요청(PUT)을 보냅니다.
         const response = await axios.put('/api/mgmypage/update', updateData);
 
         if (response.status === 200) {
+            // 성공(200)했다면
             alert('정보가 성공적으로 수정되었습니다.');
-            router.push({ name: 'managerInfo' });
+            router.push({ name: 'managerInfo' }); // 정보 확인 페이지로 이동합니다.
         }
     } catch (error) {
+        // 수정 실패 시 에러 내용을 콘솔에 찍고 사용자에게 이유를 알립니다.
         console.error('수정 에러 상세:', error.response?.data || error);
         alert(error.response?.data?.mmessage || '수정 중 오류가 발생했습니다.');
     }
