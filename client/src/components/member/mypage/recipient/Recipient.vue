@@ -1,41 +1,39 @@
 <script setup>
-import axios from 'axios'; // http 통신을 위한 axios 임포트
-import { ref, watch, onMounted } from 'vue'; // Vue 반응형 객체 및 감시자 임포트
-import { useAuthStore } from '@/stores/auth'; // 작성한 Auth(피니아) 스토어 임포트
-import { useRouter } from 'vue-router';
+// 1. 필요한 도구들을 가져오는 단계
+import axios from 'axios'; // 서버와 통신하기 위한 도구
+import { ref, watch, onMounted } from 'vue'; // 반응형 데이터, 감시자, 시작 시 실행 함수
+import { useAuthStore } from '@/stores/auth'; // 로그인 정보를 보관 중인 창고(Pinia)
+import { useRouter } from 'vue-router'; // 페이지 이동을 위한 도구
 
-const router = useRouter();
+const router = useRouter(); // 라우터 사용 준비
+const authStore = useAuthStore(); // 로그인 정보 창고 사용 준비
 
-// [상태] Pinia 스토어 인스턴스 생성
-const authStore = useAuthStore(); // 로그인 정보를 담고 있는 스토어 호출
-
-// [상태] 입력 폼 데이터 정의
+// 2. 화면의 입력창들과 연결될 '데이터 바구니' (대상자 정보)
 const form = ref({
-    name: '', // 대상자 이름
-    birth: '', // 생년월일
-    gender: '여성', // 성별 (기본값 = 여성)
+    name: '', // 대상자 성함
+    birth: '', // 생년월일 (8자리)
+    gender: '여성', // 성별 (기본값 여성)
     zipCode: '', // 우편번호
     addr1: '', // 기본 주소
     addr2: '', // 상세 주소
-    disabilityType: null, // 장애 유형
-    relation: '부모', // 대상자와의 관계 (기본값 = 부모)
-    relationEtc: '', // 관계 '기타'를 선택 시 입력값
-    file: null // 첨부파일
+    disabilityType: null, // 장애 유형 (선택)
+    relation: '부모', // 신청자와의 관계 (기본값 부모)
+    relationEtc: '', // 관계가 '기타'일 때 직접 입력할 내용
+    file: null // 증빙 서류 파일
 });
 
+// 3. [초기 설정] 페이지가 열리면 로그인한 사용자의 주소를 미리 채워줍니다.
 onMounted(async () => {
-    // [설명] 스토어에 이미 주소 정보가 있다면 바로 사용합니다.
+    // 창고(Pinia)에 이미 내 주소가 저장되어 있다면 바로 사용합니다.
     if (authStore.userZip && authStore.userAddr1) {
         form.value.zipCode = authStore.userZip;
         form.value.addr1 = authStore.userAddr1;
         form.value.addr2 = authStore.userAddr2;
     } else if (authStore.userId) {
-        // 만약 스토어가 비어있다면(새로고침 등), 서버에서 직접 상세 정보를 가져옵니다.
+        // 창고가 비어있다면 서버에 내 주소를 직접 물어봐서 가져옵니다.
         try {
-            // 우리가 만든 전용 API를 통해 유저 상세 정보를 조회
             const response = await axios.get(`/api/info/user-detail/${authStore.userId}`);
             const user = response.data;
-            // DB 컬럼명에 맞춰 폼 데이터를 할당
             form.value.zipCode = user.zip_code;
             form.value.addr1 = user.address;
             form.value.addr2 = user.detail_address;
@@ -45,106 +43,91 @@ onMounted(async () => {
     }
 });
 
-// [옵션] 장애유형 리스트
+// 4. [옵션 리스트] 선택창(Select)이나 라디오 버튼에 보여줄 항목들
 const disabilityOptions = ['지체장애', '시각장애', '청각장애', '지적장애', '뇌병변장애', '기타'];
-// [옵션] 대상자와의 관계 리스트
 const relations = ['부모', '배우자', '자녀', '친족', '후견인', '기타'];
 
-// [함수] 주소 검색 API 팝업창 열기
+// 5. [주소 검색] 카카오 주소 API 팝업창을 실행합니다.
 const openPostcode = () => {
     new window.daum.Postcode({
         oncomplete: (data) => {
-            // 도로명 주소와 지번 주소 중 우선순위에 따라 주소 설정
-            let fullAddress = data.roadAddress || data.jibunAddress; // 주소 방식 선택
-            let extraAddress = ''; // 참고 항목 변수
+            let fullAddress = data.roadAddress || data.jibunAddress; // 선택한 주소
+            let extraAddress = '';
 
-            // 도로명 주소일 경우 참고항목(법정동, 건물명) 조합
             if (data.userSelectedType === 'R') {
-                // 도로명 주소 선택 시
-                if (data.bname !== '') extraAddress += data.bname; // 법정동 추가
-                if (data.buildingName !== '') extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName; // 건물명 추가
-                fullAddress += extraAddress !== '' ? ` (${extraAddress})` : ''; // 최종 주소 조합
+                // 도로명 주소일 때 참고항목 조합
+                if (data.bname !== '') extraAddress += data.bname;
+                if (data.buildingName !== '') extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName;
+                fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
             }
 
-            // [데이터 바인딩] 우편번호와 주소를 form 객체에 저장
             form.value.zipCode = data.zonecode; // 우편번호 저장
-            form.value.addr1 = fullAddress; // 기본 주소 저장
-
-            // 주소 입력 후 상세주소 필드로 포커스 이동 (선택 사항)
-            document.getElementById('addr2')?.focus(); // 상세주소 입력창으로 포커스 이동
+            form.value.addr1 = fullAddress; // 주소 저장
+            document.getElementById('addr2')?.focus(); // 상세주소 칸으로 커서 이동
         }
     }).open();
 };
 
-// [함수] 파일 선택 시 상태 업데이트
+// 6. [파일 선택] 서류를 선택하면 바구니(form.file)에 담습니다.
 const onFileSelect = (event) => {
-    form.value.file = event.files[0]; // 선택된 첫 번째 파일을 저장
+    form.value.file = event.files[0];
 };
 
-// [함수] 서버로 데이터 전송 (등록 버튼 클릭 시)
+// 7. [등록 버튼] 모든 정보를 서버로 전송하는 메인 함수
 const submitForm = async () => {
+    // [검사] 필수 입력 항목들이 비어있거나 틀렸는지 확인합니다.
     if (!form.value.name.trim()) {
         alert('대상자 성명을 입력해 주세요.');
         return;
     }
     if (!form.value.birth || form.value.birth.length !== 8) {
-        alert('생년월일 8자리를 정확히 입력해 주세요. (예: 19900101)');
+        alert('생년월일 8자리를 정확히 입력해 주세요.');
         return;
     }
     if (!form.value.disabilityType) {
         alert('장애유형을 선택해 주세요.');
         return;
     }
-    // 관계가 '기타'인데 상세 내용을 적지 않은 경우도 체크 (선택 사항)
     if (form.value.relation === '기타' && !form.value.relationEtc.trim()) {
         alert('관계를 직접 입력해 주세요.');
         return;
     }
 
     try {
-        // 1. Pinia 스토어에서 로그인된 유저 ID 확인
-        const userId = authStore.userId;
-
+        const userId = authStore.userId; // 현재 로그인한 사람의 ID
         if (!userId) {
-            // 로그인 정보가 없는 경우 처리
-            alert('로그인 정보가 없습니다. 다시 로그인 해주세요');
-            return; // 함수 종료
+            alert('로그인 정보가 없습니다.');
+            return;
         }
 
-        const genderCode = form.value.gender === '남성' ? 'M' : 'F';
+        const genderCode = form.value.gender === '남성' ? 'M' : 'F'; // 성별을 코드(M/F)로 변환
 
-        // 2. 서버로 보낼 최종 데이터 조립
+        // 서버로 보낼 최종 데이터를 예쁘게 포장합니다.
         const sendData = {
-            ...form.value, // 입력 폼의 모든 데이터 복사
+            ...form.value, // 입력한 모든 내용 복사
             gender: genderCode,
-            family_id: userId // Pinia의 userId를 family_id 컬럼에 매칭
+            family_id: userId // 누구의 대상자인지 알려주기 위해 내 ID를 붙임
         };
 
-        // 3. 백엔드 API 호출 (경로 주의: /recipient/register 등... 서버 설정에 맞출 것)
+        // 서버의 등록 주소로 데이터를 전송(POST)합니다.
         const response = await axios.post('/api/recipient/register', sendData);
 
         if (response.data.success) {
-            // 서버 응답이 성공인 경우
             alert('대상자가 성공적으로 등록되었습니다.');
-
-            // ★ [추가] 등록 성공 시 '지원신청' 페이지로 이동
-            router.push({ name: 'mApplication' });
-            // router.push({name: 'myInfo'}) // 일반이용자 마이페이지 경로
+            router.push({ name: 'mApplication' }); // 성공 시 신청 페이지로 이동
         }
     } catch (error) {
-        // 통신 중 오류 발생 시
-        console.error('Error:', error); // 콘솔에 상세 에러 출력
+        console.error('Error:', error);
         alert('등록 중 오류 발생');
     }
 };
 
-// [감시자] 관계 설정이 '기타'가 아닐 경우 입력값 초기화
+// 8. [감시자] 관계를 '기타'에서 다른 것으로 바꾸면, 직접 입력했던 내용을 지워줍니다.
 watch(
-    () => form.value.relation, // 감시 대상: 관계 라디오 버튼
+    () => form.value.relation,
     (newVal) => {
         if (newVal !== '기타') {
-            // '기타'가 선택 해제되면
-            form.value.relationEtc = ''; // 직접 입력했던 내용 삭제
+            form.value.relationEtc = '';
         }
     }
 );

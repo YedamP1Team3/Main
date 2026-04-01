@@ -1,29 +1,33 @@
 <script setup>
+// 1. 필요한 도구 임포트
 import { ref, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { useRoute, useRouter } from 'vue-router'; // 주소창의 ID를 읽고 페이지를 이동하기 위함
+import { useAuthStore } from '@/stores/auth'; // 내 로그인 정보를 확인하기 위함
 import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
-const recipientId = route.params.id; // 수정할 대상자의 ID
+const recipientId = route.params.id; // URL 주소 끝에 붙은 대상자의 고유 번호를 가져옵니다.
 
+// 2. 선택창에 보여줄 옵션들
 const disabilityOptions = ['지체장애', '시각장애', '청각장애', '지적장애', '뇌병변장애', '기타'];
 const relations = ['부모', '배우자', '자녀', '친족', '후견인', '기타'];
 
+// 3. 데이터를 담을 바구니 (form)
 const form = ref({
     name: '',
     birth: '',
     gender: '여성',
-    postcode: '', // 일반 이용자의 DB 주소로 채워질 예정
-    address: '', // 일반 이용자의 DB 주소로 채워질 예정
-    detailAddress: '', // 일반 이용자의 DB 주소로 채워질 예정
+    postcode: '', // 내(보호자) 주소로 채워질 예정
+    address: '', // 내(보호자) 주소로 채워질 예정
+    detailAddress: '', // 내(보호자) 주소로 채워질 예정
     disabilityType: null,
     relation: '부모',
     relationEtc: ''
 });
 
+// 4. [감시자] 관계가 '기타'가 아니면 직접 입력창을 비웁니다.
 watch(
     () => form.value.relation,
     (newVal) => {
@@ -31,24 +35,24 @@ watch(
     }
 );
 
+// 5. [데이터 로드] 페이지가 열리자마자 실행
 onMounted(async () => {
     try {
-        // 1. 수정할 대상자의 기본 정보 가져오기
+        // [단계 1] 수정할 대상자의 현재 정보를 서버에서 가져옵니다.
         const resTarget = await axios.get(`/api/recipient/${recipientId}`);
         if (resTarget.data) {
             const d = resTarget.data;
-            // DB 컬럼명에 맞춰서 매칭
-            form.value.name = d.bene_name || d.BENE_NAME;
+            form.value.name = d.bene_name;
 
-            // 날짜에 포함된 '-' 제거
-            const rawBirth = d.birth_date || d.BIRTH_DATE;
+            // [날짜 처리] DB의 날짜 형식(2026-04-01...)에서 '-'를 제거하여 8자리 숫자로 만듭니다.
+            const rawBirth = d.birth_date;
             form.value.birth = rawBirth ? rawBirth.split('T')[0].replace(/-/g, '') : '';
 
-            const genderVal = d.gender || d.GENDER;
-            form.value.gender = genderVal === 'M' ? '남성' : '여성';
-            form.value.disabilityType = d.disability_type || d.DISABILITY_TYPE;
+            // [성별 처리] M/F 코드를 화면용 '남성/여성'으로 바꿉니다.
+            form.value.gender = d.gender === 'M' ? '남성' : '여성';
+            form.value.disabilityType = d.disability_type;
 
-            // [관계 로직 수정]
+            // [관계 처리] 리스트에 없는 관계라면 '기타'로 분류하고 내용을 칸에 채웁/니다.
             const relationOptions = ['부모', '배우자', '자녀', '친족', '후견인'];
             if (relationOptions.includes(d.relationship)) {
                 form.value.relation = d.relationship;
@@ -59,12 +63,11 @@ onMounted(async () => {
             }
         }
 
-        // 2. [핵심] 일반 이용자(본인)의 주소 정보를 가져와서 덮어쓰기
-        // MemberEdit.vue에서 사용했던 본인 정보 조회 API를 활용하세요.
+        // [단계 2] 보호자(본인)의 주소 정보를 가져와서 대상자 주소에 덮어씌웁니다.
+        // 대상자가 보호자와 함께 거주한다는 전제하에 최신 주소로 동기화하는 과정입니다.
         if (authStore.userId) {
             const resUser = await axios.get(`/api/info/user-detail/${authStore.userId}`);
             if (resUser.data) {
-                // MemberEdit.vue의 데이터 구조에 맞춰 할당
                 form.value.postcode = resUser.data.zip_code;
                 form.value.address = resUser.data.address;
                 form.value.detailAddress = resUser.data.detail_address;
@@ -75,21 +78,26 @@ onMounted(async () => {
     }
 });
 
+// 6. [수정 실행] '수정 완료' 버튼 클릭 시
 const updateRecipient = async () => {
     try {
-        // [1번 적용] 서버가 인식할 수 있도록 '남성/여성' 문자열을 'M/F' 코드로 변환하여 전송
-        const payload = { ...form.value, gender: form.value.gender === '남성' ? 'M' : 'F' };
+        // [데이터 가공] 성별을 다시 DB용 코드(M/F)로 변환하여 보냅니다.
+        const payload = {
+            ...form.value,
+            gender: form.value.gender === '남성' ? 'M' : 'F'
+        };
 
         const response = await axios.put(`/api/recipient/${recipientId}`, payload);
         if (response.data.success) {
             alert('수정 완료!');
-            router.push({ name: 'myInfo' });
+            router.push({ name: 'myInfo' }); // 수정 후 마이페이지로 이동
         }
     } catch (error) {
         alert('수정 중 오류가 발생했습니다.');
     }
 };
-// 주소 검색 API 연동 (기존 로직 사용)
+
+// 7. [주소 검색] 수동으로 주소를 바꿀 때 사용
 const openPostcode = () => {
     new window.daum.Postcode({
         oncomplete: (data) => {

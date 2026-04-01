@@ -22,6 +22,7 @@ const mgMyPageRouter = require("./router/mgmypage_router.js");
 const mgTargetRouter = require("./router/mgtargets_router.js");
 const adAgencyRouter = require("./router/adAgency_router.js");
 const admypageRouter = require("./router/admypage_router.js");
+const adapphistoryRouter = require("./router/adapphistory_router.js");
 
 app.use("/abc", require("./router/noTouch_router.js"));
 app.use("/api", userRouter);
@@ -35,6 +36,7 @@ app.use("/mgmypage", mgMyPageRouter);
 app.use("/mgtargets", mgTargetRouter);
 app.use("/adagency", adAgencyRouter);
 app.use("/admypage", admypageRouter);
+app.use("/adhistory", adapphistoryRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcom!!");
