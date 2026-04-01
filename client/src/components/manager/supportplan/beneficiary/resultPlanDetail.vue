@@ -93,9 +93,9 @@ const deleteTemp = async (resultId) => {
     }
 };
 
-// 3. 승인 신청 (수정 후 재신청)
+// 3. 재승인요청
 const Approval = async (id) => {
-    if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
+    if (!confirm('수정한 내용으로 재승인을 신청하시겠습니까?')) return;
     try {
         const planIds = selectedPlans.value.map((plan) => plan.plan_id);
         const updateData = {
@@ -103,9 +103,9 @@ const Approval = async (id) => {
             result_content: resultDetail.value.result_content,
             planIds: planIds
         };
-        const response = await axios.put(`http://localhost:3000/resultPlan/support-result/${id}`, updateData);
+        const response = await axios.put(`api/resultPlan/support-result/${id}/apply`, updateData);
         if (response.data.status === 'success') {
-            alert('승인 신청되었습니다.');
+            alert('재승인 신청되었습니다.');
             emit('refresh');
         } else {
             alert('처리 중 오류가 발생했습니다.');
@@ -117,7 +117,7 @@ const Approval = async (id) => {
 
 // 4. 임시 저장
 const SaveTemp = async (id) => {
-    if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
+    if (!confirm('수정한 내용으로 임시저장하겠습니까?')) return;
     try {
         const planIds = selectedPlans.value.map((plan) => plan.plan_id);
         const updateData = {
@@ -125,7 +125,7 @@ const SaveTemp = async (id) => {
             result_content: resultDetail.value.result_content,
             planIds: planIds
         };
-        const response = await axios.put(`http://localhost:3000/resultPlan/support-result/${id}/temp`, updateData);
+        const response = await axios.put(`/api/resultPlan/support-result/${id}/save`, updateData);
         if (response.data.status === 'success') {
             alert('임시저장되었습니다');
             emit('refresh');
@@ -167,14 +167,14 @@ onMounted(() => {
             <div class="form-row">
                 <label for="objective">지원목표</label>
                 <div class="input-wrapper">
-                    <input id="objective" v-model="resultDetail.result_title" :readonly="!['임시', '반려'].includes(resultDetail.progress_state)" type="text" class="content-input" />
+                    <input id="objective" v-model="resultDetail.result_title" :readonly="!['반려/수정중', '반려'].includes(resultDetail.progress_state)" type="text" class="content-input" />
                 </div>
             </div>
 
             <div class="form-row">
                 <label for="content">계획내용</label>
                 <div class="input-wrapper">
-                    <textarea id="content" v-model="resultDetail.result_content" rows="8" :readonly="!['임시', '반려'].includes(resultDetail.progress_state)" class="content-textarea"></textarea>
+                    <textarea id="content" v-model="resultDetail.result_content" rows="8" :readonly="!['반려/수정중', '반려'].includes(resultDetail.progress_state)" class="content-textarea"></textarea>
                 </div>
             </div>
 
@@ -185,7 +185,7 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div v-if="['임시', '반려'].includes(resultDetail.progress_state)" class="form-row">
+            <div v-if="['반려/수정중', '반려'].includes(resultDetail.progress_state)" class="form-row">
                 <label>계획서 추가</label>
                 <div class="input-wrapper">
                     <div class="select-group-inline">
@@ -207,16 +207,16 @@ onMounted(() => {
 
                     <div v-for="plan in selectedPlans" :key="plan.plan_id" class="plan-tag-item" @click="selectSubPlan(plan.plan_id)">
                         <span>{{ plan.plan_objective }}</span>
-                        <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" type="button" class="btn-remove-tag" @click.stop="removePlan(plan.plan_id)">X</button>
+                        <button v-if="['반려/수정중', '반려'].includes(resultDetail.progress_state)" type="button" class="btn-remove-tag" @click.stop="removePlan(plan.plan_id)">X</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="button-group">
-            <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" class="btn-approve" @click="Approval(resultDetail.result_id)">승인 신청</button>
-            <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" class="btn-temp" @click="SaveTemp(resultDetail.result_id)">임시 저장</button>
-            <button v-if="['임시', '대기'].includes(resultDetail.progress_state) && rejectionLog.length === 0" class="btn-delete" @click="deleteTemp(resultDetail.result_id)">삭제</button>
+            <button v-if="['반려/수정중', '반려'].includes(resultDetail.progress_state)" class="btn-approve" @click="Approval(resultDetail.result_id)">재승인 신청</button>
+            <button v-if="['반려/수정중', '반려'].includes(resultDetail.progress_state)" class="btn-temp" @click="SaveTemp(resultDetail.result_id)">임시 저장</button>
+            <button v-if="['대기'].includes(resultDetail.progress_state) && rejectionLog.length === 0" class="btn-delete" @click="deleteTemp(resultDetail.result_id)">삭제</button>
         </div>
 
         <div v-if="rejectionLog.length > 0" class="history-section">

@@ -60,7 +60,7 @@ const Approval = async (planId) => {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
         };
-        const response = await axios.put(`http://localhost:3000/api/support-plans/${planId}`, updateData);
+        const response = await axios.put(`api/api/support-plans/${planId}`, updateData);
         if (response.data.status == true) {
             alert('승인 신청되었습니다.');
             emit('refresh');
@@ -78,7 +78,7 @@ const SaveTemp = async (planId) => {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
         };
-        const response = await axios.put(`http://localhost:3000/api/support-plans/${planId}/temp`, updateData);
+        const response = await axios.put(`api/api/support-plans/${planId}/save`, updateData);
         if (response.data.status == true) {
             alert('임시저장되었습니다');
             emit('refresh');
@@ -112,13 +112,13 @@ watch(
             <div class="form-row">
                 <label for="objective">지원목표</label>
                 <div class="input-wrapper">
-                    <input id="objective" v-model="planDetail.plan_objective" :readonly="!['임시', '반려'].includes(planDetail.progress_state)" type="text" class="content-input" />
+                    <input id="objective" v-model="planDetail.plan_objective" :readonly="!['반려/수정중', '반려'].includes(planDetail.progress_state)" type="text" class="content-input" />
                 </div>
             </div>
             <div class="form-row">
                 <label for="content">계획내용</label>
                 <div class="input-wrapper">
-                    <textarea id="content" v-model="planDetail.plan_content" rows="8" :readonly="!['임시', '반려'].includes(planDetail.progress_state)" class="content-textarea"></textarea>
+                    <textarea id="content" v-model="planDetail.plan_content" rows="8" :readonly="!['반려/수정중', '반려'].includes(planDetail.progress_state)" class="content-textarea"></textarea>
                 </div>
             </div>
             <div class="form-row">
@@ -130,9 +130,9 @@ watch(
         </div>
 
         <div class="button-group">
-            <button v-if="['임시', '반려'].includes(planDetail.progress_state)" class="btn-approve" @click="Approval(planDetail.plan_id)">승인 신청</button>
-            <button v-if="['임시', '반려'].includes(planDetail.progress_state)" class="btn-temp" @click="SaveTemp(planDetail.plan_id)">임시 저장</button>
-            <button v-if="['임시', '대기'].includes(planDetail.progress_state) && rejectionLog.length === 0" class="btn-delete" @click="DeleteTemp(planDetail.plan_id)">삭제</button>
+            <button v-if="['반려/수정중', '반려'].includes(planDetail.progress_state)" class="btn-approve" @click="Approval(planDetail.plan_id)">승인 신청</button>
+            <button v-if="['반려/수정중', '반려'].includes(planDetail.progress_state)" class="btn-temp" @click="SaveTemp(planDetail.plan_id)">임시 저장</button>
+            <button v-if="['대기'].includes(planDetail.progress_state) && rejectionLog.length === 0" class="btn-delete" @click="DeleteTemp(planDetail.plan_id)">삭제</button>
         </div>
 
         <div v-if="rejectionLog.length > 0" class="history-section">

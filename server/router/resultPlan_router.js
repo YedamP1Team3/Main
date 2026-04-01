@@ -45,14 +45,21 @@ router.delete("/support-result/:resultId", async (req, res) => {
   let result = await resultService.removeSupportResult(resultNo);
   res.send(result);
 });
-//지원결과서 승인요청 업데이트
-router.put("/support-result/:id", async (req, res) => {
-  let { id } = req.params;
-  let { result_title, result_content, planIds } = req.body;
-  let result = await resultService.applySupportResult(
+//임시지원결과서삭제
+router.delete("/temp-result/:resultId", async (req, res) => {
+  let resultNo = req.params.resultId;
+  let result = await resultService.removeTempResult(resultNo);
+  res.send(result);
+});
+//지원결과서 임시 승인요청 업데이트
+router.post("/temp-result/:id/apply", async (req, res) => {
+  const { id } = req.params; // result_draft_id
+  const { manager_id, bene_id, result_title, result_content, planIds } = req.body;
+
+  const result = await resultService.applySupportResult(
     id,
-    { result_title, result_content },
-    planIds,
+    { manager_id, bene_id, result_title, result_content },
+    planIds
   );
   res.send(result);
 });
@@ -71,6 +78,20 @@ router.put("/support-result/:id/temp", async (req, res) => {
 router.get("/temp-result/:resultId", async (req, res) => {
   let target = req.params.resultId;
   let result = await resultService.getSupportTempDetail(target);
+  res.send(result);
+});
+//반려-임시저장-반려/수정중
+router.put("/support-result/:resultId/apply", async (req, res) => {
+  let resultNo = req.params.resultId; // URL에서 ID 추출
+  let target = req.body;            // 수정된 title, content, planIds 포함
+  let result = await resultService.resubmitSupportResult(resultNo, target);
+  res.send(result);
+});
+
+router.put("/support-result/:resultId/save", async (req, res) => {
+  let resultNo = req.params.resultId; // URL에서 ID 추출
+  let target = req.body;            // 수정된 title, content, planIds 포함
+  let result = await resultService.rejectSupportResult(resultNo, target);
   res.send(result);
 });
 

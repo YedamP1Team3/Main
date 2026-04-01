@@ -157,8 +157,8 @@ watch(
         </div>
 
         <div class="button-group">
-            <button v-if="resultDetail.progress_state === '대기'" class="btn-approve" @click="Approval(resultDetail.result_id)">승인</button>
-            <button v-if="resultDetail.progress_state === '대기' && !reasoninsert" class="btn-reject" @click="reasoninsert = true">반려하기</button>
+            <button v-if="['반려/재승인', '대기'].includes(resultDetail.progress_state)" class="btn-approve" @click="Approval(resultDetail.result_id)">승인</button>
+            <button v-if="['반려/재승인', '대기'].includes(resultDetail.progress_state)" class="btn-reject" @click="reasoninsert = true">반려하기</button>
         </div>
 
         <div v-if="reasoninsert" class="reason-input-area">

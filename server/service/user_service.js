@@ -110,8 +110,20 @@ const removeTempPlan = async (planDelete) => {
   return resObj;
 };
 //지원계획서승인신청
-const applySupportPlan = async (planId, planDate) => {
-  let result = await userMapper.applySupportPlan(planId, planDate);
+const resubmitSupportPlan = async (planId, planDate) => {
+  let result = await userMapper.resubmitSupportPlan(planId, planDate);
+  let resObj = {
+    status: result.affectedRows > 0,
+    target: {
+      plan_no: planId,
+      ...planDate,
+    },
+  };
+  return resObj;
+};
+//지원계획서승인신청
+const rejectSupportPlan = async (planId, planDate) => {
+  let result = await userMapper.rejectSupportPlan(planId, planDate);
   let resObj = {
     status: result.affectedRows > 0,
     target: {
@@ -190,7 +202,8 @@ module.exports = {
   getTempPlanDetail,
   removeSupportPlan,
   removeTempPlan,
-  applySupportPlan,
+  resubmitSupportPlan,
+  rejectSupportPlan,
   updateTempPlan,
   approveTempPlan,
 };

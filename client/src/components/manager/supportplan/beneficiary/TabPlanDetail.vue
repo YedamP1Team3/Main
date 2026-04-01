@@ -18,7 +18,7 @@ const fetchPlanDetail = async (id) => {
     isLoading.value = true;
     try {
         // ✅ API 주소 주의: 서버 포트(3000)와 경로를 명확히 작성
-        const response = await axios.get(`http://localhost:3000/api/support-plans/${id}`);
+        const response = await axios.get(`api/api/support-plans/${id}`);
 
         // 데이터가 배열로 올 경우를 대비해 첫 번째 항목 선택
         if (Array.isArray(response.data)) {
@@ -56,13 +56,13 @@ watch(
             <table class="detail-table">
                 <tbody>
                     <tr>
-                        <th>계획번호</th>
+                        <th>NO</th>
                         <td>{{ planDetail.plan_id }}</td>
                         <th>작성일자</th>
-                        <td>{{ planDetail.create_date }}</td>
+                        <td>{{ planDetail.created_at }}</td>
                     </tr>
                     <tr>
-                        <th>담당자 ID</th>
+                        <th>담당자</th>
                         <td>{{ planDetail.manager_id }}</td>
                         <th>진행상태</th>
                         <td>
@@ -76,7 +76,7 @@ watch(
                         <td colspan="3">{{ planDetail.plan_objective }}</td>
                     </tr>
                     <tr>
-                        <th>세부내용</th>
+                        <th>계획내용</th>
                         <td colspan="3" class="content-text">{{ planDetail.plan_content }}</td>
                     </tr>
                 </tbody>
