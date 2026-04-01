@@ -140,29 +140,14 @@ const deleteBlockedTime = `
 
 // -----------------------------------manageReservation API--------------------------
 
-const selectBeneReservations = `
-SELECT
-    r.rsv_id,
-    b.bene_name,
-    b.disability_type,
-    r.start_time,
-    r.end_time,
-    r.rsv_status
-FROM reservations r
-JOIN beneficiary_info b
-    ON r.bene_id = b.bene_id
-WHERE b.family_id = ?
-ORDER BY r.start_time DESC
-`;
-
 const selectManagerReservations = `
 SELECT
     r.rsv_id,
     u.user_name AS family_name,
     b.bene_name,
     b.disability_type,
-    r.start_time,
-    r.end_time,
+    DATE_FORMAT(r.start_time, '%Y-%m-%d %H:%i:%s') AS start_time,
+    DATE_FORMAT(r.end_time, '%Y-%m-%d %H:%i:%s') AS end_time,
     r.rsv_status
 FROM reservations r
 JOIN beneficiary_info b
@@ -171,6 +156,33 @@ JOIN user_info u
     ON b.family_id = u.user_id
 WHERE r.manager_id = ?
 ORDER BY r.start_time DESC
+`;
+
+const updateReservationStatus = `
+UPDATE reservations
+SET rsv_status = ?
+WHERE rsv_id = ?
+  AND rsv_status = 'REQUESTED'
+`;
+
+// -----------------------------------counseling API--------------------------
+
+const insertCounselingNote = `
+INSERT INTO counseling_note (
+    rsv_id,
+    counseling_type,
+    title,
+    content,
+    future_plan,
+    created_at,
+    updated_at
+) VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+`;
+
+const updateReservationStatusToNoteWritten = `
+UPDATE reservations
+SET rsv_status = 'NOTE_WRITTEN'
+WHERE rsv_id = ?
 `;
 
 module.exports = {
@@ -187,6 +199,8 @@ module.exports = {
   insertManagerSchedules,
   getBeneficiariesByFamilyId,
   getBeneficiaryManagerInfo,
-  selectBeneReservations,
   selectManagerReservations,
+  updateReservationStatus,
+  insertCounselingNote,
+  updateReservationStatusToNoteWritten,
 };
