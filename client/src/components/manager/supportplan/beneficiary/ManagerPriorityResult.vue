@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useSurveyStore, PRIORITY_MAP } from '@/stores/useSurveyStore'; // ⭐️ 사전 임포트
 
-const emit = defineEmits(['cancel-request', 'adjust-request']);
+const emit = defineEmits(['cancel-request']);
 const surveyStore = useSurveyStore();
 
 // ⭐️ 스토어에서 직접 정보 가져오기 (Props 완전 제거)
@@ -54,7 +54,6 @@ const circleColorClass = computed(() => {
         <div class="action-area">
             <!-- 소문자로 완벽히 통일된 상태 비교 -->
             <button v-if="status === 'pending'" class="btn-cancel" @click="emit('cancel-request')">취소하기</button>
-            <button v-else-if="status === 'approved'" class="btn-adjust" @click="emit('adjust-request')">단계조정신청</button>
         </div>
     </div>
 </template>
@@ -120,11 +119,5 @@ const circleColorClass = computed(() => {
 }
 .btn-cancel:hover {
     background-color: #4f46e5;
-}
-.btn-adjust {
-    background-color: #475569;
-}
-.btn-adjust:hover {
-    background-color: #334155;
 }
 </style>
