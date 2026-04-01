@@ -33,7 +33,10 @@ const normalizePriorityLabel = (priorityData) => {
 
     if (progressStatus === 'pending') return '대기';
     if (progressStatus === 'rejected') return '반려';
-    if (progressStatus === 'approved') return PRIORITY_MAP[priorityStatus] || '승인';
+    if (priorityStatus === 'planned') return '계획';
+    if (priorityStatus === 'high') return '긴급';
+    if (priorityStatus === 'urgent') return '중점';
+
     if (!priorityStatus || priorityStatus === 'none') return '-';
 
     return PRIORITY_MAP[priorityStatus] || priorityStatus;
@@ -41,9 +44,12 @@ const normalizePriorityLabel = (priorityData) => {
 
 const resolveStatusCode = (priorityData) => {
     const progressStatus = String(priorityData?.progress_status || '').toLowerCase();
+    const priorityStatus = String(priorityData?.priority_status || '').toLowerCase();
 
-    if (progressStatus === 'pending' || progressStatus === 'approved' || progressStatus === 'rejected') {
+    if (['pending', 'rejected'].includes(progressStatus)) {
         return progressStatus;
+    } else if (['planned', 'high', 'urgent'].includes(priorityStatus)) {
+        return priorityStatus;
     }
 
     return 'all';

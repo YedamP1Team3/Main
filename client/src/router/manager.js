@@ -27,5 +27,10 @@ export const manager = [
                 component: () => import('@/components/manager/mypage/management/ManagedRecipientList.vue')
             }
         ]
+    },
+    {
+        path: '/manager-home',
+        name: 'm_home',
+        component: () => import('@/views/manager/manager_home.vue')
     }
 ];
