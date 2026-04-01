@@ -10,9 +10,10 @@ module.exports = {
         agency_id AS institution,
         DATE_FORMAT(created_at, '%Y.%m.%d') AS joinDate,
         tel AS phone,
-        zip_code,        -- 이 부분들이 있어야 수정 페이지에서 기존 주소가 보임
+        zip_code,
         address, 
-        detail_address
+        detail_address,
+        password
     FROM user_info
     WHERE user_id = ? AND role = 'MANAGER'
 `,
@@ -53,7 +54,8 @@ module.exports = {
         tel = ?,
         zip_code = ?,
         address = ?,
-        detail_address = ?
+        detail_address = ?,
+        password = ?
     WHERE user_id = ? AND role = 'MANAGER'
     `,
 };

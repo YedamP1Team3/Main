@@ -42,6 +42,12 @@ export const useAuthStore = defineStore(
 
             sessionStorage.clear();
         }
+
+        // updateName 액션 하나 추가
+        function updateName(newName) {
+            userName.value = newName;
+            sessionStorage.setItem('userName', newName);
+        }
         return {
             userId,
             userName,
@@ -50,7 +56,8 @@ export const useAuthStore = defineStore(
             agencyName,
             isLoggedIn,
             login,
-            logout
+            logout,
+            updateName
         };
     },
     {
