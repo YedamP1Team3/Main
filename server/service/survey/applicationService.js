@@ -1,43 +1,63 @@
 const surveyMapper = require("../../database/mappers/survey_mapper");
 const structureService = require("./structureService");
 
+// 신청이 이미 검토 단계로 넘어간 뒤에는 작성자가 임의로 삭제하면 안 된다.
+// member 화면에서는 "대기" 상태까지만 삭제를 허용하고,
+// 실제 검토가 시작된 "진행중", 최종 종료된 "완료"는 삭제를 막는다.
 const BLOCKED_DELETE_STATUSES = new Set(["진행중", "진행 중", "완료"]);
 
-// 지원신청서 제출은 "신청서 1건 + 답변 여러 건"을 함께 저장하는 흐름이다.
-// 그래서 실제 insert 는 mapper transaction 쪽에서 처리하고,
-// service 는 제출 가능 여부만 먼저 검증한다.
+const createError = (status, message) => {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+};
+
 const submitSurveyResult = async (data) => {
-  if (!data.bene_id || !data.version_id || !data.user_id || !data.answers) {
-    throw new Error("필수 데이터가 누락되었습니다.");
+  if (!data.bene_id || !data.version_id || !data.user_id) {
+    throw createError(400, "bene_id, version_id, user_id는 필수입니다.");
   }
 
+  if (!data.answers || Object.keys(data.answers).length === 0) {
+    throw createError(400, "answers는 최소 1개 이상 필요합니다.");
+  }
+
+  // 같은 지원대상자에게 아직 끝나지 않은 신청서가 이미 있으면
+  // 신청 단계, 대기단계, 결과 승인 흐름이 두 줄로 갈라져 정합성이 깨진다.
+  // 그래서 저장 전에 "진행 중인 신청서가 있는가"를 먼저 확인한다.
   const activeCount = await surveyMapper.checkActiveApplication(data.bene_id);
 
   if (activeCount > 0) {
-    throw new Error("이미 진행 중인 지원신청서가 있어 중복 신청이 불가능합니다.");
+    throw createError(
+      400,
+      "이미 진행 중인 지원신청서가 있어 중복 신청은 할 수 없습니다.",
+    );
   }
 
   return surveyMapper.submitSurveyApplication(data);
 };
 
-// 신청서 상세 조회는 "신청서 메타데이터 + 당시 설문 구조 + 답변값"을 합쳐서
-// 프론트가 바로 그릴 수 있는 형태로 반환한다.
 const getApplicationDetail = async (appId) => {
+  if (!appId) {
+    throw createError(400, "app_id가 필요합니다.");
+  }
+
+  // 상세 조회 화면은 application 한 줄만으로는 완성되지 않는다.
+  // "신청 당시 사용한 설문 버전 구조"와 "실제 체크한 답변"을 다시 합쳐야
+  // 프론트가 질문/답변을 같은 화면에서 자연스럽게 렌더링할 수 있다.
   const appInfo = await surveyMapper.getApplicationById(appId);
 
   if (!appInfo) {
-    throw new Error("해당 신청서를 찾을 수 없습니다.");
+    throw createError(404, "해당 신청서를 찾을 수 없습니다.");
   }
 
-  const versionId = appInfo.VERSION_ID || appInfo.version_id;
-  const structure = await structureService.getSurveyStructure(versionId);
+  const structure = await structureService.getSurveyStructure(appInfo.version_id);
   const answerRows = await surveyMapper.getAnswersByAppId(appId);
   const answers = {};
 
+  // DB에는 0/1로 저장하지만, 프론트의 체크 UI는 true/false를 다루기 쉽다.
+  // service에서 한 번 변환해 두면 화면 컴포넌트는 표시 역할에만 집중할 수 있다.
   answerRows.forEach((row) => {
-    const detailId = row.DETAIL_ID || row.detail_id;
-    const value = row.ANSWER_VALUE || row.answer_value;
-    answers[detailId] = value === 1 || value === true;
+    answers[row.detail_id] = row.answer_value === 1 || row.answer_value === true;
   });
 
   return {
@@ -48,16 +68,32 @@ const getApplicationDetail = async (appId) => {
 };
 
 const getApplicationListByBene = async (beneId) => {
+  if (!beneId) {
+    throw createError(400, "bene_id가 필요합니다.");
+  }
+
   return surveyMapper.getApplicationList(beneId);
 };
 
-// 이미 검토가 시작된 신청서는 사용자가 임의로 삭제하지 못하게 막는다.
 const deleteSurveyApplication = async (appId) => {
-  const appData = await surveyMapper.getApplicationStatus(appId);
-  const status = appData?.app_status || appData?.status;
+  if (!appId) {
+    throw createError(400, "app_id가 필요합니다.");
+  }
 
-  if (BLOCKED_DELETE_STATUSES.has(status)) {
-    throw new Error("해당 건은 검토가 시작되어 삭제가 불가능합니다.");
+  const appData = await surveyMapper.getApplicationStatus(appId);
+
+  if (!appData) {
+    throw createError(404, "해당 신청서를 찾을 수 없습니다.");
+  }
+
+  // 신청이 이미 검토 흐름에 들어간 뒤 삭제를 허용하면
+  // 관리자 화면에서는 존재하던 신청이 사라지고,
+  // 대기단계/결과서 같은 후속 이력과 실제 신청 데이터가 어긋날 수 있다.
+  if (BLOCKED_DELETE_STATUSES.has(appData.app_status)) {
+    throw createError(
+      400,
+      "해당 신청서는 이미 검토가 시작되어 삭제할 수 없습니다.",
+    );
   }
 
   return surveyMapper.deleteApplicationTransaction(appId);

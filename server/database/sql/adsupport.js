@@ -113,6 +113,39 @@ WHERE
   result_id =?
 `;
 
+const completeApplicationsByApprovedResult = `
+UPDATE application
+SET
+  app_status = '완료'
+WHERE
+  bene_id = (
+    SELECT bene_id
+    FROM support_result
+    WHERE result_id = ?
+  )
+  AND app_status IN ('대기', '진행중', '진행 중')
+`;
+
+const resetPriorityByApprovedResult = `
+INSERT INTO priority (
+    bene_id,
+    priority_status,
+    progress_status,
+    approval_date,
+    rejection_reason,
+    priority_id2
+)
+SELECT
+    bene_id,
+    'none',
+    'none',
+    NOW(),
+    NULL,
+    NULL
+FROM support_result
+WHERE result_id = ?
+`;
+
 const returnSupportResult = `
 UPDATE support_result
 SET
@@ -153,6 +186,8 @@ module.exports = {
   selectSupportResultList,
   selectSupportResultDetail,
   approveSupportResult,
+  completeApplicationsByApprovedResult,
+  resetPriorityByApprovedResult,
   returnSupportResult,
   addResultRejectionHistory,
   selectResultRejectionHistory,
