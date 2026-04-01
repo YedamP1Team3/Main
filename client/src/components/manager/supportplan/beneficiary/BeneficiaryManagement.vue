@@ -7,7 +7,8 @@ import TabPlanDetail from './TabPlanDetail.vue';
 import resultPlan from './resultPlan.vue';
 
 const props = defineProps({
-    beneId: { type: [String, Number] }
+    beneId: { type: [String, Number] },
+    priorityId: { type: [String, Number] }
 });
 
 // 💡 상세 조회를 위한 'select-app' 이벤트 추가
@@ -116,7 +117,7 @@ watch(
                 </table>
             </div>
 
-            <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @Newaddplan="emit('newaddplan', id)" @select-plan="handleSelectPlan" />
+            <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" :priorityId="priorityId" @newaddplan="(id) => emit('newaddplan', id)" @select-plan="handleSelectPlan" />
             <div v-if="currentTab === 'Result'">
                 <resultPlan v-if="leftMode === 'list'" ref="tabPlanRef" :beneId="beneId" @newresultplan="emit('newresultplan')" @select-result="handleResultIdDetail" />
                 <TabPlanDetail v-else-if="leftMode === 'plan'" :planId="selectedSubPlanId" @close="handleCloseSubPlan" />

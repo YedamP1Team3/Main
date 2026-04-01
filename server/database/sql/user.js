@@ -21,7 +21,8 @@ SELECT
     b.gender,
     DATE_FORMAT(b.birth_date, '%Y-%m-%d') AS birth_date,
     b.disability_type,
-    p.priority_status
+    p.priority_status,
+    p.priority_id
 FROM beneficiary_info b
 LEFT JOIN user_info u1 ON b.family_id = u1.user_id   -- 가족 정보를 위한 조인
 LEFT JOIN user_info u2 ON b.manager_id = u2.user_id  -- 매니저 정보를 위한 조인 (추가된 부분)

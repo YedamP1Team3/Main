@@ -26,6 +26,8 @@ const removeFile = (index) => {
 };
 
 const Approval = async () => {
+    console.log('전송 직전 priorityId:', props.priorityId);
+    console.log('전송 직전 beneId:', props.beneId);
     if (!planObjective.value || !planContent.value) {
         alert('내용을 입력해주세요');
         return;
@@ -33,7 +35,7 @@ const Approval = async () => {
 
     const formData = new FormData();
 
-    formData.append('priority_id', authStore.priorityId);
+    formData.append('priority_id', props.priorityId);
     formData.append('manager_id', authStore.userId);
     formData.append('bene_id', props.beneId);
     formData.append('plan_objective', planObjective.value);

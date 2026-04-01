@@ -31,7 +31,7 @@ const createSupportPlan = async (supportPlan, files) => {
     plan_content,
     progress_state,
   } = supportPlan;
-  let insertDate = [
+  const insertDate = [
     priority_id,
     manager_id,
     bene_id,
@@ -40,27 +40,33 @@ const createSupportPlan = async (supportPlan, files) => {
     progress_state,
   ];
 
-  let result = await userMapper.createSupportPlan(insertDate);
-  const planId = result.insertId;
-  //파일첨부 추가
-  if (planId > 0 && files && files.length > 0) {
-    for (const file of files) {
-      const fileData = [
-        planId,
-        null, // plan_draft_id
-        file.originalname, // 원본 파일명
-        file.filename, // 서버에 저장된 실제 파일명 (D:/uploads 내 이름)
-        file.size, // 파일 크기
-      ];
-      await userMapper.insertAttachment(fileData);
-    }
-  }
+  try {
+    const result = await userMapper.createSupportPlan(insertDate);
+    const planId = result?.insertId;
+    if (planId && files && files.length > 0) {
+      for (const file of files) {
+        const fileData = [
+          planId,
+          null, // plan_draft_id
+          file.originalname, // 원본 파일명
+          file.filename, // 서버에 저장된 실제 파일명
+          file.size, // 파일 크기
+        ];
 
-  let resObj = {
-    status: result.insertId > 0 ? "success" : "fail",
-    user_no: result.insertId,
-  };
-  return resObj;
+        // 매퍼 호출 (이 안에서 파일을 직접 '쓰는' 로직이 없는지 확인하세요)
+        await userMapper.insertAttachment(fileData);
+      }
+    }
+
+    // 4. 최종 결과 반환
+    return {
+      status: planId ? "success" : "fail",
+      plan_id: planId, // user_no 대신 의미가 명확한 plan_id 사용 권장
+    };
+  } catch (error) {
+    console.error("지원계획서 생성 서비스 에러:", error);
+    throw error; // 에러를 던져서 라우터에서 catch할 수 있게 함
+  }
 };
 
 const createTempPlan = async (supportPlan) => {

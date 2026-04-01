@@ -213,7 +213,7 @@ let insertAttachment = async (fileData) => {
   try {
     conn = await pool.getConnection();
     // 서비스에서 넘겨준 [planId, null, originName, fileName, fileSize] 배열을 쿼리에 매핑
-    let [result] = await conn.query(userSql.insertAttachment, fileData);
+    let result = await conn.query(userSql.insertAttachment, fileData);
     return result;
   } catch (err) {
     console.error("Mapper 에러 (insertAttachment): ", err);
