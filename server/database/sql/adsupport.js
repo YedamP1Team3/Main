@@ -109,6 +109,19 @@ const selectSupportResultDetail = `
   WHERE p.result_id = ?
 `;
 
+const selectAttachments = `
+    SELECT 
+        file_id,
+        plan_id,
+        plan_draft_id,
+        origin_name, 
+        path AS file_name,
+        file_size,
+        created_at
+    FROM attachment_file
+    WHERE plan_id = ?
+`;
+
 const approveSupportResult = `
 UPDATE support_result
 SET
@@ -179,4 +192,5 @@ module.exports = {
   selectResultRejectionHistory,
   resultMappingHistory,
   selectResultMappingHistory,
+  selectAttachments,
 };

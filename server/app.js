@@ -18,6 +18,8 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 const externalPath = "d:/uploads";
 app.use("/uploads", express.static(externalPath));
 
+
+const downloadRouter = require('./middleware/download.js');
 const userRouter = require("./router/user_router.js");
 const surveyRouter = require("./router/survey_router.js");
 const adsupportPlan = require("./router/adsupport_router.js");
@@ -29,7 +31,9 @@ const mgTargetRouter = require("./router/mgtargets_router.js");
 const adAgencyRouter = require("./router/adAgency_router.js");
 const admypageRouter = require("./router/admypage_router.js");
 
+app.use('/download', downloadRouter);
 app.use("/abc", require("./router/noTouch_router.js"));
+app.use("/", userRouter);
 app.use("/api", userRouter);
 app.use("/reserve", require("./router/rsv_router.js"));
 app.use("/survey", surveyRouter);
