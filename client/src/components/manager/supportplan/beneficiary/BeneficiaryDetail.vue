@@ -28,12 +28,18 @@ const fetchPlanDetail = async (id) => {
 
 const fetchRejectionHistory = async (id) => {
     try {
-        // 관리자 때 만드신 그 API를 그대로 사용합니다.
-        const response = await axios.get(`http://localhost:3000/adsupport/admin/support-plan/${id}/rejection-history`);
-        rejectionLog.value = Array.isArray(response.data) ? response.data : [];
+        const response = await axios.get(`api/adsupport/admin/support-plan/${id}/rejection-history`);
+        rejectionLog.value = response.data.map((log) => ({
+            ...log,
+            isOpen: false
+        }));
     } catch (error) {
         console.error('이력 조회 실패', error);
     }
+};
+
+const toggleHistory = (log) => {
+    log.isOpen = !log.isOpen;
 };
 
 // 2. 삭제 (임시/대기 상태일 때만)
@@ -111,20 +117,23 @@ watch(
         <div class="table-container">
             <div class="form-row">
                 <label for="objective">지원목표</label>
-                <div class="input-wrapper">
+                <div class="content-box">
                     <input id="objective" v-model="planDetail.plan_objective" :readonly="!['반려/수정중', '반려'].includes(planDetail.progress_state)" type="text" class="content-input" />
                 </div>
             </div>
+
             <div class="form-row">
                 <label for="content">계획내용</label>
-                <div class="input-wrapper">
+                <div class="content-box">
                     <textarea id="content" v-model="planDetail.plan_content" rows="8" :readonly="!['반려/수정중', '반려'].includes(planDetail.progress_state)" class="content-textarea"></textarea>
                 </div>
             </div>
+
             <div class="form-row">
                 <label>파일첨부</label>
-                <div class="input-wrapper">
-                    <input type="text" placeholder="첨부된 파일이 없습니다." readonly class="content-input gray-bg" />
+                <div class="content-box file-box">
+                    <span v-if="planDetail.file_name" class="file-link">{{ planDetail.file_name }}</span>
+                    <span v-else class="no-file">첨부된 파일이 없습니다.</span>
                 </div>
             </div>
         </div>
@@ -136,14 +145,23 @@ watch(
         </div>
 
         <div v-if="rejectionLog.length > 0" class="history-section">
-            <h3 class="history-title">반려 사유 목록</h3>
-            <div class="history-list">
-                <div v-for="(log, index) in rejectionLog" :key="index" class="history-card">
-                    <div class="history-header">
-                        <span class="history-user">검토자: {{ log.manager_name }}</span>
-                        <span class="history-date">작성일: {{ log.created_at }}</span>
+            <h3 class="history-title">반려 리스트</h3>
+            <div v-for="log in rejectionLog" :key="log.history_id" class="history-card clickable" @click="toggleHistory(log)">
+                <div class="history-header">
+                    <span class="history-user">검토자: {{ log.manager_name }}</span>
+                    <span class="history-date">{{ log.created_at }}</span>
+                </div>
+                <div class="history-body"><strong>반려 사유:</strong> {{ log.rejection_reason }}</div>
+
+                <div v-if="log.isOpen" class="history-detail-fold">
+                    <div class="detail-item">
+                        <span class="detail-label">[당시 지원목표]</span>
+                        <p>{{ log.plan_objective }}</p>
                     </div>
-                    <div class="history-body"><strong>사유:</strong> {{ log.rejection_reason }}</div>
+                    <div class="detail-item">
+                        <span class="detail-label">[당시 계획내용]</span>
+                        <p class="pre-wrap">{{ log.plan_content }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -151,34 +169,37 @@ watch(
 </template>
 
 <style scoped>
-/* 전체 컨테이너 */
+/* 1. 전체 컨테이너 및 기본 텍스트 */
 .BfnewPlan {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 30px;
-    background-color: #ffffff;
+    padding: 20px;
+    background: #fff;
+    color: #334155;
 }
 
 .main-hr {
     border: none;
     border-top: 2px solid #334155;
-    margin-bottom: 15px;
+    margin: 15px 0;
 }
 
-/* 상단 정보 라인 (작성일 우측 정렬) */
+/* 2. 상단 정보 (상태 & 작성자/일자) - 겹침 방지 및 양 끝 정렬 */
 .info-row-top {
-    display: flex;
+    display: flex !important;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+    width: 100%;
 }
 
+.author-row,
 .date-box {
     font-size: 0.95rem;
     color: #475569;
+    white-space: nowrap;
 }
 
-/* 상태 배지 */
 .state-badge {
     padding: 4px 12px;
     border-radius: 4px;
@@ -189,7 +210,8 @@ watch(
     background: #f1f5f9;
     color: #475569;
 }
-.state-badge.반려 {
+.state-badge.반려,
+.state-badge.반려\/재승인 {
     background: #fee2e2;
     color: #dc2626;
 }
@@ -202,36 +224,36 @@ watch(
     color: #16a34a;
 }
 
-/* 폼 테이블 박스 (관리자와 동일) */
+/* 3. 테이블형 폼 */
 .table-container {
     border: 1px solid #e2e8f0;
+    border-bottom: none;
+    background-color: #fff;
 }
 
 .form-row {
     display: flex;
     border-bottom: 1px solid #e2e8f0;
-}
-
-.form-row:last-child {
-    border-bottom: none;
+    min-height: 50px;
 }
 
 .form-row label {
     width: 140px;
-    min-width: 140px;
-    background-color: #f8fafc;
+    background: #f8fafc;
+    padding: 15px;
+    font-weight: bold;
     color: #475569;
-    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
     border-right: 1px solid #e2e8f0;
+    flex-shrink: 0;
 }
 
-.input-wrapper {
+.content-box {
     flex: 1;
     display: flex;
+    align-items: stretch;
 }
 
 .content-input,
@@ -240,9 +262,9 @@ watch(
     border: none;
     padding: 15px;
     outline: none;
-    font-size: 1rem;
-    font-family: inherit;
+    font-size: 0.95rem;
     color: #1e293b;
+    background: transparent;
 }
 
 .content-textarea {
@@ -250,97 +272,111 @@ watch(
     line-height: 1.6;
 }
 
-/* 읽기 전용일 때 배경색 처리 */
-input[readonly],
-textarea[readonly] {
-    background-color: #ffffff;
+.file-box {
+    padding: 15px;
+    color: #94a3b8;
+    font-size: 0.9rem;
 }
 
-/* 수정 불가능한 상태에서 강조를 빼고 싶을 때 사용하는 클래스 (선택 사항) */
-.gray-bg {
-    background-color: #f9fafb !important;
-}
-
-/* 버튼 그룹 (알약 모양) */
+/* 4. 하단 버튼 그룹 (알약 디자인) */
 .button-group {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    margin-top: 30px;
+    gap: 10px;
+    margin: 25px 0;
 }
 
 .button-group button {
-    padding: 10px 25px;
+    padding: 10px 24px;
     border-radius: 30px;
-    font-size: 1rem;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
-    border: none;
+    border: 1px solid transparent;
     transition: 0.2s;
 }
 
 .btn-approve {
-    background-color: #1e293b;
-    color: #ffffff;
+    background: #1e293b;
+    color: #fff;
 }
 .btn-temp {
-    background-color: #64748b;
-    color: #ffffff;
+    background: #64748b;
+    color: #fff;
 }
 .btn-delete {
-    background-color: #ffffff;
+    background: #fff;
     color: #e11d48;
-    border: 1px solid #e11d48 !important;
+    border-color: #e11d48 !important;
 }
 
-button:hover {
-    opacity: 0.8;
-    transform: translateY(-1px);
-}
-
-/* 반려 히스토리 섹션 (관리자용 디자인 계승) */
+/* 5. 반려 히스토리 (관리자 스타일과 완벽 통일) */
 .history-section {
-    margin-top: 50px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
 }
 
 .history-title {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
+    margin-bottom: 15px;
     font-weight: 800;
     color: #1e293b;
-    margin-bottom: 15px;
 }
 
 .history-card {
-    background-color: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     padding: 18px;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
+    background: #f8fafc; /* 관리자 카드 배경색 적용 */
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.history-card:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
 }
 
 .history-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
-    border-bottom: 1px dashed #cbd5e1;
-    padding-bottom: 8px;
-}
-
-.history-user {
-    font-weight: 700;
-    color: #475569;
     font-size: 0.9rem;
-}
-
-.history-date {
-    font-size: 0.85rem;
-    color: #94a3b8;
+    color: #64748b;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #cbd5e1; /* 관리자용 점선 스타일 */
 }
 
 .history-body {
+    font-size: 0.95rem;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+/* 상세 접힘 영역 상세 디자인 */
+.history-detail-fold {
+    margin-top: 15px;
+    padding: 15px;
+    background: #ffffff; /* 카드 배경보다 밝게 하여 구분감 생성 */
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.detail-label {
+    display: block;
+    font-weight: bold;
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.pre-wrap {
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 0.95rem;
     color: #334155;
     line-height: 1.6;
-    font-size: 0.95rem;
-    white-space: pre-wrap;
 }
 </style>

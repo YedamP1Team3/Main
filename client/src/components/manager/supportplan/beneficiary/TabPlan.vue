@@ -33,7 +33,9 @@ function addNewPlan() {
         alert('대기단계 지원계획서를 신청하지 못합니다');
         return;
     }
-    emit('newaddplan');
+    const pId = planList.value.length > 0 ? planList.value[0].priority_id : null;
+
+    emit('newaddplan', pId);
 }
 const savefile = () => {
     if (!props.beneId) {

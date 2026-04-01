@@ -29,10 +29,22 @@ const returnSupportPlan = async (planId) => {
   };
   return resObj;
 };
-
+//지원계획서히스토리
 const addRejectionHistory = async (data) => {
-  const { plan_id, rejection_reason, manager_id } = data;
-  let insertDate = [plan_id, rejection_reason, manager_id];
+  const {
+    plan_id,
+    plan_objective,
+    plan_content,
+    rejection_reason,
+    manager_id,
+  } = data;
+  let insertDate = [
+    plan_id,
+    plan_objective,
+    plan_content,
+    rejection_reason,
+    manager_id,
+  ];
 
   let result = await adminMapper.addRejectionHistory(insertDate);
   let resObj = {
@@ -95,22 +107,62 @@ const returnSupportResult = async (resultId) => {
 };
 
 const addResultRejectionHistory = async (data) => {
-  const { result_id, rejection_reason, manager_id } = data;
-  let insertDate = [result_id, rejection_reason, manager_id];
+  const {
+    result_id,
+    result_title,
+    result_content,
+    rejection_reason,
+    manager_id,
+    plan_ids, // 프론트에서 넘어온 배열
+  } = data;
 
-  let result = await adminMapper.addResultRejectionHistory(insertDate);
-  let resObj = {
-    status: result.insertId > 0 ? "success" : "fail",
-    user_no: result.insertId,
-  };
-  return resObj;
+  const insertData = [
+    result_id,
+    result_title,
+    result_content,
+    rejection_reason,
+    manager_id,
+  ];
+
+  try {
+    // 1. 반려 히스토리 메인 정보 저장 (resultrejection_history 테이블)
+    const result = await adminMapper.addResultRejectionHistory(insertData);
+    const newHistoryId = result.insertId;
+
+    // 2. 매핑 데이터 저장 (result_plan_mapping_history 테이블)
+    if (newHistoryId > 0 && plan_ids && plan_ids.length > 0) {
+      for (let planId of plan_ids) {
+        // 매퍼의 resultMappingHistory를 호출하여 하나씩 저장
+        await adminMapper.resultMappingHistory(newHistoryId, planId);
+      }
+    }
+
+    return {
+      status: newHistoryId > 0 ? "success" : "fail",
+      history_id: newHistoryId,
+    };
+  } catch (err) {
+    console.error("반려 히스토리 저장 서비스 에러:", err);
+    throw err;
+  }
 };
 
+// 1. 리스트만 가져오는 서비스 (기존 유지)
 const getResultRejectionHistory = async (resultId) => {
   let list = await adminMapper.selectResultRejectionHistory(resultId);
   return list || [];
 };
 
+// 2. 특정 이력의 상세(계획서 포함)를 가져오는 서비스 추가
+const getRejectionHistoryDetail = async (historyId) => {
+  // 매핑된 계획서 목록 조회
+  const rows = await adminMapper.selectResultMappingHistory(historyId);
+
+  // ⭐️ 반드시 객체 안에 plans 배열을 담아서 리턴하세요.
+  return {
+    plans: rows || [],
+  };
+};
 module.exports = {
   getSupportPlanList,
   getSupportPlanDetail,
@@ -125,4 +177,5 @@ module.exports = {
   returnSupportResult,
   addResultRejectionHistory,
   getResultRejectionHistory,
+  getRejectionHistoryDetail,
 };

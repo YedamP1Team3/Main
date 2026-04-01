@@ -12,6 +12,12 @@ const rsvService = require("./service/rsv_service.js");
 app.use(cors()); // 모든 요청 허용 (개발 단계)
 app.use(express.json());
 
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ limit: "100mb", extended: true }));
+
+const externalPath = "d:/uploads";
+app.use("/uploads", express.static(externalPath));
+
 const userRouter = require("./router/user_router.js");
 const surveyRouter = require("./router/survey_router.js");
 const adsupportPlan = require("./router/adsupport_router.js");

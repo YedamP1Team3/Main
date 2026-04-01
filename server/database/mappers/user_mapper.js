@@ -146,7 +146,7 @@ const removeTempPlan = async (planDelete) => {
   }
 };
 //지원계획서 승인요청
-const resubmitSupportPlan= async (planId, planDate) => {
+const resubmitSupportPlan = async (planId, planDate) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
@@ -208,6 +208,21 @@ const updateTempPlan = async (planDraftId, planDate) => {
   }
 };
 
+let insertAttachment = async (fileData) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    // 서비스에서 넘겨준 [planId, null, originName, fileName, fileSize] 배열을 쿼리에 매핑
+    let [result] = await conn.query(userSql.insertAttachment, fileData);
+    return result;
+  } catch (err) {
+    console.error("Mapper 에러 (insertAttachment): ", err);
+    throw err; // 에러를 위로 던져서 서비스에서 알 수 있게 함
+  } finally {
+    if (conn) conn.release(); // 연결 해제
+  }
+};
+
 module.exports = {
   selectAllUser,
   selectBeneficiariesNames,
@@ -223,4 +238,5 @@ module.exports = {
   resubmitSupportPlan,
   rejectSupportPlan,
   updateTempPlan,
+  insertAttachment,
 };

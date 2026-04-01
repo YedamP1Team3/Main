@@ -143,6 +143,17 @@ const updateTempPlan = `
     plan_draft_id =?
 `;
 
+const insertAttachment = `
+INSERT INTO attachment_file (
+      plan_id, 
+      plan_draft_id, 
+      origin_name, 
+      path, 
+      file_size, 
+      created_at
+    ) VALUES (?, ?, ?, ?, ?, NOW())
+  `;
+
 module.exports = {
   selectAllUser,
   selectBeneficiariesNames,
@@ -158,4 +169,5 @@ module.exports = {
   resubmitSupportPlan,
   rejectSupportPlan,
   updateTempPlan,
+  insertAttachment,
 };

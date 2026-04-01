@@ -21,8 +21,8 @@ const getSupportPlanList = async (beneId) => {
   let list = await userMapper.selectSupportPlanList(beneId);
   return list || [];
 };
-//지원계획서 생성
-const createSupportPlan = async (supportPlan) => {
+//지원계획서 생성(파일첨부)
+const createSupportPlan = async (supportPlan, files) => {
   const {
     priority_id,
     manager_id,
@@ -41,6 +41,20 @@ const createSupportPlan = async (supportPlan) => {
   ];
 
   let result = await userMapper.createSupportPlan(insertDate);
+  const planId = result.insertId;
+  //파일첨부 추가
+  if (planId > 0 && files && files.length > 0) {
+    for (const file of files) {
+      const fileData = [
+        planId,
+        null, // plan_draft_id
+        file.originalname, // 원본 파일명
+        file.filename, // 서버에 저장된 실제 파일명 (D:/uploads 내 이름)
+        file.size, // 파일 크기
+      ];
+      await userMapper.insertAttachment(fileData);
+    }
+  }
 
   let resObj = {
     status: result.insertId > 0 ? "success" : "fail",

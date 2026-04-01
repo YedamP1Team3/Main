@@ -116,7 +116,7 @@ watch(
                 </table>
             </div>
 
-            <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @Newaddplan="emit('newaddplan')" @select-plan="handleSelectPlan" />
+            <TabPlan v-if="currentTab === 'Plan'" ref="tabPlanRef" :beneId="beneId" @Newaddplan="emit('newaddplan', id)" @select-plan="handleSelectPlan" />
             <div v-if="currentTab === 'Result'">
                 <resultPlan v-if="leftMode === 'list'" ref="tabPlanRef" :beneId="beneId" @newresultplan="emit('newresultplan')" @select-result="handleResultIdDetail" />
                 <TabPlanDetail v-else-if="leftMode === 'plan'" :planId="selectedSubPlanId" @close="handleCloseSubPlan" />
