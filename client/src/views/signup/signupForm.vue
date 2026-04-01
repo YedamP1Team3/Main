@@ -1,47 +1,52 @@
 <script setup>
-import { reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { reactive, ref } from 'vue'; // 데이터 상태를 관리하기 위한 도구들을 가져옵니다.
+import { useRouter } from 'vue-router'; // 가입 성공 후 로그인 페이지로 보내주기 위해 사용합니다.
+import axios from 'axios'; // 서버에 회원가입 정보를 전송하기 위한 통신 도구입니다.
+
+// 화면을 예쁘게 구성할 PrimeVue의 입력창과 버튼들을 가져옵니다.
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import RadioButton from 'primevue/radiobutton';
 
-const router = useRouter();
+const router = useRouter(); // 페이지 이동 함수를 준비합니다.
 
+// 선택창(Select)에 보여줄 기관 목록 예시 데이터입니다.
 const agencyOptions = ref([
     { label: '기관 A', value: 102 },
     { label: '기관 B', value: 101 }
 ]);
 
+// 1. [회원가입 폼 데이터] 사용자가 입력할 모든 정보를 담는 큰 바구니입니다.
 const form = reactive({
-    userType: 'user',
-    name: '',
-    userId: '',
-    password: '',
-    passwordConfirm: '',
-    zipcode: '',
-    address: '',
-    detailAddress: '',
-    region: '',
-    organization: '',
-    phone: '',
-    email: ''
+    userType: 'user', // 일반 유저인지 담당자인지 구분 (기본값은 일반 유저)
+    name: '', // 이름
+    userId: '', // 아이디
+    password: '', // 비밀번호
+    passwordConfirm: '', // 비밀번호 확인용
+    zipcode: '', // 우편번호
+    address: '', // 주소
+    detailAddress: '', // 상세 주소
+    region: '', // 지역 (담당자용)
+    organization: '', // 소속 기관 (담당자용)
+    phone: '', // 전화번호
+    email: '' // 이메일
 });
 
-const isIdDuplicated = ref(false);
-const idCheckMessage = ref('');
-const isIdVerified = ref(false);
+// 아이디 중복 체크 상태를 관리하는 변수들입니다.
+const isIdDuplicated = ref(false); // 아이디가 중복되었는지 여부
+const idCheckMessage = ref(''); // 화면에 보여줄 안내 메시지
+const isIdVerified = ref(false); // 중복 체크를 통과했는지 여부
 
-// 아이디 입력 시 중복체크 상태 초기화
+// 아이디를 다시 입력하기 시작하면 중복 체크 상태를 초기화합니다. (다시 검사하게 유도)
 const resetIdCheck = () => {
     isIdDuplicated.value = false;
     idCheckMessage.value = '';
     isIdVerified.value = false;
 };
 
-// 아이디 중복 확인
+// 2. [아이디 중복 확인] 서버에 이 아이디를 써도 되는지 물어봅니다.
 const checkId = async () => {
     if (!form.userId) {
         alert('아이디를 입력해주세요.');
@@ -49,37 +54,43 @@ const checkId = async () => {
     }
 
     try {
+        // 서버의 중복 체크 API(/api/info/check-id/아이디)를 호출합니다.
         const response = await axios.get(`/api/info/check-id/${form.userId}`);
         if (response.data.isAvailable) {
+            // 사용 가능한 경우
             isIdDuplicated.value = false;
-            idCheckMessage.value = '사용 가능한 아이디입니다.'; // '(테스트)' 문구 삭제
-            isIdVerified.value = true;
+            idCheckMessage.value = '사용 가능한 아이디입니다.';
+            isIdVerified.value = true; // '확인 완료' 상태로 변경
         } else {
+            // 이미 누가 쓰고 있는 경우
             isIdDuplicated.value = true;
             idCheckMessage.value = '';
             isIdVerified.value = false;
         }
     } catch (error) {
         console.error('ID 체크 중 오류:', error);
-        // 테스트용 예외 처리
+        // 서버가 꺼져있을 때를 대비한 테스트용 로직입니다.
         if (['admin', 'family_01', 'manager_01'].includes(form.userId)) {
             isIdDuplicated.value = true;
             isIdVerified.value = false;
         } else {
             isIdDuplicated.value = false;
-            idCheckMessage.value = '사용 가능한 아이디입니다.'; // '(테스트)' 문구 삭제
+            idCheckMessage.value = '사용 가능한 아이디입니다.';
             isIdVerified.value = true;
         }
     }
 };
 
+// 3. [주소 검색] 카카오(Daum) 주소 API창을 띄웁니다.
 const searchAddress = () => {
     new window.daum.Postcode({
         oncomplete: (data) => {
+            // 도로명 주소와 지번 주소 중 사용자가 선택한 것을 가져옵니다.
             const addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
             const extraAddr = data.bname !== '' ? ` (${data.bname})` : '';
-            form.zipcode = data.zonecode;
-            form.address = addr + extraAddr;
+            form.zipcode = data.zonecode; // 우편번호 저장
+            form.address = addr + extraAddr; // 기본 주소 저장
+            // 상세 주소 칸으로 자동으로 커서를 옮겨줍니다.
             setTimeout(() => {
                 document.getElementById('detailAddress')?.focus();
             }, 100);
@@ -87,24 +98,28 @@ const searchAddress = () => {
     }).open();
 };
 
+// 4. [가입하기] 최종 버튼을 눌렀을 때 실행됩니다.
 const submit = async () => {
+    // [검사 1] 비밀번호와 비밀번호 확인이 똑같은지 확인합니다.
     if (form.password !== form.passwordConfirm) {
         alert('비밀번호가 다릅니다. 다시 확인해주세요');
         return;
     }
 
+    // [검사 2] 아이디 중복 확인 버튼을 눌렀었는지 확인합니다.
     if (!isIdVerified.value) {
         alert('아이디 중복 확인을 진행해주세요.');
         return;
     }
 
+    // [데이터 정리] DB 컬럼명에 맞춰서 예쁘게 데이터를 포장합니다.
     const signupData = {
         user_id: form.userId,
-        agency_id: form.organization || null,
+        agency_id: form.organization || null, // 기관이 없으면 빈 값(null)을 보냅니다.
         password: form.password,
         user_name: form.name,
-        role: form.userType === 'user' ? 'FAMILY' : 'MANAGER',
-        join_status: 'PENDING',
+        role: form.userType === 'user' ? 'FAMILY' : 'MANAGER', // 유저 타입에 따라 역할을 정합니다.
+        join_status: 'PENDING', // 가입 승인 대기 상태로 설정합니다.
         zip_code: form.zipcode,
         address: form.address,
         detail_address: form.detailAddress,
@@ -114,9 +129,10 @@ const submit = async () => {
     };
 
     try {
+        // 서버의 가입 API(/api/info/signup)로 데이터를 전송합니다.
         const response = await axios.post('/api/info/signup', signupData);
-        alert(response.data.message);
-        router.push('/login');
+        alert(response.data.message); // 가입 축하 메시지를 띄웁니다.
+        router.push('/login'); // 로그인 페이지로 이동시킵니다.
     } catch (error) {
         alert('가입 처리 중 오류가 발생했습니다.');
     }
