@@ -1,75 +1,77 @@
 <script setup>
-// 1. Vue 내장 함수
-import { ref, computed, onMounted } from 'vue';
-// 2. 외부 라이브러리
+import { computed, onMounted, ref } from 'vue';
 import axios from 'axios';
-// 3. 로컬 스토어
 import { useSurveyStore } from '@/stores/useSurveyStore';
 import { useAuthStore } from '@/stores/auth';
 
-const authStore = useAuthStore();
 const surveyStore = useSurveyStore();
+const authStore = useAuthStore();
 
-// 💡 작성 및 상태 관리용 로컬 변수들 (조회용 변수는 모두 빠짐)
-const surveyData = ref([]); // 서버에서 불러올 빈 설문지 데이터
-const selectedTabId = ref(null); // 현재 활성화된 탭(카테고리) ID
-const answers = ref({}); // 유저가 체크 중인 답변 내역 (v-model 연결)
-const currentVersionId = ref(null); // 현재 설문지 버전 ID
+// 설문 구조는 item -> subItem -> detail 계층으로 내려온다.
+// 작성 화면에서는 현재 선택한 대분류(item)만 보여주므로 tab id를 따로 들고 있는다.
+const surveyData = ref([]);
+const selectedTabId = ref(null);
+const currentVersionId = ref(null);
 
-// '최종 확인 모드' 전환 플래그 (작성 폼 <-> 요약 화면)
-const is_confirm_mode = ref(false);
+// answers 객체는 "detail id -> true/false" 형태다.
+// 설문 문항 id를 key로 쓰면 서버에 보낼 때도 그대로 재사용할 수 있어 구조가 단순해진다.
+const answers = ref({});
 
-// [API] 현재 활성화된 최신 설문 문항 로드
-const fetchActiveSurvey = async () => {
-    try {
-        const response = await axios.get('/api/survey/active_survey');
-        if (response.data.success) {
-            surveyData.value = response.data.data.items;
-            currentVersionId.value = response.data.data.version_id;
+// 작성 화면과 최종 확인 화면을 분리해 두면
+// 사용자가 제출 전에 한 번 더 검토할 수 있어 실수 제출을 줄일 수 있다.
+const isConfirmMode = ref(false);
 
-            if (surveyData.value.length > 0) {
-                selectedTabId.value = surveyData.value[0].id;
-            }
-        }
-    } catch (error) {
-        console.error('설문지 로드 실패:', error);
-    }
+const getResponseData = (response) => {
+    return response?.data?.success ? response.data.data : null;
 };
 
-// 현재 선택된 탭에 해당하는 질문 목록 필터링
 const currentItem = computed(() => {
     return surveyData.value.find((item) => item.id === selectedTabId.value) || null;
 });
 
-// 전체 질문 개수 계산 (누락 없이 다 체크했는지 확인하기 위함)
 const totalQuestionCount = computed(() => {
-    let count = 0;
-    surveyData.value.forEach((item) => {
-        item.subItems.forEach((sub) => {
-            if (sub.details) count += sub.details.length;
-        });
-    });
-    return count;
+    return surveyData.value.reduce((count, item) => {
+        return count + item.subItems.reduce((subCount, subItem) => subCount + (subItem.details?.length || 0), 0);
+    }, 0);
 });
 
-// [이벤트] '신청 하기' 버튼 클릭: 유효성 검사 후 최종 요약 화면으로 넘김
-const goToConfirmMode = () => {
-    if (!surveyStore.selected_bene_id) {
-        alert('좌측에서 지원 대상자를 먼저 선택해주세요.');
-        return;
-    }
+const answeredQuestionCount = computed(() => Object.keys(answers.value).length);
 
-    const answeredCount = Object.keys(answers.value).length;
-    if (answeredCount < totalQuestionCount.value) {
-        alert(`체크하지 않은 항목이 있습니다. \n(총 ${totalQuestionCount.value}문항 중 ${answeredCount}문항 완료)`);
-        return;
-    }
-
-    // 검사 통과: 확인 모드 ON
-    is_confirm_mode.value = true;
+const resetFormState = () => {
+    answers.value = {};
+    isConfirmMode.value = false;
 };
 
-// [API] '최종 전송' 버튼 클릭: 작성 데이터를 백엔드로 POST
+const fetchActiveSurvey = async () => {
+    try {
+        const response = await axios.get('/api/survey/active_survey');
+        const activeSurvey = getResponseData(response);
+
+        surveyData.value = activeSurvey?.items || [];
+        currentVersionId.value = activeSurvey?.version_id || null;
+        selectedTabId.value = surveyData.value.length > 0 ? surveyData.value[0].id : null;
+    } catch (error) {
+        console.error('설문지 로드 실패:', error);
+        surveyData.value = [];
+        currentVersionId.value = null;
+        selectedTabId.value = null;
+    }
+};
+
+const goToConfirmMode = () => {
+    if (!surveyStore.selected_bene_id) {
+        alert('왼쪽에서 지원대상자를 먼저 선택해 주세요.');
+        return;
+    }
+
+    if (answeredQuestionCount.value < totalQuestionCount.value) {
+        alert(`체크하지 않은 문항이 있습니다.\n(총 ${totalQuestionCount.value}문항 중 ${answeredQuestionCount.value}문항 답변 완료)`);
+        return;
+    }
+
+    isConfirmMode.value = true;
+};
+
 const submitSurvey = async () => {
     const payload = {
         bene_id: surveyStore.selected_bene_id,
@@ -79,26 +81,21 @@ const submitSurvey = async () => {
     };
 
     try {
-        const res = await axios.post('/api/survey/submit', payload);
+        const response = await axios.post('/api/survey/submit', payload);
 
-        if (res.data.success) {
-            alert('신청서가 성공적으로 접수되었습니다.');
+        if (response.data?.success) {
+            alert('지원신청서가 정상적으로 접수되었습니다.');
 
-            // 초기화 및 모달 닫기
-            answers.value = {};
-            is_confirm_mode.value = false;
-            surveyStore.is_survey_visible = false;
-
-            // 리스트 최신화
+            resetFormState();
+            surveyStore.closeSurvey();
             await surveyStore.fetchApplicationList(surveyStore.selected_bene_id);
         }
     } catch (error) {
-        console.error('제출 에러:', error);
-        alert('신청서 제출 중 오류가 발생했습니다.');
+        console.error('지원신청서 제출 실패:', error);
+        alert('지원신청서 제출 중 오류가 발생했습니다.');
     }
 };
 
-// 컴포넌트 등장 시 설문 폼 가져오기
 onMounted(() => {
     fetchActiveSurvey();
 });
@@ -108,15 +105,14 @@ onMounted(() => {
     <div class="survey-wrap">
         <h2>지원 신청하기</h2>
 
-        <!-- [모드 A] 새 신청서 작성 영역 (라디오 버튼 입력) -->
-        <template v-if="!is_confirm_mode">
+        <template v-if="!isConfirmMode">
             <nav class="tabs" v-if="surveyData.length > 0">
                 <button v-for="item in surveyData" :key="item.id" :class="{ active: selectedTabId === item.id }" @click="selectedTabId = item.id">
                     {{ item.name }}
                 </button>
             </nav>
             <div v-else class="tabs">
-                <p>등록된 설문 항목이 없습니다.</p>
+                <p>등록된 설문 문항이 없습니다.</p>
             </div>
 
             <div v-if="currentItem">
@@ -139,13 +135,12 @@ onMounted(() => {
             </div>
 
             <div class="submit-box">
-                <button class="btn-primary" @click="goToConfirmMode">신청 하기</button>
+                <button class="btn-primary" @click="goToConfirmMode">신청서 검토하기</button>
             </div>
         </template>
 
-        <!-- [모드 B] 최종 점검 요약 화면 (입력 완료 후 확인용) -->
         <template v-else>
-            <div class="confirm-notice"><i class="pi pi-info-circle"></i> 아래 작성하신 내용을 최종 확인해 주세요.</div>
+            <div class="confirm-notice"><i class="pi pi-info-circle"></i> 아래 작성한 내용을 최종 확인해 주세요.</div>
 
             <div class="confirm-scroll-area">
                 <div v-for="item in surveyData" :key="'conf_' + item.id" class="conf-item-box">
@@ -158,7 +153,6 @@ onMounted(() => {
                                 <div class="conf-q">
                                     <span>{{ index + 1 }}.</span> {{ detail.question_text }}
                                 </div>
-                                <!-- 💡 로컬에 바인딩된 answers를 참조하여 예/아니오 출력 -->
                                 <div class="conf-a" :class="answers[detail.id] ? 'ans-yes' : 'ans-no'">
                                     {{ answers[detail.id] ? '예' : '아니오' }}
                                 </div>
@@ -169,17 +163,14 @@ onMounted(() => {
             </div>
 
             <div class="submit-box dual-buttons">
-                <button class="btn-secondary" @click="is_confirm_mode = false">취소 (수정하기)</button>
-                <button class="btn-primary" @click="submitSurvey">최종 전송</button>
+                <button class="btn-secondary" @click="isConfirmMode = false">취소 (수정하기)</button>
+                <button class="btn-primary" @click="submitSurvey">최종 제출</button>
             </div>
         </template>
     </div>
 </template>
 
 <style scoped>
-/* ========================================== */
-/* 공통 레이아웃 스타일 */
-/* ========================================== */
 .survey-wrap {
     max-width: 850px;
     margin: 0 auto;
@@ -192,12 +183,12 @@ onMounted(() => {
     font-weight: 700;
 }
 
-/* 탭 관련 스타일 */
 .tabs {
     display: flex;
     gap: 12px;
     margin-bottom: 40px;
 }
+
 .tabs button {
     padding: 10px 24px;
     font-weight: 600;
@@ -207,27 +198,30 @@ onMounted(() => {
     border-radius: 6px;
     cursor: pointer;
 }
+
 .tabs button.active {
     color: #fff;
     background: #94a3b8;
 }
 
-/* 질문지 폼 영역 스타일 */
 .q-section {
     margin-bottom: 20px;
 }
+
 .q-section h3 {
     margin-bottom: 15px;
     font-size: 0.95rem;
     font-weight: 600;
     color: #64748b;
 }
+
 .q-section ul {
     margin: 0;
     padding: 0;
     list-style: none;
     border-top: 2px solid #334155;
 }
+
 .q-section li {
     display: flex;
     gap: 40px;
@@ -235,18 +229,19 @@ onMounted(() => {
     padding: 24px 10px;
     border-bottom: 1px solid #e2e8f0;
 }
+
 .q-section p {
     flex: 1;
     margin: 0;
     font-size: 1.05rem;
     line-height: 1.6;
 }
+
 .q-section span {
     margin-right: 6px;
     font-weight: 700;
 }
 
-/* 라디오 버튼 스타일 */
 .radios {
     display: flex;
     gap: 24px;
@@ -254,6 +249,7 @@ onMounted(() => {
     min-width: 140px;
     padding-top: 4px;
 }
+
 .radios label {
     display: flex;
     gap: 8px;
@@ -261,20 +257,19 @@ onMounted(() => {
     font-weight: 500;
     cursor: pointer;
 }
+
 .radios input {
     width: 18px;
     height: 18px;
     accent-color: #475569;
 }
+
 .empty-msg {
     padding: 20px 10px;
     font-size: 0.9rem;
     color: #94a3b8;
 }
 
-/* ========================================== */
-/* 요약 화면 및 버튼 스타일 */
-/* ========================================== */
 .submit-box {
     margin-top: 50px;
     text-align: right;
@@ -300,6 +295,7 @@ onMounted(() => {
     border-color: #94a3b8 !important;
     color: #1e293b;
 }
+
 .btn-primary:hover {
     background: #f8fafc;
     border-color: #0f172a !important;
@@ -310,6 +306,7 @@ onMounted(() => {
     color: #64748b;
     border-color: #cbd5e1 !important;
 }
+
 .btn-secondary:hover {
     background: #e2e8f0;
     color: #475569;
@@ -327,15 +324,16 @@ onMounted(() => {
 .confirm-scroll-area {
     max-height: 500px;
     overflow-y: auto;
-    padding-right: 15px;
+    padding: 20px 15px 20px 20px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     background-color: #fafafa;
-    padding: 20px;
 }
+
 .confirm-scroll-area::-webkit-scrollbar {
     width: 8px;
 }
+
 .confirm-scroll-area::-webkit-scrollbar-thumb {
     background-color: #cbd5e1;
     border-radius: 4px;
@@ -344,6 +342,7 @@ onMounted(() => {
 .conf-item-box {
     margin-bottom: 30px;
 }
+
 .conf-item-title {
     font-size: 1.2rem;
     color: #1e293b;
@@ -351,41 +350,49 @@ onMounted(() => {
     padding-bottom: 8px;
     border-bottom: 2px solid #cbd5e1;
 }
+
 .conf-sub-title {
     font-size: 1rem;
     color: #475569;
     margin: 10px 0;
 }
+
 .conf-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 20px 0;
+    margin: 0 0 20px;
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
 }
+
 .conf-list li {
     display: flex;
     justify-content: space-between;
     padding: 15px;
     border-bottom: 1px solid #f1f5f9;
 }
+
 .conf-list li:last-child {
     border-bottom: none;
 }
+
 .conf-q {
     flex: 1;
     padding-right: 20px;
     line-height: 1.5;
 }
+
 .conf-a {
     font-weight: 700;
     min-width: 60px;
     text-align: center;
 }
+
 .ans-yes {
     color: #2563eb;
 }
+
 .ans-no {
     color: #dc2626;
 }

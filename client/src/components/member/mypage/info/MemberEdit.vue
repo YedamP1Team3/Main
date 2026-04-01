@@ -1,95 +1,97 @@
 <script setup>
-import { ref, onMounted } from 'vue'; // 반응형 데이터 처리를 위한 ref
-import { useRouter } from 'vue-router'; // 페이지 이동을 위한 router
-import { useAuthStore } from '@/stores/auth';
-import axios from 'axios';
+// 1. 필요한 도구들을 가져오는 단계
+import { ref, onMounted } from 'vue'; // 반응형 데이터(ref)와 시작 시 실행 함수(onMounted)
+import { useRouter } from 'vue-router'; // 페이지 이동을 위한 도구
+import { useAuthStore } from '@/stores/auth'; // 로그인 상태(ID 등) 확인용 창고
+import axios from 'axios'; // 서버와 통신하기 위한 도구
 
-const router = useRouter(); // 라우터 인스턴스 생성
-const authStore = useAuthStore();
+const router = useRouter(); // 페이지 이동 기능을 변수에 담습니다.
+const authStore = useAuthStore(); // 로그인 정보 창고를 사용할 준비를 합니다.
 
-// 사용자 정보 데이터 객체 (소속 기관 필드 추가)
+// 2. 화면의 입력창들과 연결될 '데이터 바구니' (사용자 정보 객체)
 const memberForm = ref({
-    name: '',
-    id: '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-    agencyRegion: '',
-    agencyName: '',
-    postcode: '',
-    address: '',
-    detailAddress: '',
-    phone: '',
-    email: ''
+    name: '', // 이름
+    id: '', // 아이디
+    currentPassword: '', // 본인 확인용 현재 비밀번호
+    newPassword: '', // 새로 바꿀 비밀번호
+    confirmPassword: '', // 새 비밀번호 확인 입력
+    agencyRegion: '', // 소속 지역
+    agencyName: '', // 기관(센터) 이름
+    postcode: '', // 우편번호
+    address: '', // 기본 주소
+    detailAddress: '', // 상세 주소
+    phone: '', // 전화번호
+    email: '' // 이메일
 });
 
-// 카카오 주소 API 실행 함수
+// 3. [주소 찾기] 카카오 주소 API 팝업을 실행하는 함수
 const openPostcode = () => {
     new window.daum.Postcode({
         oncomplete: (data) => {
+            // 사용자가 선택한 주소 타입(도로명/지번)에 따라 값을 가져옵니다.
             let fullAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
 
-            memberForm.value.address = fullAddr;
-            memberForm.value.postcode = data.zonecode;
+            memberForm.value.address = fullAddr; // 주소 칸에 자동 입력
+            memberForm.value.postcode = data.zonecode; // 우편번호 칸에 자동 입력
 
+            // 주소 입력이 끝나면 '상세주소' 칸으로 커서를 자동으로 옮겨줍니다.
             const detailInput = document.querySelector('input[placeholder="상세주소를 입력하세요"]');
             if (detailInput) detailInput.focus();
         }
-    }).open();
+    }).open(); // 팝업창 열기
 };
 
+// 4. [조회] 페이지가 열리자마자 기존 내 정보를 불러와서 화면에 채워줍니다.
 onMounted(async () => {
     if (authStore.userId) {
+        // 로그인한 아이디가 있다면 실행
         try {
-            // [설명] API 호출 시 '/api' 프록시 경로를 확인하여 호출합니다.
+            // 서버에 "내 상세 정보를 보내줘"라고 요청(GET)합니다.
             const response = await axios.get(`/api/info/user-detail/${authStore.userId}`);
             const data = response.data;
 
-            // [설명] 서버 DB 컬럼명에 맞춰 memberForm 객체에 데이터를 할당합니다.
-            memberForm.value.id = data.user_id; // 아이디 할당
-            memberForm.value.name = data.user_name; // 이름 할당
-            memberForm.value.phone = data.tel; // DB의 tel을 phone에 매칭
-            memberForm.value.email = data.email; // 이메일 할당
-            memberForm.value.postcode = data.zip_code; // 우편번호 할당
-            memberForm.value.address = data.address; // 기본 주소 할당
-            memberForm.value.detailAddress = data.detail_address; // 상세 주소 할당
+            // [매칭] 서버 DB의 이름표(user_id 등)를 화면의 이름표(id 등)와 연결하여 채웁니다.
+            memberForm.value.id = data.user_id;
+            memberForm.value.name = data.user_name;
+            memberForm.value.phone = data.tel;
+            memberForm.value.email = data.email;
+            memberForm.value.postcode = data.zip_code;
+            memberForm.value.address = data.address;
+            memberForm.value.detailAddress = data.detail_address;
 
-            // [설명] 소속 기관(지역, 센터명) 데이터를 폼에 채워줍니다.
-            memberForm.value.agencyRegion = data.region; // DB의 region을 지역 필드에 할당
-            memberForm.value.agencyName = data.agency_name; // DB의 agency_name을 센터명 필드에 할당
+            // 소속 기관 정보도 함께 채워줍니다.
+            memberForm.value.agencyRegion = data.region;
+            memberForm.value.agencyName = data.agency_name;
         } catch (error) {
             console.error('데이터 로드 실패:', error);
             alert('정보를 불러오는 중 오류가 발생했습니다.');
         }
     } else {
+        // 로그인 정보가 없으면 로그인 페이지로 돌려보냅니다.
         alert('로그인 정보가 없습니다.');
         router.push({ name: 'loginForm' });
     }
 });
 
-// 정보 저장 로직
+// 5. [저장] '수정 완료' 버튼을 눌렀을 때 실행되는 함수
 const saveInfo = async () => {
+    // [검사] 새 비밀번호를 두 번 입력했을 때 서로 똑같은지 확인합니다.
     if (memberForm.value.newPassword !== memberForm.value.confirmPassword) {
         alert('새 비밀번호와 확인 값이 일치하지 않습니다.');
-        return;
+        return; // 다르면 여기서 멈춤!
     }
 
     try {
+        // 서버의 수정 전용 주소로 바구니(memberForm)에 담긴 데이터를 보냅니다 (PUT).
         const response = await axios.put('/api/info/update-user', memberForm.value);
 
-        // 서버 응답을 확인하기 위한 로그 (개발자 도구에서 확인 가능)
-        console.log('서버 응답:', response.data);
-
-        // [수정] 응답 데이터가 존재하거나 success 관련 필드가 하나라도 true라면 실행
-        if (response.data && (response.data.status === 'success' || response.data.success || response.status === 200)) {
+        // 서버 응답이 성공(success 또는 200번 코드)이라면 처리합니다.
+        if (response.data && (response.data.status === 'success' || response.status === 200)) {
+            authStore.updateName(memberForm.value.name);
             alert('수정 완료 !');
-            router.push({ name: 'myInfo' });
+            router.push({ name: 'myInfo' }); // 수정 후 내 정보 확인 페이지로 이동
         } else {
-            // 응답은 왔으나 조건에 맞지 않는 경우
             console.warn('응답 조건 미달:', response.data);
-            // 강제로라도 이동시키고 싶다면 아래 주석 해제
-            // alert('수정 완료 !');
-            // router.push('/mypage/info');
         }
     } catch (error) {
         console.error('수정 에러 상세:', error);

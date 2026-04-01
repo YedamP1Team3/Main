@@ -2,16 +2,17 @@
 import { ref } from 'vue';
 import { useSurveyStore } from '@/stores/useSurveyStore'; // 💡 스토어 연결 (동기화 용도)
 
-import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
-import BeneficiaryInfo from '@/components/manager/supportplan/beneficiary/BeneficiaryInfo.vue';
-import BeneficiaryManagement from '@/components/manager/supportplan/beneficiary/BeneficiaryManagement.vue';
+import JsTopbarmg from '@/layout/manager/JsTopbarmg.vue';
+import BeneficiaryInfo from '@/components/manager/BeneficiaryInfo.vue';
+import BeneficiaryManagement from '@/components/manager/BeneficiaryManagement.vue';
+// 💡 신청서 상세조회 뷰 임포트
+import ManagerSurveyView from '@/components/manager/manager_app/ManagerSurveyView.vue';
+// 💡 [추가] 대기단계 스위치 컴포넌트 임포트 (경로 확인 필요)
+import ManagerPrioritySwitch from '@/components/manager/manager_app/ManagerPrioritySwitch.vue';
+
 import BeneficiaryNewPlan from '@/components/manager/supportplan/beneficiary/BeneficiaryNewPlan.vue';
 import BeneficiaryDetail from '@/components/manager/supportplan/beneficiary/BeneficiaryDetail.vue';
 import ResultNewPlan from '@/components/manager/supportplan/beneficiary/resultNewPlan.vue';
-// 💡 신청서 상세조회 뷰 임포트
-import ManagerSurveyView from '@/components/manager/supportplan/beneficiary/ManagerSurveyView.vue';
-// 💡 [추가] 대기단계 스위치 컴포넌트 임포트 (경로 확인 필요)
-import ManagerPrioritySwitch from '@/components/manager/supportplan/beneficiary/ManagerPrioritySwitch.vue';
 import resultPlanDetail from '@/components/manager/supportplan/beneficiary/resultPlanDetail.vue';
 import BeneficiaryTempDetail from '@/components/manager/supportplan/beneficiary/BeneficiaryTempDetail.vue';
 import resultTempDetail from '@/components/manager/supportplan/beneficiary/resultTempDetail.vue';

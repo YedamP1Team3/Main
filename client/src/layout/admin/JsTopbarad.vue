@@ -26,6 +26,10 @@ const toggleAuth = () => {
     }
 };
 
+const goToregistration = () => {
+    router.push({ name: 'adjoinfamily' });
+};
+
 const goToPlan = () => {
     router.push('/administratorMain');
 };
@@ -69,7 +73,7 @@ const goToProfile = () => {
             </router-link>
 
             <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
-                <button type="button" class="p-link text-color font-medium">신청내역</button>
+                <button type="button" class="p-link text-color font-medium" @click="goToregistration">신청내역</button>
                 <button type="button" class="p-link text-color font-medium" @click="goToPlan">신청관리</button>
                 <button type="button" class="p-link text-color font-medium" @click="goToSchedule">담당자관리</button>
             </div>

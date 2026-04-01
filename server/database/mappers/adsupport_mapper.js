@@ -134,11 +134,21 @@ const approveSupportResult = async (resultID) => {
   try {
     conn = await pool.getConnection();
     await conn.beginTransaction();
+
+    // 결과서 승인 이후에는 "현재 지원 사이클이 종료됐다"는 의미가 되므로
+    // 1) 결과서 상태를 승인으로 바꾸고
+    // 2) 같은 대상자의 신청서를 완료로 닫고
+    // 3) priority 최신 상태를 미신청(none)으로 리셋해
+    // 다음 신청 사이클을 다시 시작할 수 있게 만든다.
     let result = await conn.query(adminSql.approveSupportResult, [resultID]);
+    await conn.query(adminSql.completeApplicationsByApprovedResult, [resultID]);
+    await conn.query(adminSql.resetPriorityByApprovedResult, [resultID]);
+
     await conn.commit();
     return result;
   } catch (err) {
     console.log(err);
+    if (conn) await conn.rollback();
     throw err;
   } finally {
     if (conn) conn.release();

@@ -10,30 +10,45 @@ const versionList = ref([]);
 const selectedVersionId = ref(null);
 const currentVersion = ref('');
 
-// 선택된 item / subItem 을 기준으로 가운데, 오른쪽 패널 데이터가 바뀐다.
+// 선택된 item / subItem을 따로 들고 있어야
+// 3단 패널 구조에서 어떤 목록을 보여줘야 하는지 즉시 계산할 수 있다.
 const selectedItemId = ref(null);
 const selectedSubItemId = ref(null);
 
+const getResponseData = (response, fallbackValue = null) => {
+    return response?.data?.success ? response.data.data : fallbackValue;
+};
+
+const getVersionId = (version) => version?.version_id ?? version?.VERSION_ID;
+const getIsActive = (version) => version?.is_active ?? version?.IS_ACTIVE;
+
 const maxVersionId = computed(() => {
     if (versionList.value.length === 0) return 0;
-    return Math.max(...versionList.value.map((version) => version.VERSION_ID));
+    return Math.max(...versionList.value.map((version) => getVersionId(version)));
 });
 
-// 가장 최신 version 만 수정 가능하고,
-// 과거 version 은 조회 전용으로 남겨두는 구조다.
+// 최신 draft 버전만 수정 가능하고,
+// 이미 운영에 쓰인 과거 버전은 조회 전용으로 두는 정책이다.
 const isEditableVersion = computed(() => {
     return selectedVersionId.value === maxVersionId.value;
 });
 
-const currentSubItems = computed(() => surveyData.value.find((item) => item.id === selectedItemId.value)?.subItems || []);
+const currentSubItems = computed(() => {
+    return surveyData.value.find((item) => item.id === selectedItemId.value)?.subItems || [];
+});
 
 const currentDetails = computed(() => {
     const item = surveyData.value.find((target) => target.id === selectedItemId.value);
     return item?.subItems.find((subItem) => subItem.id === selectedSubItemId.value)?.details || [];
 });
 
-const selectedItemName = computed(() => surveyData.value.find((item) => item.id === selectedItemId.value)?.name || '');
-const selectedSubItemName = computed(() => currentSubItems.value.find((subItem) => subItem.id === selectedSubItemId.value)?.name || '');
+const selectedItemName = computed(() => {
+    return surveyData.value.find((item) => item.id === selectedItemId.value)?.name || '';
+});
+
+const selectedSubItemName = computed(() => {
+    return currentSubItems.value.find((subItem) => subItem.id === selectedSubItemId.value)?.name || '';
+});
 
 const resetSelection = () => {
     selectedItemId.value = null;
@@ -42,9 +57,11 @@ const resetSelection = () => {
 
 const fetchSurveyData = async (versionId) => {
     try {
-        const { data } = await axios.get('/api/survey', { params: { versionId } });
-        surveyData.value = data.items;
-        currentVersion.value = data.version_id;
+        const response = await axios.get('/api/survey', { params: { versionId } });
+        const payload = getResponseData(response, response.data);
+
+        surveyData.value = payload?.items || [];
+        currentVersion.value = payload?.version_id || versionId;
     } catch (error) {
         console.error('설문 구조 조회 실패:', error);
     }
@@ -52,14 +69,14 @@ const fetchSurveyData = async (versionId) => {
 
 const fetchVersionList = async () => {
     try {
-        const { data } = await axios.get('/api/survey/versions');
+        const response = await axios.get('/api/survey/versions');
+        const successData = getResponseData(response);
+        const versions = Array.isArray(successData) ? successData : Array.isArray(response.data?.versions) ? response.data.versions : [];
 
-        if (data.success) {
-            versionList.value = data.versions;
+        versionList.value = versions;
 
-            if (!selectedVersionId.value && data.versions.length > 0) {
-                selectedVersionId.value = Math.max(...data.versions.map((version) => version.VERSION_ID));
-            }
+        if (!selectedVersionId.value && versions.length > 0) {
+            selectedVersionId.value = Math.max(...versions.map((version) => getVersionId(version)));
         }
     } catch (error) {
         console.error('설문 버전 목록 조회 실패:', error);
@@ -78,9 +95,11 @@ const handleAddItem = async (name) => {
     });
 
     if (data.success) {
+        const createdItem = data.item || data.data;
+
         surveyData.value.push({
-            id: data.item.item_id,
-            name: data.item.item_name,
+            id: createdItem.item_id,
+            name: createdItem.item_name,
             subItems: []
         });
     }
@@ -93,12 +112,13 @@ const handleAddSubItem = async (name) => {
     });
 
     if (data.success) {
+        const createdSubItem = data.item || data.data;
         const parent = surveyData.value.find((item) => item.id === selectedItemId.value);
 
         if (parent) {
             parent.subItems.push({
-                id: data.item.sub_item_id,
-                name: data.item.sub_item_name,
+                id: createdSubItem.sub_item_id,
+                name: createdSubItem.sub_item_name,
                 details: []
             });
         }
@@ -112,12 +132,13 @@ const handleAddDetail = async (text) => {
     });
 
     if (data.success) {
+        const createdDetail = data.data;
         const parentSubItem = surveyData.value.find((item) => item.id === selectedItemId.value)?.subItems.find((subItem) => subItem.id === selectedSubItemId.value);
 
         if (parentSubItem) {
             parentSubItem.details.push({
-                id: data.data.detail_id,
-                question_text: data.data.question_text
+                id: createdDetail.detail_id,
+                question_text: createdDetail.question_text
             });
         }
     }
@@ -160,8 +181,9 @@ const handleDeleteSubItem = async (subItemId) => {
     await fetchSurveyData(selectedVersionId.value);
 };
 
-// "적용"은 현재 선택 버전을 active 로 만들고,
-// 동시에 다음 수정을 위한 새 draft version 을 만드는 작업이다.
+// "적용"은 단순 저장이 아니라
+// 1) 선택 버전을 active로 만들고
+// 2) 다음 편집용 draft 버전을 하나 더 만드는 작업이다.
 const handleApplyVersion = async () => {
     if (!confirm('현재 선택한 버전을 활성화하고, 수정 가능한 새 설문 버전을 생성하시겠습니까?')) {
         return;
@@ -174,7 +196,7 @@ const handleApplyVersion = async () => {
     if (data.success) {
         alert('버전 적용이 완료되었고 새 설문 버전이 생성되었습니다.');
         await fetchVersionList();
-        selectedVersionId.value = data.newVersionId;
+        selectedVersionId.value = data.newVersionId ?? data.data?.new_version_id;
         handleVersionChange();
     }
 };
@@ -194,9 +216,9 @@ onMounted(async () => {
             <div class="flex items-center gap-3">
                 <label class="font-bold text-slate-700">설문지 버전 선택:</label>
                 <select v-model="selectedVersionId" @change="handleVersionChange" class="border rounded-lg p-2 bg-slate-50 font-medium outline-none focus:ring-2 focus:ring-blue-500">
-                    <option v-for="version in versionList" :key="version.VERSION_ID" :value="version.VERSION_ID">
-                        버전 {{ version.VERSION_ID }}
-                        {{ version.IS_ACTIVE === 1 ? '(현재 활성)' : version.VERSION_ID === maxVersionId ? '(수정 가능 draft)' : '' }}
+                    <option v-for="version in versionList" :key="getVersionId(version)" :value="getVersionId(version)">
+                        버전 {{ getVersionId(version) }}
+                        {{ getIsActive(version) === 1 ? '(현재 활성)' : getVersionId(version) === maxVersionId ? '(수정 가능 draft)' : '' }}
                     </option>
                 </select>
             </div>
