@@ -95,6 +95,12 @@ const saveInfo = async () => {
         const response = await axios.put('/api/mgmypage/update', updateData);
 
         if (response.status === 200) {
+            authStore.updateName(managerForm.value.name);
+
+            authStore.$patch({
+                userName: managerForm.value.name
+            });
+
             // 서버가 "오케이, 수정 완료!"라고 응답(200)하면
             alert('정보가 성공적으로 수정되었습니다.');
             router.push({ name: 'managerInfo' }); // 수정한 내용을 확인하는 페이지로 이동

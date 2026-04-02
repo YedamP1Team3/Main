@@ -1,83 +1,93 @@
 <script setup>
-// import { computed, onMounted, ref } from 'vue';
-// import { useRouter } from 'vue-router';
-// import axios from 'axios';
-// import { useAuthStore } from '@/stores/auth';
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
 
-// const router = useRouter();
-// const authStore = useAuthStore();
+const router = useRouter();
+const authStore = useAuthStore();
 
-// // --- 상태 관리 ---
-// const historyRows = ref([]);
-// const isLoading = ref(false);
-// const filterStatus = ref('all');
-// const searchName = ref('');
-// const currentPage = ref(1);
+// --- 상태 관리 ---
+const historyRows = ref([]);
+const isLoading = ref(false);
+const filterStatus = ref('all');
+const searchName = ref('');
+const currentPage = ref(1);
 
-// // --- 필터링 로직 ---
-// const filteredRows = computed(() => {
-//     return historyRows.value.filter((item) => {
-//         const matchedStatus = filterStatus.value === 'all' || item.status === '0';
-//         const matchedName = !searchName.value || item.userName.includes(searchName.value);
-//         return matchedStatus && matchedName;
-//     });
-// });
+// --- 필터링 로직 ---
+const filteredRows = computed(() => {
+    return historyRows.value.filter((item) => {
+        const matchedStatus = filterStatus.value === 'all' || item.status === 'PENDING';
+        const matchedName = !searchName.value || item.userName.includes(searchName.value);
+        return matchedStatus && matchedName;
+    });
+});
 
-// // --- 페이지네이션 로직 (10개씩) ---
-// const paginatedRows = computed(() => {
-//     const start = (currentPage.value - 1) * 10;
-//     return filteredRows.value.slice(start, start + 10);
-// });
+// --- 페이지네이션 로직 (10개씩) ---
+const paginatedRows = computed(() => {
+    const start = (currentPage.value - 1) * 10;
+    return filteredRows.value.slice(start, start + 10);
+});
 
-// const totalPages = computed(() => Math.ceil(filteredRows.value.length / 10) || 1);
+const totalPages = computed(() => Math.ceil(filteredRows.value.length / 10) || 1);
 
-// // --- 데이터 페칭 ---
-// const fetchJoinRequests = async () => {
-//     isLoading.value = true;
-//     try {
-//         const res = await axios.get('/api/admin/join-requests/family');
-//         if (res.data.success) {
-//             historyRows.value = res.data.data;
-//         }
-//     } catch (error) {
-//         console.error('신청 내역을 불러오지 못했습니다.', error);
-//         // 테스트용 가상 데이터
-//         historyRows.value = [
-//             { id: 1, userId: 'hong1', userName: '홍길동', phone: '010-1111-2222', email: 'hong1@naver.com', joinDate: '2026.03.01', status: 'pending' },
-//             { id: 2, userId: 'youn23', userName: '영길이', phone: '010-2222-3333', email: 'youn23@naver.com', joinDate: '2026.03.03', status: 'approved' },
-//             { id: 3, userId: 'kim612', userName: '김동홍', phone: '010-1111-4444', email: 'kim612@google.com', joinDate: '2026.03.07', status: 'pending' }
-//         ];
-//     } finally {
-//         isLoading.value = false;
-//     }
-// };
+// --- 데이터 페칭 ---
+const fetchJoinRequests = async () => {
+    isLoading.value = true;
+    try {
+        const res = await axios.get('/api/adhistory/join-requests/family');
+        if (res.data.success) {
+            historyRows.value = res.data.data;
+        }
+    } catch (error) {
+        console.error('신청 내역을 불러오지 못했습니다.', error);
+        // 테스트용 가상 데이터
+        historyRows.value = [
+            { id: 1, userId: 'hong1', userName: '홍길동', phone: '010-1111-2222', email: 'hong1@naver.com', joinDate: '2026.03.01', status: 'pending' },
+            { id: 2, userId: 'youn23', userName: '영길이', phone: '010-2222-3333', email: 'youn23@naver.com', joinDate: '2026.03.03', status: 'approved' },
+            { id: 3, userId: 'kim612', userName: '김동홍', phone: '010-1111-4444', email: 'kim612@google.com', joinDate: '2026.03.07', status: 'pending' }
+        ];
+    } finally {
+        isLoading.value = false;
+    }
+};
 
-// // --- 액션 함수 ---
-// const approveUser = async (id) => {
-//     if (confirm('승인하시겠습니까?')) {
-//         try {
-//             const res = await axios.post(`/api/admin/approve/${userId}`);
-//             if (res.data.success) {
-//                 alert('승인되었습니다');
-//                 fetchJoinRequests();
-//             }
-//         } catch (e) {
-//             alert('처리 중 오류가 발생했습니다.');
-//         }
-//     }
-// };
+// --- 액션 함수 ---
+const approveUser = async (userId) => {
+    if (confirm('승인하시겠습니까?')) {
+        try {
+            const res = await axios.post(`/api/adhistory/active/${userId}`);
+            if (res.data.success) {
+                alert('승인되었습니다');
+                fetchJoinRequests();
+            }
+        } catch (e) {
+            alert('처리 중 오류가 발생했습니다.');
+        }
+    }
+};
 
-// const openRejectModal = (user) => {
-//     console.log('반려 모달 오픈:', user.userName);
-// };
+const openRejectModal = (user) => {
+    console.log('반려 모달 오픈:', user.userName);
+};
 
-// const deleteUser = (id) => {
-//     if (confirm('정말로 삭제하시겠습니까?')) {
-//         console.log('삭제 ID:', id);
-//     }
-// };
+const deleteUser = async (userId) => {
+    if (confirm('정말로 삭제하시겠습니까?')) {
+        try {
+            // 라우터의 /delete/:userId 경로와 매칭
+            const res = await axios.delete(`/api/adhistory/delete/${userId}`);
+            if (res.data.success) {
+                alert('삭제되었습니다');
+                fetchJoinRequests();
+            }
+        } catch (e) {
+            console.error('삭제 에러:', e);
+            alert('삭제 중 오류가 발생했습니다.');
+        }
+    }
+};
 
-// onMounted(fetchJoinRequests);
+onMounted(fetchJoinRequests);
 </script>
 
 <template>
@@ -91,7 +101,7 @@
                     <span>전체사용자</span>
                 </label>
                 <label class="radio-label">
-                    <input type="radio" v-model="filterStatus" value="pending" @change="currentPage = 1" />
+                    <input type="radio" v-model="filterStatus" value="PENDING" @change="currentPage = 1" />
                     <span>미승인 사용자</span>
                 </label>
             </div>
@@ -133,7 +143,7 @@
                             </div>
                         </td>
                         <td>
-                            <button class="btn-delete" @click="deleteUser(item.id)">삭제</button>
+                            <button class="btn-delete" @click="deleteUser(item.userId)">삭제</button>
                         </td>
                     </tr>
                     <tr v-if="filteredRows.length === 0">
