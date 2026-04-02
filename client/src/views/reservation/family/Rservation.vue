@@ -6,6 +6,7 @@ import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
 import MTopbar from '@/layout/member/mTopbar.vue';
 import BeneInfo from '@/components/reservation/beneInfo.vue';
 import RsvTable from '@/components/common/RsvTable.vue';
+import RejectionReasonModal from '@/components/reservation/RejectionReasonModal.vue';
 
 import { getManagerSchedule } from '@/api/reservation/schedule';
 import { getBeneficiariesByFamilyId, getManagerIdByBene } from '@/api/reservation/beneInfo';
@@ -17,7 +18,8 @@ export default {
         MTopbar,
         RsvSideBar,
         BeneInfo,
-        RsvTable
+        RsvTable,
+        RejectionReasonModal
     },
 
     setup() {
@@ -32,12 +34,16 @@ export default {
 
         const reservationRows = ref([]);
 
+        const isRejectReasonModalOpen = ref(false);
+        const selectedRejectReservation = ref(null);
+
         const reservationColumns = [
             { key: 'bene_name', label: '지원대상자명', type: 'text' },
             { key: 'disability_type', label: '장애유형', type: 'text' },
             { key: 'start_time', label: '예약날짜', type: 'date' },
             { key: 'start_time', label: '예약시간', type: 'timeRange', endKey: 'end_time' },
             { key: 'rsv_status', label: '예약상태', type: 'status' },
+            { key: 'view_reject_reason', label: '반려사유', type: 'action', action: 'viewRejectReason' },
             { key: 'cancel_action', label: '취소', type: 'action', action: 'cancel' }
         ];
 
@@ -216,7 +222,27 @@ export default {
             }
         };
 
+        const openRejectReasonModal = (row) => {
+            if (row.rsv_status !== 'REJECTED') {
+                alert('반려된 예약만 반려사유를 조회할 수 있습니다.');
+                return;
+            }
+
+            selectedRejectReservation.value = row;
+            isRejectReasonModalOpen.value = true;
+        };
+
+        const closeRejectReasonModal = () => {
+            isRejectReasonModalOpen.value = false;
+            selectedRejectReservation.value = null;
+        };
+
         const handleTableActionClick = async ({ action, row }) => {
+            if (action === 'viewRejectReason') {
+                openRejectReasonModal(row);
+                return;
+            }
+
             if (action !== 'cancel') return;
 
             if (!confirm('해당 상담 신청을 취소하시겠습니까?')) return;
@@ -242,10 +268,14 @@ export default {
             selectedDate,
             slots,
             blockedSummary,
+            isRejectReasonModalOpen,
+            selectedRejectReservation,
             reservationRows,
             reservationColumns,
             handleSelectBeneficiary,
             handleReserve,
+            openRejectReasonModal,
+            closeRejectReasonModal,
             handleTableActionClick
         };
     }
@@ -267,6 +297,7 @@ export default {
                         <TimeSlot :selectedDate="selectedDate" :slots="slots" mode="family" @reserveTimes="handleReserve" />
                     </div>
                     <RsvTable :columns="reservationColumns" :rows="reservationRows" rowKey="rsv_id" emptyMessage="상담 신청 내역이 없습니다." @action-click="handleTableActionClick" />
+                    <RejectionReasonModal :visible="isRejectReasonModalOpen" :reservation="selectedRejectReservation" @close="closeRejectReasonModal" />
                 </div>
             </main>
         </div>

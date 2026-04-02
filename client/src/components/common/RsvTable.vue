@@ -113,6 +113,8 @@ const getActionLabel = (column, row) => {
             return '처리';
         case 'writeLog':
             return row.rsv_status === 'NOTE_WRITTEN' ? '수정' : '작성';
+        case 'viewRejectReason':
+            return '조회';
         default:
             return '버튼';
     }
@@ -126,6 +128,8 @@ const getActionClass = (column) => {
             return 'process';
         case 'writeLog':
             return 'write-log';
+        case 'viewRejectReason':
+            return 'view-reject-reason';
         default:
             return '';
     }
@@ -142,6 +146,8 @@ const isActionDisabled = (row, column) => {
         case 'writeLog':
             return !['COMPLETED', 'NOTE_WRITTEN'].includes(row.rsv_status);
 
+        case 'viewRejectReason':
+            return row.rsv_status !== 'REJECTED';
         default:
             return false;
     }
@@ -307,5 +313,9 @@ const handleActionClick = (row, column) => {
     background-color: #cbd5e1;
     color: #f8fafc;
     cursor: not-allowed;
+}
+.action-btn.view-reject-reason {
+    background-color: #f1f3f5;
+    color: #333;
 }
 </style>
