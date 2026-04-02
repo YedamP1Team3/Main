@@ -1,70 +1,76 @@
 <script setup>
-import { reactive } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { useAuthStore } from '@/stores/auth'; //pinia 스토어 불러오기
+import { reactive } from 'vue'; // 여러 데이터를 하나로 묶어 관리하기 위해 가져옵니다.
+import { useRouter } from 'vue-router'; // 로그인 성공 후 다른 페이지로 이동시키기 위해 사용합니다.
+import axios from 'axios'; // 서버(Node.js)에 로그인 요청을 보내기 위한 도구입니다.
+import { useAuthStore } from '@/stores/auth'; // 로그인 상태(이름, 아이디 등)를 앱 전체에 공유하기 위한 저장소입니다.
 
-// PrimeVue 컴포넌트 (main.js에 등록했다면 여기서 생략 가능)
+// PrimeVue 컴포넌트들을 가져옵니다 (화면 UI를 예쁘게 만들어줍니다).
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
 
-const router = useRouter();
-const authStore = useAuthStore(); // ★ 2. 스토어 사용 준비
+const router = useRouter(); // 페이지 이동을 시켜주는 함수를 준비합니다.
+const authStore = useAuthStore(); // 로그인 정보를 저장할 저장소를 사용할 준비를 합니다.
 
-// 1. 데이터 상태 관리
+// 1. [입력창 데이터] 사용자가 입력할 아이디와 비밀번호를 담는 바구니입니다.
 const form = reactive({
     userId: '',
     password: ''
 });
 
-// 2. 로그인 실행 로직
+// 2. [로그인 버튼 클릭 시] 실행되는 핵심 로직입니다.
 const handleLogin = async () => {
-    // 유효성 검사
+    // [유효성 검사] 빈 칸이 있는지 먼저 확인합니다.
     if (!form.userId || !form.password) {
         alert('아이디와 비밀번호를 모두 입력해주세요.');
         return;
     }
 
     try {
-        // 백엔드 서버(3000번 포트)로 요청 전송
+        // 서버의 로그인 API(/api/info/login)로 아이디와 비번을 실어서 보냅니다.
         const response = await axios.post('/api/info/login', {
             userId: form.userId,
             password: form.password
         });
 
-        // 성공 시 처리
+        // 서버에서 응답(성공 데이터)이 왔다면 처리 시작!
         if (response.data) {
-            const user = response.data.user;
-            authStore.login(user);
+            const user = response.data.user; // 서버가 보내준 유저 정보를 변수에 담습니다.
+            authStore.login(user); // Pinia 저장소에 유저 정보를 저장합니다 (로그인 상태 유지).
+
+            // 유저의 역할(ADMIN, FAMILY 등)을 대문자로 바꿔서 비교하기 쉽게 만듭니다.
             const userRole = user.role.toUpperCase();
 
+            // [교통 정리] 역할에 따라 서로 다른 페이지로 보내줍니다.
             if (userRole === 'ADMIN') {
-                alert(`${user.name}님 환영합니다 관리자페이지로 이동합니다`);
+                // 관리자라면? 관리자 메인으로!
+                alert(`${user.name}님 환영합니다. 관리자 페이지로 이동합니다.`);
                 router.push('/AdministratorMain');
             } else if (userRole === 'MANAGER') {
-                alert(`${user.name}님 환영합니다 담당자페이지로 이동합니다`);
+                // 담당자(시설장 등)라면? 담당자 메인으로!
+                alert(`${user.name}님 환영합니다. 담당자 페이지로 이동합니다.`);
                 router.push('/BeneficiaryMain');
             } else if (userRole === 'FAMILY') {
-                alert(`${user.name}님 환영합니다 일반사용자 페이지로 이동합니다.`);
-                // router.push('/recipient');
+                // 일반 가족 사용자라면? 신청 페이지로!
+                alert(`${user.name}님 환영합니다. 일반 사용자 페이지로 이동합니다.`);
                 router.push('/memberApplication');
             } else {
-                alert(`${user.name}님 환영합니다`);
+                // 그 외의 경우 기본 환영 메시지만 띄웁니다.
+                alert(`${user.name}님 환영합니다.`);
             }
         }
     } catch (error) {
-        // 상세 에러 메시지가 있으면 보여주고, 없으면 기본 메시지 출력
+        // 로그인 실패 시 (비번 틀림 등) 서버가 보내준 에러 메시지를 띄웁니다.
         const errorMsg = error.response?.data?.message || '로그인 중 오류가 발생했습니다.';
         alert(errorMsg);
         console.error('Login Error:', error);
     }
 };
 
-// 3. 페이지 이동 함수들
-const goToSignUp = () => router.push('/signup');
-const findId = () => alert('서비스 준비 중입니다.');
-const findPw = () => alert('서비스 준비 중입니다.');
+// 3. [기타 버튼들] 회원가입이나 아이디 찾기 버튼 클릭 시 이동하는 함수들입니다.
+const goToSignUp = () => router.push('/signup'); // 회원가입 페이지로 이동
+const findId = () => alert('서비스 준비 중입니다.'); // 준비 중 알림
+const findPw = () => alert('서비스 준비 중입니다.'); // 준비 중 알림
 </script>
 
 <template>

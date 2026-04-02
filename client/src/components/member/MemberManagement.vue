@@ -1,14 +1,14 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSurveyStore } from '@/stores/useSurveyStore';
-import TabPlan from './MemberTabPlan.vue';
-import TabResult from './MemberTabResult.vue';
+import TabPlan from './m_plan_result/MemberTabPlan.vue';
+import TabResult from './m_plan_result/MemberTabResult.vue';
 
+// 아직 처리 중인 신청서가 있으면 같은 대상자에 대해 중복 신청을 막는다.
 const ACTIVE_APPLICATION_STATUSES = new Set(['대기', '진행중', '진행 중']);
 
 const props = defineProps({
-    // 바깥 화면(ApplicationForm)에서 처음 열 탭을 제어할 수 있게 열어둔 prop
     activeTab: {
         type: String,
         default: 'Application'
@@ -31,14 +31,6 @@ const handleTabChange = (tabName) => {
     emit('change-tab', tabName);
 };
 
-const handleSelectPlan = (planId) => {
-    emit('select-plan', planId);
-};
-
-const handleSelectResult = (resultId) => {
-    emit('select-result', resultId);
-};
-
 watch(
     () => props.activeTab,
     (newTab) => {
@@ -54,13 +46,12 @@ watch(
             <button :class="{ active: currentTab === 'Application' }" @click="handleTabChange('Application')">지원신청서</button>
             <button :class="{ active: currentTab === 'Plan' }" @click="handleTabChange('Plan')">지원계획서</button>
             <button :class="{ active: currentTab === 'Result' }" @click="handleTabChange('Result')">지원결과서</button>
-            <button :class="{ active: currentTab === 'Consult' }" @click="handleTabChange('Consult')">상담내역</button>
+            <button :class="{ active: currentTab === 'Consult' }" @click="handleTabChange('Consult')">상담이력</button>
         </nav>
 
         <div v-if="currentTab === 'Application'" class="tab-content">
             <div class="content-header">
                 <h3>지원 신청서</h3>
-                <!-- 대기/진행중 신청서가 이미 있으면 중복 신청을 막는다. -->
                 <button class="btn-add" :disabled="!selected_bene_id || hasActiveApplication" @click="surveyStore.openSurvey()">
                     {{ hasActiveApplication ? '진행 중인 신청서 존재' : '+ 추가하기' }}
                 </button>
@@ -78,7 +69,7 @@ watch(
                 <tbody>
                     <tr v-if="application_list.length === 0">
                         <td colspan="4" class="empty-msg">
-                            {{ selected_bene_id ? '등록된 신청서가 없습니다.' : '지원대상자를 먼저 선택해주세요.' }}
+                            {{ selected_bene_id ? '등록된 신청서가 없습니다.' : '지원대상자를 먼저 선택해 주세요.' }}
                         </td>
                     </tr>
 
@@ -95,11 +86,11 @@ watch(
         </div>
 
         <div v-else-if="currentTab === 'Plan'" class="tab-content">
-            <TabPlan :beneId="selected_bene_id" @select-plan="handleSelectPlan" />
+            <TabPlan :beneId="selected_bene_id" @select-plan="(planId) => emit('select-plan', planId)" />
         </div>
 
         <div v-else-if="currentTab === 'Result'" class="tab-content">
-            <TabResult :beneId="selected_bene_id" @select-result="handleSelectResult" />
+            <TabResult :beneId="selected_bene_id" @select-result="(resultId) => emit('select-result', resultId)" />
         </div>
     </div>
 </template>

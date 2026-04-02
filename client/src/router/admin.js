@@ -23,6 +23,18 @@ export const admin = [
                 path: '/center-info',
                 name: 'admincenterinfo',
                 component: () => import('@/components/admin/mypage/centerinfo/Admincenterinfo.vue')
+            },
+            {
+                path: '/adjoin-family',
+                name: 'adjoinfamily',
+                component: () => import('@/components/admin/registration/adjoin-family/AdFamilyJoinList.vue'),
+                meta: { sidebar: 'TySidbarsinup' }
+            },
+            {
+                path: '/adjoin-manager',
+                name: 'adjoinmanager',
+                component: () => import('@/components/admin/registration/adjoin-manager/AdManagerJoinList.vue'),
+                meta: { sidebar: 'TySidbarsinup' }
             }
         ]
     }

@@ -2,15 +2,14 @@
 import { ref } from 'vue';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 import JsTopbarad from '@/layout/admin/JsTopbarad.vue';
-import AdSupportInfo from '@/components/admin/supportplan/adbeneficiary/AdSupportInfo.vue';
-import AdminManagement from '@/components/admin/supportplan/adbeneficiary/AdminManagement.vue';
+import AdSupportInfo from '@/components/admin/AdSupportInfo.vue';
+import AdminManagement from '@/components/admin/AdminManagement.vue';
 import AdplanDetail from '@/components/admin/supportplan/adbeneficiary/AdplanDetail.vue';
-import adminsurvey from '@/components/admin/supportplan/adbeneficiary/AdminSurveyView.vue';
-import ManagerAssignView from '@/components/admin/supportplan/adbeneficiary/ManagerAssignModal.vue';
-
-// ⭐️ 새로 만든 관리자용 승인/반려 컴포넌트 임포트 (경로는 실제에 맞게 수정해주세요)
-import AdminPriorityManage from '@/components/admin/supportplan/adbeneficiary/AdminPriorityManage.vue';
 import adResultPlanDetail from '@/components/admin/supportplan/adbeneficiary/AdresultPlanDetail.vue';
+import adminsurvey from '@/components/admin/ad_app/AdminSurveyView.vue';
+import ManagerAssignView from '@/components/admin/ad_app/ManagerAssignModal.vue';
+// ⭐️ 새로 만든 관리자용 승인/반려 컴포넌트 임포트 (경로는 실제에 맞게 수정해주세요)
+import AdminPriorityManage from '@/components/admin/ad_app/AdminPriorityManage.vue';
 
 const selectedId = ref('');
 const selectedPriorityId = ref(null);

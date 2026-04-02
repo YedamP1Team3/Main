@@ -57,7 +57,9 @@ const handleReset = () => {
             <select v-model="searchFilter.status">
                 <option value="all">전체</option>
                 <option value="pending">대기</option>
-                <option value="approved">승인</option>
+                <option value="high">긴급</option>
+                <option value="urgent">중점</option>
+                <option value="planned">계획</option>
                 <option value="rejected">반려</option>
             </select>
         </div>
