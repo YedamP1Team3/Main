@@ -4,7 +4,7 @@ import { useSurveyStore } from '@/stores/useSurveyStore'; // 💡 스토어 연�
 
 import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
 import BeneficiaryInfo from '@/components/manager/supportplan/beneficiary/BeneficiaryInfo.vue';
-import BeneficiaryManagement from '@/components/manager/supportplan/beneficiary/BeneficiaryManagement.vue';
+import BeneficiaryManagement from '@/components/manager/BeneficiaryManagement.vue';
 import BeneficiaryNewPlan from '@/components/manager/supportplan/beneficiary/BeneficiaryNewPlan.vue';
 import BeneficiaryDetail from '@/components/manager/supportplan/beneficiary/BeneficiaryDetail.vue';
 import ResultNewPlan from '@/components/manager/supportplan/beneficiary/resultNewPlan.vue';
@@ -22,12 +22,14 @@ const viewMode = ref('empty');
 const managementRef = ref(null);
 const selectPlan = ref(null);
 const selectResultId = ref(null);
+const selectedPriorityStatus = ref('');
 
 const surveyStore = useSurveyStore(); // 💡 스토어 초기화
 
-const handleIdUpdate = async (id, priorityId) => {
+const handleIdUpdate = async (id, priorityId, priorityStatus) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
+    selectedPriorityStatus.value = priorityStatus;
     viewMode.value = 'empty';
     surveyStore.is_survey_visible = false;
 
@@ -112,6 +114,7 @@ const handleNewPlanOpen = (priorityIdFromChild) => {
                     ref="managementRef"
                     :beneId="selectedId"
                     :priorityId="selectedPriorityId"
+                    :priorityStatus="selectedPriorityStatus"
                     @select-plan="handleIdDetail"
                     @select-result="handleResultIdDetail"
                     @select-app="handleAppDetail"

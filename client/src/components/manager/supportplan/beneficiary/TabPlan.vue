@@ -4,7 +4,8 @@ import axios from 'axios';
 
 const props = defineProps({
     beneId: [String, Number],
-    priorityId: [String, Number]
+    priorityId: [String, Number],
+    priorityStatus: { type: [String, Number] }
 });
 
 const emit = defineEmits(['newaddplan', 'select-plan', 'refresh']);
@@ -36,7 +37,7 @@ function addNewPlan() {
     }
     console.log('--- TabPlan 발신 데이터 체크 ---');
     console.log('1. 현재 계획 목록(planList):', planList.value);
-    console.log('2. 부모에게 받은 props.priorityId:', props.priorityId);
+    console.log('2. 부모에게 받은 props.priorityId:', props.progress_state);
 
     const pId = planList.value.length > 0 ? planList.value[0].priority_id : null;
     console.log('3. 최종적으로 emit할 pId:', pId);

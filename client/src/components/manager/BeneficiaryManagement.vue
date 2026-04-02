@@ -2,13 +2,14 @@
 import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSurveyStore, PRIORITY_MAP } from '@/stores/useSurveyStore'; // 💡 스토어 연결
-import TabPlan from './TabPlan.vue';
-import TabPlanDetail from './TabPlanDetail.vue';
-import resultPlan from './resultPlan.vue';
+import TabPlan from './supportplan/beneficiary/TabPlan.vue';
+import TabPlanDetail from './supportplan/beneficiary/TabPlanDetail.vue';
+import resultPlan from './supportplan/beneficiary/resultPlan.vue';
 
 const props = defineProps({
     beneId: { type: [String, Number] },
-    priorityId: { type: [String, Number] }
+    priorityId: { type: [String, Number] },
+    priorityStatus: { type: [String, Number] }
 });
 
 // 💡 상세 조회를 위한 'select-app' 이벤트 추가

@@ -40,7 +40,7 @@ const router = createRouter({
         {
             path: '/beneficiaryMain',
             name: 'beneficiaryMain',
-            component: () => import('../views/beneficiary/BeneficiaryMain.vue')
+            component: () => import('../views/manager/BeneficiaryMain.vue')
         },
         {
             path: '/manager',
