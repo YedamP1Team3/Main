@@ -27,3 +27,16 @@ export const getFamilyReservations = () => {
 export const cancelReservation = (rsvId) => {
     return axios.delete(`/api/reserve/reservations/${rsvId}`);
 };
+
+export const getManagerReservations = (managerId) => {
+    return axios.get('/api/reserve/manager/reservations', {
+        params: { managerId }
+    });
+};
+
+export const processReservation = (rsvId, decision, rejectReason = '') => {
+    return axios.patch(`/api/reserve/manager/reservations/${rsvId}/process`, {
+        decision,
+        rejectReason
+    });
+};

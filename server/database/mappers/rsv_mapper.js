@@ -1,5 +1,5 @@
-const { pool } = require('../DAO.js');
-const rsvSql = require('../sql/rsv.js');
+const { pool } = require("../DAO.js");
+const rsvSql = require("../sql/rsv.js");
 
 const getBeneficiaryManagerInfo = async (beneId) => {
   let conn = null;
@@ -55,9 +55,10 @@ const selectFamilyReservations = async (userId) => {
   try {
     conn = await pool.getConnection();
     const rows = await conn.query(rsvSql.selectFamilyReservations, [userId]);
+    console.log("FamilyRsvInfo : ", rows);
     return rows;
   } catch (err) {
-    console.error('selectFamilyReservations mapper 에러:', err);
+    console.error("selectFamilyReservations mapper 에러:", err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -71,7 +72,7 @@ const deleteReservation = async (rsvId) => {
     const result = await conn.query(rsvSql.deleteReservation, [rsvId]);
     return result;
   } catch (err) {
-    console.error('deleteReservation mapper 에러:', err);
+    console.error("deleteReservation mapper 에러:", err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -201,20 +202,6 @@ const deleteBlockedTime = async (managerId, date, startTime, endTime) => {
   }
 };
 
-const selectBeneReservations = async (userId) => {
-  let conn = null;
-  try {
-    conn = await pool.getConnection();
-    const rows = await conn.query(rsvSql.selectBeneReservations, [userId]);
-    return rows;
-  } catch (err) {
-    console.error('selectBeneReservations error:', err);
-    throw err;
-  } finally {
-    if (conn) conn.release();
-  }
-};
-
 const selectManagerReservations = async (managerId) => {
   let conn = null;
   try {
@@ -224,7 +211,69 @@ const selectManagerReservations = async (managerId) => {
     ]);
     return rows;
   } catch (err) {
-    console.error('selectManagerReservations error:', err);
+    console.error("selectManagerReservations error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const updateReservationStatus = async (rsvId, status) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const result = await conn.query(rsvSql.updateReservationStatus, [
+      status,
+      rsvId,
+    ]);
+    return result;
+  } catch (err) {
+    console.error("updateReservationStatus error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// -----------------------------------counseling API--------------------------
+
+const insertCounselingNote = async (noteData) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+
+    const { rsvId, counselingType, title, content, futurePlan } = noteData;
+
+    const result = await conn.query(rsvSql.insertCounselingNote, [
+      rsvId,
+      counselingType,
+      title,
+      content,
+      futurePlan,
+    ]);
+
+    return result;
+  } catch (err) {
+    console.error("insertCounselingNote error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const updateReservationStatusToNoteWritten = async (rsvId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+
+    const result = await conn.query(
+      rsvSql.updateReservationStatusToNoteWritten,
+      [rsvId],
+    );
+
+    return result;
+  } catch (err) {
+    console.error("updateReservationStatusToNoteWritten error:", err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -244,6 +293,8 @@ module.exports = {
   insertManagerSchedules,
   getBeneficiariesByFamilyId,
   getBeneficiaryManagerInfo,
-  selectBeneReservations,
   selectManagerReservations,
+  updateReservationStatus,
+  insertCounselingNote,
+  updateReservationStatusToNoteWritten,
 };
