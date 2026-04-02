@@ -96,27 +96,27 @@ const updateUser = async (data) => {
       // --- [상황 A: 비밀번호도 같이 바꿀 때] ---
       const hashedPassword = await bcrypt.hash(data.newPassword, 10);
       const updateParams = [
-        data.name,
-        data.phone,
+        data.user_name, // data.name -> data.user_name (회원가입과 통일)
+        data.tel, // data.phone -> data.tel
         data.email,
-        data.postcode,
+        data.zip_code, // data.postcode -> data.zip_code (★)
         data.address,
-        data.detailAddress,
-        hashedPassword, // 새로 만든 암호문 추가
-        data.id,
+        data.detail_address, // data.detailAddress -> data.detail_address (★)
+        hashedPassword,
+        data.user_id, // data.id -> data.user_id (★)
       ];
       // 비밀번호가 포함된 전용 매퍼를 호출합니다.
       await infoMapper.updateUserWithPassword(updateParams);
     } else {
       // --- [상황 B: 이름, 연락처 등만 바꿀 때] ---
       const updateParams = [
-        data.name,
-        data.phone,
+        data.user_name,
+        data.tel,
         data.email,
-        data.postcode,
+        data.zip_code, // ★
         data.address,
-        data.detailAddress,
-        data.id,
+        data.detail_address, // ★
+        data.user_id, // ★
       ];
       // 기존 비밀번호는 건드리지 않는 일반 매퍼를 호출합니다.
       await infoMapper.updateUser(updateParams);
@@ -129,6 +129,30 @@ const updateUser = async (data) => {
   }
 };
 
+// 6. [기관 목록 조회] 회원가입 시 선택할 수 있는 기관 리스트를 가져옵니다.
+const getAllAgencies = async () => {
+  try {
+    // 매퍼에게 "창고에서 기관 정보(ID, 이름) 다 꺼내와"라고 시킵니다.
+    const agencies = await infoMapper.selectAllAgencies();
+
+    // 가져온 데이터를 반환합니다.
+    // (만약 데이터가 없으면 빈 배열 []이 반환될 것입니다)
+    return agencies;
+  } catch (err) {
+    console.error("기관 목록 조회 서비스 에러:", err);
+    throw err;
+  }
+};
+
+const getAgenciesByRegion = async (region) => {
+  try {
+    return await infoMapper.selectAgenciesByRegion(region);
+  } catch (err) {
+    console.error("지역별 기관 조회 서비스 에러:", err);
+    throw err;
+  }
+};
+
 // 위 기능들을 다른 곳(Router)에서 쓸 수 있게 내보냅니다.
 module.exports = {
   userSignup,
@@ -136,4 +160,6 @@ module.exports = {
   checkIdAvailability,
   getUserDetail,
   updateUser,
+  getAllAgencies,
+  getAgenciesByRegion,
 };

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'; // 데이터 상태를 관리하기 위한 도구들을 가져옵니다.
+import { onMounted, reactive, ref, watch } from 'vue'; // 데이터 상태를 관리하기 위한 도구들을 가져옵니다.
 import { useRouter } from 'vue-router'; // 가입 성공 후 로그인 페이지로 보내주기 위해 사용합니다.
 import axios from 'axios'; // 서버에 회원가입 정보를 전송하기 위한 통신 도구입니다.
 
@@ -12,11 +12,33 @@ import RadioButton from 'primevue/radiobutton';
 
 const router = useRouter(); // 페이지 이동 함수를 준비합니다.
 
-// 선택창(Select)에 보여줄 기관 목록 예시 데이터입니다.
-const agencyOptions = ref([
-    { label: '기관 A', value: 102 },
-    { label: '기관 B', value: 101 }
-]);
+// 빈 배열로 초기화
+const agencyOptions = ref([]);
+
+const fetchAgencies = async () => {
+    if (!form.region) {
+        agencyOptions.value = [];
+        return;
+    }
+
+    try {
+        // 서버에 ?region=대구 와 같이 파라미터를 보냅니다.
+        const response = await axios.get('/api/info/agencies', {
+            params: { region: form.region }
+        });
+
+        agencyOptions.value = response.data;
+
+        if (agencyOptions.value.length === 0) {
+            agencyOptions.value = [{ label: '해당 지역에 등록된 기관이 없습니다.', value: null }];
+        }
+    } catch (error) {
+        console.error('기관 목록을 가져오는 중 오류 발생:', error);
+        agencyOptions.value = [{ label: '기관 목록 로드 실패', value: null }];
+    }
+};
+
+// [기관 목록 가져오기] 서버에서 데이터르 받아오는 함수
 
 // 1. [회원가입 폼 데이터] 사용자가 입력할 모든 정보를 담는 큰 바구니입니다.
 const form = reactive({
@@ -100,6 +122,18 @@ const searchAddress = () => {
 
 // 4. [가입하기] 최종 버튼을 눌렀을 때 실행됩니다.
 const submit = async () => {
+    if (!form.name || !form.userId || !form.password || !form.passwordConfirm || !form.phone || !form.address) {
+        alert('이름, 아이디, 비밀번호, 비밀번호확인 ,전화번호, 주소는 필수 입력 사항입니다');
+        return;
+    }
+
+    if (form.userType === 'agency') {
+        if (!form.region || !form.organization) {
+            alert('기관 담당자는 지역과 소속 기관을 반드시 선택해야 합니다.');
+            return;
+        }
+    }
+
     // [검사 1] 비밀번호와 비밀번호 확인이 똑같은지 확인합니다.
     if (form.password !== form.passwordConfirm) {
         alert('비밀번호가 다릅니다. 다시 확인해주세요');
@@ -137,6 +171,18 @@ const submit = async () => {
         alert('가입 처리 중 오류가 발생했습니다.');
     }
 };
+
+watch(
+    () => form.region,
+    (newRegion) => {
+        form.organization = '';
+        fetchAgencies();
+    }
+);
+
+onMounted(() => {
+    // fetchAgencies();
+});
 </script>
 
 <template>
@@ -208,7 +254,7 @@ const submit = async () => {
                         <div class="field mb-3">
                             <label class="block text-900 font-semibold mb-2">소속 기관 선택</label>
                             <div class="flex gap-2">
-                                <Select v-model="form.region" :options="['서울', '대구']" placeholder="지역 선택" class="flex-1" />
+                                <Select v-model="form.region" :options="['서울', '경기도', '부산']" placeholder="지역 선택" class="flex-1" />
                                 <Select v-model="form.organization" :options="agencyOptions" optionLabel="label" optionValue="value" placeholder="기관 선택" class="flex-1" />
                             </div>
                         </div>

@@ -35,9 +35,19 @@ const updateUser = `
     WHERE user_id = ?    -- [주의!] 이 아이디를 가진 사람의 정보만 바꾸겠다는 뜻입니다.
 `;
 
+const selectAgenciesByRegion = `
+    SELECT 
+            agency_id AS id, 
+            agency_name AS agency_name 
+        FROM agency_info
+        WHERE region = ?
+        ORDER BY agency_name ASC
+`;
+
 // 이 쿼리들을 다른 파일(Mapper)에서 가져다 쓸 수 있도록 내보냅니다.
 module.exports = {
   insertUser,
   selectUserById,
   updateUser,
+  selectAgenciesByRegion,
 };
