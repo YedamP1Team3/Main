@@ -1,20 +1,21 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import { storeToRefs } from 'pinia';
-import axios from 'axios'; // 서버와 통신하기 위한 axios 라이브러리 임포트
+// 1. 필요한 도구들을 가져오는 단계
+import { onMounted, ref } from 'vue'; // 시작 시 실행 함수와 반응형 데이터를 만드는 도구
+import { useRouter } from 'vue-router'; // 페이지 이동을 도와주는 도구
+import { useAuthStore } from '@/stores/auth'; // 로그인된 유저 정보를 저장하는 창고
+import { storeToRefs } from 'pinia'; // 저장소 데이터를 반응형으로 꺼내오기 위한 도구
+import axios from 'axios'; // 서버와 통신(HTTP)하기 위한 도구
 
-const router = useRouter();
+const router = useRouter(); // 라우터 기능 사용 준비
 
-/* 1. 인증 스토어에서 로그인한 유저 정보 가져오기 */
-const authStore = useAuthStore();
-const { userId } = storeToRefs(authStore); // 내 대상자만 가져오기 위해 userId(family_id)를 추가로 추출
+/* 1. 로그인한 사용자의 ID 가져오기 */
+const authStore = useAuthStore(); // 인증 정보 창고를 엽니다.
+const { userId } = storeToRefs(authStore); // 창고에서 현재 로그인한 유저의 ID를 꺼냅니다.
 
-/* 2. 지원대상자 더미 데이터 (나중에 DB 연결 시 API로 교체하세요!) */
-// [수정] 기존의 더미데이터는 삭제하고 빈 배열([])로 초기화
-const recipients = ref([]);
+/* 2. 화면에 보여줄 데이터 바구니들 */
+const recipients = ref([]); // 서버에서 받아올 '지원 대상자 목록'이 담길 빈 리스트
 const userInfo = ref({
+    // 내 프로필 정보가 담길 객체
     userId: '',
     userName: '',
     userEmail: '',
@@ -23,65 +24,69 @@ const userInfo = ref({
     joinDate: ''
 });
 
-//  날짜 형식을 YYYY-MM-DD로 변환
+// 날짜 형식 도우미: DB의 복잡한 날짜 정보를 "2026-04-01"처럼 예쁘게 잘라줍니다.
 const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = ('0' + (date.getMonth() + 1)).slice(-2);
-    const day = ('0' + date.getDate()).slice(-2);
-    return `${year}-${month}-${day}`; // 1990-01-01 형식
+    const year = date.getFullYear(); // 연도 추출
+    const month = ('0' + (date.getMonth() + 1)).slice(-2); // 월 추출 (두 자릿수 맞춤)
+    const day = ('0' + date.getDate()).slice(-2); // 일 추출 (두 자릿수 맞춤)
+    return `${year}-${month}-${day}`;
 };
 
+// [함수 A] 내 상세 정보(프로필)를 서버에서 가져오기
 const fetchMyDetail = async () => {
     try {
-        // 수정페이지에서 썼던 API와 동일하거나 유사한 상세조회 API 호출
+        // 서버에 내 ID를 보내서 상세 데이터를 달라고 요청(GET)합니다.
         const response = await axios.get(`/api/info/user-detail/${userId.value}`);
-        const data = response.data;
+        const data = response.data; // 서버에서 받은 데이터(user_id 등)를 우리 바구니(userInfo)에 맞게 옮겨 담습니다.
 
-        // 서버에서 받은 데이터를 화면용 변수에 할당
         userInfo.value.userId = data.user_id;
         userInfo.value.userName = data.user_name;
         userInfo.value.userEmail = data.email;
-        userInfo.value.organization = data.agency_name; // 혹은 data.region + data.agency_name
+        userInfo.value.organization = data.agency_name;
         userInfo.value.phone = data.tel;
-        userInfo.value.joinDate = formatDate(data.created_at); // DB 컬럼명에 맞춰 수정
+        userInfo.value.joinDate = formatDate(data.created_at); // 날짜는 예쁘게 변환해서 저장
     } catch (error) {
-        console.error('데이터 조회 실패:', error);
+        console.error('내 데이터 조회 실패:', error); // 에러 발생 시 로그 출력
     }
 };
 
-// 서버에서 지원대상자 목록을 가져오는 함수
+// [함수 B] 내가 관리하는 지원 대상자 목록을 서버에서 가져오기
 const fetchRecipients = async () => {
     try {
-        // 서버의 /recipient/list/유저ID 경로로 데이터를 요청함
+        // 서버의 대상자 목록 API에 내 ID를 보내서 명단을 요청합니다.
         const response = await axios.get(`/api/recipient/list/${userId.value}`);
 
         if (response.data.success) {
-            // 성공 시 서버에서 받은 리스트(list)를 우리 화면의 recipients 변수에 담는다
+            // 성공했다면 서버가 보내준 명단(list)을 recipients 바구니에 쏙 넣습니다.
             recipients.value = response.data.list;
         }
     } catch (error) {
-        console.error('데이터 로드 실패:', error); // 에러 발생 시 콘솔에 내용을 출력
+        console.error('대상자 목록 로드 실패:', error);
     }
 };
 
+// 3. 페이지가 화면에 나타날 때 실행되는 구간
 onMounted(() => {
-    fetchMyDetail(); // 페이지 로드 시 DB 데이터 조회
-    fetchRecipients(); // 기존 지원대상자 조회
+    fetchMyDetail(); // 내 프로필 가져오기 실행
+    fetchRecipients(); // 관리 대상자 목록 가져오기 실행
 });
 
-/* 3. 수정 페이지 이동 함수  */
+/* 4. 다른 페이지로 보내주는 안내판 기능 */
+// 내 정보 수정 페이지로 이동
 const goToMemberEdit = () => {
-    router.push({ name: 'myInfoEdit' }); // 내 정보 수정 페이지로 이동
+    router.push({ name: 'myInfoEdit' });
 };
 
+// 특정 대상자의 수정 페이지로 이동 (누구인지 알아야 하므로 id를 가지고 갑니다)
 const goToRecipientEdit = (id) => {
-    router.push({ name: 'recipientEdit', params: { id: id } }); // 대상자 수정 페이지로 ID값과 함께 이동
+    router.push({ name: 'recipientEdit', params: { id: id } });
 };
 
+// 대상자 추가(리스트) 페이지로 이동
 const goToAddRecipient = () => {
-    router.push({ name: 'recipientList' }); // 대상자 추가 페이지로 이동
+    router.push({ name: 'recipientList' });
 };
 </script>
 

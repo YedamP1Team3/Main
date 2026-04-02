@@ -61,7 +61,8 @@ const toggleAuth = () => {
 <template>
     <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
-            <router-link to="/" class="layout-topbar-logo">
+            <div class="layout-topbar-logo">
+                <!-- <img src="./로고.png" /> -->
                 <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         fill-rule="evenodd"
@@ -80,8 +81,8 @@ const toggleAuth = () => {
                     </g>
                 </svg>
 
-                <span>SAKAI</span>
-            </router-link>
+                <span>DAEGU</span>
+            </div>
 
             <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
                 <div class="a-name text-color font-medium">기관명</div>

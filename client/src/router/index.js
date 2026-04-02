@@ -1,7 +1,7 @@
 import sAdmin from '@/layout/sAdmin_layout/JsLayout.vue';
 import sakayLay from '@/layout/sakima_layout/AppLayout.vue';
 import memberLay from '@/layout/member/mLayout.vue';
-import managerTop from '@/layout/manger/JsTopbarmg.vue';
+import managerTop from '@/layout/manager/JsTopbarmg.vue';
 // import memberSid from '@/layout/member/mSidbar.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { member } from './member.js';
