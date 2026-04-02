@@ -1,5 +1,5 @@
 const { pool } = require("../DAO.js"); // 여러 명이 동시에 DB를 써도 줄을 잘 서게 도와주는 '대기열(Pool)'을 가져옵니다.
-const userSql = require("../sql/info.js"); // 미리 적어둔 SQL 명령어(대본)들을 가져옵니다.
+const infoSql = require("../sql/info.js"); // 미리 적어둔 SQL 명령어(대본)들을 가져옵니다.
 
 // 1. [등록] 신규 회원의 정보를 DB에 한 줄 추가합니다.
 const insertUser = async (userDataArray) => {
@@ -7,7 +7,7 @@ const insertUser = async (userDataArray) => {
   try {
     conn = await pool.getConnection(); // 대기열에서 연결 통로를 하나 빌려옵니다.
     // 준비한 SQL 문장에 회원 정보를 담은 배열(userDataArray)을 넣어 실행합니다.
-    let result = await conn.query(userSql.insertUser, userDataArray);
+    let result = await conn.query(infoSql.insertUser, userDataArray);
     return result; // 실행 결과(성공 여부 등)를 돌려줍니다.
   } catch (err) {
     console.error("Mapper insertUser Error:", err);
@@ -23,7 +23,7 @@ const selectUserById = async (userId) => {
   try {
     conn = await pool.getConnection();
     // 아이디를 조건으로 검색을 실행합니다.
-    const rows = await conn.query(userSql.selectUserById, [userId]);
+    const rows = await conn.query(infoSql.selectUserById, [userId]);
     // 검색 결과의 첫 번째 데이터만 꺼내서 돌려줍니다.
     return rows[0];
   } catch (err) {
@@ -122,6 +122,21 @@ const selectAgenciesByRegion = async (region) => {
   }
 };
 
+const selectAgenciesByCity = async () => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    // 쿼리 결과에서 rows만 깔끔하게 반환 (DB 라이브러리에 따라 결과 구조 확인 필요)
+    const rows = await conn.query(infoSql.selectAgenciesByCity);
+    return rows;
+  } catch (err) {
+    console.error("DB 에러:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 // 이 모든 기능들을 묶어서 밖으로 내보냅니다.
 module.exports = {
   insertUser,
@@ -131,4 +146,5 @@ module.exports = {
   updateUserWithPassword,
   selectAllAgencies,
   selectAgenciesByRegion,
+  selectAgenciesByCity,
 };

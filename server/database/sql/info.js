@@ -44,10 +44,17 @@ const selectAgenciesByRegion = `
         ORDER BY agency_name ASC
 `;
 
+const selectAgenciesByCity = `
+SELECT DISTINCT region AS label, region AS value 
+FROM agency_info
+ORDER BY region ASC;
+`;
+
 // 이 쿼리들을 다른 파일(Mapper)에서 가져다 쓸 수 있도록 내보냅니다.
 module.exports = {
   insertUser,
   selectUserById,
   updateUser,
   selectAgenciesByRegion,
+  selectAgenciesByCity,
 };

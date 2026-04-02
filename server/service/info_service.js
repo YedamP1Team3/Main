@@ -153,6 +153,15 @@ const getAgenciesByRegion = async (region) => {
   }
 };
 
+const getAgenciesByCity = async () => {
+  try {
+    return await infoMapper.selectAgenciesByCity();
+  } catch (err) {
+    console.error("지역별 기관 조회 서비스 에러:", err);
+    throw err;
+  }
+};
+
 // 위 기능들을 다른 곳(Router)에서 쓸 수 있게 내보냅니다.
 module.exports = {
   userSignup,
@@ -162,4 +171,5 @@ module.exports = {
   updateUser,
   getAllAgencies,
   getAgenciesByRegion,
+  getAgenciesByCity,
 };
