@@ -12,6 +12,7 @@ const planContent = ref(''); //내용저장
 const today = new Date().toLocaleDateString(); //작성일
 
 const selectedFiles = ref([]);
+const isSubmitting = ref(false);
 
 const handleFileChange = (event) => {
     const newFiles = Array.from(event.target.files);
@@ -26,12 +27,11 @@ const removeFile = (index) => {
 };
 
 const Approval = async () => {
-    console.log('전송 직전 priorityId:', props.priorityId);
-    console.log('전송 직전 beneId:', props.beneId);
     if (!planObjective.value || !planContent.value) {
         alert('내용을 입력해주세요');
         return;
     }
+    if (isSubmitting.value) return;
 
     const formData = new FormData();
 
@@ -48,6 +48,7 @@ const Approval = async () => {
     });
 
     try {
+        isSubmitting.value = true;
         const response = await axios.post('/api/support-plan', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -60,15 +61,20 @@ const Approval = async () => {
     } catch (error) {
         console.error('데이터 전송 중 에러', error);
         alert('서버 오류가 발생했습니다.');
+    } finally {
+        isSubmitting.value = false;
     }
 };
 
 const SaveTemp = async () => {
-    if (!planObjective.value || !planContent.value) {
+    if (isSubmitting.value) return;
+    if (!planObjective.value) {
         alert('내용을 입력해주세요');
         return;
     }
     try {
+        isSubmitting.value = true;
+
         const formData = new FormData();
         formData.append('manager_id', authStore.userId);
         formData.append('bene_id', props.beneId);
@@ -92,6 +98,8 @@ const SaveTemp = async () => {
     } catch (error) {
         console.error('데이터 전송 중 에러', error);
         alert('서버오류');
+    } finally {
+        isSubmitting.value = false;
     }
 };
 

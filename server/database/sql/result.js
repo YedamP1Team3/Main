@@ -1,29 +1,32 @@
 const selectSupportResultList = `
     SELECT 
-        result_id,         
-        manager_id,        
-        result_title,      
-        DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at, 
-        progress_state,    
-        bene_id
-    FROM support_result
-    WHERE bene_id = ? 
-      AND progress_state != '임시' 
-    ORDER BY result_id DESC       
+        s.result_id,         
+        s.manager_id,        
+        s.result_title,      
+        DATE_FORMAT(s.created_at, '%Y-%m-%d') AS created_at, 
+        s.progress_state,    
+        s.bene_id,
+        u.user_name AS manager_name
+    FROM support_result s
+    LEFT JOIN user_info u ON s.manager_id = u.user_id
+    WHERE s.bene_id = ? 
+      AND s.progress_state != '임시' 
+    ORDER BY s.result_id DESC       
 `;
 //임시저장 리스트
 const selectSupportResultTempList = `
     SELECT 
-        result_draft_id,         
-        manager_id,        
-        result_title,      
-        DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at, 
-        progress_state,    
-        bene_id
-    FROM result_draft
-    WHERE bene_id = ? 
-      AND progress_state = '임시' 
-    ORDER BY result_draft_id DESC       
+        s.result_draft_id,         
+        s.manager_id,        
+        s.result_title,      
+        DATE_FORMAT(s.created_at, '%Y-%m-%d') AS created_at, 
+        s.progress_state,    
+        s.bene_id
+    FROM result_draft s
+    LEFT JOIN user_info u ON s.manager_id = u.user_id
+    WHERE s.bene_id = ? 
+      AND s.progress_state = '임시' 
+    ORDER BY s.result_draft_id DESC       
 `;
 
 const createSupportResult = `

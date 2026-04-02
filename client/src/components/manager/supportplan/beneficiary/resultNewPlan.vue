@@ -13,8 +13,10 @@ const today = new Date().toLocaleDateString(); //작성일
 const supportList = ref([]);
 const supportPlan = ref('');
 const selectedPlans = ref([]);
+const isSubmitting = ref(false);
 
 const Approval = async () => {
+    if (isSubmitting.value) return;
     if (!resultTitle.value || !resultContent.value) {
         alert('내용을 입력해주세요');
         return;
@@ -34,6 +36,7 @@ const Approval = async () => {
         selected_plans: selectedPlans.value
     };
     try {
+        isSubmitting.value = true;
         const response = await axios.post('api/resultPlan/support-result', target);
         if (response.data.success) {
             alert('지원서가 입력되었습니다');
@@ -42,6 +45,8 @@ const Approval = async () => {
     } catch (error) {
         console.error('데이터 전송 중 에러', error);
         alert('서버오류');
+    } finally {
+        isSubmitting.value = false;
     }
 };
 
@@ -50,6 +55,7 @@ const SaveTemp = async () => {
         alert('내용을 입력해주세요');
         return;
     }
+    if (isSubmitting.value) return;
     const target = {
         manager_id: authStore.userId,
         bene_id: props.beneId,
@@ -59,6 +65,7 @@ const SaveTemp = async () => {
         selected_plans: selectedPlans.value
     };
     try {
+        isSubmitting.value = true;
         const response = await axios.post('api/resultPlan/temp-result', target);
         if (response.data.success) {
             alert('지원서가 입력되었습니다');
@@ -67,6 +74,8 @@ const SaveTemp = async () => {
     } catch (error) {
         console.error('데이터 전송 중 에러', error);
         alert('서버오류');
+    } finally {
+        isSubmitting.value = false;
     }
 };
 
