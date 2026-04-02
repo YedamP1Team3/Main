@@ -130,4 +130,9 @@ router.get("/agencies", async (req, res) => {
   }
 });
 
+router.get("/agencies/city", async (req, res) => {
+  let result = await infoService.getAgenciesByCity();
+  res.send(result);
+});
+
 module.exports = router; // 이 라우터 설정을 메인 서버 파일(app.js 등)에서 쓸 수 있게 내보냅니다.

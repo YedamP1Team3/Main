@@ -14,15 +14,29 @@ const router = useRouter(); // 페이지 이동 함수를 준비합니다.
 
 // 빈 배열로 초기화
 const agencyOptions = ref([]);
+const agencyCityOptions = ref([]);
 
+// 1. [지역 목록] - 페이지 로드시나 초기화 시 호출 (파라미터 필요 없음)
+const fetchAgenciesCity = async () => {
+    try {
+        const response = await axios.get('/api/info/agencies/city');
+        // 보통 지역 목록은 { label, value } 형태의 배열로 저장합니다.
+        agencyCityOptions.value = response.data;
+    } catch (error) {
+        console.error('지역 목록 로드 실패:', error);
+    }
+};
+
+// 2. [기관 목록] - 지역(region)이 변경될 때마다 호출
 const fetchAgencies = async () => {
+    // 지역을 다시 '선택 안 함'으로 바꿨을 때 처리
     if (!form.region) {
         agencyOptions.value = [];
+        form.organization = null; // 기존 선택값 초기화
         return;
     }
 
     try {
-        // 서버에 ?region=대구 와 같이 파라미터를 보냅니다.
         const response = await axios.get('/api/info/agencies', {
             params: { region: form.region }
         });
@@ -30,15 +44,13 @@ const fetchAgencies = async () => {
         agencyOptions.value = response.data;
 
         if (agencyOptions.value.length === 0) {
-            agencyOptions.value = [{ label: '해당 지역에 등록된 기관이 없습니다.', value: null }];
+            agencyOptions.value = [{ label: '해당 지역에 기관이 없습니다.', value: null }];
         }
     } catch (error) {
-        console.error('기관 목록을 가져오는 중 오류 발생:', error);
-        agencyOptions.value = [{ label: '기관 목록 로드 실패', value: null }];
+        console.error('기관 목록 로드 실패:', error);
+        agencyOptions.value = [{ label: '로드 실패', value: null }];
     }
 };
-
-// [기관 목록 가져오기] 서버에서 데이터르 받아오는 함수
 
 // 1. [회원가입 폼 데이터] 사용자가 입력할 모든 정보를 담는 큰 바구니입니다.
 const form = reactive({
@@ -175,13 +187,18 @@ const submit = async () => {
 watch(
     () => form.region,
     (newRegion) => {
+        // 지역이 변경되면 기관 선택값은 무조건 초기화
         form.organization = '';
-        fetchAgencies();
+        if (newRegion) {
+            fetchAgencies();
+        } else {
+            agencyOptions.value = [];
+        }
     }
 );
 
 onMounted(() => {
-    // fetchAgencies();
+    fetchAgenciesCity();
 });
 </script>
 
@@ -254,7 +271,7 @@ onMounted(() => {
                         <div class="field mb-3">
                             <label class="block text-900 font-semibold mb-2">소속 기관 선택</label>
                             <div class="flex gap-2">
-                                <Select v-model="form.region" :options="['서울', '경기도', '부산']" placeholder="지역 선택" class="flex-1" />
+                                <Select v-model="form.region" :options="agencyCityOptions" optionLabel="label" optionValue="value" placeholder="지역 선택" class="flex-1" />
                                 <Select v-model="form.organization" :options="agencyOptions" optionLabel="label" optionValue="value" placeholder="기관 선택" class="flex-1" />
                             </div>
                         </div>

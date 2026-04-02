@@ -6,7 +6,6 @@ const selectAllUser = async () => {
   let conn = null;
   try {
     conn = await pool.getConnection();
-
     let rows = await conn.query(userSql.selectAllUser);
     return rows;
   } catch (err) {
