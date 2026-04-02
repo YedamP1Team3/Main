@@ -1,47 +1,3 @@
-<template>
-    <div v-if="visible" class="modal-overlay" @click="handleClose">
-        <div class="modal-container" @click.stop>
-            <div class="modal-header">
-                <h3 class="modal-title">예약 처리</h3>
-                <button type="button" class="close-btn" @click="handleClose">✕</button>
-            </div>
-
-            <div class="modal-body">
-                <div class="info-box">
-                    <p><strong>보호자명</strong> : {{ reservation?.family_name }}</p>
-                    <p><strong>지원대상자명</strong> : {{ reservation?.bene_name }}</p>
-                    <p><strong>예약날짜</strong> : {{ reservation?.reservation_date }}</p>
-                    <p><strong>예약시간</strong> : {{ reservation?.reservation_time }}</p>
-                </div>
-
-                <div class="decision-section">
-                    <p class="section-label">처리 방식을 선택하세요.</p>
-
-                    <label class="radio-item">
-                        <input v-model="decision" type="radio" value="APPROVED" />
-                        승인
-                    </label>
-
-                    <label class="radio-item">
-                        <input v-model="decision" type="radio" value="REJECTED" />
-                        반려
-                    </label>
-                </div>
-
-                <div v-if="decision === 'REJECTED'" class="reject-section">
-                    <label for="rejectReason" class="section-label">반려사유</label>
-                    <textarea id="rejectReason" v-model="rejectReason" class="reject-textarea" placeholder="반려 사유를 입력하세요." rows="4" />
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="cancel-btn" @click="handleClose">취소</button>
-                <button type="button" class="confirm-btn" :disabled="isConfirmDisabled" @click="handleConfirm">확인</button>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { computed, ref, watch } from 'vue';
 
@@ -91,6 +47,50 @@ const handleConfirm = () => {
     });
 };
 </script>
+
+<template>
+    <div v-if="visible" class="modal-overlay" @click="handleClose">
+        <div class="modal-container" @click.stop>
+            <div class="modal-header">
+                <h3 class="modal-title">예약 처리</h3>
+                <button type="button" class="close-btn" @click="handleClose">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="info-box">
+                    <p><strong>보호자명</strong> : {{ reservation?.family_name }}</p>
+                    <p><strong>지원대상자명</strong> : {{ reservation?.bene_name }}</p>
+                    <p><strong>예약날짜</strong> : {{ reservation?.reservation_date }}</p>
+                    <p><strong>예약시간</strong> : {{ reservation?.reservation_time }}</p>
+                </div>
+
+                <div class="decision-section">
+                    <p class="section-label">처리 방식을 선택하세요.</p>
+
+                    <label class="radio-item">
+                        <input v-model="decision" type="radio" value="APPROVED" />
+                        승인
+                    </label>
+
+                    <label class="radio-item">
+                        <input v-model="decision" type="radio" value="REJECTED" />
+                        반려
+                    </label>
+                </div>
+
+                <div v-if="decision === 'REJECTED'" class="reject-section">
+                    <label for="rejectReason" class="section-label">반려사유</label>
+                    <textarea id="rejectReason" v-model="rejectReason" class="reject-textarea" placeholder="반려 사유를 입력하세요." rows="4" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" @click="handleClose">취소</button>
+                <button type="button" class="confirm-btn" :disabled="isConfirmDisabled" @click="handleConfirm">확인</button>
+            </div>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .modal-overlay {

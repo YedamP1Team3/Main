@@ -11,6 +11,7 @@ const props = defineProps({
 
 const planDetail = ref({});
 const attachments = ref([]);
+const selectedFiles = ref([]);
 const rejectionLog = ref([]); // 반려 히스토리 저장용
 const isSubmitting = ref(false);
 
@@ -27,6 +28,52 @@ const fetchPlanDetail = async (id) => {
     } catch (error) {
         console.error(`에러`, error);
     }
+};
+
+const uploadSelectedFiles = async (planId) => {
+    if (!planId) return false;
+    if (selectedFiles.value.length === 0) return true;
+
+    const formData = new FormData();
+    selectedFiles.value.forEach((file) => {
+        formData.append('files', file);
+    });
+
+    const response = await axios.post(`api/api/support-plans/${planId}/files`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    if (response.data?.status !== 'success') return false;
+    selectedFiles.value = [];
+    await fetchPlanDetail(planId);
+    return true;
+};
+
+const deleteExistingFile = async (fileId) => {
+    const planId = planDetail.value?.plan_id;
+    if (!planId || !fileId) return;
+    if (!confirm('이 파일을 삭제하시겠습니까?')) return;
+    try {
+        const response = await axios.delete(`api/api/support-plans/${planId}/files/${fileId}`);
+        if (response.data?.status === 'success') {
+            await fetchPlanDetail(planId);
+        } else {
+            alert('파일 삭제에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('파일 삭제 중 오류 발생', error);
+        alert('파일 삭제 중 오류가 발생했습니다.');
+    }
+};
+
+const handleFileChange = (event) => {
+    const newFiles = Array.from(event.target.files);
+    selectedFiles.value = [...selectedFiles.value, ...newFiles];
+    event.target.value = '';
+};
+
+const removeSelectedFile = (index) => {
+    selectedFiles.value.splice(index, 1);
 };
 
 const fetchRejectionHistory = async (id) => {
@@ -72,6 +119,11 @@ const Approval = async (planId) => {
         }
 
         isSubmitting.value = true;
+        const uploaded = await uploadSelectedFiles(planId);
+        if (!uploaded) {
+            alert('파일 업로드에 실패했습니다.');
+            return;
+        }
 
         const updateData = {
             plan_objective: planDetail.value.plan_objective,
@@ -95,6 +147,11 @@ const SaveTemp = async (planId) => {
     if (!confirm('내용을 저장하시겠습니까?')) return;
     try {
         isSubmitting.value = true;
+        const uploaded = await uploadSelectedFiles(planId);
+        if (!uploaded) {
+            alert('파일 업로드에 실패했습니다.');
+            return;
+        }
         const updateData = {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
@@ -179,13 +236,25 @@ watch(
                 <label>파일첨부</label>
                 <div class="input-wrapper">
                     <div class="file_input_container">
+                        <input type="file" ref="fileInput" multiple @change="handleFileChange" @click.stop accept=".pdf, .png, .jpg, .jpeg, .xlsx, .xls, .docx, .doc, .hwp" style="display: none" />
+                        <button v-if="['반려/수정중', '반려'].includes(planDetail.progress_state)" type="button" class="btn_file_select" @click="$refs.fileInput.click()">파일 선택하기</button>
+
                         <ul v-if="attachments.length > 0" class="file_list">
                             <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
                                 <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
                                 <span class="file_name">{{ file.origin_name }}</span>
+                                <button v-if="['반려/수정중', '반려'].includes(planDetail.progress_state)" type="button" class="btn_remove" @click.stop="deleteExistingFile(file.file_id)">✕</button>
                             </li>
                         </ul>
                         <span v-else class="no-attachments">첨부된 파일이 없습니다.</span>
+
+                        <ul v-if="selectedFiles.length > 0" class="file_list">
+                            <li v-for="(file, index) in selectedFiles" :key="index" class="file_item">
+                                <span class="file_icon">{{ getFileIcon(file.name) }}</span>
+                                <span class="file_name">{{ file.name }}</span>
+                                <button type="button" class="btn_remove" @click="removeSelectedFile(index)">✕</button>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -479,6 +548,41 @@ watch(
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.btn_file_select {
+    width: fit-content;
+    padding: 10px 15px;
+    background-color: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn_file_select:hover {
+    background-color: #1d4ed8;
+}
+
+.btn_remove {
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn_remove:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
 }
 
 .no-attachments {

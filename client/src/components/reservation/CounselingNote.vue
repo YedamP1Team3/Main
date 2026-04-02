@@ -1,82 +1,3 @@
-<template>
-    <div class="counseling-note-container">
-        <h2 class="page-title">
-            {{ mode === 'edit' ? '상담일지 수정' : '상담일지 작성' }}
-        </h2>
-
-        <section class="info-section">
-            <h3 class="section-title">상담 정보</h3>
-
-            <div class="info-grid">
-                <div class="info-item">
-                    <label class="info-label">보호자명</label>
-                    <div class="info-value">{{ reservationInfo.family_name || '-' }}</div>
-                </div>
-
-                <div class="info-item">
-                    <label class="info-label">지원대상자명</label>
-                    <div class="info-value">{{ reservationInfo.bene_name || '-' }}</div>
-                </div>
-
-                <div class="info-item">
-                    <label class="info-label">장애유형</label>
-                    <div class="info-value">{{ reservationInfo.disability_type || '-' }}</div>
-                </div>
-
-                <div class="info-item">
-                    <label class="info-label">예약날짜</label>
-                    <div class="info-value">{{ reservationInfo.reservation_date || '-' }}</div>
-                </div>
-
-                <div class="info-item">
-                    <label class="info-label">예약시간</label>
-                    <div class="info-value">{{ reservationInfo.reservation_time || '-' }}</div>
-                </div>
-
-                <div class="info-item">
-                    <label class="info-label">예약상태</label>
-                    <div class="info-value">{{ formatStatusLabel(reservationInfo.rsv_status) }}</div>
-                </div>
-            </div>
-        </section>
-
-        <section class="form-section">
-            <h3 class="section-title">상담일지 입력</h3>
-
-            <div class="form-group">
-                <label for="counselingType" class="form-label">상담유형</label>
-                <select id="counselingType" v-model="form.counselingType" class="form-control">
-                    <option value="">선택하세요</option>
-                    <option value="PHONE">전화상담</option>
-                    <option value="VISIT">방문상담</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="title" class="form-label">상담제목</label>
-                <input id="title" v-model="form.title" type="text" class="form-control" placeholder="상담 제목을 입력하세요" maxlength="100" />
-            </div>
-
-            <div class="form-group">
-                <label for="content" class="form-label">상세내용</label>
-                <textarea id="content" v-model="form.content" class="form-control textarea" rows="7" placeholder="상담 상세내용을 입력하세요" />
-            </div>
-
-            <div class="form-group">
-                <label for="futurePlan" class="form-label">성과 및 향후계획</label>
-                <textarea id="futurePlan" v-model="form.futurePlan" class="form-control textarea" rows="6" placeholder="성과 및 향후계획을 입력하세요" />
-            </div>
-        </section>
-
-        <div class="button-group">
-            <button type="button" class="btn cancel-btn" @click="handleCancel">취소</button>
-            <button type="button" class="btn submit-btn" @click="handleSubmit">
-                {{ mode === 'edit' ? '수정하기' : '작성완료' }}
-            </button>
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { reactive, watch } from 'vue';
 
@@ -171,6 +92,85 @@ const handleCancel = () => {
     emit('cancel');
 };
 </script>
+
+<template>
+    <div class="counseling-note-container">
+        <h2 class="page-title">
+            {{ mode === 'edit' ? '상담일지 수정' : '상담일지 작성' }}
+        </h2>
+
+        <section class="info-section">
+            <h3 class="section-title">상담 정보</h3>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <label class="info-label">보호자명</label>
+                    <div class="info-value">{{ reservationInfo.family_name || '-' }}</div>
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label">지원대상자명</label>
+                    <div class="info-value">{{ reservationInfo.bene_name || '-' }}</div>
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label">장애유형</label>
+                    <div class="info-value">{{ reservationInfo.disability_type || '-' }}</div>
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label">예약날짜</label>
+                    <div class="info-value">{{ reservationInfo.reservation_date || '-' }}</div>
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label">예약시간</label>
+                    <div class="info-value">{{ reservationInfo.reservation_time || '-' }}</div>
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label">예약상태</label>
+                    <div class="info-value">{{ formatStatusLabel(reservationInfo.rsv_status) }}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h3 class="section-title">상담일지 입력</h3>
+
+            <div class="form-group">
+                <label for="counselingType" class="form-label">상담유형</label>
+                <select id="counselingType" v-model="form.counselingType" class="form-control">
+                    <option value="">선택하세요</option>
+                    <option value="PHONE">전화상담</option>
+                    <option value="VISIT">방문상담</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="title" class="form-label">상담제목</label>
+                <input id="title" v-model="form.title" type="text" class="form-control" placeholder="상담 제목을 입력하세요" maxlength="100" />
+            </div>
+
+            <div class="form-group">
+                <label for="content" class="form-label">상세내용</label>
+                <textarea id="content" v-model="form.content" class="form-control textarea" rows="7" placeholder="상담 상세내용을 입력하세요" />
+            </div>
+
+            <div class="form-group">
+                <label for="futurePlan" class="form-label">성과 및 향후계획</label>
+                <textarea id="futurePlan" v-model="form.futurePlan" class="form-control textarea" rows="6" placeholder="성과 및 향후계획을 입력하세요" />
+            </div>
+        </section>
+
+        <div class="button-group">
+            <button type="button" class="btn cancel-btn" @click="handleCancel">취소</button>
+            <button type="button" class="btn submit-btn" @click="handleSubmit">
+                {{ mode === 'edit' ? '수정하기' : '작성완료' }}
+            </button>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .counseling-note-container {

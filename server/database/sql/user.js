@@ -220,10 +220,25 @@ const selectDraftAttachment = `
     WHERE plan_draft_id = ? AND file_id = ?
     LIMIT 1
 `;
+//지원계획서 파일 상세조회
+const selectPlanAttachment = `
+    SELECT 
+        file_id,
+        plan_id,
+        path AS file_name
+    FROM attachment_file
+    WHERE plan_id = ? AND file_id = ?
+    LIMIT 1
+`;
 //임시파일 한부분삭제
 const deleteDraftAttachment = `
     DELETE FROM attachment_file
     WHERE plan_draft_id = ? AND file_id = ?
+`;
+//지원계획서 파일 삭제
+const deletePlanAttachment = `
+    DELETE FROM attachment_file
+    WHERE plan_id = ? AND file_id = ?
 `;
 
 module.exports = {
@@ -249,4 +264,6 @@ module.exports = {
   moveDraftAttachmentsToPlan,
   selectDraftAttachment,
   deleteDraftAttachment,
+  selectPlanAttachment,
+  deletePlanAttachment,
 };

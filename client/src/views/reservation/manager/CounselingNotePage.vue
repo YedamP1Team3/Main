@@ -1,23 +1,3 @@
-<template>
-    <div class="page">
-        <header class="layout-header">
-            <JsTopbarmg />
-        </header>
-
-        <div class="layout-body">
-            <RsvSideBar />
-
-            <main class="layout-main">
-                <div class="note-page-container">
-                    <CounselingNote v-if="!isLoading" :mode="mode" :reservationInfo="reservationInfo" :initialForm="initialForm" @submit="handleSubmit" @cancel="handleCancel" />
-
-                    <div v-else class="loading-box">상담 정보를 불러오는 중입니다...</div>
-                </div>
-            </main>
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -134,6 +114,26 @@ onMounted(() => {
     fetchPageData();
 });
 </script>
+
+<template>
+    <div class="page">
+        <header class="layout-header">
+            <JsTopbarmg />
+        </header>
+
+        <div class="layout-body">
+            <RsvSideBar />
+
+            <main class="layout-main">
+                <div class="note-page-container">
+                    <CounselingNote v-if="!isLoading" :mode="mode" :reservationInfo="reservationInfo" :initialForm="initialForm" @submit="handleSubmit" @cancel="handleCancel" />
+
+                    <div v-else class="loading-box">상담 정보를 불러오는 중입니다...</div>
+                </div>
+            </main>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .page {
