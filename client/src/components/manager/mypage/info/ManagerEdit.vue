@@ -1,23 +1,21 @@
 <script setup>
-// 외부 라이브러리나 다른 파일에서 필요한 기능들을 불러오는 단계입니다.
-import { ref, onMounted } from 'vue'; // Vue에서 반응형 데이터(ref)와 화면이 뜰 때 실행할 함수(onMounted)를 가져옵니다.
-import { useRouter } from 'vue-router'; // 페이지 이동을 제어하는 라우터 기능을 가져옵니다.
-import { useAuthStore } from '@/stores/auth'; // 로그인 상태(ID 등)를 관리하는 저장소(Pinia 등)를 가져옵니다.
-import axios from 'axios'; // 서버와 통신하기 위한 도구인 axios를 가져옵니다. (http)
-import { manager } from '@/router/manager'; // 매니저 관련 라우트 정보를 가져옵니다 (여기선 직접 사용되지 않음).
+// 1. 필요한 도구들을 외부에서 가져오는 단계 (임포트)
+import { ref, onMounted } from 'vue'; // Vue의 핵심 기능: 반응형 데이터(ref), 시작 시 실행 함수(onMounted)
+import { useRouter } from 'vue-router'; // 페이지를 이동시키는 도구 (예: 저장 후 목록으로 가기)
+import { useAuthStore } from '@/stores/auth'; // 로그인한 사람의 정보(ID 등)가 저장된 창고
+import axios from 'axios'; // 서버와 데이터를 주고받는 통신 도구
 
-const router = useRouter(); // 페이지 이동을 위해 라우터 인스턴스를 생성합니다.
-const authStore = useAuthStore(); // 로그인된 사용자 정보를 사용하기 위해 스토어를 실행합니다.
+const router = useRouter(); // 페이지 이동 도구 사용 준비
+const authStore = useAuthStore(); // 로그인 정보 창고 사용 준비
 
-// 화면에 입력될 데이터들을 저장하는 바구니를 만드는 단계입니다.
-// 관리자 정보를 담을 반응형 객체입니다. input 태그들과 연결될 데이터들입니다.
+// 2. 화면의 입력창들과 연결될 '데이터 바구니' 만들기 (반응형 변수)
 const managerForm = ref({
-    name: '', // 이름
-    id: '', // 아이디
-    currentPassword: '', // 현재 비밀번호
-    newPassword: '', // 새 비밀번호
-    confirmPassword: '', // 새 비밀번호 확인
-    agencyRegion: '', // 기관 지역
+    name: '', // 이름 입력칸과 연결
+    id: '', // 아이디 (수정 불가용)
+    currentPassword: '', // [중요] 본인 확인을 위해 입력받을 현재 비밀번호
+    newPassword: '', // 새로 바꿀 비밀번호
+    confirmPassword: '', // 비밀번호 확인 (두 번 입력)
+    agencyRegion: '', // 지역
     agencyName: '', // 기관명
     postcode: '', // 우편번호
     address: '', // 주소
@@ -26,35 +24,32 @@ const managerForm = ref({
     email: '' // 이메일
 });
 
-// 카카오(Daum) 주소 API를 사용하여 주소를 검색하는 기능입니다.
+// 3. 주소 찾기 기능 (카카오/다음 우편번호 서비스 연동)
 const openPostcode = () => {
     new window.daum.Postcode({
-        // 카카오 주소찾기 팝업을 실행합니다.
         oncomplete: (data) => {
-            // 사용자가 주소를 선택했을 때 실행되는 함수입니다.
-            // 도로명 주소(R)인지 지번 주소인지 확인하여 변수에 담습니다.
+            // 사용자가 선택한 주소 종류에 따라 주소값을 가져옵니다.
             let fullAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+            managerForm.value.address = fullAddr; // 주소창에 자동 입력
+            managerForm.value.postcode = data.zonecode; // 우편번호창에 자동 입력
 
-            managerForm.value.address = fullAddr; // 선택한 주소를 입력창 데이터에 넣습니다.
-            managerForm.value.postcode = data.zonecode; // 우편번호를 데이터에 넣습니다.
-
-            // 상세주소를 입력하는 칸을 찾아 자동으로 커서(포커스)를 옮겨줍니다.
+            // 주소 입력이 끝나면 '상세주소' 칸으로 커서를 옮겨줍니다.
             const detailInput = document.querySelector('input[placeholder="상세주소를 입력하세요"]');
             if (detailInput) detailInput.focus();
         }
-    }).open();
+    }).open(); // 주소 팝업창 열기
 };
 
-// 페이지가 처음 화면에 나타날 때(컴포넌트가 마운트될 때) 실행되는 코드입니다.
+// 4. [조회] 페이지가 열리자마자 서버에서 내 정보를 가져오는 단계
 onMounted(async () => {
     if (authStore.userId) {
-        // 로그인한 사용자의 ID가 있는지 확인합니다.
+        // 로그인한 아이디가 있다면
         try {
-            // 서버에 해당 ID의 프로필 정보를 달라고 요청(GET)합니다.
+            // 서버에 "내 아이디 줄게, 정보 다 보내줘"라고 요청(GET)합니다.
             const response = await axios.get(`/api/mgmypage/${authStore.userId}`);
-            const data = response.data.profile; // 서버에서 받아온 정보를 변수에 저장합니다.
+            const data = response.data.profile; // 서버가 보내준 데이터 중 프로필만 쏙!
 
-            // 서버에서 받은 데이터를 화면에 보여줄 바구니(managerForm)에 하나씩 옮겨 담습니다.
+            // 서버에서 받은 정보들을 화면의 각 입력창(managerForm)에 채워넣습니다.
             managerForm.value.name = data.name;
             managerForm.value.id = data.userId;
             managerForm.value.phone = data.phone;
@@ -64,27 +59,26 @@ onMounted(async () => {
             managerForm.value.detailAddress = data.detail_address || '';
             managerForm.value.agencyName = data.institution || '';
         } catch (error) {
-            // 데이터를 가져오는데 실패했을 경우 에러 메시지를 띄웁니다.
             console.error('담당자 데이터 로드 실패:', error);
             alert('정보를 불러오는 중 오류가 발생했습니다.');
         }
     } else {
-        // 로그인 정보가 없다면 경고창을 띄우고 로그인 페이지로 보냅니다.
+        // 로그인 정보가 없으면 내쫓습니다.
         alert('로그인 정보가 없습니다.');
         router.push({ name: 'loginForm' });
     }
 });
 
-// '저장' 버튼을 눌렀을 때 실행되는 수정 로직입니다.
+// 5. [저장] 사용자가 수정한 내용을 서버에 보내는 단계
 const saveInfo = async () => {
-    // 1차 검사: 새 비밀번호와 확인용 비밀번호가 똑같은지 확인합니다.
+    // [검사 1] 새 비밀번호를 입력했는데, 확인 입력값과 다르다면 중단!
     if (managerForm.value.newPassword !== managerForm.value.confirmPassword) {
         alert('새 비밀번호와 확인 값이 일치하지 않습니다.');
-        return; // 일치하지 않으면 여기서 함수를 종료합니다.
+        return;
     }
 
     try {
-        // 서버로 보낼 데이터를 정리합니다. (서버가 요구하는 형식에 맞춰 이름을 맞춤)
+        // [검사 2] 서버가 원하는 이름표(Key)를 붙여서 데이터를 포장합니다.
         const updateData = {
             userId: managerForm.value.id,
             user_name: managerForm.value.name,
@@ -93,22 +87,22 @@ const saveInfo = async () => {
             postcode: managerForm.value.postcode,
             address: managerForm.value.address,
             detailAddress: managerForm.value.detailAddress,
-            currentPassword: managerForm.value.currentPassword,
-            newPassword: managerForm.value.newPassword
+            currentPassword: managerForm.value.currentPassword, // 현재 비번 (본인 확인용)
+            newPassword: managerForm.value.newPassword // 새 비번 (수정용)
         };
 
-        // 서버에 수정 요청(PUT)을 보냅니다.
+        // 서버의 '수정 성문(Router)'으로 포장한 데이터를 보냅니다 (PUT 방식).
         const response = await axios.put('/api/mgmypage/update', updateData);
 
         if (response.status === 200) {
-            // 성공(200)했다면
+            // 서버가 "오케이, 수정 완료!"라고 응답(200)하면
             alert('정보가 성공적으로 수정되었습니다.');
-            router.push({ name: 'managerInfo' }); // 정보 확인 페이지로 이동합니다.
+            router.push({ name: 'managerInfo' }); // 수정한 내용을 확인하는 페이지로 이동
         }
     } catch (error) {
-        // 수정 실패 시 에러 내용을 콘솔에 찍고 사용자에게 이유를 알립니다.
+        // 만약 서버에서 "현재 비번 틀렸어!" 같은 에러를 보내면 사용자에게 보여줍니다.
         console.error('수정 에러 상세:', error.response?.data || error);
-        alert(error.response?.data?.mmessage || '수정 중 오류가 발생했습니다.');
+        alert(error.response?.data?.message || '수정 중 오류가 발생했습니다.');
     }
 };
 </script>
