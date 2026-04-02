@@ -10,14 +10,16 @@ const props = defineProps({
 });
 
 const planDetail = ref({});
+const attachments = ref([]);
 const rejectionLog = ref([]); // 반려 히스토리 저장용
 
 // 1. 상세 정보 및 반려 히스토리 가져오기
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/api/support-plans/${id}`);
-        planDetail.value = response.data;
+        const response = await axios.get(`api/api/support-plans/${id}`);
+        planDetail.value = response.data.plan || {};
+        attachments.value = response.data.files || [];
 
         // 상태가 '반려'이거나 이력이 있을 수 있으므로 히스토리 조회
         fetchRejectionHistory(id);
@@ -28,7 +30,7 @@ const fetchPlanDetail = async (id) => {
 
 const fetchRejectionHistory = async (id) => {
     try {
-        const response = await axios.get(`api/adsupport/admin/support-plan/${id}/rejection-history`);
+        const response = await axios.get(`/api/adsupport/admin/support-plan/${id}/rejection-history`);
         rejectionLog.value = response.data.map((log) => ({
             ...log,
             isOpen: false
@@ -46,7 +48,7 @@ const toggleHistory = (log) => {
 const DeleteTemp = async (planId) => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`http://localhost:3000/api/support-plans/${planId}`);
+        const response = await axios.delete(`api/api/support-plans/${planId}`);
         if (response.data.status == 'success') {
             alert('삭제되었습니다');
             emit('refresh');
@@ -93,6 +95,34 @@ const SaveTemp = async (planId) => {
         console.error('오류 발생', error);
     }
 };
+//파일다운로드
+const downloadFile = (file) => {
+    // 백엔드 download.js 라우터 주소에 맞춰 호출
+    // 서버파일명(file_name)과 원본명(origin_name)을 전달
+    const url = `api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
+
+    // 단순 다운로드는 location.href로 충분합니다.
+    window.location.href = url;
+};
+
+const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(ext)) {
+        return '🖼️';
+    }
+
+    const iconMap = {
+        pdf: '📕',
+        xlsx: '📗',
+        xls: '📗',
+        docx: '📘',
+        doc: '📘',
+        hwp: '📝'
+    };
+
+    return iconMap[ext] || '📄';
+};
 
 watch(
     () => props.planId,
@@ -117,23 +147,30 @@ watch(
         <div class="table-container">
             <div class="form-row">
                 <label for="objective">지원목표</label>
-                <div class="content-box">
+                <div class="input-wrapper">
                     <input id="objective" v-model="planDetail.plan_objective" :readonly="!['반려/수정중', '반려'].includes(planDetail.progress_state)" type="text" class="content-input" />
                 </div>
             </div>
 
             <div class="form-row">
                 <label for="content">계획내용</label>
-                <div class="content-box">
+                <div class="input-wrapper">
                     <textarea id="content" v-model="planDetail.plan_content" rows="8" :readonly="!['반려/수정중', '반려'].includes(planDetail.progress_state)" class="content-textarea"></textarea>
                 </div>
             </div>
 
             <div class="form-row">
                 <label>파일첨부</label>
-                <div class="content-box file-box">
-                    <span v-if="planDetail.file_name" class="file-link">{{ planDetail.file_name }}</span>
-                    <span v-else class="no-file">첨부된 파일이 없습니다.</span>
+                <div class="input-wrapper">
+                    <div class="file_input_container">
+                        <ul v-if="attachments.length > 0" class="file_list">
+                            <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
+                                <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
+                                <span class="file_name">{{ file.origin_name }}</span>
+                            </li>
+                        </ul>
+                        <span v-else class="no-attachments">첨부된 파일이 없습니다.</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -250,7 +287,7 @@ watch(
     flex-shrink: 0;
 }
 
-.content-box {
+.input-wrapper {
     flex: 1;
     display: flex;
     align-items: stretch;
@@ -270,12 +307,6 @@ watch(
 .content-textarea {
     resize: none;
     line-height: 1.6;
-}
-
-.file-box {
-    padding: 15px;
-    color: #94a3b8;
-    font-size: 0.9rem;
 }
 
 /* 4. 하단 버튼 그룹 (알약 디자인) */
@@ -378,5 +409,69 @@ watch(
     font-size: 0.95rem;
     color: #334155;
     line-height: 1.6;
+}
+
+/* 💡 추가되는 파일 다운로드 스타일 */
+.file_input_container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 15px;
+}
+
+.file_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.file_item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    min-width: 200px;
+    transition: all 0.2s;
+}
+
+.file_item:hover {
+    border-color: #2563eb;
+    background-color: #f8fafc;
+}
+
+.file_icon {
+    font-size: 1.2rem;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.file_name {
+    flex: 1;
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.no-attachments {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    padding: 5px 0;
+}
+
+.clickable {
+    cursor: pointer;
 }
 </style>

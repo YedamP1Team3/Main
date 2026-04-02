@@ -7,8 +7,12 @@ const getSupportPlanList = async (beneId) => {
 };
 
 const getSupportPlanDetail = async (planID) => {
-  let list = await adminMapper.selectSupportPlanDetail(planID);
-  return list || {};
+  let planResult = await adminMapper.selectSupportPlanDetail(planID);
+  let fileList = await adminMapper.selectAttachments(planID);
+  return {
+    plan: planResult || {},
+    files: fileList || [],
+  };
 };
 
 const approveSupportPlan = async (planID) => {

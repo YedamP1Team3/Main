@@ -112,6 +112,7 @@ const handleNewPlanOpen = (priorityIdFromChild) => {
                 <BeneficiaryManagement
                     ref="managementRef"
                     :beneId="selectedId"
+                    :priorityId="selectedPriorityId"
                     @select-plan="handleIdDetail"
                     @select-result="handleResultIdDetail"
                     @select-app="handleAppDetail"

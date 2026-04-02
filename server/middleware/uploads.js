@@ -13,8 +13,21 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    // 파일명 중복을 방지하기 위해 [현재시간-원본파일명]으로 저장합니다.
-    const uniqueSuffix = Date.now() + "-" + file.originalname;
+    const normalizedOriginalName = (() => {
+      if (!file?.originalname) return "file";
+      const hasNonLatin1CodePoint = Array.from(file.originalname).some(
+        (ch) => ch.codePointAt(0) > 255,
+      );
+      const decodedName = hasNonLatin1CodePoint
+        ? file.originalname
+        : Buffer.from(file.originalname, "latin1").toString("utf8");
+
+      const baseName = path.basename(decodedName);
+      file.originalname = baseName;
+      return baseName || "file";
+    })();
+
+    const uniqueSuffix = `${Date.now()}-${normalizedOriginalName}`;
     cb(null, uniqueSuffix);
   },
 });
