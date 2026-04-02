@@ -76,7 +76,7 @@ const submitSurvey = async () => {
     const payload = {
         bene_id: surveyStore.selected_bene_id,
         version_id: currentVersionId.value,
-        user_id: authStore.userId,
+        user_id: authStore.userName,
         answers: answers.value
     };
 

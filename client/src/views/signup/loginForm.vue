@@ -54,6 +54,10 @@ const handleLogin = async () => {
                 // 일반 가족 사용자라면? 신청 페이지로!
                 alert(`${user.name}님 환영합니다. 일반 사용자 페이지로 이동합니다.`);
                 router.push('/memberApplication');
+            } else if (userRole === 'SYSADMIN') {
+                // 일반 가족 사용자라면? 신청 페이지로!
+                alert(`${user.name}님 환영합니다. 일반 사용자 페이지로 이동합니다.`);
+                router.push('/survey');
             } else {
                 // 그 외의 경우 기본 환영 메시지만 띄웁니다.
                 alert(`${user.name}님 환영합니다.`);
