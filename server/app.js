@@ -42,7 +42,7 @@ app.use("/mgmypage", mgMyPageRouter);
 app.use("/mgtargets", mgTargetRouter);
 app.use("/adagency", adAgencyRouter);
 app.use("/admypage", admypageRouter);
-app.use("/adhistory", adapphistoryRouter);
+// app.use("/adhistory", adapphistoryRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcom!!");
