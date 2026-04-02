@@ -34,8 +34,7 @@ const router = useRouter();
 
 const isLoading = ref(true);
 
-const mode = computed(() =>
-route.name === 'editCounselingNote' ? 'edit' : 'create');
+const mode = computed(() => (route.name === 'editCounselingNote' ? 'edit' : 'create'));
 
 const reservationInfo = ref({
     rsv_id: '',
@@ -73,66 +72,66 @@ const formatReservationInfo = (item) => {
 };
 
 const formatInitialForm = (note) => {
-  return {
-    counselingType: note.counseling_type || '',
-    title: note.title || '',
-    content: note.content ||'',
-    futurePlan: note.future_plan || ''
-  };
+    return {
+        counselingType: note.counseling_type || '',
+        title: note.title || '',
+        content: note.content || '',
+        futurePlan: note.future_plan || ''
+    };
 };
 
 const fetchPageData = async () => {
-  try {
-    const rsvId = route.query.rsvId;
+    try {
+        const rsvId = route.query.rsvId;
 
-    if (!rsvId) {
-      alert('잘못된 접근입니다.');
-      router.push({ name: 'managecounsel'});
-      return;
-    }
-    const reservationRes = await getCounselReservationByRsvId(rsvId);
-    reservationInfo.value = formatReservationInfo(reservationRes.data.reservation);
+        if (!rsvId) {
+            alert('잘못된 접근입니다.');
+            router.push({ name: 'managecounsel' });
+            return;
+        }
+        const reservationRes = await getCounselReservationByRsvId(rsvId);
+        reservationInfo.value = formatReservationInfo(reservationRes.data.reservation);
 
-    if (mode.value === 'edit') {
-      const noteRes = await getCounselingNoteByRsvId(rsvId);
-      initialForm.value = formatInitialForm(noteRes.data.note);
+        if (mode.value === 'edit') {
+            const noteRes = await getCounselingNoteByRsvId(rsvId);
+            initialForm.value = formatInitialForm(noteRes.data.note);
+        }
+    } catch (err) {
+        console.error('상담일지 페이지 조회 실패 : ', err);
+        alert(err.response?.data?.message || '상담 정보 조회 실패');
+        router.push({ name: 'managecounsel' });
+    } finally {
+        isLoading.value = false;
     }
-  } catch (err) {
-    console.error('상담일지 페이지 조회 실패 : ', err);
-    alert(err.response?.data?.message || '상담 정보 조회 실패');
-    router.push({name: 'managecounsel'});
-  } finally {
-    isLoading.value = false;
-  }
 };
 
 const handleSubmit = async (formData) => {
-  try {
-    const payload = {
-      rsvId: reservationInfo.value.rsv_id,
-      ...formData
-    };
+    try {
+        const payload = {
+            rsvId: reservationInfo.value.rsv_id,
+            ...formData
+        };
 
-    if (mode.value === 'create') {
-      await createCounselingNote(payload);
-      alert('상담일지가 작성되었습니다.');
-    } else {
-      await updateCounselingNote(reservationInfo.value.rsv_id, formData);
-      alert('상담일지가 수정되었습니다.');
+        if (mode.value === 'create') {
+            await createCounselingNote(payload);
+            alert('상담일지가 작성되었습니다.');
+        } else {
+            await updateCounselingNote(reservationInfo.value.rsv_id, formData);
+            alert('상담일지가 수정되었습니다.');
+        }
+        router.push({ name: 'managecounsel' });
+    } catch (err) {
+        console.error('상담일지 저장 실패 : ', err);
+        alert(err.response?.data?.message || '상담일지 저장 실패');
     }
-    router.push({ name: 'managecounsel'});
-  } catch (err) {
-    console.error('상담일지 저장 실패 : ', err);
-    alert(err.response?.data?.message || '상담일지 저장 실패');
-  }
 };
 
-const handleCancel = () = {
-  router.push({ name: 'managecounsel'});
+const handleCancel = () => {
+    router.push({ name: 'managecounsel' });
 };
 
 onMounted(() => {
-  fetchPageData();
+    fetchPageData();
 });
 </script>
 

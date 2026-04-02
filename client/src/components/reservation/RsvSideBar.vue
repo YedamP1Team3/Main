@@ -16,8 +16,6 @@ export default {
         <nav class="sidebar-menu">
             <RouterLink :to="{ name: 'managereservation' }" class="menu-item" active-class="active"> 상담예약 관리 </RouterLink>
 
-            <RouterLink :to="{ name: 'counselingnotepage' }" class="menu-item" active-class="active"> 상담일지 작성 </RouterLink>
-
             <RouterLink :to="{ name: 'managecounsel' }" class="menu-item" active-class="active"> 상담일지 관리 </RouterLink>
 
             <RouterLink :to="{ name: 'schedule' }" class="menu-item" active-class="active"> 상담시간 관리 </RouterLink>

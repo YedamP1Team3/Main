@@ -369,4 +369,6 @@ module.exports = {
   selectCounselReservationByRsvId,
   insertCounselingNote,
   updateReservationStatusToNoteWritten,
+  selectCounselingNoteByRsvId,
+  updateCounselingNoteByRsvId,
 };
