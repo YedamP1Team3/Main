@@ -8,6 +8,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close']); // 목록으로 돌아가기 위한 이벤트
 
+const attachments = ref([]);
 const planDetail = ref({});
 const isLoading = ref(false);
 
@@ -19,13 +20,9 @@ const fetchPlanDetail = async (id) => {
     try {
         // ✅ API 주소 주의: 서버 포트(3000)와 경로를 명확히 작성
         const response = await axios.get(`api/api/support-plans/${id}`);
+        planDetail.value = response.data.plan || {};
+        attachments.value = response.data.files || [];
 
-        // 데이터가 배열로 올 경우를 대비해 첫 번째 항목 선택
-        if (Array.isArray(response.data)) {
-            planDetail.value = response.data[0] || {};
-        } else {
-            planDetail.value = response.data || {};
-        }
         console.log('계획서 상세 로드 성공:', planDetail.value);
     } catch (error) {
         console.error('상세 데이터를 불러오는 중 에러 발생:', error);
@@ -35,12 +32,41 @@ const fetchPlanDetail = async (id) => {
     }
 };
 
+const downloadFile = (file) => {
+    const isConfirmed = confirm(`'${file.origin_name}' 파일을 다운로드하시겠습니까?`);
+    if (isConfirmed) {
+        const url = `api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
+
+        console.log('다운로드 시작:', file.origin_name);
+        window.location.href = url;
+    }
+};
+
 // 2. 컴포넌트가 마운트되거나 planId가 바뀔 때마다 데이터 다시 호출
 onMounted(() => fetchPlanDetail(props.planId));
 watch(
     () => props.planId,
     (newId) => fetchPlanDetail(newId)
 );
+
+const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(ext)) {
+        return '🖼️';
+    }
+
+    const iconMap = {
+        pdf: '📕',
+        xlsx: '📗',
+        xls: '📗',
+        docx: '📘',
+        doc: '📘',
+        hwp: '📝'
+    };
+
+    return iconMap[ext] || '📄';
+};
 </script>
 
 <template>
@@ -78,6 +104,20 @@ watch(
                     <tr>
                         <th>계획내용</th>
                         <td colspan="3" class="content-text">{{ planDetail.plan_content }}</td>
+                    </tr>
+                    <tr>
+                        <th>파일첨부</th>
+                        <td colspan="3">
+                            <div class="file_input_container">
+                                <ul v-if="attachments.length > 0" class="file_list">
+                                    <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
+                                        <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
+                                        <span class="file_name">{{ file.origin_name }}</span>
+                                    </li>
+                                </ul>
+                                <span v-else class="no-attachments">첨부된 파일이 없습니다.</span>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>

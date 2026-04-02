@@ -117,8 +117,7 @@ const selectSupportResultTempDetail = `
     SELECT 
         result_draft_id AS result_id, 
         result_title,
-        result_content,
-        selected_plan_ids,  
+        result_content,    
         progress_state,
         DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at,
         manager_id,
@@ -142,8 +141,7 @@ const insertTempMapping = `
     VALUES (?, ?)
 `;
 
-const selectLinkedTempList =
-`SELECT 
+const selectLinkedTempList = `SELECT 
         p.plan_id,
         p.plan_objective,
         p.plan_content
@@ -195,5 +193,5 @@ module.exports = {
   removeTempResult,
   removeTempMapping,
   rejectSupportResult,
-  resubmitSupportResult
+  resubmitSupportResult,
 };

@@ -43,8 +43,12 @@ const getFileIcon = (fileName) => {
 };
 
 const downloadFile = (file) => {
-    const url = `/api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
-    window.location.href = url;
+    const isConfirmed = confirm(`'${file.origin_name}' 파일을 다운로드하시겠습니까?`);
+    if (isConfirmed) {
+        const url = `api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
+        console.log('다운로드 시작:', file.origin_name);
+        window.location.href = url;
+    }
 };
 
 const fetchRejectionHistory = async (id) => {
