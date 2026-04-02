@@ -45,7 +45,7 @@ const handleLogin = async () => {
             if (userRole === 'ADMIN') {
                 // 관리자라면? 관리자 메인으로!
                 alert(`${user.name}님 환영합니다. 관리자 페이지로 이동합니다.`);
-                router.push('/AdministratorMain');
+                router.push('/adjoin-family');
             } else if (userRole === 'MANAGER') {
                 // 담당자(시설장 등)라면? 담당자 메인으로!
                 alert(`${user.name}님 환영합니다. 담당자 페이지로 이동합니다.`);
@@ -53,7 +53,7 @@ const handleLogin = async () => {
             } else if (userRole === 'FAMILY') {
                 // 일반 가족 사용자라면? 신청 페이지로!
                 alert(`${user.name}님 환영합니다. 일반 사용자 페이지로 이동합니다.`);
-                router.push('/memberApplication');
+                router.push('/homepage');
             } else if (userRole === 'SYSADMIN') {
                 // 일반 가족 사용자라면? 신청 페이지로!
                 alert(`${user.name}님 환영합니다. 일반 사용자 페이지로 이동합니다.`);
