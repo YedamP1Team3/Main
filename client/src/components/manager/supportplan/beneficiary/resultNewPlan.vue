@@ -19,6 +19,12 @@ const Approval = async () => {
         alert('내용을 입력해주세요');
         return;
     }
+
+    if (selectedPlans.value.length === 0) {
+        alert('연결된 지원계획서가 없습니다. 결과에 포함할 계획을 선택해주세요.');
+        return;
+    }
+
     const target = {
         manager_id: authStore.userId,
         bene_id: props.beneId,
@@ -28,7 +34,7 @@ const Approval = async () => {
         selected_plans: selectedPlans.value
     };
     try {
-        const response = await axios.post('http://localhost:3000/resultPlan/support-result', target);
+        const response = await axios.post('api/resultPlan/support-result', target);
         if (response.data.success) {
             alert('지원서가 입력되었습니다');
             emit('refresh');

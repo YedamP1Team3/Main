@@ -4,7 +4,8 @@ import axios from 'axios';
 
 const props = defineProps({
     beneId: [String, Number],
-    progress_state: String
+    // progress_state: String,
+    progressStatus: { type: [String, Number] }
 });
 
 const emit = defineEmits(['newresultplan', 'select-result', 'refresh']);
@@ -30,8 +31,8 @@ function addNewPlan() {
         alert('지원자를 클릭해주세요');
         return;
     }
-    if (!props.progress_state === '대기') {
-        alert('대기단계 지원계획서를 신청하지 못합니다');
+    if (props.progressStatus !== 'approved') {
+        alert('현재단계에서는 지원결과서를 신청하지 못합니다');
         return;
     }
     emit('newresultplan');

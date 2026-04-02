@@ -16,8 +16,8 @@ const selectBeneficiariesDetail = `
 SELECT 
     b.bene_id,
     b.bene_name,
-    u1.user_name AS family_name, -- 기존 가족 이름
-    u2.user_name AS manager_name, -- 매니저 아이디 기준 이름 추가
+    u1.user_name AS family_name, 
+    u2.user_name AS manager_name, 
     b.gender,
     DATE_FORMAT(b.birth_date, '%Y-%m-%d') AS birth_date,
     b.disability_type,
@@ -25,10 +25,18 @@ SELECT
     p.priority_id,
     p.progress_status
 FROM beneficiary_info b
-LEFT JOIN user_info u1 ON b.family_id = u1.user_id   -- 가족 정보를 위한 조인
-LEFT JOIN user_info u2 ON b.manager_id = u2.user_id  -- 매니저 정보를 위한 조인 (추가된 부분)
-LEFT JOIN priority p ON b.bene_id = p.bene_id
-WHERE b.bene_id = ?
+LEFT JOIN user_info u1 ON b.family_id = u1.user_id
+LEFT JOIN user_info u2 ON b.manager_id = u2.user_id
+-- ✅ 가장 최신(PK가 큰) priority_id만 가져오는 서브쿼리 조인
+LEFT JOIN (
+    SELECT * FROM priority 
+    WHERE (bene_id, priority_id) IN (
+        SELECT bene_id, MAX(priority_id) 
+        FROM priority 
+        GROUP BY bene_id
+    )
+) p ON b.bene_id = p.bene_id
+WHERE b.bene_id = ?;
 `;
 //지원계획서 해당아이디 조회
 const selectSupportPlanList = `

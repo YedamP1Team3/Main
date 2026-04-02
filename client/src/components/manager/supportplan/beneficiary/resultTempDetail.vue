@@ -98,6 +98,10 @@ const deleteTemp = async (resultId) => {
 // 3. 승인 신청 (수정 후 재신청)
 const Approval = async (id) => {
     if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
+    if (selectedPlans.value.length === 0) {
+        alert('연결된 지원계획서가 없습니다. 결과에 포함할 계획을 선택해주세요.');
+        return;
+    }
     try {
         const planIds = selectedPlans.value.map((plan) => plan.plan_id);
         const target = {
