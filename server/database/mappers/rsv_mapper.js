@@ -237,6 +237,20 @@ const updateReservationStatus = async (rsvId, status) => {
 
 // -----------------------------------counseling API--------------------------
 
+const selectManagerCounselList = async (managerId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(rsvSql.selectManagerCounselList, [managerId]);
+    return rows;
+  } catch (err) {
+    console.error("selectManagerCounselList error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 const insertCounselingNote = async (noteData) => {
   let conn = null;
   try {
@@ -295,6 +309,7 @@ module.exports = {
   getBeneficiaryManagerInfo,
   selectManagerReservations,
   updateReservationStatus,
+  selectManagerCounselList,
   insertCounselingNote,
   updateReservationStatusToNoteWritten,
 };

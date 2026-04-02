@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue';
 import Calendar from '@/components/common/Calendar.vue';
 import TimeSlot from '@/components/common/TimeSlot.vue';
-import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
+import JsTopbarmg from '@/layout/manager/JsTopbarmg.vue';
 import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
 
 import { getManagerSchedule } from '@/api/reservation/schedule';

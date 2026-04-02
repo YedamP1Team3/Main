@@ -344,6 +344,15 @@ const processReservation = async (rsvId, decision) => {
 
 // -----------------------------------counseling API--------------------------
 
+const getManagerCounselList = async (managerId) => {
+  if (!managerId) {
+    throw new Error("managerId가 필요합니다.");
+  }
+
+  const rows = await rsvMapper.selectManagerCounselList(managerId);
+  return rows;
+};
+
 const createCounselingNote = async (noteData) => {
   const { rsvId, counselingType, title, content, futurePlan } = noteData;
 
@@ -383,5 +392,6 @@ module.exports = {
   resolveManagerId,
   getManagerReservations,
   processReservation,
+  getManagerCounselList,
   createCounselingNote,
 };

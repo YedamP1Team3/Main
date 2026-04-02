@@ -24,7 +24,7 @@
 import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
-import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
+import JsTopbarmg from '@/layout/manager/JsTopbarmg.vue';
 import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
 import RsvTable from '@/components/common/RsvTable.vue';
 import RsvProcessModal from '@/components/reservation/RsvProcessModal.vue';
