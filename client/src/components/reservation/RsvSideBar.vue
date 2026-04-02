@@ -18,7 +18,7 @@ export default {
 
             <RouterLink to="/" class="menu-item" active-class="active"> 상담일지 작성 </RouterLink>
 
-            <RouterLink to="/" class="menu-item" active-class="active"> 상담일지 관리 </RouterLink>
+            <RouterLink :to="{ name: 'manageCounsel' }" class="menu-item" active-class="active"> 상담일지 관리 </RouterLink>
 
             <RouterLink :to="{ name: 'schedule' }" class="menu-item" active-class="active"> 상담시간 관리 </RouterLink>
         </nav>

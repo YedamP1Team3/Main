@@ -64,6 +64,8 @@ const formatStatusLabel = (status) => {
             return '예약반려';
         case 'COMPLETED':
             return '상담완료';
+        case 'NOTE_WRITTEN':
+            return '일지작성완료';
         default:
             return '-';
     }
@@ -79,6 +81,8 @@ const getStatusClass = (status) => {
             return 'rejected';
         case 'COMPLETED':
             return 'completed';
+        case 'NOTE_WRITTEN':
+            return 'note-written';
         default:
             return '';
     }
@@ -101,14 +105,14 @@ const getCellValue = (row, column) => {
     }
 };
 
-const getActionLabel = (column) => {
+const getActionLabel = (column, row) => {
     switch (column.action) {
         case 'cancel':
             return '취소';
         case 'process':
             return '처리';
         case 'writeLog':
-            return '일지작성';
+            return row.rsv_status === 'NOTE_WRITTEN' ? '수정' : '작성';
         default:
             return '버튼';
     }
@@ -136,7 +140,7 @@ const isActionDisabled = (row, column) => {
             return row.rsv_status !== 'REQUESTED';
 
         case 'writeLog':
-            return row.rsv_status !== 'COMPLETED';
+            return !['COMPLETED', 'NOTE_WRITTEN'].includes(row.rsv_status);
 
         default:
             return false;
@@ -185,7 +189,7 @@ const handleActionClick = (row, column) => {
 
                     <template v-else-if="column.type === 'action'">
                         <button type="button" class="action-btn" :class="getActionClass(column)" :disabled="isActionDisabled(row, column)" @click.stop="handleActionClick(row, column)">
-                            {{ getActionLabel(column) }}
+                            {{ getActionLabel(column, row) }}
                         </button>
                     </template>
 
@@ -264,6 +268,11 @@ const handleActionClick = (row, column) => {
 .status-badge.completed {
     background-color: #f1f5f9;
     color: #475569;
+}
+
+.status-badge.note-written {
+    background-color: #f3e8ff;
+    color: #7c3aed;
 }
 
 .action-btn {

@@ -89,6 +89,11 @@ const router = createRouter({
             component: () => import('../views/reservation/family/Rservation.vue')
         },
         {
+            path: '/manageCounsel',
+            name: 'managecounsel',
+            component: () => import('../views/reservation/manager/ManageConusel.vue')
+        },
+        {
             path: '/administratorMain',
             name: 'administratorMain',
             component: () => import('../views/beneficiary/AdministratorMain.vue')
