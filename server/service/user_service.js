@@ -1,4 +1,6 @@
 const userMapper = require("../database/mappers/user_mapper.js");
+const fs = require("fs");
+const path = require("path");
 
 //전체 회원조회
 const findAll = async () => {
@@ -21,8 +23,8 @@ const getSupportPlanList = async (beneId) => {
   let list = await userMapper.selectSupportPlanList(beneId);
   return list || [];
 };
-//지원계획서 생성
-const createSupportPlan = async (supportPlan) => {
+//지원계획서 생성(파일첨부)
+const createSupportPlan = async (supportPlan, files) => {
   const {
     priority_id,
     manager_id,
@@ -31,7 +33,7 @@ const createSupportPlan = async (supportPlan) => {
     plan_content,
     progress_state,
   } = supportPlan;
-  let insertDate = [
+  const insertDate = [
     priority_id,
     manager_id,
     bene_id,
@@ -40,16 +42,36 @@ const createSupportPlan = async (supportPlan) => {
     progress_state,
   ];
 
-  let result = await userMapper.createSupportPlan(insertDate);
+  try {
+    const result = await userMapper.createSupportPlan(insertDate);
+    const planId = result?.insertId;
+    if (planId && files && files.length > 0) {
+      for (const file of files) {
+        const fileData = [
+          planId,
+          null, // plan_draft_id
+          file.originalname, // 원본 파일명
+          file.filename, // 서버에 저장된 실제 파일명
+          file.size, // 파일 크기
+        ];
 
-  let resObj = {
-    status: result.insertId > 0 ? "success" : "fail",
-    user_no: result.insertId,
-  };
-  return resObj;
+        // 매퍼 호출 (이 안에서 파일을 직접 '쓰는' 로직이 없는지 확인하세요)
+        await userMapper.insertAttachment(fileData);
+      }
+    }
+
+    // 4. 최종 결과 반환
+    return {
+      status: planId ? "success" : "fail",
+      plan_id: planId, // user_no 대신 의미가 명확한 plan_id 사용 권장
+    };
+  } catch (error) {
+    console.error("지원계획서 생성 서비스 에러:", error);
+    throw error; // 에러를 던져서 라우터에서 catch할 수 있게 함
+  }
 };
-
-const createTempPlan = async (supportPlan) => {
+//지원계획서 임시 생성(파일첨부)
+const createTempPlan = async (supportPlan, files) => {
   const {
     plan_draft_id,
     manager_id,
@@ -59,7 +81,7 @@ const createTempPlan = async (supportPlan) => {
     progress_state,
   } = supportPlan;
   let insertDate = [
-    plan_draft_id,
+    plan_draft_id ?? null,
     manager_id,
     bene_id,
     plan_objective,
@@ -67,13 +89,31 @@ const createTempPlan = async (supportPlan) => {
     progress_state,
   ];
 
-  let result = await userMapper.createTempPlan(insertDate);
+  try {
+    const result = await userMapper.createTempPlan(insertDate);
+    const planDraftId = result?.insertId;
 
-  let resObj = {
-    status: result.insertId > 0 ? "success" : "fail",
-    user_no: result.insertId,
-  };
-  return resObj;
+    if (planDraftId && files && files.length > 0) {
+      for (const file of files) {
+        const fileData = [
+          null, // plan_id
+          planDraftId, // plan_draft_id
+          file.originalname,
+          file.filename,
+          file.size,
+        ];
+        await userMapper.insertAttachment(fileData);
+      }
+    }
+
+    return {
+      status: planDraftId ? "success" : "fail",
+      plan_draft_id: planDraftId,
+    };
+  } catch (error) {
+    console.error("지원계획서 임시생성 서비스 에러:", error);
+    throw error;
+  }
 };
 
 //지원계획서 임시 조회
@@ -83,31 +123,49 @@ const getSupportPlanTempList = async (beneId) => {
 };
 //지원계획서상세조회
 const getSupportPlanDetail = async (planID) => {
-  let list = await userMapper.selectSupportPlanDetail(planID);
-  return list || {};
+    let planResult = await userMapper.selectSupportPlanDetail(planID);
+    let fileList = await userMapper.selectAttachments(planID); 
+    return {
+        plan: planResult || {}, 
+        files: fileList || []      
+    };
 };
 //임시지원계획서조회
 const getTempPlanDetail = async (planID) => {
-  let list = await userMapper.selectTempPlanDetail(planID);
-  return list || {};
+  const plan = await userMapper.selectTempPlanDetail(planID);
+  const files = await userMapper.selectDraftAttachments(planID);
+  return {
+    ...(plan || {}),
+    files: files || [],
+  };
 };
 //지원계획서삭제
-const removeSupportPlan = async (planDelete) => {
-  let result = await userMapper.removeSupportPlan(planDelete);
-  let resObj = {
-    status: result.affectedRows > 0 ? "success" : "fail",
-    plan_no: planDelete,
-  };
-  return resObj;
+const removeSupportPlan = async (planId) => {
+  try {
+    await userMapper.deleteAttachments(planId); 
+    const result = await userMapper.removeSupportPlan(planId);
+    if (result && result.affectedRows > 0) {
+      return { status: "success" };
+    }
+    return { status: "fail" };
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
-
-const removeTempPlan = async (planDelete) => {
-  let result = await userMapper.removeTempPlan(planDelete);
-  let resObj = {
-    status: result.affectedRows > 0 ? "success" : "fail",
-    plan_no: planDelete,
-  };
-  return resObj;
+//지원계획서임시 삭제
+const removeTempPlan = async (planDraftId) => {
+  try {
+    await userMapper.deleteDraftAttachments(planDraftId);
+    const result = await userMapper.removeTempPlan(planDraftId);
+    if (result && result.affectedRows > 0) {
+      return { status: "success" };
+    }
+    return { status: "fail" };
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 //지원계획서승인신청
 const resubmitSupportPlan = async (planId, planDate) => {
@@ -145,7 +203,7 @@ const updateTempPlan = async (planDraftId, planDate) => {
   };
   return resObj;
 };
-
+//지원계획서 임시승인처리
 const approveTempPlan = async (target) => {
   try {
     // 1. 객체 구조 분해 할당 (target 객체에서 필요한 값들을 추출)
@@ -168,10 +226,16 @@ const approveTempPlan = async (target) => {
     ];
     // 3. 정식 지원계획서 생성 수행
     const createResult = await userMapper.createSupportPlan(insertData);
+    const createdPlanId = createResult?.insertId;
+
+    if (createdPlanId && plan_draft_id) {
+      await userMapper.moveDraftAttachmentsToPlan(createdPlanId, plan_draft_id);
+    }
 
     // 4. 생성이 성공(affectedRows > 0)했다면, 임시 저장본 삭제 수행
     if (createResult && createResult.affectedRows > 0) {
       if (plan_draft_id) {
+        await userMapper.deleteDraftAttachments(plan_draft_id);
         await userMapper.removeTempPlan(plan_draft_id);
       }
     }
@@ -188,6 +252,58 @@ const approveTempPlan = async (target) => {
       message: "승인 처리 중 오류가 발생했습니다.",
     };
   }
+};
+//지원계획서 임시 파일 저장
+const addTempPlanFiles = async (planDraftId, files) => {
+  if (!planDraftId) {
+    return { status: "fail" };
+  }
+  if (!files || files.length === 0) {
+    return { status: "fail" };
+  }
+
+  for (const file of files) {
+    const fileData = [
+      null,
+      planDraftId,
+      file.originalname,
+      file.filename,
+      file.size,
+    ];
+    await userMapper.insertAttachment(fileData);
+  }
+
+  return { status: "success" };
+};
+//지원계획서 임시 파일 삭제
+const removeTempPlanFile = async (planDraftId, fileId) => {
+  const draftId = Number(planDraftId);
+  const attachmentId = Number(fileId);
+  if (!Number.isFinite(draftId) || !Number.isFinite(attachmentId)) {
+    return { status: "fail" };
+  }
+
+  const fileRow = await userMapper.selectDraftAttachment(draftId, attachmentId);
+  if (!fileRow) {
+    return { status: "fail" };
+  }
+
+  const result = await userMapper.deleteDraftAttachment(draftId, attachmentId);
+  if (!result || result.affectedRows <= 0) {
+    return { status: "fail" };
+  }
+
+  const uploadDir = "d:/uploads";
+  const targetPath = path.join(uploadDir, fileRow.file_name);
+  try {
+    if (fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  return { status: "success" };
 };
 
 module.exports = {
@@ -206,4 +322,6 @@ module.exports = {
   rejectSupportPlan,
   updateTempPlan,
   approveTempPlan,
+  addTempPlanFiles,
+  removeTempPlanFile,
 };

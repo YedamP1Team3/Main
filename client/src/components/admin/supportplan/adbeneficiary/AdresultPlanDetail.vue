@@ -26,7 +26,7 @@ const rejectReason = ref('');
 const fetchResultDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/adsupport/admin/support-result/${id}`);
+        const response = await axios.get(`api/adsupport/admin/support-result/${id}`);
         resultDetail.value = response.data;
         selectedPlans.value = response.data.selected_plans || []; // ✅ 계획서 목록 추출
         fetchRejectionHistory(id);
@@ -34,19 +34,39 @@ const fetchResultDetail = async (id) => {
         console.error(`에러`, error);
     }
 };
-// 수정사항;
+// 히스토리 조회;
+// 1. 목록만 가져오기
 const fetchRejectionHistory = async (id) => {
     try {
-        const response = await axios.get(`http://localhost:3000/adsupport/admin/support-result/${id}/rejection-history`);
-        rejectionLog.value = Array.isArray(response.data) ? response.data : [];
+        const response = await axios.get(`api/adsupport/admin/support-result/${id}/rejection-history`);
+        rejectionLog.value = response.data.map((item) => ({
+            ...item,
+            plans: [],
+            isOpened: false, // 열림 상태 초기값
+            loading: false
+        }));
     } catch (error) {
         console.error('이력 조회 실패', error);
     }
 };
 
-const startReject = () => {
-    reasoninsert.value = true;
-    rejectReason.value = '';
+// 특정 항목을 클릭했을 때 호출할 함수 (토글 기능 추가)
+const fetchHistoryPlans = async (log) => {
+    if (log.isOpened) {
+        log.isOpened = false;
+        return;
+    }
+    rejectionLog.value.forEach((item) => (item.isOpened = false));
+    try {
+        const response = await axios.get(`api/adsupport/admin/rejection-history/${log.history_id}/plans`);
+
+        // 2. ⭐️ 데이터 할당 (서버 응답 구조에 맞춤)
+        // 만약 서버가 { plans: [] } 로 보낸다면 response.data.plans를 사용
+        log.plans = response.data.plans || [];
+        log.isOpened = true;
+    } catch (error) {
+        console.error('상세 계획 조회 실패:', error);
+    }
 };
 
 // 3. 승인 신청 (수정 후 재신청)
@@ -79,14 +99,18 @@ const updateReturn = async (resultId) => {
     }
     if (!confirm('반려하시겠습니까?')) return;
     try {
-        const updateRes = await axios.put(`http://localhost:3000/adsupport/admin/support-result/${resultId}/return`);
+        const updateRes = await axios.put(`api/adsupport/admin/support-result/${resultId}/return`);
         if (updateRes.data.status) {
+            const planIds = selectedPlans.value.map((p) => p.plan_id);
             const historyData = {
                 result_id: resultId,
+                result_title: resultDetail.value.result_title,
+                result_content: resultDetail.value.result_content,
                 rejection_reason: rejectReason.value,
-                manager_id: authStore.userId
+                manager_id: authStore.userId,
+                plan_ids: planIds
             };
-            await axios.post(`http://localhost:3000/adsupport/admin/support-result/rejection-history`, historyData);
+            await axios.post(`api/adsupport/admin/support-result/rejection-history`, historyData);
 
             alert('반려 처리 및 이력이 저장되었습니다.');
             reasoninsert.value = false;
@@ -127,14 +151,14 @@ watch(
             <div class="form-row">
                 <label for="objective">지원목표</label>
                 <div class="input-wrapper">
-                    <input id="objective" v-model="resultDetail.result_title" :readonly="!['임시', '반려'].includes(resultDetail.progress_state)" type="text" class="content-input" />
+                    <input id="objective" v-model="resultDetail.result_title" readonly type="text" class="content-input" />
                 </div>
             </div>
 
             <div class="form-row">
                 <label for="content">계획내용</label>
                 <div class="input-wrapper">
-                    <textarea id="content" v-model="resultDetail.result_content" rows="8" :readonly="!['임시', '반려'].includes(resultDetail.progress_state)" class="content-textarea"></textarea>
+                    <textarea id="content" v-model="resultDetail.result_content" rows="8" readonly class="content-textarea"></textarea>
                 </div>
             </div>
 
@@ -158,7 +182,7 @@ watch(
 
         <div class="button-group">
             <button v-if="['반려/재승인', '대기'].includes(resultDetail.progress_state)" class="btn-approve" @click="Approval(resultDetail.result_id)">승인</button>
-            <button v-if="['반려/재승인', '대기'].includes(resultDetail.progress_state)" class="btn-reject" @click="reasoninsert = true">반려하기</button>
+            <button v-if="['반려/재승인', '대기'].includes(resultDetail.progress_state) && !reasoninsert" class="btn-reject" @click="reasoninsert = true">반려하기</button>
         </div>
 
         <div v-if="reasoninsert" class="reason-input-area">
@@ -167,15 +191,37 @@ watch(
             <button class="btn-submit-reject" @click="updateReturn(resultDetail.result_id)">반려 확정</button>
         </div>
 
-        <div v-if="rejectionLog.length > 0" class="history-section">
-            <h3 class="history-title">반려 사유 목록</h3>
-            <div class="history-list">
-                <div v-for="log in rejectionLog" :key="index" class="history-card">
-                    <div class="history-header">
-                        <span class="history-user">검토자: {{ log.manager_name }}</span>
-                        <span class="history-date">작성일: {{ log.created_at }}</span>
+        <div class="history-section">
+            <h3>반려 리스트</h3>
+
+            <div v-for="log in rejectionLog" :key="log.history_id" class="history-card" :class="{ 'is-active': log.isOpened }" @click="fetchHistoryPlans(log)">
+                <div class="history-header">
+                    <span class="history-user">검토자: {{ log.manager_name }}</span>
+                    <span class="history-date">{{ log.created_at }}</span>
+                </div>
+
+                <div v-if="!log.isOpened" class="history-summary">사유: {{ log.rejection_reason }}</div>
+
+                <div v-if="log.isOpened" class="history-detail">
+                    <div class="detail-inner-box">
+                        <div class="detail-row">
+                            <span class="detail-label">지원 목표</span>
+                            <div class="detail-value">{{ log.result_title || '내용 없음' }}</div>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">지원 내용</span>
+                            <div class="detail-value">{{ log.result_content || '내용 없음' }}</div>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">연결된 계획</span>
+                            <div class="plan-tags">
+                                <span v-for="plan in log.plans" :key="plan.plan_id" class="plan-badge">{{ plan.plan_objective }} </span>
+                                <div v-if="!log.plans || log.plans.length === 0" class="no-data">연결된 계획 정보가 없습니다.</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="history-body"><strong>사유:</strong> {{ log.rejection_reason }}</div>
                 </div>
             </div>
         </div>
@@ -183,68 +229,93 @@ watch(
 </template>
 
 <style scoped>
-/* 전체 컨테이너 */
+/* 1. 전체 컨테이너 레이아웃 (AdplanDetail과 동일) */
 .BfnewPlan {
     max-width: 900px;
     margin: 0 auto;
     padding: 30px;
     background-color: #ffffff;
-}
-h2 {
-    font-size: 1.5rem;
-    font-weight: 800;
     color: #1e293b;
-    margin-bottom: 8px;
-}
-.main-hr {
-    border: 0;
-    height: 2px;
-    background: #334155;
-    margin: 15px 0 20px 0;
+    font-family:
+        'Pretendard',
+        -apple-system,
+        sans-serif;
 }
 
-/* 상단 상태 바 */
-.info-row-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* 메인 제목 아래 구분선 */
+.main-hr {
+    border: none;
+    border-top: 2px solid #334155;
     margin-bottom: 20px;
 }
-.state-badge {
-    padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-.state-badge.임시 {
-    background-color: #f1f5f9;
-    color: #64748b;
-}
-.state-badge.대기 {
-    background-color: #fef3c7;
-    color: #d97706;
-}
-.state-badge.반려 {
-    background-color: #fee2e2;
-    color: #ef4444;
-}
-.date-box {
-    color: #64748b;
-    font-size: 0.95rem;
+
+/* 2. 상단 정보 (상태 배지 & 작성일) */
+.info-row-top {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+    min-height: 32px;
 }
 
-/* 표 레이아웃 */
-.table-container {
-    border-top: 1px solid #e2e8f0;
+.status-box {
+    display: flex;
+    align-items: center;
 }
+
+.date-box {
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+/* 상태별 배지 스타일 */
+.state-badge {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    display: inline-block;
+}
+.state-badge.대기 {
+    background: #fef3c7;
+    color: #d97706;
+}
+.state-badge.반려,
+.state-badge.반려\/재승인 {
+    background: #fee2e2;
+    color: #dc2626;
+}
+.state-badge.승인 {
+    background: #dcfce7;
+    color: #16a34a;
+}
+.state-badge.임시 {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* 3. 테이블 컨테이너 (조회/수정용 그리드) */
+.table-container {
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    margin-bottom: 25px;
+    border-radius: 2px;
+}
+
 .form-row {
     display: flex;
     border-bottom: 1px solid #e2e8f0;
-    border-left: 1px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
 }
+
+.form-row:last-child {
+    border-bottom: none;
+}
+
 .form-row label {
     width: 140px;
+    min-width: 140px;
     background-color: #f8fafc;
     color: #475569;
     font-weight: 700;
@@ -253,207 +324,219 @@ h2 {
     justify-content: center;
     padding: 20px;
     border-right: 1px solid #e2e8f0;
-    font-size: 0.9rem;
-    flex-shrink: 0;
 }
+
+/* 입력 영역 스타일 */
 .input-wrapper {
     flex: 1;
+    padding: 10px 15px;
     display: flex;
     align-items: center;
 }
 
-/* 입력 필드 */
 .content-input,
-.content-textarea,
-.custom-select-small {
+.content-textarea {
     width: 100%;
-    border: none;
-    padding: 15px 20px;
+    border: 1px solid transparent;
+    padding: 8px 12px;
     font-size: 1rem;
-    color: #334155;
+    color: #1e293b;
     outline: none;
     background: transparent;
 }
+
+/* 읽기 전용이 아닐 때의 테두리 스타일 */
+.content-input:not([readonly]),
+.content-textarea:not([readonly]) {
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #fff;
+}
+
 .content-textarea {
-    min-height: 180px;
-    line-height: 1.6;
+    line-height: 1.7;
     resize: none;
 }
+
 .gray-bg {
-    background-color: #f8fafc !important;
+    background-color: #f1f5f9 !important;
+    color: #94a3b8;
 }
 
-/* 계획서 태그 및 추가 */
+/* 선택된 계획 태그 스타일 */
 .plan-tags {
-    padding: 10px 20px;
+    display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-}
-.select-group-inline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    width: 100%;
-}
-.btn-plus-small {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    border: 1px solid #1e293b;
-    background: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-.plan-tag-item {
-    display: flex;
-    align-items: center;
-    background: #eff6ff;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    color: #1e40af;
-    border: 1px solid #dbeafe;
-    cursor: pointer;
-    margin-right: 5px;
-}
-.active-tag {
-    background-color: #1e293b !important;
-    color: #fff !important;
-}
-.btn-remove-tag {
-    margin-left: 8px;
-    border: none;
-    background: none;
-    color: #ef4444;
-    font-weight: bold;
-    cursor: pointer;
+    gap: 8px;
 }
 
-/* 하단 버튼 (우측 정렬) */
+.plan-tag-item {
+    background-color: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.plan-tag-item:hover {
+    background-color: #dbeafe;
+}
+
+/* 4. 버튼 그룹 */
 .button-group {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 30px;
+    margin: 30px 0;
 }
-.btn-approve {
-    padding: 12px 40px;
-    background: #fff;
-    color: #1e293b;
-    border: 1.5px solid #1e293b;
+
+.button-group button {
+    padding: 12px 28px;
     border-radius: 30px;
-    font-weight: 800;
+    font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
-}
-.btn-temp,
-.btn-delete {
-    padding: 12px 24px;
-    background: #f1f5f9;
-    color: #64748b;
     border: none;
-    border-radius: 30px;
-    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-approve,
+.btn-submit-reject {
+    background-color: #ffffff !important; /* 배경 흰색 */
+    color: #e11d48 !important; /* 글자 빨간색 */
+    border: 1px solid #e11d48 !important; /* 빨간 테두리 */
+    padding: 12px 28px;
+    border-radius: 30px; /* 알약 모양 */
+    font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
-}
-.btn-delete {
-    color: #ef4444;
-}
-
-/* //반려 이력 */
-.history-section {
-    margin-top: 40px;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 20px;
-}
-.history-card {
-    background: #fff1f2;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #fecdd3;
-    margin-bottom: 10px;
+    transition: all 0.2s ease;
+    display: block; /* 줄바꿈 적용 */
+    margin-left: auto; /* 오른쪽 정렬 */
 }
 
-/* 반려 입력 영역 */
+.btn-reject {
+    background-color: #ffffff;
+    color: #e11d48;
+    border: 1px solid #e11d48 !important;
+}
+
+button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* 5. 반려 사유 입력창 */
 .reason-input-area {
-    margin-top: 30px;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 10px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 15px;
 }
 
 .reason-label {
-    color: #e11d48;
-    font-weight: bold;
-    margin-bottom: 10px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin-bottom: 12px;
 }
 
 .reason-input-area textarea {
     width: 100%;
     height: 100px;
-    padding: 10px;
-    border: 1px solid #fda4af;
-    border-radius: 5px;
+    padding: 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
     resize: none;
+    margin-bottom: 15px;
 }
 
-.btn-submit-reject {
-    background: #e11d48;
-    color: #fff;
-    padding: 8px 20px;
-    border-radius: 20px;
-    border: none;
-    float: right;
-    margin-top: 10px;
-    cursor: pointer;
-}
-
-/* 반려 히스토리 섹션 (관리자용 디자인 계승) */
+/* 6. 반려 히스토리 섹션 */
 .history-section {
     margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
 }
 
-.history-title {
-    font-size: 1.2rem;
+.history-section h3 {
+    font-size: 1.25rem;
     font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .history-card {
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
-    padding: 18px;
-    margin-bottom: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.history-card:hover {
+    background-color: #f1f5f9;
 }
 
 .history-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     border-bottom: 1px dashed #cbd5e1;
-    padding-bottom: 8px;
+    padding-bottom: 10px;
+    font-size: 0.9rem;
 }
 
 .history-user {
     font-weight: 700;
-    color: #475569;
-    font-size: 0.9rem;
+    color: #334155;
 }
-
 .history-date {
-    font-size: 0.85rem;
     color: #94a3b8;
 }
 
-.history-body {
-    color: #334155;
-    line-height: 1.6;
+.history-summary {
     font-size: 0.95rem;
+    color: #1e293b;
+}
+
+/* 상세 내역 스타일 */
+.history-detail {
+    margin-top: 15px;
+    padding: 15px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.detail-row {
+    margin-bottom: 12px;
+}
+
+.detail-label {
+    display: block;
+    font-weight: bold;
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.detail-value {
+    font-size: 0.95rem;
+    line-height: 1.6;
     white-space: pre-wrap;
+}
+
+.plan-badge {
+    display: inline-block;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-right: 5px;
+    margin-top: 5px;
 }
 </style>

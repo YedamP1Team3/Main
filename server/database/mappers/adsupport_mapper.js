@@ -129,16 +129,40 @@ const selectSupportResultDetail = async (planId) => {
   }
 };
 
+const selectAttachments = async (planId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(adminSql.selectAttachments, [planId]);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (selectAttachments):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 const approveSupportResult = async (resultID) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
     await conn.beginTransaction();
+
+    // 결과서 승인 이후에는 "현재 지원 사이클이 종료됐다"는 의미가 되므로
+    // 1) 결과서 상태를 승인으로 바꾸고
+    // 2) 같은 대상자의 신청서를 완료로 닫고
+    // 3) priority 최신 상태를 미신청(none)으로 리셋해
+    // 다음 신청 사이클을 다시 시작할 수 있게 만든다.
     let result = await conn.query(adminSql.approveSupportResult, [resultID]);
+    await conn.query(adminSql.completeApplicationsByApprovedResult, [resultID]);
+    await conn.query(adminSql.resetPriorityByApprovedResult, [resultID]);
+
     await conn.commit();
     return result;
   } catch (err) {
     console.log(err);
+    if (conn) await conn.rollback();
     throw err;
   } finally {
     if (conn) conn.release();
@@ -195,6 +219,36 @@ const selectResultRejectionHistory = async (resultId) => {
   }
 };
 
+const resultMappingHistory = async (historyId, resultId) => {
+  let conn = await pool.getConnection();
+  try {
+    // 위에서 새로 만든 adminSql.copyResultMappingHistory 쿼리를 실행
+    const result = await conn.query(adminSql.resultMappingHistory, [
+      historyId,
+      resultId,
+    ]);
+    return result;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectResultMappingHistory = async (historyId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(adminSql.selectResultMappingHistory, [
+      historyId,
+    ]);
+    return rows;
+  } catch (err) {
+    console.error("매핑 히스토리 상세 조회 중 오류:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   selectSupportPlanList,
   selectSupportPlanDetail,
@@ -209,4 +263,7 @@ module.exports = {
   returnSupportResult,
   addResultRejectionHistory,
   selectResultRejectionHistory,
+  resultMappingHistory,
+  selectResultMappingHistory,
+  selectAttachments,
 };

@@ -67,7 +67,7 @@ const createSupportPlan = async (supportPlan) => {
     if (conn) conn.release();
   }
 };
-
+//지원계획서임시생성
 const createTempPlan = async (supportPlan) => {
   let conn = null;
   try {
@@ -105,7 +105,7 @@ const selectSupportPlanDetail = async (planId) => {
     if (conn) conn.release();
   }
 };
-
+//지원계획서임시상세조회
 const selectTempPlanDetail = async (planId) => {
   let conn = null;
   try {
@@ -146,7 +146,7 @@ const removeTempPlan = async (planDelete) => {
   }
 };
 //지원계획서 승인요청
-const resubmitSupportPlan= async (planId, planDate) => {
+const resubmitSupportPlan = async (planId, planDate) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
@@ -165,7 +165,7 @@ const resubmitSupportPlan= async (planId, planDate) => {
     if (conn) conn.release();
   }
 };
-
+//지원계획서 반려처리
 const rejectSupportPlan = async (planId, planDate) => {
   let conn = null;
   try {
@@ -207,7 +207,120 @@ const updateTempPlan = async (planDraftId, planDate) => {
     if (conn) conn.release();
   }
 };
-
+//지원계획서 파일 추가
+const insertAttachment = async (fileData) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    // 서비스에서 넘겨준 [planId, null, originName, fileName, fileSize] 배열을 쿼리에 매핑
+    let result = await conn.query(userSql.insertAttachment, fileData);
+    return result;
+  } catch (err) {
+    console.error("Mapper 에러 (insertAttachment): ", err);
+    throw err; // 에러를 위로 던져서 서비스에서 알 수 있게 함
+  } finally {
+    if (conn) conn.release(); // 연결 해제
+  }
+};
+//지원계획서 파일 조회
+const selectAttachments = async (planId) => {
+    let conn = null;
+    try {
+        conn = await pool.getConnection();
+        // userSql.selectAttachmentsByPlanId는 아래 3번에서 만들 SQL 이름입니다.
+        let result = await conn.query(userSql.selectAttachments, [planId]);
+        return result;
+    } catch (err) {
+        console.error("매퍼 에러 (getAttachments):", err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+//임시지원계획서 파일 조회
+const selectDraftAttachments = async (planDraftId) => {
+    let conn = null;
+    try {
+        conn = await pool.getConnection();
+        let result = await conn.query(userSql.selectDraftAttachments, [planDraftId]);
+        return result;
+    } catch (err) {
+        console.error("매퍼 에러 (selectDraftAttachments):", err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+//지원계획서 파일 삭제
+const deleteAttachments = async (planId) => {
+    let conn = null;
+    try {
+        conn = await pool.getConnection();
+        let result = await conn.query(userSql.deleteAttachments, [planId]);
+        return result;
+    } catch (err) {
+        console.error("매퍼 에러 (deleteAttachments):", err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+//임시지원계획서 파일 삭제
+const deleteDraftAttachments = async (planDraftId) => {
+    let conn = null;
+    try {
+        conn = await pool.getConnection();
+        let result = await conn.query(userSql.deleteDraftAttachments, [planDraftId]);
+        return result;
+    } catch (err) {
+        console.error("매퍼 에러 (deleteDraftAttachments):", err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+//임시지원계획서 파일을 지원계획서로 이동
+const moveDraftAttachmentsToPlan = async (planId, planDraftId) => {
+    let conn = null;
+    try {
+        conn = await pool.getConnection();
+        let result = await conn.query(userSql.moveDraftAttachmentsToPlan, [planId, planDraftId]);
+        return result;
+    } catch (err) {
+        console.error("매퍼 에러 (moveDraftAttachmentsToPlan):", err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+//임시지원계획서 파일 상세조회
+const selectDraftAttachment = async (planDraftId, fileId) => {
+    let conn = null;
+    try {
+        conn = await pool.getConnection();
+        let rows = await conn.query(userSql.selectDraftAttachment, [planDraftId, fileId]);
+        return rows[0] || null;
+    } catch (err) {
+        console.error("매퍼 에러 (selectDraftAttachment):", err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+//임시지원계획서 파일 삭제
+const deleteDraftAttachment = async (planDraftId, fileId) => {
+    let conn = null;
+    try {
+        conn = await pool.getConnection();
+        let result = await conn.query(userSql.deleteDraftAttachment, [planDraftId, fileId]);
+        return result;
+    } catch (err) {
+        console.error("매퍼 에러 (deleteDraftAttachment):", err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
 module.exports = {
   selectAllUser,
   selectBeneficiariesNames,
@@ -223,4 +336,12 @@ module.exports = {
   resubmitSupportPlan,
   rejectSupportPlan,
   updateTempPlan,
+  insertAttachment,
+   selectAttachments,
+   selectDraftAttachments,
+   deleteAttachments,
+   deleteDraftAttachments,
+   moveDraftAttachmentsToPlan,
+   selectDraftAttachment,
+   deleteDraftAttachment
 };

@@ -47,14 +47,18 @@ WHERE
 const addRejectionHistory = `
 INSERT INTO rejection_history (
     plan_id, 
+    plan_objective,
+    plan_content,
     rejection_reason, 
     manager_id, 
     created_at
-) VALUES (?, ?, ?, NOW())`;
+) VALUES (?, ?, ?,?,?, NOW())`;
 
 const selectRejectionHistory = `
 SELECT 
     h.history_id,
+    h.plan_objective,
+    h.plan_content,
     h.rejection_reason,
     u.user_name AS manager_name,
     DATE_FORMAT(h.created_at, '%Y-%m-%d %H:%i') AS created_at
@@ -105,12 +109,58 @@ const selectSupportResultDetail = `
   WHERE p.result_id = ?
 `;
 
+const selectAttachments = `
+    SELECT 
+        file_id,
+        plan_id,
+        plan_draft_id,
+        origin_name, 
+        path AS file_name,
+        file_size,
+        created_at
+    FROM attachment_file
+    WHERE plan_id = ?
+`;
+
 const approveSupportResult = `
 UPDATE support_result
 SET
   progress_state = '승인'
 WHERE
   result_id =?
+`;
+
+const completeApplicationsByApprovedResult = `
+UPDATE application
+SET
+  app_status = '완료'
+WHERE
+  bene_id = (
+    SELECT bene_id
+    FROM support_result
+    WHERE result_id = ?
+  )
+  AND app_status IN ('대기', '진행중', '진행 중')
+`;
+
+const resetPriorityByApprovedResult = `
+INSERT INTO priority (
+    bene_id,
+    priority_status,
+    progress_status,
+    approval_date,
+    rejection_reason,
+    priority_id2
+)
+SELECT
+    bene_id,
+    'none',
+    'none',
+    NOW(),
+    NULL,
+    NULL
+FROM support_result
+WHERE result_id = ?
 `;
 
 const returnSupportResult = `
@@ -125,14 +175,18 @@ WHERE
 const addResultRejectionHistory = `
 INSERT INTO resultrejection_history (
     result_id, 
+    result_title,
+    result_content,
     rejection_reason, 
     manager_id, 
     created_at
-) VALUES (?, ?, ?, NOW())`;
+) VALUES (?, ?, ?, ?,?,NOW())`;
 
 const selectResultRejectionHistory = `
 SELECT 
     h.history_id,
+    h.result_title,
+    h.result_content,
     h.rejection_reason,
     u.user_name AS manager_name,
     DATE_FORMAT(h.created_at, '%Y-%m-%d %H:%i') AS created_at
@@ -142,6 +196,19 @@ WHERE h.result_id = ?
 ORDER BY h.created_at DESC;
 `;
 
+const resultMappingHistory = `
+   INSERT INTO result_plan_mapping_history (history_id, plan_id)
+    VALUES (?, ?)
+`;
+
+const selectResultMappingHistory = `
+SELECT 
+        h.plan_id,
+        p.plan_objective  
+    FROM result_plan_mapping_history h
+    JOIN support_plan p ON h.plan_id = p.plan_id
+    WHERE h.history_id = ? 
+`;
 module.exports = {
   selectSupportPlanList,
   selectSupportPlanDetail,
@@ -153,7 +220,12 @@ module.exports = {
   selectSupportResultList,
   selectSupportResultDetail,
   approveSupportResult,
+  completeApplicationsByApprovedResult,
+  resetPriorityByApprovedResult,
   returnSupportResult,
   addResultRejectionHistory,
   selectResultRejectionHistory,
+  resultMappingHistory,
+  selectResultMappingHistory,
+  selectAttachments,
 };

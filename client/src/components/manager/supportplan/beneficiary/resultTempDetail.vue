@@ -101,8 +101,8 @@ const Approval = async (id) => {
     try {
         const planIds = selectedPlans.value.map((plan) => plan.plan_id);
         const target = {
-            manager_id: authStore.userId, 
-            bene_id: props.beneId,        
+            manager_id: authStore.userId,
+            bene_id: props.beneId,
             result_title: resultDetail.value.result_title,
             result_content: resultDetail.value.result_content,
             planIds: planIds

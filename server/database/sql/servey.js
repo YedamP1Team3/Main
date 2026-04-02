@@ -1,129 +1,179 @@
-// 기존 selectSurvey 쿼리 수정: WHERE v.IS_ACTIVE = 1 을 삭제하고 VERSION_ID 조건으로 변경
+// 설문 구조를 item -> sub_item -> detail 순서로 펼쳐서 가져오는 조회문.
+// left join을 쓰는 이유는 아직 하위 항목이 비어 있는 draft 설문도 보여줘야 하기 때문이다.
+// inner join이면 detail이 없는 중간 저장 상태가 통째로 누락될 수 있다.
 const selectSurvey = `
-SELECT 
-    v.VERSION_ID,    
-    i.ITEM_ID, 
-    i.ITEM_NAME, 
-    i.DISPLAY_ORDER, 
-    s.SUB_ITEM_ID, 
-    s.SUB_ITEM_NAME, 
-    d.DETAIL_ID, 
-    d.QUESTION_TEXT
-FROM survey_version v
-LEFT JOIN survey_item i ON v.VERSION_ID = i.VERSION_ID
-LEFT JOIN survey_sub_item s ON i.ITEM_ID = s.ITEM_ID
-LEFT JOIN survey_detail d ON s.SUB_ITEM_ID = d.SUB_ITEM_ID
-WHERE v.VERSION_ID = ?  /* 이 부분이 핵심입니다! */
-ORDER BY i.DISPLAY_ORDER, s.DISPLAY_ORDER, d.DISPLAY_ORDER;
+select
+    v.version_id as version_id,
+    i.item_id as item_id,
+    i.item_name as item_name,
+    i.display_order as item_display_order,
+    s.sub_item_id as sub_item_id,
+    s.sub_item_name as sub_item_name,
+    s.display_order as sub_item_display_order,
+    d.detail_id as detail_id,
+    d.question_text as question_text,
+    d.display_order as detail_display_order
+from survey_version v
+left join survey_item i
+    on v.version_id = i.version_id
+left join survey_sub_item s
+    on i.item_id = s.item_id
+left join survey_detail d
+    on s.sub_item_id = d.sub_item_id
+where v.version_id = ?
+order by i.display_order, s.display_order, d.display_order;
 `;
 
 const insert_item = `
-INSERT INTO survey_item (item_name, version_id, display_order)
-SELECT 
-    ?,        
+insert into survey_item (item_name, version_id, display_order)
+select
     ?,
-    IFNULL(MAX(display_order), 0) + 1 
-FROM survey_item 
-WHERE version_id = ?; 
+    ?,
+    ifnull(max(display_order), 0) + 1
+from survey_item
+where version_id = ?;
 `;
 
 const insert_subitem = `
-    INSERT INTO survey_sub_item (sub_item_name, item_id, display_order)
-    SELECT ?, ?, IFNULL(MAX(display_order), 0) + 1 
-    FROM survey_sub_item
-    WHERE item_id = ?
-  `;
+insert into survey_sub_item (sub_item_name, item_id, display_order)
+select
+    ?,
+    ?,
+    ifnull(max(display_order), 0) + 1
+from survey_sub_item
+where item_id = ?;
+`;
 
 const insert_detail = `
-    INSERT INTO survey_detail (question_text, sub_item_id, display_order)
-    SELECT ?, ?, IFNULL(MAX(display_order), 0) + 1 
-    FROM survey_detail AS temp
-    WHERE sub_item_id = ?
-  `;
+insert into survey_detail (question_text, sub_item_id, display_order)
+select
+    ?,
+    ?,
+    ifnull(max(display_order), 0) + 1
+from survey_detail
+where sub_item_id = ?;
+`;
 
 const selectVersionList = `
-  SELECT VERSION_ID, IS_ACTIVE, DATE_FORMAT(CREATE_DATE, '%Y-%m-%d') as CREATE_DATE 
-  FROM survey_version 
-  ORDER BY VERSION_ID DESC;
+select
+    version_id as version_id,
+    is_active as is_active,
+    date_format(create_date, '%Y-%m-%d') as create_date
+from survey_version
+order by version_id desc;
 `;
 
-const deactivateVersions = `UPDATE survey_version SET IS_ACTIVE = 0 WHERE IS_ACTIVE = 1;`;
-const insertNewVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (1, NOW());`;
+const deactivateVersions = `
+update survey_version
+set is_active = 0
+where is_active = 1;
+`;
 
-const memberSurvey =
-  "SELECT VERSION_ID FROM survey_version WHERE IS_ACTIVE = 1";
+const setActiveVersion = `
+update survey_version
+set is_active = 1
+where version_id = ?;
+`;
 
-// [수정] 1. 지원신청서(application) 마스터 저장
+const insertNewDraftVersion = `
+insert into survey_version (is_active, create_date)
+values (0, now());
+`;
+
+const memberSurvey = `
+select
+    version_id as version_id
+from survey_version
+where is_active = 1;
+`;
+
 const insert_application = `
-  INSERT INTO application (version_id, bene_id, user_id, created_at) 
-  VALUES (?, ?, ?, NOW());
+insert into application (version_id, bene_id, user_id, created_at)
+values (?, ?, ?, now());
 `;
 
-// [수정] 2. 조사지답변(survey_answer) 상세 저장
+// 답변은 mapper에서 conn.batch()로 한 번에 밀어 넣는다.
+// SQL은 단순 insert 형태로 두고, 파라미터 묶음을 여러 벌 넘겨 벌크 처리한다.
 const insert_survey_answer = `
-  INSERT INTO survey_answer (answer_value, detail_id, app_id) 
-  VALUES (?, ?, ?);
+insert into survey_answer (answer_value, detail_id, app_id)
+values (?, ?, ?);
 `;
-// [조회] 3. 특정 신청서 마스터 정보 가져오기 (버전 ID 확인용)
+
 const select_application_by_id = `
-  SELECT app_id, version_id, bene_id, user_id, app_status, DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
-  FROM application 
-  WHERE app_id = ?;
+select
+    app_id as app_id,
+    version_id as version_id,
+    bene_id as bene_id,
+    user_id as user_id,
+    app_status as app_status,
+    date_format(created_at, '%Y-%m-%d') as created_at
+from application
+where app_id = ?;
 `;
 
-// [조회] 4. 특정 신청서의 상세 답변 모두 가져오기
 const select_answers_by_app_id = `
-  SELECT detail_id, answer_value 
-  FROM survey_answer 
-  WHERE app_id = ?;
+select
+    detail_id as detail_id,
+    answer_value as answer_value
+from survey_answer
+where app_id = ?;
 `;
-// [목록 조회] 5. 특정 대상자(bene_id)의 신청서 목록 가져오기
+
+// 신청서 목록에서 priority를 join 하는 이유는 "신청 자체 정보"와
+// "현재 최신 대기단계 상태"를 한 번에 내려 member / manager / admin 화면이 같이 쓰게 하기 위해서다.
+// max(priority_id)를 쓰는 이유는 priority 테이블이 최신 상태 update형이 아니라 이력 누적형이기 때문이다.
 const select_application_list_by_bene = `
-SELECT 
-    a.app_id AS id, 
-    a.user_id AS writer, 
-    b.bene_name, 
-    DATE_FORMAT(a.created_at, '%Y.%m.%d') AS date,
-    p.priority_status,
-    p.progress_status,
-    a.app_status  /* ⭐️ 화면 출력을 위해 추가 */
-FROM application a
-LEFT JOIN beneficiary_info b ON a.bene_id = b.bene_id
-LEFT JOIN priority p ON p.priority_id = (
-    SELECT MAX(priority_id) 
-    FROM priority 
-    WHERE bene_id = a.bene_id
-)
-WHERE a.bene_id = ?
-ORDER BY a.created_at DESC;
+select
+    a.app_id as id,
+    a.user_id as writer,
+    b.bene_name as bene_name,
+    date_format(a.created_at, '%Y.%m.%d') as date,
+    p.priority_status as priority_status,
+    p.progress_status as progress_status,
+    a.app_status as app_status
+from application a
+left join beneficiary_info b
+    on a.bene_id = b.bene_id
+left join priority p
+    on p.priority_id = (
+        select max(priority_id)
+        from priority
+        where bene_id = a.bene_id
+    )
+where a.bene_id = ?
+order by a.created_at desc;
 `;
 
-const delete_survey_answers = `DELETE FROM survey_answer WHERE app_id = ?;`;
-const delete_application = `DELETE FROM application WHERE app_id = ?;`;
+const delete_survey_answers = `
+delete from survey_answer
+where app_id = ?;
+`;
 
-// 기존 쿼리에 아래 두 줄을 추가/수정합니다.
-const setActiveVersion = `UPDATE survey_version SET IS_ACTIVE = 1 WHERE VERSION_ID = ?;`;
-const insertNewDraftVersion = `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (0, NOW());`;
+const delete_application = `
+delete from application
+where app_id = ?;
+`;
 
-// [추가] 1. 진행 중인 신청서 개수 확인 (중복 방지)
 const check_active_application = `
-  SELECT COUNT(*) as cnt 
-  FROM application 
-  WHERE bene_id = ? AND app_status IN ('대기', '진행중');
+select
+    count(*) as cnt
+from application
+where bene_id = ?
+  and app_status in ('대기', '진행중', '진행 중');
 `;
 
-// [추가] 2. 신청서 현재 상태 확인 (수정/삭제 방어용)
 const select_application_status = `
-  SELECT app_status 
-  FROM application 
-  WHERE app_id = ?;
+select
+    app_status as app_status
+from application
+where app_id = ?;
 `;
 
-// [추가] 3. 대기단계 승인 처리 시 상태 업데이트 (요구사항 2)
-const update_status_inprogress = `
-  UPDATE application 
-  SET app_status = '진행중' 
-  WHERE app_id = ? AND app_status = '대기';
+const update_applications_to_inprogress_by_bene = `
+update application
+set app_status = '진행중'
+where bene_id = ?
+  and app_status = '대기';
 `;
 
 module.exports = {
@@ -133,8 +183,8 @@ module.exports = {
   insert_detail,
   selectVersionList,
   deactivateVersions,
-  insertNewVersion,
-  // member용
+  setActiveVersion,
+  insertNewDraftVersion,
   memberSurvey,
   insert_application,
   insert_survey_answer,
@@ -143,8 +193,7 @@ module.exports = {
   select_application_list_by_bene,
   delete_survey_answers,
   delete_application,
-  //구조 변경
   check_active_application,
   select_application_status,
-  update_status_inprogress,
+  update_applications_to_inprogress_by_bene,
 };

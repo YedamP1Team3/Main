@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import SearchSidebar from '@/layout/member/SearchSidebar.vue';
 import HistoryTable from '@/components/member/homepage/HistoryTable.vue';
 
-const filters = ref({
+const getInitialFilters = () => ({
     startDate: '',
     endDate: '',
     beneName: '',
@@ -12,19 +12,14 @@ const filters = ref({
     progress: 'all'
 });
 
+const filters = ref(getInitialFilters());
+
 const handleSearch = (nextFilters) => {
     filters.value = nextFilters;
 };
 
 const handleReset = () => {
-    filters.value = {
-        startDate: '',
-        endDate: '',
-        beneName: '',
-        managerName: '',
-        status: 'all',
-        progress: 'all'
-    };
+    filters.value = getInitialFilters();
 };
 </script>
 
