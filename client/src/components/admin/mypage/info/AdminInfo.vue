@@ -45,6 +45,23 @@ const fetchAdminInfo = async () => {
     }
 };
 
+const openPostcode = () => {
+    new window.daum.Postcode({
+        oncomplete: (data) => {
+            // 사용자가 선택한 주소 종류에 따라 주소값을 가져옵니다.
+            let fullAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+
+            // --- 수정된 부분: managerForm 대신 adminData를 사용합니다 ---
+            adminData.address = fullAddr; // 주소창에 자동 입력
+            adminData.zip_code = data.zonecode; // 우편번호창에 자동 입력 (기존 postcode -> zip_code)
+
+            // 주소 입력이 끝나면 '상세주소' 칸으로 커서를 옮겨줍니다.
+            const detailInput = document.querySelector('input[placeholder="상세주소를 입력하세요"]');
+            if (detailInput) detailInput.focus();
+        }
+    }).open(); // 주소 팝업창 열기
+};
+
 // 페이지가 화면에 처음 나타날 때 자동으로 서버에서 정보를 불러옵니다.
 onMounted(fetchAdminInfo);
 
@@ -149,7 +166,7 @@ const handleSave = async () => {
                         <label class="block text-sm font-semibold mb-2">주소</label>
                         <div class="flex gap-2 mb-2">
                             <input v-model="adminData.zip_code" type="text" class="p-inputtext w-32" disabled />
-                            <button type="button" class="p-button p-button-secondary p-button-sm" :disabled="!isEditMode">우편번호 검색</button>
+                            <button type="button" class="p-button p-button-secondary p-button-sm" :disabled="!isEditMode" @click="openPostcode">우편번호 검색</button>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                             <input v-model="adminData.address" type="text" class="p-inputtext w-full" disabled />
