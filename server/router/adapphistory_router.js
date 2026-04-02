@@ -11,10 +11,10 @@ router.get("/join-requests/family", async (req, res) => {
   }
 });
 
-router.post("/approve/:userId", async (req, res) => {
+router.post("/active/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-    const result = await service.approveUser(userId);
+    const result = await service.activeUser(userId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, message: "서버 오류" });

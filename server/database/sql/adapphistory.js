@@ -7,7 +7,7 @@ const selecthistory = `
         DATE_FORMAT(created_at, '%Y.%m.%d') AS joinDate,
         join_status AS status
     FROM user_info
-    WHERE role = 'FAMILY' -- 일반 회원만 조회할 경우
+    WHERE role = 'FAMILY'
     ORDER BY created_at DESC;
 `;
 

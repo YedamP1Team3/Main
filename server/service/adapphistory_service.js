@@ -11,12 +11,12 @@ const adapphistory_service = {
     }
   },
 
-  approveUser: async (userId) => {
+  activeUser: async (userId) => {
     try {
-      const result = await mapper.updateJoinStatus(userId, "approved");
+      const result = await mapper.updateJoinStatus(userId, "ACTIVE");
       return { success: result.affectedRows > 0 };
     } catch (error) {
-      console.error("Service Error (approveUser):", error);
+      console.error("Service Error (activeUser):", error);
       return { success: false, message: "승인 처리 중 오류 발생" };
     }
   },

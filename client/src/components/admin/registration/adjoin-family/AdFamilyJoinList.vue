@@ -18,7 +18,9 @@ const currentPage = ref(1);
 // --- 필터링 로직 ---
 const filteredRows = computed(() => {
     return historyRows.value.filter((item) => {
-        const matchedStatus = filterStatus.value === 'all' || item.status === 'pending';
+        const itemStatus = item.status ? item.status.toUpperCase() : '';
+
+        const matchedStatus = filterStatus.value === 'all' || item.status === 'PENDING';
         const matchedName = !searchName.value || item.userName.includes(searchName.value);
         return matchedStatus && matchedName;
     });
@@ -54,10 +56,10 @@ const fetchJoinRequests = async () => {
 };
 
 // --- 액션 함수 ---
-const approveUser = async (userId) => {
+const activeUser = async (userId) => {
     if (confirm('승인하시겠습니까?')) {
         try {
-            const res = await axios.post(`/api/adhistory/approve/${userId}`);
+            const res = await axios.post(`/api/adhistory/active/${userId}`);
             if (res.data.success) {
                 alert('승인되었습니다');
                 fetchJoinRequests();
@@ -137,7 +139,7 @@ onMounted(fetchJoinRequests);
                         <td>{{ item.joinDate }}</td>
                         <td>
                             <div class="btn-group">
-                                <button class="btn-action" @click="approveUser(item.userId)">승인</button>
+                                <button class="btn-action" @click="activeUser(item.userId)">승인</button>
                                 <button class="btn-action-outline" @click="openRejectModal(item)">반려</button>
                             </div>
                         </td>
