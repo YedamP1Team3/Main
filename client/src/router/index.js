@@ -28,6 +28,7 @@ const router = createRouter({
                 ...systemAdmin // 내가 만든 경로를 먼저 배치 (우선순위 높음)
             ]
         },
+        { path: '/administratorMain', name: 'administratorMain', component: () => import('../views/beneficiary/AdministratorMain.vue') },
 
         {
             path: '/member',
