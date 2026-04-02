@@ -89,6 +89,39 @@ const updateUserWithPassword = async (updateDataArray) => {
   }
 };
 
+// 6. [기관 목록 조회] DB의 기관 테이블에서 모든 데이터를 가져옵니다.
+const selectAllAgencies = async () => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    // 기관 테이블(agencies)에서 ID와 이름을 가져오는 SQL입니다.
+    // 테이블명이나 컬럼명이 다를 경우 본인의 DB에 맞춰 수정하세요.
+    const sql = "SELECT id, agency_name FROM agencies ORDER BY agency_name ASC";
+    const rows = await conn.query(sql);
+    return rows; // 전체 목록(배열)을 반환합니다.
+  } catch (err) {
+    console.error("Mapper selectAllAgencies Error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectAgenciesByRegion = async (region) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const sql = require("../sql/info.js").selectAgenciesByRegion;
+    const rows = await conn.query(sql, [region]);
+    return rows;
+  } catch (err) {
+    console.error("Mapper selectAgenciesByRegion Error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 // 이 모든 기능들을 묶어서 밖으로 내보냅니다.
 module.exports = {
   insertUser,
@@ -96,4 +129,6 @@ module.exports = {
   countUserId,
   updateUser,
   updateUserWithPassword,
+  selectAllAgencies,
+  selectAgenciesByRegion,
 };

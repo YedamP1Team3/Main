@@ -102,4 +102,32 @@ router.put("/update-user", async (req, res) => {
   }
 });
 
+// 6. [기관 목록 조회] GET /api/info/agencies - DB에서 모든 기관 정보를 가져옴
+router.get("/agencies", async (req, res) => {
+  try {
+    const { region } = req.query; // 주소창의 ?region=값 을 읽어옵니다.
+
+    let agencies;
+    if (region) {
+      // 지역 정보가 있으면 필터링해서 가져옴
+      agencies = await infoService.getAgenciesByRegion(region);
+    } else {
+      // 지역 정보가 없으면 전체를 가져옴 (기존 로직 유지)
+      agencies = await infoService.getAllAgencies();
+    }
+
+    // DB에서 가져온 데이터를 프론트엔드 Select 박스 형식에 맞게 변환하여 보냅니다.
+    // 만약 서비스단에서 이미 처리했다면 바로 res.json(agencies) 하면 됩니다.
+    const formattedAgencies = agencies.map((agency) => ({
+      label: agency.agency_name, // 화면에 보여줄 이름
+      value: agency.id, // 실제 DB에 저장될 ID 값
+    }));
+
+    res.status(200).json(formattedAgencies);
+  } catch (err) {
+    console.error("Fetch Agencies Error:", err);
+    res.status(500).send({ message: "기관 목록을 불러오는데 실패했습니다." });
+  }
+});
+
 module.exports = router; // 이 라우터 설정을 메인 서버 파일(app.js 등)에서 쓸 수 있게 내보냅니다.
