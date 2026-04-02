@@ -15,6 +15,9 @@ const currentVersion = ref('');
 const selectedItemId = ref(null);
 const selectedSubItemId = ref(null);
 
+// [추가 1] 모달 표시 여부를 관리하는 상태값
+const showPreviewModal = ref(false);
+
 const getResponseData = (response, fallbackValue = null) => {
     return response?.data?.success ? response.data.data : fallbackValue;
 };
@@ -181,14 +184,18 @@ const handleDeleteSubItem = async (subItemId) => {
     await fetchSurveyData(selectedVersionId.value);
 };
 
-// "적용"은 단순 저장이 아니라
-// 1) 선택 버전을 active로 만들고
-// 2) 다음 편집용 draft 버전을 하나 더 만드는 작업이다.
-const handleApplyVersion = async () => {
-    if (!confirm('현재 선택한 버전을 활성화하고, 수정 가능한 새 설문 버전을 생성하시겠습니까?')) {
+// 1) 버튼 클릭 시 미리보기 모달 열기
+const openPreviewModal = () => {
+    // surveyData가 비어있는지 방어 로직 (선택사항)
+    if (!surveyData.value || surveyData.value.length === 0) {
+        alert('등록된 설문 항목이 없습니다.');
         return;
     }
+    showPreviewModal.value = true;
+};
 
+// 2) 모달 안에서 '확인'을 눌렀을 때 실제 적용하는 로직
+const confirmAndApplyVersion = async () => {
     const { data } = await axios.post('/api/survey/version/new', {
         versionId: selectedVersionId.value
     });
@@ -198,9 +205,9 @@ const handleApplyVersion = async () => {
         await fetchVersionList();
         selectedVersionId.value = data.newVersionId ?? data.data?.new_version_id;
         handleVersionChange();
+        showPreviewModal.value = false; // 완료 후 모달 닫기
     }
 };
-
 onMounted(async () => {
     await fetchVersionList();
 
@@ -223,7 +230,7 @@ onMounted(async () => {
                 </select>
             </div>
 
-            <button @click="handleApplyVersion" class="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-600 transition-colors shadow-md">현재 버전 적용 및 새 설문 버전 생성</button>
+            <button @click="openPreviewModal" class="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-600 transition-colors shadow-md">현재 버전 적용 및 새 설문 버전 생성</button>
         </div>
 
         <div class="grid grid-cols-12 gap-4 md:gap-6">
@@ -258,6 +265,56 @@ onMounted(async () => {
                     @add-detail="handleAddDetail"
                     @delete-selected="handleDeleteSelected"
                 />
+            </div>
+        </div>
+
+        <!-- 제출전 -->
+        <div v-if="showPreviewModal" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+                <div @click="showPreviewModal = false" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+
+                <div class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-4xl max-h-[calc(100vh-15rem)] flex flex-col mt-20">
+                    <button @click="showPreviewModal = false" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors z-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    <div class="px-8 pt-8 pb-6 border-b border-slate-100 shrink-0">
+                        <h3 class="text-2xl font-extrabold text-slate-950 tracking-tight" id="modal-title">설문지 미리보기</h3>
+                        <p class="text-base text-slate-500 mt-1.5 font-medium">최종 적용 전, 질문이 올바른지 확인해주세요.</p>
+                    </div>
+
+                    <div class="p-8 overflow-y-auto flex-1 bg-slate-50 confirm-scroll-area">
+                        <div v-for="item in surveyData" :key="'preview_' + item.id" class="mb-8 last:mb-0 border border-slate-200 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <h4 class="text-xl font-bold text-slate-900 mb-6 pb-3 border-b border-slate-200"><span class="text-blue-600 mr-2">Q.</span>{{ item.name }}</h4>
+
+                            <div v-for="sub in item.subItems" :key="'preview_sub_' + sub.id" class="mb-6 last:mb-0">
+                                <h5 class="text-base font-semibold text-blue-700 mb-3 ml-1 flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                    {{ sub.name }}
+                                </h5>
+
+                                <ul class="divide-y divide-slate-100 border border-slate-100 rounded-xl bg-slate-50/50">
+                                    <li v-for="(detail, index) in sub.details" :key="'preview_det_' + detail.id" class="p-4 flex items-start gap-3.5 hover:bg-slate-50 rounded-lg transition-colors">
+                                        <span class="font-mono font-bold text-slate-400 shrink-0 pt-0.5 text-xs w-5 text-right">
+                                            {{ String(index + 1).padStart(2, '0') }}
+                                        </span>
+                                        <span class="text-sm text-slate-700 font-medium leading-relaxed">
+                                            {{ detail.question_text }}
+                                        </span>
+                                    </li>
+                                    <li v-if="!sub.details || sub.details.length === 0" class="p-6 text-sm text-slate-400 text-center italic bg-white rounded-lg">등록된 질문이 없습니다.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-8 py-6 border-t border-slate-100 bg-white flex justify-end gap-3.5 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.03)]">
+                        <button @click="showPreviewModal = false" class="px-5 py-2.5 text-sm rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors border border-slate-200">돌아가기</button>
+                        <button @click="confirmAndApplyVersion" class="px-5 py-2.5 text-sm rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30">이대로 버전 적용 및 생성</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
