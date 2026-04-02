@@ -12,6 +12,14 @@ const rsvService = require("./service/rsv_service.js");
 app.use(cors()); // 모든 요청 허용 (개발 단계)
 app.use(express.json());
 
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ limit: "100mb", extended: true }));
+
+const externalPath = "d:/uploads";
+app.use("/uploads", express.static(externalPath));
+
+
+const downloadRouter = require('./middleware/download.js');
 const userRouter = require("./router/user_router.js");
 const surveyRouter = require("./router/survey_router.js");
 const adsupportPlan = require("./router/adsupport_router.js");
@@ -22,8 +30,11 @@ const mgMyPageRouter = require("./router/mgmypage_router.js");
 const mgTargetRouter = require("./router/mgtargets_router.js");
 const adAgencyRouter = require("./router/adAgency_router.js");
 const admypageRouter = require("./router/admypage_router.js");
+const adapphistoryRouter = require("./router/adapphistory_router.js");
 
+app.use('/download', downloadRouter);
 app.use("/abc", require("./router/noTouch_router.js"));
+app.use("/", userRouter);
 app.use("/api", userRouter);
 app.use("/reserve", require("./router/rsv_router.js"));
 app.use("/survey", surveyRouter);
@@ -35,6 +46,7 @@ app.use("/mgmypage", mgMyPageRouter);
 app.use("/mgtargets", mgTargetRouter);
 app.use("/adagency", adAgencyRouter);
 app.use("/admypage", admypageRouter);
+app.use("/adhistory", adapphistoryRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcom!!");

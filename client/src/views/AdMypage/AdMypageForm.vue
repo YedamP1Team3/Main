@@ -1,6 +1,10 @@
 <script setup>
+import { useRoute } from 'vue-router';
 import JsTopbarad from '@/layout/admin/JsTopbarad.vue';
 import JsSidbarad from '@/layout/admin/JsSidbarad.vue';
+import TySidbarsinup from '@/layout/admin/TySidbarsinup.vue';
+
+const route = useRoute();
 </script>
 <template>
     <div class="layout-wrapper">
@@ -8,7 +12,8 @@ import JsSidbarad from '@/layout/admin/JsSidbarad.vue';
 
         <div class="layout-body">
             <aside class="layout-sidebar">
-                <JsSidbarad />
+                <TySidbarsinup v-if="route.meta.sidebar === 'TySidbarsinup'" />
+                <JsSidbarad v-else />
             </aside>
 
             <main class="layout-content">

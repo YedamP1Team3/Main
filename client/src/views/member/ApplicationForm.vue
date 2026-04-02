@@ -3,16 +3,17 @@ import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 
-import BeneficiaryInfo from '@/components/member/m_application/m_BeneficiaryInfo.vue';
-import BeneficiaryManagement from '@/components/member/m_application/MemberManagement.vue';
+import BeneficiaryInfo from '@/components/member/m_BeneficiaryInfo.vue';
+import BeneficiaryManagement from '@/components/member//MemberManagement.vue';
 import SurveyApplicationForm from '@/components/member/m_application/MemberSurvey.vue';
-import MemberSupportDetail from '@/components/member/m_application/MemberSupportDetail.vue';
-import MemberResultDetail from '@/components/member/m_application/MemberResultDetail .vue';
+import MemberSupportDetail from '@/components/member/m_plan_result/MemberSupportDetail.vue';
+import MemberResultDetail from '@/components/member/m_plan_result/MemberResultDetail .vue';
 
 const surveyStore = useSurveyStore();
 const route = useRoute();
 
-// 오른쪽 메인 영역이 지금 무엇을 보여주는지 관리한다.
+// 오른쪽 메인 영역은 사용자가 무엇을 클릭했는지에 따라 달라진다.
+// 신청서 작성/조회, 계획서 상세, 결과서 상세 중 무엇을 보여줄지 이 값으로 제어한다.
 const viewMode = ref('empty');
 const selectedPlanId = ref(null);
 const selectedResultId = ref(null);
@@ -46,8 +47,8 @@ const handleSelectResult = (resultId) => {
     viewMode.value = 'result';
 };
 
-// 홈 이력표에서 beneId/tab을 넘겨주면
-// 이 화면은 해당 대상자를 자동 선택하고 원하는 탭을 연다.
+// HistoryTable이나 사이드바에서 beneId/tab query를 넘겨주면
+// 이 화면은 그 값을 읽어서 "누가 선택되었는지"와 "어느 탭부터 열지"를 복원한다.
 const applyRouteState = async () => {
     const beneId = route.query.beneId;
     activeTab.value = resolveTabName(route.query.tab);
@@ -77,12 +78,10 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
     <div class="dashboard-container">
         <aside class="side-panel">
             <section class="info-section">
-                <!-- 현재 선택된 지원대상자의 기본 정보 -->
                 <BeneficiaryInfo />
             </section>
 
             <section class="list-section">
-                <!-- 신청서/계획서/결과서 목록과 탭 전환 -->
                 <BeneficiaryManagement :active-tab="activeTab" @change-tab="handleTabChange" @select-plan="handleSelectPlan" @select-result="handleSelectResult" />
             </section>
         </aside>
@@ -103,7 +102,7 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
             <div v-else class="empty-state">
                 <div class="guide-box">
                     <i class="pi pi-file"></i>
-                    <p>왼쪽 목록에서 항목을 선택해주세요.</p>
+                    <p>왼쪽 목록에서 항목을 선택해 주세요.</p>
                 </div>
             </div>
         </main>

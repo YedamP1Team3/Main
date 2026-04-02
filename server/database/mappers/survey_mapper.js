@@ -1,279 +1,215 @@
-// database/mappers/survey_mapper.js
 const { pool } = require("../DAO");
 const surveySql = require("../sql/servey.js");
 
-// 🚨 [수정] 함수 정의 부분에 (versionId) 인자를 반드시 추가해야 합니다!
-const selectSurvey = async (versionId) => {
+const runQuery = async (query, params = []) => {
   let conn = null;
+
   try {
     conn = await pool.getConnection();
-
-    // 💡 디버깅용 로그: 실제로 DB에 어떤 ID를 던지는지 확인
-    // console.log("DB 조회 시도 versionId:", versionId);
-
-    // [ ] 배열 안에 versionId를 넣어서 SQL의 ? 자리에 매칭시킵니다.
-    let rows = await conn.query(surveySql.selectSurvey, [versionId]);
-
-    return rows;
+    return await conn.query(query, params);
   } catch (err) {
-    console.error("Mapper Error:", err);
+    // mapper는 에러를 가공해서 숨기지 않는다.
+    // 최종 에러 응답 형태는 router가 책임지고, 여기서는 원인만 그대로 올린다.
     throw err;
   } finally {
-    if (conn) conn.release();
+    // 가벼운 SELECT라도 getConnection()을 썼다면 반드시 반납해야 한다.
+    // release를 빼먹으면 요청이 쌓일수록 pool이 막혀 전체 서버가 느려질 수 있다.
+    if (conn) {
+      conn.release();
+    }
   }
+};
+
+const selectSurvey = async (versionId) => {
+  return runQuery(surveySql.selectSurvey, [versionId]);
 };
 
 const insertItem = async (params) => {
-  try {
-    const result = await pool.query(surveySql.insert_item, [
-      params.item_name,
-      params.version_id,
-      params.version_id,
-    ]);
-    return result;
-  } catch (dbError) {
-    console.error(dbError);
-    throw dbError;
-  }
+  return runQuery(surveySql.insert_item, [
+    params.item_name,
+    params.version_id,
+    params.version_id,
+  ]);
 };
 
 const insertSubItem = async (params) => {
-  const result = await pool.query(surveySql.insert_subitem, [
+  return runQuery(surveySql.insert_subitem, [
     params.sub_item_name,
     params.item_id,
     params.item_id,
   ]);
-  return result;
 };
 
 const insertSurveyDetail = async (params) => {
-  const result = await pool.query(surveySql.insert_detail, [
+  return runQuery(surveySql.insert_detail, [
     params.question_text,
     params.sub_item_id,
     params.sub_item_id,
   ]);
-  return result;
 };
 
-const deleteItems = (ids) =>
-  pool.query("DELETE FROM survey_item WHERE item_id IN (?)", [ids]);
-const deleteSubItems = (ids) =>
-  pool.query("DELETE FROM survey_sub_item WHERE sub_item_id IN (?)", [ids]);
-const deleteDetails = (ids) =>
-  pool.query("DELETE FROM survey_detail WHERE detail_id IN (?)", [ids]);
+const deleteItems = async (ids) => {
+  return runQuery("delete from survey_item where item_id in (?);", [ids]);
+};
 
-// ⭐️ 추가: 버전 목록을 가져오는 매퍼 함수
+const deleteSubItems = async (ids) => {
+  return runQuery("delete from survey_sub_item where sub_item_id in (?);", [ids]);
+};
+
+const deleteDetails = async (ids) => {
+  return runQuery("delete from survey_detail where detail_id in (?);", [ids]);
+};
+
 const getVersions = async () => {
-  let conn = null;
-  try {
-    conn = await pool.getConnection();
-    // surveySql에 selectVersionList 쿼리가 정의되어 있어야 합니다.
-    let rows = await conn.query(
-      surveySql.selectVersionList ||
-        "SELECT * FROM survey_version ORDER BY VERSION_ID DESC",
-    );
-    return rows;
-  } finally {
-    if (conn) conn.release();
-  }
+  return runQuery(surveySql.selectVersionList);
 };
 
-// ⭐️ [MEMBER용] 현재 활성화된(1) 버전 ID 딱 하나만 가져오는 함수 추가
 const getActiveVersionId = async () => {
-  let conn = null;
-  try {
-    conn = await pool.getConnection();
-
-    // 복잡한 JOIN 없이, 단순히 활성 상태인 버전의 ID만 찾습니다.
-    let rows = await conn.query(surveySql.memberSurvey);
-
-    // 결과가 있으면 첫 번째 행의 ID를 반환, 없으면 null 반환
-    return rows.length > 0 ? rows[0].VERSION_ID : null;
-  } catch (err) {
-    console.error("❌ [Mapper 에러] 활성 버전 ID 조회 실패:", err);
-    throw err;
-  } finally {
-    if (conn) conn.release();
-  }
+  const rows = await runQuery(surveySql.memberSurvey);
+  return rows.length > 0 ? rows[0].version_id : null;
 };
-// [추가] 지원신청서 및 답변 트랜잭션 저장 로직
+
 const submitSurveyApplication = async (params) => {
   let conn = null;
+
   try {
     conn = await pool.getConnection();
-    await conn.beginTransaction(); // ⭐️ 트랜잭션 시작 (실패 시 롤백을 위함)
+    await conn.beginTransaction();
 
-    // 1. APPLICATION (지원신청서) 테이블에 INSERT
-    // 파라미터 순서: VERSION_ID, BENE_ID, USER_ID
-    const appResult = await conn.query(surveySql.insert_application, [
+    // 신청서 1건과 답변 여러 건은 논리적으로 한 묶음이다.
+    // 둘 중 하나만 저장되면 "신청서는 있는데 답변이 비어 있음" 같은
+    // 불완전한 데이터가 생기므로 반드시 하나의 트랜잭션으로 처리한다.
+    const applicationResult = await conn.query(surveySql.insert_application, [
       params.version_id,
       params.bene_id,
       params.user_id,
     ]);
 
-    // 새로 생성된 신청서의 APP_ID (PK) 추출
-    const appId =
-      appResult.insertId ||
-      (appResult[0] && appResult[0].insertId) ||
-      appResult.affectedRows;
+    const appId = applicationResult.insertId;
 
-    if (!appId)
-      throw new Error("신청서 생성 실패: APP_ID를 가져올 수 없습니다.");
-
-    // 2. Survey_Answer (조사지답변) 테이블에 다중 INSERT
-    // 프론트에서 온 답변 데이터 형태: { "상세내용_ID": true, "상세내용_ID": false }
-    const answers = params.answers;
-
-    // 객체(Object) 형태의 답변을 배열 형태로 변환하여 반복 저장
-    for (const [detailId, answerValue] of Object.entries(answers)) {
-      // 파라미터 순서: ANSWER_VALUE, DETAIL_ID, APP_ID
-      await conn.query(surveySql.insert_survey_answer, [
-        answerValue, // true/false (또는 1/0)
-        detailId, // 프론트에서 넘어온 문항의 DETAIL_ID
-        appId, // 방금 위에서 만든 신청서의 ID
-      ]);
+    if (!appId) {
+      throw new Error("신청서 저장 후 생성된 app_id를 확인할 수 없습니다.");
     }
 
-    await conn.commit(); // ⭐️ 모든 저장이 성공하면 DB에 확정!
+    const answerRows = Object.entries(params.answers).map(
+      ([detailId, answerValue]) => [answerValue ? 1 : 0, detailId, appId],
+    );
 
-    return appId; // 생성된 신청서 번호 반환
+    // 답변 수만큼 insert를 반복하면 질문 개수만큼 쿼리가 발생한다.
+    // mariadb 드라이버의 conn.batch()를 쓰면 같은 insert 문에 파라미터만 여러 벌 보내
+    // N+1 성격의 비효율을 줄이고 코드도 더 짧게 유지할 수 있다.
+    if (answerRows.length > 0) {
+      await conn.batch(surveySql.insert_survey_answer, answerRows);
+    }
+
+    await conn.commit();
+
+    return appId;
   } catch (err) {
-    if (conn) await conn.rollback(); // 🚨 중간에 하나라도 에러나면 전체 취소!
-    console.error("❌ [Mapper 에러] 설문 답변 저장 중 오류:", err);
+    if (conn) {
+      await conn.rollback();
+    }
     throw err;
   } finally {
-    if (conn) conn.release();
+    // 트랜잭션 성공/실패와 무관하게 커넥션은 반드시 finally에서 반납한다.
+    if (conn) {
+      conn.release();
+    }
   }
 };
 
-// [조회] 신청서 번호로 마스터 정보 조회
 const getApplicationById = async (appId) => {
-  let conn = null;
-  try {
-    conn = await pool.getConnection();
-    const rows = await conn.query(surveySql.select_application_by_id, [appId]);
-    return rows.length > 0 ? rows[0] : null;
-  } finally {
-    if (conn) conn.release();
-  }
+  const rows = await runQuery(surveySql.select_application_by_id, [appId]);
+  return rows.length > 0 ? rows[0] : null;
 };
 
-// [조회] 신청서 번호로 답변 목록 조회
 const getAnswersByAppId = async (appId) => {
-  let conn = null;
-  try {
-    conn = await pool.getConnection();
-    const rows = await conn.query(surveySql.select_answers_by_app_id, [appId]);
-    return rows;
-  } finally {
-    if (conn) conn.release();
-  }
+  return runQuery(surveySql.select_answers_by_app_id, [appId]);
 };
 
-// [목록 조회] 대상자 ID로 신청서 리스트 조회
 const getApplicationList = async (beneId) => {
-  let conn = null;
-  try {
-    conn = await pool.getConnection();
-    const rows = await conn.query(surveySql.select_application_list_by_bene, [
-      beneId,
-    ]);
-    // console.log(rows);
-    return rows; // 리스트 반환
-  } finally {
-    if (conn) conn.release();
-  }
+  return runQuery(surveySql.select_application_list_by_bene, [beneId]);
 };
 
 const deleteApplicationTransaction = async (appId) => {
   let conn = null;
+
   try {
     conn = await pool.getConnection();
     await conn.beginTransaction();
+
+    // survey_answer가 application을 참조하므로 자식 테이블을 먼저 삭제한다.
+    // 이 순서를 지키면 외래키 문제나 고아 데이터 위험을 피할 수 있다.
     await conn.query(surveySql.delete_survey_answers, [appId]);
     await conn.query(surveySql.delete_application, [appId]);
+
     await conn.commit();
     return true;
   } catch (err) {
-    if (conn) await conn.rollback();
+    if (conn) {
+      await conn.rollback();
+    }
     throw err;
   } finally {
-    if (conn) conn.release();
+    if (conn) {
+      conn.release();
+    }
   }
 };
 
-// createNewVersion 함수를 덮어씌웁니다.
 const createNewVersion = async (targetVersionId) => {
   let conn = null;
+
   try {
     conn = await pool.getConnection();
     await conn.beginTransaction();
 
-    // 1. 기존 모든 버전 비활성화 (전체 FALSE)
+    // 설문 버전은 동시에 하나만 active여야 한다.
+    // 먼저 기존 active를 내리고, 사용자가 선택한 버전을 다시 active로 올린다.
     await conn.query(surveySql.deactivateVersions);
 
-    // 2. 선택한 버전을 활성화 (TRUE)
     if (targetVersionId) {
-      await conn.query(
-        surveySql.setActiveVersion ||
-          `UPDATE survey_version SET IS_ACTIVE = 1 WHERE VERSION_ID = ?`,
-        [targetVersionId],
-      );
+      await conn.query(surveySql.setActiveVersion, [targetVersionId]);
     }
 
-    // 3. 수정용 새 버전(FALSE) 생성
-    const result = await conn.query(
-      surveySql.insertNewDraftVersion ||
-        `INSERT INTO survey_version (IS_ACTIVE, CREATE_DATE) VALUES (0, NOW());`,
-    );
+    // 운영에 쓰는 active 버전은 유지하고,
+    // 다음 수정을 위한 draft 버전을 새로 하나 만들어 둔다.
+    const result = await conn.query(surveySql.insertNewDraftVersion);
 
     await conn.commit();
 
-    const insertId =
-      result.insertId ||
-      (result[0] && result[0].insertId) ||
-      result.affectedRows;
-    return insertId; // 새로 생성된 가장 큰 PK 반환
+    return result.insertId;
   } catch (err) {
-    if (conn) await conn.rollback();
-    console.error("Mapper Error:", err);
+    if (conn) {
+      await conn.rollback();
+    }
     throw err;
   } finally {
-    if (conn) conn.release();
+    if (conn) {
+      conn.release();
+    }
   }
 };
 
-// [추가] 활성화된 신청서 체크 (중복 방어)
 const checkActiveApplication = async (beneId) => {
-  const result = await pool.query(surveySql.check_active_application, [beneId]);
-  // 💡 드라이버(mysql2 등)에 따른 이중 배열 엣지 케이스 방어
-  const rows =
-    Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result;
-  return rows[0]?.cnt || 0;
+  const rows = await runQuery(surveySql.check_active_application, [beneId]);
+  return rows.length > 0 ? rows[0].cnt : 0;
 };
 
-// [추가] 신청서 상태 조회 (삭제 방어)
 const getApplicationStatus = async (appId) => {
-  const result = await pool.query(surveySql.select_application_status, [appId]);
-  const rows =
-    Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result;
+  const rows = await runQuery(surveySql.select_application_status, [appId]);
   return rows.length > 0 ? rows[0] : null;
 };
 
-// [추가] 상태를 '진행중'으로 업데이트
-const updateApplicationToInProgress = async (appId) => {
-  const result = await pool.query(surveySql.update_status_inprogress, [appId]);
-  return result.affectedRows || result[0]?.affectedRows;
-};
 const updateApplicationsToInProgressByBene = async (beneId) => {
-  const query = surveySql.update_status_inprogress.replace(
-    "WHERE app_id = ?",
-    "WHERE bene_id = ?",
+  const result = await runQuery(
+    surveySql.update_applications_to_inprogress_by_bene,
+    [beneId],
   );
-  const result = await pool.query(query, [beneId]);
-  return result.affectedRows || result[0]?.affectedRows;
+
+  return result.affectedRows;
 };
-// module.exports 에 deleteApplicationTransaction 추가
+
 module.exports = {
   selectSurvey,
   insertItem,
@@ -282,18 +218,15 @@ module.exports = {
   deleteItems,
   deleteSubItems,
   deleteDetails,
-  getVersions, // 추가됨
-  createNewVersion,
-  //member 용
+  getVersions,
   getActiveVersionId,
   submitSurveyApplication,
   getApplicationById,
   getAnswersByAppId,
   getApplicationList,
   deleteApplicationTransaction,
-  //구조 변경
+  createNewVersion,
   checkActiveApplication,
   getApplicationStatus,
-  updateApplicationToInProgress,
   updateApplicationsToInProgressByBene,
 };
