@@ -411,4 +411,53 @@ router.post("/counsel", async (req, res) => {
   }
 });
 
+router.get("/counsel/:rsvId", async (req, res) => {
+  try {
+    const { rsvId } = req.params;
+
+    const note = await rsvService.getCounselingNoteByRsvId(rsvId);
+
+    return res.status(200).json({
+      success: true,
+      note,
+    });
+  } catch (err) {
+    console.error("getCounselingNoteByRsvId error:", err);
+
+    return res.status(404).json({
+      success: false,
+      message: err.message || "상담일지 조회 실패",
+    });
+  }
+});
+
+// 상담일지 수정
+router.put("/counsel/:rsvId", async (req, res) => {
+  try {
+    const { rsvId } = req.params;
+    const { counselingType, title, content, futurePlan } = req.body;
+
+    const result = await rsvService.updateCounselingNote({
+      rsvId,
+      counselingType,
+      title,
+      content,
+      futurePlan,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "상담일지 수정 완료",
+      data: result,
+    });
+  } catch (err) {
+    console.error("updateCounselingNote error:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message || "상담일지 수정 실패",
+    });
+  }
+});
+
 module.exports = router;

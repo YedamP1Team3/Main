@@ -310,6 +310,46 @@ const updateReservationStatusToNoteWritten = async (rsvId) => {
   }
 };
 
+const selectCounselingNoteByRsvId = async (rsvId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+
+    const rows = await conn.query(rsvSql.selectCounselingNoteByRsvId, [rsvId]);
+
+    return rows;
+  } catch (err) {
+    console.error("selectCounselingNoteByRsvId error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const updateCounselingNoteByRsvId = async (noteData) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+
+    const { rsvId, counselingType, title, content, futurePlan } = noteData;
+
+    const result = await conn.query(rsvSql.updateCounselingNoteByRsvId, [
+      counselingType,
+      title,
+      content,
+      futurePlan,
+      rsvId,
+    ]);
+
+    return result;
+  } catch (err) {
+    console.error("updateCounselingNoteByRsvId error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   selectManagerSchedule,
   selectReservedTimes,
