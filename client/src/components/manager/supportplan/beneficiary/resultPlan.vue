@@ -83,7 +83,7 @@ watch(
                 </tr>
                 <tr v-for="plan in planList" :key="showTemp ? plan.result_draft_id : plan.result_id" @click="detailClick(plan)" class="clickable-row">
                     <td>{{ showTemp ? plan.result_draft_id : plan.result_id }}</td>
-                    <td>{{ plan.manager_id }}</td>
+                    <td>{{ plan.manager_name }}</td>
                     <td>{{ plan.result_title }}</td>
                     <td>{{ plan.created_at }}</td>
                     <td>{{ plan.progress_state }}</td>

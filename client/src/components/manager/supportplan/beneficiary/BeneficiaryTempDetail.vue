@@ -14,6 +14,7 @@ const props = defineProps({
 const tempDetail = ref({});
 const attachments = ref([]);
 const selectedFiles = ref([]);
+const isSubmitting = ref(false);
 
 // 1. 상세 정보
 const fetchTempDetail = async (id) => {
@@ -100,8 +101,10 @@ const deleteExistingFile = async (fileId) => {
 // 3. 승인 신청 (수정 후 재신청)
 const Approval = async (planDraftId) => {
     if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
+    if (isSubmitting.value) return;
     if (!planDraftId) return;
     try {
+        isSubmitting.value = true;
         const uploaded = await uploadSelectedFiles(planDraftId);
         if (!uploaded) {
             alert('파일 업로드에 실패했습니다.');
@@ -130,13 +133,17 @@ const Approval = async (planDraftId) => {
         }
     } catch (error) {
         console.error('오류 발생', error);
+    } finally {
+        isSubmitting.value = false;
     }
 };
 
 // 4. 임시 저장
 const SaveTemp = async (planDraftId) => {
     if (!confirm('내용을 저장하시겠습니까?')) return;
+    if (isSubmitting.value) return;
     try {
+        isSubmitting.value = true;
         const uploaded = await uploadSelectedFiles(planDraftId);
         if (!uploaded) {
             alert('파일 업로드에 실패했습니다.');
@@ -154,6 +161,8 @@ const SaveTemp = async (planDraftId) => {
         }
     } catch (error) {
         console.error('오류 발생', error);
+    } finally {
+        isSubmitting.value = false;
     }
 };
 

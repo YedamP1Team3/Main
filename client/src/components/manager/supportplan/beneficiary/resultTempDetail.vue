@@ -17,7 +17,7 @@ const selectedPlans = ref([]);
 
 const supportList = ref([]);
 const supportPlan = ref('');
-
+const isSubmitting = ref(false); //중복방지
 // 1. 상세 정보 및 반려 히스토리 가져오기
 const fetchResultDetail = async (id) => {
     if (!id) return;
@@ -97,12 +97,18 @@ const deleteTemp = async (resultId) => {
 
 // 3. 승인 신청 (수정 후 재신청)
 const Approval = async (id) => {
+    if (isSubmitting.value) return;
     if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
+    if (!resultDetail.value.result_title || !resultDetail.value.result_content) {
+        alert('내용을 입력해주세요');
+        return;
+    }
     if (selectedPlans.value.length === 0) {
         alert('연결된 지원계획서가 없습니다. 결과에 포함할 계획을 선택해주세요.');
         return;
     }
     try {
+        isSubmitting.value = true;
         const planIds = selectedPlans.value.map((plan) => plan.plan_id);
         const target = {
             manager_id: authStore.userId,
@@ -120,6 +126,8 @@ const Approval = async (id) => {
         }
     } catch (error) {
         console.error('오류 발생', error);
+    } finally {
+        isSubmitting.value = false;
     }
 };
 

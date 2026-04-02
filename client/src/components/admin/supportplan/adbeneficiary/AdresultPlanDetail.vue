@@ -144,7 +144,7 @@ watch(
             <div class="status-box">
                 <span :class="['state-badge', resultDetail.progress_state]"> 상태: {{ resultDetail?.progress_state }} </span>
             </div>
-            <div class="date-box"><strong>작성일 :</strong> {{ resultDetail.created_at }}</div>
+            <div class="date-box"><strong>작성자 :</strong> {{ resultDetail.manager_name }}</div>
         </div>
 
         <div class="table-container">

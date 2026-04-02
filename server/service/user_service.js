@@ -123,12 +123,12 @@ const getSupportPlanTempList = async (beneId) => {
 };
 //지원계획서상세조회
 const getSupportPlanDetail = async (planID) => {
-    let planResult = await userMapper.selectSupportPlanDetail(planID);
-    let fileList = await userMapper.selectAttachments(planID); 
-    return {
-        plan: planResult || {}, 
-        files: fileList || []      
-    };
+  let planResult = await userMapper.selectSupportPlanDetail(planID);
+  let fileList = await userMapper.selectAttachments(planID);
+  return {
+    plan: planResult || {},
+    files: fileList || [],
+  };
 };
 //임시지원계획서조회
 const getTempPlanDetail = async (planID) => {
@@ -142,7 +142,7 @@ const getTempPlanDetail = async (planID) => {
 //지원계획서삭제
 const removeSupportPlan = async (planId) => {
   try {
-    await userMapper.deleteAttachments(planId); 
+    await userMapper.deleteAttachments(planId);
     const result = await userMapper.removeSupportPlan(planId);
     if (result && result.affectedRows > 0) {
       return { status: "success" };

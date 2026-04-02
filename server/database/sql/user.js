@@ -41,15 +41,17 @@ WHERE b.bene_id = ?;
 //지원계획서 해당아이디 조회
 const selectSupportPlanList = `
     SELECT 
-      plan_id, 
-      bene_id, 
-      plan_objective, 
-      progress_state, 
-      manager_id,
-      DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
-    FROM support_plan
-    WHERE bene_id = ? AND progress_state != '임시'
-    ORDER BY plan_id ASC
+      s.plan_id, 
+      s.bene_id, 
+      s.plan_objective, 
+      s.progress_state, 
+      s.manager_id,
+      u.user_name AS manager_name, 
+      DATE_FORMAT(s.created_at, '%Y-%m-%d') AS created_at
+    FROM support_plan s
+    LEFT JOIN user_info u ON s.manager_id = u.user_id
+    WHERE s.bene_id = ? AND s.progress_state != '임시'
+    ORDER BY s.plan_id ASC
 `;
 //지원계획서생성
 const createSupportPlan = `
@@ -78,15 +80,17 @@ const createTempPlan = `
 //임시지원계획리스트 조회
 const selectSupportPlanTempList = `
         SELECT 
-      plan_draft_id, 
-      bene_id, 
-      plan_objective, 
-      progress_state, 
-      manager_id,
-      DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at
-    FROM plan_draft
-    WHERE bene_id = ? 
-    ORDER BY plan_draft_id ASC
+      s.plan_draft_id, 
+      s.bene_id, 
+      s.plan_objective, 
+      s.progress_state, 
+      s.manager_id,
+      u.user_name AS manager_name,
+      DATE_FORMAT(s.created_at, '%Y-%m-%d') AS created_at
+    FROM plan_draft s
+    LEFT JOIN user_info u ON s.manager_id = u.user_id
+    WHERE s.bene_id = ? 
+    ORDER BY s.plan_draft_id ASC
  `;
 //지원자리스트 조회
 const selectSupportPlanDetail = `

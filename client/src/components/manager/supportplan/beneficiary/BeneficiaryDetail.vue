@@ -12,6 +12,7 @@ const props = defineProps({
 const planDetail = ref({});
 const attachments = ref([]);
 const rejectionLog = ref([]); // 반려 히스토리 저장용
+const isSubmitting = ref(false);
 
 // 1. 상세 정보 및 반려 히스토리 가져오기
 const fetchPlanDetail = async (id) => {
@@ -62,8 +63,16 @@ const DeleteTemp = async (planId) => {
 
 // 3. 승인 신청 (수정 후 재신청)
 const Approval = async (planId) => {
+    if (isSubmitting.value) return;
     if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
     try {
+        if (!planDetail.value?.plan_objective || !planDetail.value?.plan_content) {
+            alert('내용을 입력해주세요');
+            return;
+        }
+
+        isSubmitting.value = true;
+
         const updateData = {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
@@ -75,13 +84,17 @@ const Approval = async (planId) => {
         }
     } catch (error) {
         console.error('오류 발생', error);
+    } finally {
+        isSubmitting.value = false;
     }
 };
 
 // 4. 임시 저장
 const SaveTemp = async (planId) => {
+    if (isSubmitting.value) return;
     if (!confirm('내용을 저장하시겠습니까?')) return;
     try {
+        isSubmitting.value = true;
         const updateData = {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
@@ -93,6 +106,8 @@ const SaveTemp = async (planId) => {
         }
     } catch (error) {
         console.error('오류 발생', error);
+    } finally {
+        isSubmitting.value = false;
     }
 };
 //파일다운로드
