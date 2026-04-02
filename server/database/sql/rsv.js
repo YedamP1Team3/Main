@@ -221,6 +221,31 @@ SET rsv_status = 'NOTE_WRITTEN'
 WHERE rsv_id = ?
 `;
 
+const selectCounselingNoteByRsvId = `
+SELECT
+    note_id,
+    rsv_id,
+    counseling_type,
+    title,
+    content,
+    future_plan,
+    created_at,
+    updated_at
+FROM counseling_note
+WHERE rsv_id = ?
+`;
+
+const updateCounselingNoteByRsvId = `
+UPDATE counseling_note
+SET
+    counseling_type = ?,
+    title = ?,
+    content = ?,
+    future_plan = ?,
+    updated_at = NOW()
+WHERE rsv_id = ?
+`;
+
 module.exports = {
   selectManagerSchedule,
   selectReservedTimes,
@@ -241,4 +266,6 @@ module.exports = {
   selectCounselReservationByRsvId,
   insertCounselingNote,
   updateReservationStatusToNoteWritten,
+  selectCounselingNoteByRsvId,
+  updateCounselingNoteByRsvId,
 };

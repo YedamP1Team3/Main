@@ -89,19 +89,19 @@ const router = createRouter({
             component: () => import('../views/reservation/family/Rservation.vue')
         },
         {
-            path: '/manageCounsel',
+            path: '/managecounsel',
             name: 'managecounsel',
-            component: () => import('../views/reservation/manager/ManageConusel.vue')
+            component: () => import('@/views/reservation/manager/ManageConusel.vue')
         },
         {
-            path: '/counselingNotePage',
-            name: 'counselingnotepage',
+            path: '/counselingNotePage/create',
+            name: 'createCounselingNote',
             component: () => import('@/views/reservation/manager/CounselingNotePage.vue')
         },
         {
-            path: '/administratorMain',
-            name: 'administratorMain',
-            component: () => import('../views/beneficiary/AdministratorMain.vue')
+            path: '/counselingNotePage/edit',
+            name: 'editCounselingNote',
+            component: () => import('@/views/reservation/manager/CounselingNotePage.vue')
         },
         // 레이아웃 바깥에 있는 템플릿 페이지들 전개
         ...sakaiStandaloneRoutes

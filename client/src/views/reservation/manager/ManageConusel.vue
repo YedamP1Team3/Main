@@ -79,14 +79,17 @@ const handleActionClick = ({ action, row }) => {
 
     if (row.rsv_status === 'COMPLETED') {
         router.push({
-            name: 'counselingnotepage',
-            params: { rsvId: row.rsv_id }
+            name: 'createCounselingNote',
+            query: { rsvId: row.rsv_id }
         });
         return;
     }
 
     if (row.rsv_status === 'NOTE_WRITTEN') {
-        alert('수정 기능은 다음 단계에서 구현 예정입니다.');
+        router.push({
+            name: 'editCounselingNote',
+            query: { rsvId: row.rsv_id }
+        });
     }
 };
 

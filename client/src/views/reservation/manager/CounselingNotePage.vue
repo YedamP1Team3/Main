@@ -9,7 +9,7 @@
 
             <main class="layout-main">
                 <div class="note-page-container">
-                    <CounselingNote v-if="!isLoading" mode="create" :reservationInfo="reservationInfo" :initialForm="initialForm" @submit="handleSubmit" @cancel="handleCancel" />
+                    <CounselingNote v-if="!isLoading" :mode="mode" :reservationInfo="reservationInfo" :initialForm="initialForm" @submit="handleSubmit" @cancel="handleCancel" />
 
                     <div v-else class="loading-box">상담 정보를 불러오는 중입니다...</div>
                 </div>
@@ -19,11 +19,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { getCounselReservationByRsvId } from '@/api/reservation/counsel';
-import { createCounselingNote } from '@/api/reservation/counsel';
+import { createCounselingNote, getCounselingNoteByRsvId, updateCounselingNote } from '@/api/reservation/counsel';
 
 import JsTopbarmg from '@/layout/manager/JsTopbarmg.vue';
 import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
@@ -33,6 +33,9 @@ const route = useRoute();
 const router = useRouter();
 
 const isLoading = ref(true);
+
+const mode = computed(() =>
+route.name === 'editCounselingNote' ? 'edit' : 'create');
 
 const reservationInfo = ref({
     rsv_id: '',
@@ -69,52 +72,67 @@ const formatReservationInfo = (item) => {
     };
 };
 
-const fetchReservationInfo = async () => {
-    try {
-        const { rsvId } = route.params;
+const formatInitialForm = (note) => {
+  return {
+    counselingType: note.counseling_type || '',
+    title: note.title || '',
+    content: note.content ||'',
+    futurePlan: note.future_plan || ''
+  };
+};
 
-        if (!rsvId) {
-            alert('잘못된 접근입니다.');
-            router.push({ name: 'manageCounsel' });
-            return;
-        }
+const fetchPageData = async () => {
+  try {
+    const rsvId = route.query.rsvId;
 
-        const res = await getCounselReservationByRsvId(rsvId);
-        const reservation = res.data.reservation;
-
-        reservationInfo.value = formatReservationInfo(reservation);
-    } catch (err) {
-        console.error('상담 예약 정보 조회 실패:', err);
-        alert(err.response?.data?.message || '상담 예약 정보 조회 실패');
-        router.push({ name: 'manageCounsel' });
-    } finally {
-        isLoading.value = false;
+    if (!rsvId) {
+      alert('잘못된 접근입니다.');
+      router.push({ name: 'managecounsel'});
+      return;
     }
+    const reservationRes = await getCounselReservationByRsvId(rsvId);
+    reservationInfo.value = formatReservationInfo(reservationRes.data.reservation);
+
+    if (mode.value === 'edit') {
+      const noteRes = await getCounselingNoteByRsvId(rsvId);
+      initialForm.value = formatInitialForm(noteRes.data.note);
+    }
+  } catch (err) {
+    console.error('상담일지 페이지 조회 실패 : ', err);
+    alert(err.response?.data?.message || '상담 정보 조회 실패');
+    router.push({name: 'managecounsel'});
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const handleSubmit = async (formData) => {
-    try {
-        const payload = {
-            rsvId: reservationInfo.value.rsv_id,
-            ...formData
-        };
+  try {
+    const payload = {
+      rsvId: reservationInfo.value.rsv_id,
+      ...formData
+    };
 
-        await createCounselingNote(payload);
-
-        alert('상담일지가 작성되었습니다.');
-        router.push({ name: 'manageCounsel' });
-    } catch (err) {
-        console.error('상담일지 작성 실패:', err);
-        alert(err.response?.data?.message || '상담일지 작성 실패');
+    if (mode.value === 'create') {
+      await createCounselingNote(payload);
+      alert('상담일지가 작성되었습니다.');
+    } else {
+      await updateCounselingNote(reservationInfo.value.rsv_id, formData);
+      alert('상담일지가 수정되었습니다.');
     }
+    router.push({ name: 'managecounsel'});
+  } catch (err) {
+    console.error('상담일지 저장 실패 : ', err);
+    alert(err.response?.data?.message || '상담일지 저장 실패');
+  }
 };
 
-const handleCancel = () => {
-    router.push({ name: 'manageCounsel' });
+const handleCancel = () = {
+  router.push({ name: 'managecounsel'});
 };
 
 onMounted(() => {
-    fetchReservationInfo();
+  fetchPageData();
 });
 </script>
 

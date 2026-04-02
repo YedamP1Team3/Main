@@ -394,6 +394,45 @@ const createCounselingNote = async (noteData) => {
   };
 };
 
+const getCounselingNoteByRsvId = async (rsvId) => {
+  if (!rsvId) {
+    throw new Error("rsvId가 필요합니다.");
+  }
+
+  const rows = await rsvMapper.selectCounselingNoteByRsvId(rsvId);
+
+  if (!rows || rows.length === 0) {
+    throw new Error("해당 상담일지를 찾을 수 없습니다.");
+  }
+
+  return rows[0];
+};
+
+const updateCounselingNote = async (noteData) => {
+  const { rsvId, counselingType, title, content, futurePlan } = noteData;
+
+  if (!rsvId || !counselingType || !title || !content || !futurePlan) {
+    throw new Error("필수 입력값이 누락되었습니다.");
+  }
+
+  const updateResult = await rsvMapper.updateCounselingNoteByRsvId({
+    rsvId,
+    counselingType,
+    title,
+    content,
+    futurePlan,
+  });
+
+  if (!updateResult || updateResult.affectedRows === 0) {
+    throw new Error("수정할 상담일지가 없습니다.");
+  }
+
+  return {
+    rsvId,
+    message: "상담일지가 수정되었습니다.",
+  };
+};
+
 module.exports = {
   getManagerSchedule,
   getFamilyReservations,
@@ -409,4 +448,6 @@ module.exports = {
   processReservation,
   getManagerCounselList,
   createCounselingNote,
+  getCounselingNoteByRsvId,
+  updateCounselingNote,
 };
