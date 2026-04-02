@@ -13,19 +13,23 @@
 //     WHERE u.user_id = ?;
 // `;
 
-// const updateCenterInfo = `
-//     UPDATE agency_info
-//     SET
-//       agency_name = ?,
-//       rep_tel = ?,
-//       email = ?,
-//       address = ?,
-//       zip_code = ?,
-//       detail_address = ?
-//     WHERE agency_id = ?;
-// `;
+const getCenterInfo = `
+    SELECT * FROM agency_info LIMIT 1;
+`;
 
-// module.exports = {
-//   getCenterInfo,
-//   updateCenterInfo,
-// };
+const updateCenterInfo = `
+    UPDATE agency_info
+    SET
+      agency_name = ?,
+      rep_tel = ?,
+      email = ?,
+      address = ?,
+      zip_code = ?,
+      detail_address = ?
+    WHERE agency_id = ?;
+`;
+
+module.exports = {
+  getCenterInfo,
+  updateCenterInfo,
+};
