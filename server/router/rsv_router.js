@@ -344,6 +344,26 @@ router.patch("/manager/reservations/:rsvId/process", async (req, res) => {
 
 // -----------------------------------counseling API--------------------------
 
+router.get("/manager/counsel", async (req, res) => {
+  try {
+    const { managerId } = req.query;
+
+    const list = await counselService.getManagerCounselList(managerId);
+
+    return res.status(200).json({
+      success: true,
+      counsels: list,
+    });
+  } catch (err) {
+    console.error("getManagerCounselList error:", err);
+
+    return res.status(400).json({
+      success: false,
+      message: err.message || "상담일지 관리 목록 조회 실패",
+    });
+  }
+});
+
 router.post("/counsel", async (req, res) => {
   try {
     const { rsvId, counselingType, title, content, futurePlan } = req.body;
