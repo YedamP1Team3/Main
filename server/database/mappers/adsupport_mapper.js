@@ -129,6 +129,20 @@ const selectSupportResultDetail = async (planId) => {
   }
 };
 
+const selectAttachments = async (planId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(adminSql.selectAttachments, [planId]);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (selectAttachments):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 const approveSupportResult = async (resultID) => {
   let conn = null;
   try {
@@ -205,6 +219,36 @@ const selectResultRejectionHistory = async (resultId) => {
   }
 };
 
+const resultMappingHistory = async (historyId, resultId) => {
+  let conn = await pool.getConnection();
+  try {
+    // 위에서 새로 만든 adminSql.copyResultMappingHistory 쿼리를 실행
+    const result = await conn.query(adminSql.resultMappingHistory, [
+      historyId,
+      resultId,
+    ]);
+    return result;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectResultMappingHistory = async (historyId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(adminSql.selectResultMappingHistory, [
+      historyId,
+    ]);
+    return rows;
+  } catch (err) {
+    console.error("매핑 히스토리 상세 조회 중 오류:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   selectSupportPlanList,
   selectSupportPlanDetail,
@@ -219,4 +263,7 @@ module.exports = {
   returnSupportResult,
   addResultRejectionHistory,
   selectResultRejectionHistory,
+  resultMappingHistory,
+  selectResultMappingHistory,
+  selectAttachments,
 };

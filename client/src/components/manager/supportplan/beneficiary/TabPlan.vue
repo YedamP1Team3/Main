@@ -3,7 +3,8 @@ import { ref, watch } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
-    beneId: [String, Number]
+    beneId: [String, Number],
+    priorityId: [String, Number]
 });
 
 const emit = defineEmits(['newaddplan', 'select-plan', 'refresh']);
@@ -16,7 +17,7 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const url = showTemp.value ? `http://localhost:3000/api/beneficiaries/${id}/support-plans/temp` : `http://localhost:3000/api/beneficiaries/${id}/support-plan`;
+        const url = showTemp.value ? `/api/beneficiaries/${id}/support-plans/temp` : `/api/beneficiaries/${id}/support-plan`;
         const response = await axios.get(url);
         planList.value = response.data || [];
     } catch (error) {
@@ -33,7 +34,14 @@ function addNewPlan() {
         alert('대기단계 지원계획서를 신청하지 못합니다');
         return;
     }
-    emit('newaddplan');
+    console.log('--- TabPlan 발신 데이터 체크 ---');
+    console.log('1. 현재 계획 목록(planList):', planList.value);
+    console.log('2. 부모에게 받은 props.priorityId:', props.priorityId);
+
+    const pId = planList.value.length > 0 ? planList.value[0].priority_id : null;
+    console.log('3. 최종적으로 emit할 pId:', pId);
+    console.log('-------------------------------');
+    emit('newaddplan', pId);
 }
 const savefile = () => {
     if (!props.beneId) {

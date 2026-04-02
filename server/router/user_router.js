@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const upload = require("../middleware/uploads.js");
 const userService = require("../service/user_service.js");
 
 //db확인
@@ -26,16 +26,19 @@ router.get("/beneficiaries/:beneId/support-plan", async (req, res) => {
   let result = await userService.getSupportPlanList(target);
   res.send(result);
 });
-//지원계획서생성
-router.post("/support-plan", async (req, res) => {
+//지원계획서생성(파일첨부)
+router.post("/support-plan", upload.array("files"), async (req, res) => {
   let target = req.body;
-  let result = await userService.createSupportPlan(target);
+  let files = req.files;
+
+  let result = await userService.createSupportPlan(target, files);
   res.send(result);
 });
 //지원계획서임시생성
-router.post("/temp-plan", async (req, res) => {
+router.post("/temp-plan", upload.array("files"), async (req, res) => {
   let target = req.body;
-  let result = await userService.createTempPlan(target);
+  let files = req.files;
+  let result = await userService.createTempPlan(target, files);
   res.send(result);
 });
 
@@ -55,6 +58,20 @@ router.get("/support-plans/:planId", async (req, res) => {
 router.get("/temp-plans/:planId", async (req, res) => {
   let target = req.params.planId;
   let result = await userService.getTempPlanDetail(target);
+  res.send(result);
+});
+//임시지원계획서 파일추가
+router.post("/temp-plans/:planDraftId/files", upload.array("files"), async (req, res) => {
+  let planDraftId = req.params.planDraftId;
+  let files = req.files;
+  let result = await userService.addTempPlanFiles(planDraftId, files);
+  res.send(result);
+});
+//임시지원계획서 파일삭제
+router.delete("/temp-plans/:planDraftId/files/:fileId", async (req, res) => {
+  let planDraftId = req.params.planDraftId;
+  let fileId = req.params.fileId;
+  let result = await userService.removeTempPlanFile(planDraftId, fileId);
   res.send(result);
 });
 //지원계획서삭제
