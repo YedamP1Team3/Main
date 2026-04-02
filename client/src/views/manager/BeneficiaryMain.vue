@@ -22,14 +22,14 @@ const viewMode = ref('empty');
 const managementRef = ref(null);
 const selectPlan = ref(null);
 const selectResultId = ref(null);
-const selectedPriorityStatus = ref('');
+const selectedProgressStatus = ref('');
 
 const surveyStore = useSurveyStore(); // 💡 스토어 초기화
 
-const handleIdUpdate = async (id, priorityId, priorityStatus) => {
+const handleIdUpdate = async (id, priorityId, progressStatus) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
-    selectedPriorityStatus.value = priorityStatus;
+    selectedProgressStatus.value = progressStatus;
     viewMode.value = 'empty';
     surveyStore.is_survey_visible = false;
 
@@ -114,7 +114,7 @@ const handleNewPlanOpen = (priorityIdFromChild) => {
                     ref="managementRef"
                     :beneId="selectedId"
                     :priorityId="selectedPriorityId"
-                    :priorityStatus="selectedPriorityStatus"
+                    :progressStatus="selectedProgressStatus"
                     @select-plan="handleIdDetail"
                     @select-result="handleResultIdDetail"
                     @select-app="handleAppDetail"

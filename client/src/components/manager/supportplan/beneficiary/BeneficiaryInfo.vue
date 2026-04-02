@@ -20,7 +20,7 @@ const fetchBeneDetail = async () => {
     }
     const response = await axios.get(`api/api/beneficiaries/${selectedBeneId.value}`);
     selectedBene.value = response.data;
-    emit('updateBeneId', selectedBeneId.value, response.data.priority_id, response.data.priority_status);
+    emit('updateBeneId', selectedBeneId.value, response.data.priority_id, response.data.progress_status);
 };
 
 onMounted(async () => {

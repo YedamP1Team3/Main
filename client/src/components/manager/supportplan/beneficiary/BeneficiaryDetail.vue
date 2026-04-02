@@ -97,12 +97,13 @@ const SaveTemp = async (planId) => {
 };
 //파일다운로드
 const downloadFile = (file) => {
-    // 백엔드 download.js 라우터 주소에 맞춰 호출
-    // 서버파일명(file_name)과 원본명(origin_name)을 전달
-    const url = `api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
+    const isConfirmed = confirm(`'${file.origin_name}' 파일을 다운로드하시겠습니까?`);
+    if (isConfirmed) {
+        const url = `api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
 
-    // 단순 다운로드는 location.href로 충분합니다.
-    window.location.href = url;
+        console.log('다운로드 시작:', file.origin_name);
+        window.location.href = url;
+    }
 };
 
 const getFileIcon = (fileName) => {
