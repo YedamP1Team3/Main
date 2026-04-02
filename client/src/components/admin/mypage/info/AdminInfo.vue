@@ -116,6 +116,12 @@ const handleSave = async () => {
 
         // 서버에서 성공적으로 처리했다는 신호를 보내주면
         if (response.data.success) {
+            authStore.updateName(adminData.user_name);
+
+            authStore.$patch({
+                userName: adminData.user_name
+            });
+
             alert('수정되었습니다.');
 
             // 다음에 다시 수정할 때를 대비해 비밀번호 입력창을 초기화합니다.
