@@ -312,7 +312,7 @@ onMounted(async () => {
 
                     <div class="px-8 py-6 border-t border-slate-100 bg-white flex justify-end gap-3.5 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.03)]">
                         <button @click="showPreviewModal = false" class="px-5 py-2.5 text-sm rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors border border-slate-200">돌아가기</button>
-                        <button @click="confirmAndApplyVersion" class="px-5 py-2.5 text-sm rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30">이대로 버전 적용 및 생성</button>
+                        <button @click="confirmAndApplyVersion" class="px-5 py-2.5 text-sm rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30">버전 적용 및 생성</button>
                     </div>
                 </div>
             </div>

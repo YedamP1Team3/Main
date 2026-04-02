@@ -79,7 +79,6 @@ defineExpose({
             <button :class="{ active: currentTab === 'Application' }" @click="currentTab = 'Application'">지원신청서</button>
             <button :class="{ active: currentTab === 'Plan' }" @click="currentTab = 'Plan'">지원계획서</button>
             <button :class="{ active: currentTab === 'Result' }" @click="currentTab = 'Result'">지원결과서</button>
-            <button :class="{ active: currentTab === 'Consult' }" @click="currentTab = 'Consult'">상담내역</button>
         </nav>
 
         <div class="tab-content">

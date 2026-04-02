@@ -88,7 +88,7 @@ where is_active = 1;
 `;
 
 const insert_application = `
-insert into application (version_id, bene_id, user_id, created_at)
+insert into application (version_id, bene_id, user_name, created_at)
 values (?, ?, ?, now());
 `;
 
@@ -104,7 +104,7 @@ select
     app_id as app_id,
     version_id as version_id,
     bene_id as bene_id,
-    user_id as user_id,
+    user_name as user_name,
     app_status as app_status,
     date_format(created_at, '%Y-%m-%d') as created_at
 from application
@@ -125,7 +125,7 @@ where app_id = ?;
 const select_application_list_by_bene = `
 select
     a.app_id as id,
-    a.user_id as writer,
+    a.user_name as writer,
     b.bene_name as bene_name,
     date_format(a.created_at, '%Y.%m.%d') as date,
     p.priority_status as priority_status,

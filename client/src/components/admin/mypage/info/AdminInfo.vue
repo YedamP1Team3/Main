@@ -165,7 +165,7 @@ const handleSave = async () => {
                     </div>
                     <div class="info-item">
                         <label class="block text-sm font-semibold mb-2">기관명</label>
-                        <input v-model="adminData.agency_name" type="text" class="p-inputtext w-full" :disabled="!isEditMode" />
+                        <input v-model="adminData.agency_name" type="text" class="p-inputtext w-full" disabled autocomplete="agencyname" />
                     </div>
 
                     <div class="info-item lg:col-span-3">

@@ -46,7 +46,6 @@ watch(
             <button :class="{ active: currentTab === 'Application' }" @click="handleTabChange('Application')">지원신청서</button>
             <button :class="{ active: currentTab === 'Plan' }" @click="handleTabChange('Plan')">지원계획서</button>
             <button :class="{ active: currentTab === 'Result' }" @click="handleTabChange('Result')">지원결과서</button>
-            <button :class="{ active: currentTab === 'Consult' }" @click="handleTabChange('Consult')">상담이력</button>
         </nav>
 
         <div v-if="currentTab === 'Application'" class="tab-content">
