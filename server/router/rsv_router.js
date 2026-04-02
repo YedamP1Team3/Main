@@ -348,7 +348,7 @@ router.get("/manager/counsel", async (req, res) => {
   try {
     const { managerId } = req.query;
 
-    const list = await counselService.getManagerCounselList(managerId);
+    const list = await rsvService.getManagerCounselList(managerId);
 
     return res.status(200).json({
       success: true,
@@ -360,6 +360,26 @@ router.get("/manager/counsel", async (req, res) => {
     return res.status(400).json({
       success: false,
       message: err.message || "상담일지 관리 목록 조회 실패",
+    });
+  }
+});
+
+router.get("/manager/:rsvId", async (req, res) => {
+  try {
+    const { rsvId } = req.params;
+
+    const reservation = await rsvService.getCounselReservationByRsvId(rsvId);
+
+    return res.status(200).json({
+      success: true,
+      reservation,
+    });
+  } catch (err) {
+    console.error("getCounselReservationByRsvId error:", err);
+
+    return res.status(400).json({
+      success: false,
+      message: err.message || "상담 예약 정보 조회 실패",
     });
   }
 });

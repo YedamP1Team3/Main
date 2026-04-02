@@ -186,6 +186,23 @@ WHERE r.manager_id = ?
 ORDER BY r.start_time DESC
 `;
 
+const selectCounselReservationByRsvId = `
+SELECT
+    r.rsv_id,
+    u.user_name AS family_name,
+    b.bene_name,
+    b.disability_type,
+    DATE_FORMAT(r.start_time, '%Y-%m-%d %H:%i:%s') AS start_time,
+    DATE_FORMAT(r.end_time, '%Y-%m-%d %H:%i:%s') AS end_time,
+    r.rsv_status
+FROM reservations r
+JOIN beneficiary_info b
+    ON r.bene_id = b.bene_id
+JOIN user_info u
+    ON b.family_id = u.user_id
+WHERE r.rsv_id = ?
+`;
+
 const insertCounselingNote = `
 INSERT INTO counseling_note (
     rsv_id,
@@ -221,6 +238,7 @@ module.exports = {
   selectManagerReservations,
   updateReservationStatus,
   selectManagerCounselList,
+  selectCounselReservationByRsvId,
   insertCounselingNote,
   updateReservationStatusToNoteWritten,
 };

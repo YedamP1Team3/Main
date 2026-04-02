@@ -251,6 +251,22 @@ const selectManagerCounselList = async (managerId) => {
   }
 };
 
+const selectCounselReservationByRsvId = async (rsvId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    const rows = await conn.query(rsvSql.selectCounselReservationByRsvId, [
+      rsvId,
+    ]);
+    return rows;
+  } catch (err) {
+    console.error("selectCounselReservationByRsvId error:", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 const insertCounselingNote = async (noteData) => {
   let conn = null;
   try {
@@ -310,6 +326,7 @@ module.exports = {
   selectManagerReservations,
   updateReservationStatus,
   selectManagerCounselList,
+  selectCounselReservationByRsvId,
   insertCounselingNote,
   updateReservationStatusToNoteWritten,
 };
