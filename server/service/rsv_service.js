@@ -353,6 +353,20 @@ const getManagerCounselList = async (managerId) => {
   return rows;
 };
 
+const getCounselReservationByRsvId = async (rsvId) => {
+  if (!rsvId) {
+    throw new Error("rsvId가 필요합니다.");
+  }
+
+  const rows = await rsvMapper.selectCounselReservationByRsvId(rsvId);
+
+  if (!rows || rows.length === 0) {
+    throw new Error("해당 상담 예약 정보를 찾을 수 없습니다.");
+  }
+
+  return rows[0];
+};
+
 const createCounselingNote = async (noteData) => {
   const { rsvId, counselingType, title, content, futurePlan } = noteData;
 
@@ -391,6 +405,7 @@ module.exports = {
   getBeneficiariesByFamilyId,
   resolveManagerId,
   getManagerReservations,
+  getCounselReservationByRsvId,
   processReservation,
   getManagerCounselList,
   createCounselingNote,

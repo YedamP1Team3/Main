@@ -94,6 +94,11 @@ const router = createRouter({
             component: () => import('../views/reservation/manager/ManageConusel.vue')
         },
         {
+            path: '/counselingNotePage',
+            name: 'counselingnotepage',
+            component: () => import('@/views/reservation/manager/CounselingNotePage.vue')
+        },
+        {
             path: '/administratorMain',
             name: 'administratorMain',
             component: () => import('../views/beneficiary/AdministratorMain.vue')

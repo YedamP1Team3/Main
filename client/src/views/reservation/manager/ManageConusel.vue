@@ -24,7 +24,7 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
 import { useAuthStore } from '@/stores/auth';
-import { getManagerCounselList } from '@/api/counsel/counsel';
+import { getManagerCounselList } from '@/api/reservation/counsel';
 
 import JsTopbarmg from '@/layout/manager/JsTopbarmg.vue';
 import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
@@ -78,22 +78,15 @@ const handleActionClick = ({ action, row }) => {
     if (action !== 'writeLog') return;
 
     if (row.rsv_status === 'COMPLETED') {
-        console.log('상담일지 작성 이동:', row.rsv_id);
-
         router.push({
-            name: 'createCounselingNote',
+            name: 'counselingnotepage',
             params: { rsvId: row.rsv_id }
         });
         return;
     }
 
     if (row.rsv_status === 'NOTE_WRITTEN') {
-        console.log('상담일지 수정 이동:', row.rsv_id);
-
-        router.push({
-            name: 'editCounselingNote',
-            params: { rsvId: row.rsv_id }
-        });
+        alert('수정 기능은 다음 단계에서 구현 예정입니다.');
     }
 };
 
