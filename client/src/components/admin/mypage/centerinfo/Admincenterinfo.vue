@@ -51,7 +51,7 @@ const searchAddress = () => {
 const fetchCenterInfo = async () => {
     if (!userId.value) return;
     try {
-        const response = await axios.get(`/api/adagency/center-info/${userId.value}`);
+        const response = await axios.get(`/api/adagencyinfo/center-info/${userId.value}`);
         if (response.data) {
             // 서버 응답 데이터를 centerData에 매핑
             Object.assign(centerData, response.data);
@@ -76,7 +76,7 @@ const handleSave = async () => {
     if (confirm('기관 정보를 수정하시겠습니까?')) {
         try {
             // 서버의 updateAgencyInfo 쿼리에 필요한 데이터 전달
-            const response = await axios.put('/api/adagency/center-info', {
+            const response = await axios.put('/api/adagencyinfo/center-info', {
                 agency_id: centerData.agency_id,
                 agency_name: centerData.agency_name,
                 rep_tel: centerData.rep_tel,
