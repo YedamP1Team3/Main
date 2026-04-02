@@ -128,7 +128,7 @@ const fetchHistoryRows = async () => {
                     axios.get(`/api/abc/bene/${beneId}`),
                     axios.get(`/api/abc/priority/${beneId}`),
                     axios.get(`/api/survey/list/${beneId}`),
-                    axios.get(`/api/api/beneficiaries/${beneId}/support-plan`),
+                    axios.get(`/api/beneficiaries/${beneId}/support-plan`),
                     axios.get(`/api/resultPlan/beneficiaries/${beneId}/support-result`)
                 ]);
 

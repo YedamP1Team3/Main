@@ -8,8 +8,9 @@ const planDetail = ref({});
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`api/api/support-plans/${id}`);
-        planDetail.value = response.data;
+        const response = await axios.get(`/api/support-plans/${id}`);
+        planDetail.value = response.data?.plan || {};
+        attachments.value = response.data?.files || [];
     } catch (error) {
         console.error(`에러`, error);
     }
@@ -51,7 +52,12 @@ watch(
                 </tr>
                 <tr>
                     <th>파일첨부</th>
-                    <td class="file-cell">임시 (첨부파일 없음)</td>
+                    <td class="file-cell">
+                        <div v-if="attachments.length > 0">
+                            <div v-for="file in attachments" :key="file.file_id">{{ file.origin_name }}</div>
+                        </div>
+                        <div v-else>첨부파일 없음</div>
+                    </td>
                 </tr>
             </tbody>
         </table>

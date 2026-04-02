@@ -96,4 +96,12 @@ router.get(
   },
 );
 
+// 특정 반려 히스토리의 상세 계획서 목록 조회
+router.get("/admin/rejection-history/:historyId/plans", async (req, res) => {
+  let target = req.params.historyId;
+  // 서비스의 상세 조회 함수 호출
+  let result = await adminService.getRejectionHistoryDetail(target);
+  res.send(result);
+});
+
 module.exports = router;

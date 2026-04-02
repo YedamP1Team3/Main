@@ -47,14 +47,18 @@ WHERE
 const addRejectionHistory = `
 INSERT INTO rejection_history (
     plan_id, 
+    plan_objective,
+    plan_content,
     rejection_reason, 
     manager_id, 
     created_at
-) VALUES (?, ?, ?, NOW())`;
+) VALUES (?, ?, ?,?,?, NOW())`;
 
 const selectRejectionHistory = `
 SELECT 
     h.history_id,
+    h.plan_objective,
+    h.plan_content,
     h.rejection_reason,
     u.user_name AS manager_name,
     DATE_FORMAT(h.created_at, '%Y-%m-%d %H:%i') AS created_at
@@ -103,6 +107,19 @@ const selectSupportResultDetail = `
   FROM support_result p
   LEFT JOIN user_info u ON p.manager_id = u.user_id 
   WHERE p.result_id = ?
+`;
+
+const selectAttachments = `
+    SELECT 
+        file_id,
+        plan_id,
+        plan_draft_id,
+        origin_name, 
+        path AS file_name,
+        file_size,
+        created_at
+    FROM attachment_file
+    WHERE plan_id = ?
 `;
 
 const approveSupportResult = `
@@ -158,14 +175,18 @@ WHERE
 const addResultRejectionHistory = `
 INSERT INTO resultrejection_history (
     result_id, 
+    result_title,
+    result_content,
     rejection_reason, 
     manager_id, 
     created_at
-) VALUES (?, ?, ?, NOW())`;
+) VALUES (?, ?, ?, ?,?,NOW())`;
 
 const selectResultRejectionHistory = `
 SELECT 
     h.history_id,
+    h.result_title,
+    h.result_content,
     h.rejection_reason,
     u.user_name AS manager_name,
     DATE_FORMAT(h.created_at, '%Y-%m-%d %H:%i') AS created_at
@@ -175,6 +196,19 @@ WHERE h.result_id = ?
 ORDER BY h.created_at DESC;
 `;
 
+const resultMappingHistory = `
+   INSERT INTO result_plan_mapping_history (history_id, plan_id)
+    VALUES (?, ?)
+`;
+
+const selectResultMappingHistory = `
+SELECT 
+        h.plan_id,
+        p.plan_objective  
+    FROM result_plan_mapping_history h
+    JOIN support_plan p ON h.plan_id = p.plan_id
+    WHERE h.history_id = ? 
+`;
 module.exports = {
   selectSupportPlanList,
   selectSupportPlanDetail,
@@ -191,4 +225,7 @@ module.exports = {
   returnSupportResult,
   addResultRejectionHistory,
   selectResultRejectionHistory,
+  resultMappingHistory,
+  selectResultMappingHistory,
+  selectAttachments,
 };

@@ -84,6 +84,16 @@ const handleSelectSubPlan = (planId) => {
         managementRef.value.openSubPlan(planId);
     }
 };
+
+const handleNewPlanOpen = (priorityIdFromChild) => {
+    // 만약 자식(Management)이 특정 ID를 던져준다면 그것을 쓰고,
+    // 없다면 부모가 이미 선택해서 들고 있는 값을 유지합니다.
+    if (priorityIdFromChild) {
+        selectedPriorityId.value = priorityIdFromChild;
+    }
+
+    viewMode.value = 'create';
+};
 </script>
 
 <template>
@@ -102,10 +112,11 @@ const handleSelectSubPlan = (planId) => {
                 <BeneficiaryManagement
                     ref="managementRef"
                     :beneId="selectedId"
+                    :priorityId="selectedPriorityId"
                     @select-plan="handleIdDetail"
                     @select-result="handleResultIdDetail"
                     @select-app="handleAppDetail"
-                    @newaddplan="viewMode = 'create'"
+                    @newaddplan="handleNewPlanOpen"
                     @newresultplan="viewMode = 'resultCreate'"
                 />
             </section>

@@ -10,6 +10,7 @@ const connectionPool = mariadb.createPool({
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
+  charset: 'utf8mb4',
   connectionLimit: 5,
   // Object의 필드정보(Entiry)를 Query문에 있는 '?'에 자동변환 설정
   permitSetMultiParamEntries: true,
