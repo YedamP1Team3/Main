@@ -1,26 +1,24 @@
 <script setup>
-import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from '../AppConfigurator.vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
-const { toggleDarkMode, isDarkTheme } = useLayout();
+// [수정] 일반 이용자 헤더와 동일하게 로그아웃 로직 분리
+const toggleAuth = () => {
+    alert('로그아웃 되었습니다.');
+    router.push('/login');
+};
 </script>
 
 <template>
     <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
-            <router-link to="/" class="layout-topbar-logo">
-                <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
-                        d="M17.1637 19.2467C17.1566 19.4033 17.1529 19.561 17.1529 19.7194C17.1529 25.3503 21.7203 29.915 27.3546 29.915C32.9887 29.915 37.5561 25.3503 37.5561 19.7194C37.5561 19.5572 37.5524 19.3959 37.5449 19.2355C38.5617 19.0801 39.5759 18.9013 40.5867 18.6994L40.6926 18.6782C40.7191 19.0218 40.7326 19.369 40.7326 19.7194C40.7326 27.1036 34.743 33.0896 27.3546 33.0896C19.966 33.0896 13.9765 27.1036 13.9765 19.7194C13.9765 19.374 13.9896 19.0316 14.0154 18.6927L14.0486 18.6994C15.0837 18.9062 16.1223 19.0886 17.1637 19.2467ZM33.3284 11.4538C31.6493 10.2396 29.5855 9.52381 27.3546 9.52381C25.1195 9.52381 23.0524 10.2421 21.3717 11.4603C20.0078 11.3232 18.6475 11.1387 17.2933 10.907C19.7453 8.11308 23.3438 6.34921 27.3546 6.34921C31.36 6.34921 34.9543 8.10844 37.4061 10.896C36.0521 11.1292 34.692 11.3152 33.3284 11.4538ZM43.826 18.0518C43.881 18.6003 43.9091 19.1566 43.9091 19.7194C43.9091 28.8568 36.4973 36.2642 27.3546 36.2642C18.2117 36.2642 10.8 28.8568 10.8 19.7194C10.8 19.1615 10.8276 18.61 10.8816 18.0663L7.75383 17.4411C7.66775 18.1886 7.62354 18.9488 7.62354 19.7194C7.62354 30.6102 16.4574 39.4388 27.3546 39.4388C38.2517 39.4388 47.0855 30.6102 47.0855 19.7194C47.0855 18.9439 47.0407 18.1789 46.9536 17.4267L43.826 18.0518ZM44.2613 9.54743L40.9084 10.2176C37.9134 5.95821 32.9593 3.1746 27.3546 3.1746C21.7442 3.1746 16.7856 5.96385 13.7915 10.2305L10.4399 9.56057C13.892 3.83178 20.1756 0 27.3546 0C34.5281 0 40.8075 3.82591 44.2613 9.54743Z"
-                        fill="var(--primary-color)"
-                    />
-                </svg>
-                <span>SAKAI</span>
-            </router-link>
+            <div class="layout-topbar-logo">
+                <img src="/image/로고.png" alt="센터 로고" class="topbar-logo-img" />
+                <span class="logo-text">발달장애지원센터</span>
+            </div>
 
-            <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
+            <div class="layout-topbar-menu-items ml-4 hidden lg:flex gap-4 whitespace-nowrap">
                 <button type="button" class="p-link text-color font-medium">기관</button>
                 <button type="button" class="p-link text-color font-medium">기관관리자</button>
                 <button type="button" class="p-link text-color font-medium">조사지</button>
@@ -29,15 +27,15 @@ const { toggleDarkMode, isDarkTheme } = useLayout();
 
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
-                <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
-                    <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
-                </button>
                 <AppConfigurator />
             </div>
         </div>
 
         <div class="flex items-center gap-2">
             <span class="hidden sm:block font-medium text-color">시스템 관리자</span>
+            <button type="button" class="layout-topbar-action" @click="toggleAuth">
+                <i class="pi pi-sign-out" title="로그아웃"></i>
+            </button>
             <button type="button" class="layout-topbar-action">
                 <i class="pi pi-user"></i>
                 <span class="hidden">Profile</span>
@@ -47,19 +45,75 @@ const { toggleDarkMode, isDarkTheme } = useLayout();
 </template>
 
 <style scoped>
-/* 메뉴 간격을 위한 스타일 예시 (Tailwind 미사용 시) */
+@font-face {
+    font-family: 'NanumSquareRound';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+/* 반응형 겹침 방지: 로고 구역 고정 너비 해제 */
+.layout-topbar-logo {
+    display: flex;
+    align-items: center;
+    width: auto !important; /* 기본 테마의 고정 너비 강제 해제 */
+    margin-right: 3rem; /* 메뉴와의 최소 안전 거리 확보 */
+}
+
+/* 긴 센터명 텍스트 깔끔하게 처리 */
+.logo-text {
+    /* 추천 폰트 적용 */
+    font-family: 'NanumSquareRound', sans-serif;
+
+    font-size: 1.5rem; /* 폰트 특성에 맞춰 크기 살짝 조절 */
+    font-weight: 800; /* 둥근 느낌을 강조하기 위해 굵게 설정 */
+    white-space: nowrap;
+    letter-spacing: -0.8px; /* 둥근 폰트는 자간을 조금 더 조이는 게 예쁩니다 */
+
+    /* 세련된 오로라 그라데이션 적용 */
+    background: linear-gradient(135deg, #ffab91 0%, #ffcda5 40%, #e9d5ff 70%, #bae6fd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-top: 3px;
+
+    /* 부드러운 흐름 애니메이션 추가 (선택 사항) */
+    background-size: 200% auto;
+    animation: gradientMove 5s ease infinite;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% center;
+    }
+    50% {
+        background-position: 100% center;
+    }
+    100% {
+        background-position: 0% center;
+    }
+}
+/* 로고 이미지 크기 조절 */
+.topbar-logo-img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* 메뉴 아이템 레이아웃 유지 */
 .layout-topbar-menu-items {
     display: flex;
     align-items: center;
+    font-size: 1.1rem;
 }
+
 .p-link {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
     background: none;
     border: none;
-    cursor: pointer;
-    padding: 0.5rem 1rem;
     border-radius: 6px;
     transition: background-color 0.2s;
 }
+
 .p-link:hover {
     background-color: var(--surface-hover);
 }

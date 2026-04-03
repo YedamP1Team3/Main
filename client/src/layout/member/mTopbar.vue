@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 
-import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from '../AppConfigurator.vue';
 
 import { storeToRefs } from 'pinia';
@@ -13,7 +12,6 @@ import { storeToRefs } from 'pinia';
 const router = useRouter();
 const authStore = useAuthStore();
 const surveyStore = useSurveyStore();
-const { toggleDarkMode, isDarkTheme } = useLayout();
 const { userName } = storeToRefs(authStore);
 
 const naviToHome = () => router.push({ name: 'mHomepage' });
@@ -62,11 +60,11 @@ const toggleAuth = () => {
     <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <div class="layout-topbar-logo">
-                <img src="./로고.png" alt="센터 로고" class="topbar-logo-img" />
+                <img src="/image/로고.png" alt="센터 로고" class="topbar-logo-img" />
                 <span class="logo-text">발달장애지원센터</span>
             </div>
 
-            <div class="layout-topbar-menu-items ml-4 hidden lg:flex gap-4 whitespace-nowrap">
+            <div class="layout-topbar-menu-items ml-6 hidden lg:flex gap-4 whitespace-nowrap">
                 <button type="button" class="p-link text-color font-medium" @click="naviToHome">신청내역</button>
                 <button type="button" class="p-link text-color font-medium" @click="naviToApply">지원신청</button>
                 <button type="button" class="p-link text-color font-medium" @click="naviToReserve">상담예약</button>
@@ -75,9 +73,6 @@ const toggleAuth = () => {
 
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
-                <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
-                    <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
-                </button>
                 <AppConfigurator />
             </div>
         </div>
@@ -119,7 +114,7 @@ const toggleAuth = () => {
     /* 추천 폰트 적용 */
     font-family: 'NanumSquareRound', sans-serif;
 
-    font-size: 1.3rem; /* 폰트 특성에 맞춰 크기 살짝 조절 */
+    font-size: 1.5rem; /* 폰트 특성에 맞춰 크기 살짝 조절 */
     font-weight: 800; /* 둥근 느낌을 강조하기 위해 굵게 설정 */
     white-space: nowrap;
     letter-spacing: -0.8px; /* 둥근 폰트는 자간을 조금 더 조이는 게 예쁩니다 */
@@ -157,6 +152,7 @@ const toggleAuth = () => {
 .layout-topbar-menu-items {
     display: flex;
     align-items: center;
+    font-size: 1.1rem;
 }
 
 .p-link {

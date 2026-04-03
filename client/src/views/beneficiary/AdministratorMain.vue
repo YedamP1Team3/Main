@@ -142,7 +142,7 @@ const handleSelectSubPlan = (planId) => {
 
 /* 🟢 왼쪽 사이드 패널 (500px) */
 .side-panel {
-    flex: 0 0 600px;
+    flex: 0 0 700px;
     background-color: #fef9f6; /* 살짝 회색빛을 주어 영역 분리 */
     border-right: 2px solid #f4e2de; /* 중간 세로 구분선 */
     display: flex;

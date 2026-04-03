@@ -172,14 +172,23 @@ onMounted(() => {
 
 <style scoped>
 .survey-wrap {
-    max-width: 850px;
+    /* 기존 850px에서 1000px로 변경 */
+    max-width: 1100px;
     margin: 0 auto;
     color: #1e293b;
 }
 
+/* 질문과 라디오 버튼 사이의 여백이 너무 멀어지지 않도록 간격 조정 */
+.q-section li {
+    display: flex;
+    gap: 60px; /* 간격을 살짝 넓혀서 여백을 자연스럽게 채움 */
+    justify-content: space-between;
+    padding: 24px 10px;
+}
+
 .survey-wrap h2 {
     margin-bottom: 30px;
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 700;
 }
 
@@ -219,7 +228,7 @@ onMounted(() => {
 
 .q-section h3 {
     margin-bottom: 15px;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #ffab91;
 }
@@ -242,7 +251,7 @@ onMounted(() => {
 .q-section p {
     flex: 1;
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 1.2rem;
     line-height: 1.6;
 }
 
@@ -363,7 +372,7 @@ onMounted(() => {
 }
 
 .conf-item-title {
-    font-size: 1.2rem;
+    font-size: 1.7rem;
     color: #1e293b;
     margin-bottom: 15px;
     padding-bottom: 8px;
@@ -371,7 +380,7 @@ onMounted(() => {
 }
 
 .conf-sub-title {
-    font-size: 1rem;
+    font-size: 1.4rem;
     color: #ffab91;
     font-weight: 600;
     margin: 10px 0;
@@ -394,6 +403,7 @@ onMounted(() => {
     background: #fff;
     border: 2px solid #f4e2de;
     border-radius: 6px;
+    font-size: 1.2rem;
 }
 
 .conf-list li:last-child {

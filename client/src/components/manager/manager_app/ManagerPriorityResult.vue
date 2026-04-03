@@ -70,14 +70,14 @@ const circleColorClass = computed(() => {
     text-align: center;
 }
 .result-title {
-    font-size: 1.8rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: #1e293b;
     margin-bottom: 20px;
 }
 .info-summary {
     margin-bottom: 40px;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     color: #334155;
     line-height: 1.6;
     font-weight: 500;
@@ -92,7 +92,7 @@ const circleColorClass = computed(() => {
     width: 160px;
     height: 160px;
     border-radius: 50%;
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #ffffff;
     margin-bottom: 40px;
@@ -112,7 +112,7 @@ const circleColorClass = computed(() => {
 
 .action-area button {
     padding: 12px 40px;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 700;
     border-radius: 25px;
     cursor: pointer;

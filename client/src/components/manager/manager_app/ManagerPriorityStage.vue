@@ -111,7 +111,7 @@ const handleCancel = () => {
     margin-bottom: 30px;
 }
 .title-area h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #1e293b;
     line-height: 1.4;
@@ -128,7 +128,7 @@ const handleCancel = () => {
     height: 140px;
     border-radius: 50%;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     font-weight: 700;
     color: #000;
     cursor: pointer;
@@ -165,7 +165,7 @@ const handleCancel = () => {
 /* 승인 요청 (Primary 포인트) */
 .action-btn {
     padding: 12px 35px;
-    font-size: 1rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: #fff;
     background-color: #ffab91;
@@ -183,7 +183,7 @@ const handleCancel = () => {
 /* 취소 (Secondary 테두리) */
 .action-btn2 {
     padding: 12px 35px;
-    font-size: 1rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: #ffab91;
     background-color: #fff;
@@ -209,7 +209,7 @@ const handleCancel = () => {
     border-radius: 12px;
 }
 .history-title {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: #ffab91;
     margin-top: 0;
@@ -242,7 +242,7 @@ const handleCancel = () => {
     margin-bottom: 4px;
 }
 .history-reason {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #334155;
     margin: 0;
     line-height: 1.5;
