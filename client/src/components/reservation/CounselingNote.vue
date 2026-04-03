@@ -174,7 +174,7 @@ const handleCancel = () => {
 
 <style scoped>
 .counseling-note-container {
-    background: #ffffff;
+    background: #fff;
     border-radius: 16px;
     padding: 32px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
@@ -287,12 +287,13 @@ const handleCancel = () => {
 }
 
 .submit-btn {
-    background-color: #2563eb;
+    background: #ffab91;
     color: #fff;
 }
 
 .submit-btn:hover {
-    background-color: #1d4ed8;
+    background: #ff9472;
+    border-color: #ff9472;
 }
 
 @media (max-width: 768px) {

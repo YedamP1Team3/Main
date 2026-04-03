@@ -151,7 +151,7 @@ const handleClose = () => {
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    background-color: #2563eb;
+    background-color: #ffab91;
     color: white;
 }
 </style>

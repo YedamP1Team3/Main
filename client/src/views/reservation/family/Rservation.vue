@@ -294,6 +294,7 @@ export default {
                         <TimeSlot :selectedDate="selectedDate" :slots="slots" mode="family" @reserveTimes="handleReserve" />
                     </div>
                     <div class="table-container">
+                        <h2 class="page-title">예약 관리</h2>
                         <RsvTable :columns="reservationColumns" :rows="reservationRows" rowKey="rsv_id" emptyMessage="상담 신청 내역이 없습니다." @action-click="handleTableActionClick" />
                     </div>
                     <RejectionReasonModal :visible="isRejectReasonModalOpen" :reservation="selectedRejectReservation" @close="closeRejectReasonModal" />
@@ -325,43 +326,31 @@ export default {
 
 .layout-main {
     flex: 1;
-
     display: flex;
     justify-content: center;
     align-items: flex-start;
-
-    padding: 40px 32px 0;
+    padding: 40px 32px 32px;
     overflow-y: auto;
     box-sizing: border-box;
+    background-color: #fef9f6;
 }
 
 .reservation-container {
     width: 100%;
-    max-width: 1500px;
+    max-width: 1060px;
     margin: 0 auto;
-
     display: flex;
     flex-direction: column;
     gap: 28px;
-    background-color: #f9f9f9;
-}
-
-.table-container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    background: #fff;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    background-color: transparent;
 }
 
 .content-row {
     display: flex;
     align-items: flex-start;
-
+    gap: 44px;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1060px;
 }
 
 .content-row > :first-child {
@@ -369,11 +358,31 @@ export default {
 }
 
 .content-row > :last-child {
-    flex: 0 0 660px;
-    margin-left: auto;
+    flex: 0 1 720px;
+    min-width: 0;
 }
 
-@media (max-width: 1100px) {
+.table-container {
+    width: 100%;
+    max-width: 1060px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+@media (max-width: 1060px) {
     .content-row {
         flex-direction: column;
         gap: 24px;
@@ -384,7 +393,6 @@ export default {
     .content-row > :last-child {
         flex: none;
         width: 100%;
-        margin-left: 0;
     }
 }
 </style>
