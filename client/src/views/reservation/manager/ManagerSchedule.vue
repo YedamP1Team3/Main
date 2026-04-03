@@ -169,7 +169,7 @@ export default {
 </script>
 
 <template>
-    <div calss="page">
+    <div class="page">
         <header class="layout-header">
             <JsTopbarmg />
         </header>
@@ -206,18 +206,20 @@ export default {
 
 .layout-body {
     display: flex;
-    flex: 1; /* 남은 공간 자동 */
+    flex: 1;
+    min-height: 0;
 }
 
 .layout-sidebar {
-    width: 250px; /* 사이드바 너비 고정 */
-    flex-shrink: 0; /* 너비가 줄어들지 않도록 설정 */
-    border-right: 1px solid #ccc; /* 구분선 */
+    width: 250px;
+    flex-shrink: 0;
+    border-right: 1px solid #ccc;
 }
 
 .layout-main {
     flex: 1;
-    background-color: #f9f9f9;
+    min-height: 0;
+    background-color: #fef9f6;
 
     display: flex;
     justify-content: center;
@@ -235,6 +237,7 @@ export default {
     flex-direction: column;
     gap: 28px;
     background-color: transparent;
+    box-sizing: border-box;
 }
 
 .content-row {
@@ -273,7 +276,7 @@ export default {
 }
 
 @media (max-width: 1100px) {
-    .content.row {
+    .content-row {
         flex-direction: column;
         align-items: center;
     }
