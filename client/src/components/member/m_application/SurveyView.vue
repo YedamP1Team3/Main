@@ -62,20 +62,20 @@ const { view_survey_data, view_answers, view_app_status } = storeToRefs(surveySt
 .confirm-notice {
     padding: 15px;
     margin-bottom: 20px;
-    background-color: #f1f5f9;
-    color: #475569;
+    background-color: #fef9f6;
+    color: #ffab91;
+    border: 2px solid #f4e2de;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .confirm-scroll-area {
     max-height: 500px;
     overflow-y: auto;
-    padding-right: 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background-color: #fafafa;
     padding: 20px;
+    border: 2px solid #f4e2de;
+    border-radius: 8px;
+    background-color: #fff;
 }
 
 /* 스크롤바 커스텀 */
@@ -83,7 +83,7 @@ const { view_survey_data, view_answers, view_app_status } = storeToRefs(surveySt
     width: 8px;
 }
 .confirm-scroll-area::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
+    background-color: #f4e2de;
     border-radius: 4px;
 }
 
@@ -95,21 +95,23 @@ const { view_survey_data, view_answers, view_app_status } = storeToRefs(surveySt
     color: #1e293b;
     margin-bottom: 15px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #cbd5e1;
+    border-bottom: 2px solid #f4e2de;
 }
 
 .conf-sub-title {
     font-size: 1rem;
-    color: #475569;
+    color: #ffab91;
+    font-weight: 600;
     margin: 10px 0;
 }
 
+/* 리스트 컨테이너 배경은 연하게, 개별 요소는 하얗게 분리 */
 .conf-list {
     list-style: none;
-    padding: 0;
+    padding: 4px;
     margin: 0 0 20px 0;
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: #fef9f6;
+    border: 2px solid #f4e2de;
     border-radius: 8px;
 }
 
@@ -117,10 +119,13 @@ const { view_survey_data, view_answers, view_app_status } = storeToRefs(surveySt
     display: flex;
     justify-content: space-between;
     padding: 15px;
-    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 4px;
+    background: #fff;
+    border: 2px solid #f4e2de;
+    border-radius: 6px;
 }
 .conf-list li:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .conf-q {
@@ -128,22 +133,30 @@ const { view_survey_data, view_answers, view_app_status } = storeToRefs(surveySt
     padding-right: 20px;
     line-height: 1.5;
 }
+.conf-q span {
+    color: #ffab91;
+    font-weight: bold;
+}
 .conf-a {
     font-weight: 700;
     min-width: 60px;
     text-align: center;
 }
+
+/* 응답 텍스트 색상 */
 .ans-yes {
-    color: #2563eb;
+    color: #ffab91;
 }
 .ans-no {
-    color: #dc2626;
+    color: #94a3b8; /* 아니오는 눈에 덜 띄는 회색 유지 */
 }
 
 /* 버튼 스타일 */
 .submit-box {
     margin-top: 50px;
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
 }
 
 .submit-box button {
@@ -152,38 +165,29 @@ const { view_survey_data, view_answers, view_app_status } = storeToRefs(surveySt
     border-radius: 30px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border: 1px solid transparent;
 }
 
+/* 닫기 버튼 */
 .btn-secondary {
-    background: #f1f5f9;
-    color: #64748b;
-    border-color: #cbd5e1 !important;
+    background: #fff;
+    color: #ffab91;
+    border: 2px solid #f4e2de;
 }
 .btn-secondary:hover {
-    background: #e2e8f0;
-    color: #475569;
-}
-.submit-box {
-    margin-top: 50px;
-    display: flex;
-    justify-content: flex-end; /* 우측 정렬 유지 */
-    gap: 12px; /* 버튼 사이 간격 */
+    background: #fef9f6;
+    color: #ff8a65;
+    border-color: #ff8a65;
 }
 
+/* 삭제 버튼 (포인트 호버 유지) */
 .btn-danger {
-    padding: 12px 40px;
-    font-weight: 700;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: #fef2f2;
-    color: #ef4444;
-    border: 1px solid #fca5a5;
+    background: #fff;
+    color: #ef4444; /* 삭제라는 의미 전달을 위해 약간의 붉은 텍스트 */
+    border: 2px solid #fecaca;
 }
-
 .btn-danger:hover {
-    background: #fee2e2;
+    background: #fef2f2;
     color: #dc2626;
+    border-color: #f87171;
 }
 </style>

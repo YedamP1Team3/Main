@@ -85,7 +85,7 @@ watch(
     width: 100%;
     padding: 20px 15px;
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }

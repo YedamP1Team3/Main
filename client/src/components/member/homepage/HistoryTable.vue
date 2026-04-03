@@ -233,7 +233,7 @@ onMounted(fetchHistoryRows);
     background-color: white;
     padding: 30px;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
 }
 
 h2 {
@@ -291,15 +291,15 @@ h2 {
 }
 
 .btn-view {
-    background-color: #3b82f6;
+    background-color: #ffab91;
     color: white;
     border: none;
 }
 
 .btn-view-outline {
     background-color: white;
-    color: #3b82f6;
-    border: 1px solid #3b82f6;
+    color: #ffab91;
+    border: 1px solid #ffab91;
 }
 
 .btn-view:disabled,
