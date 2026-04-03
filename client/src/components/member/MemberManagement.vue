@@ -108,13 +108,13 @@ watch(
     display: flex;
     padding: 0 10px;
     background-color: #ffffff;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .tab-menu button {
     position: relative;
     padding: 15px 20px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #94a3b8;
     background: none;
@@ -152,13 +152,13 @@ watch(
 
 .content-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     color: #1e293b;
 }
 
 .btn-add {
     padding: 4px 10px;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     color: #fff;
     background-color: #ffab91;
     border: 1px solid #f4e2de;
@@ -184,20 +184,20 @@ watch(
 }
 
 .list-table th {
-    background-color: #f8fafc; /* 오른쪽 이미지의 연한 회색 배경 */
+    background-color: #fef9f6; /* 오른쪽 이미지의 연한 회색 배경 */
     color: #64748b;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: 700;
     padding: 12px 10px;
     border-top: none; /* 기존 왼쪽 이미지에 있던 맨 위 얇은 선 제거 */
-    border-bottom: 2px solid #e2e8f0; /* 헤더 아래쪽 두꺼운 구분선 */
+    border-bottom: 2px solid #f4e2de; /* 헤더 아래쪽 두꺼운 구분선 */
 }
 
 .list-table td {
     padding: 16px 10px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #334155;
-    border-bottom: 1px solid #f1f5f9; /* 데이터 간의 아주 얇고 연한 구분선 */
+    border-bottom: 1px solid #f4e2de; /* 데이터 간의 아주 얇고 연한 구분선 */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -195,13 +195,13 @@ const handleReject = async () => {
     flex-direction: column;
     align-items: center;
     overflow-y: auto;
+    font-size: 1.5rem;
 }
 
 .title {
-    font-size: 1.6rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 20px;
 }
 
 .action-area {
@@ -353,12 +353,12 @@ textarea:focus {
 
 .info-area {
     text-align: center;
-    margin-top: 50px;
+    margin-top: 150px;
     color: #475569;
 }
 
 .info-area i {
-    font-size: 3rem;
+    font-size: 7rem;
     margin-bottom: 15px;
 }
 

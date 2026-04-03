@@ -44,7 +44,7 @@ watch(
                         <th><label>지원자</label></th>
                         <td>
                             <select v-model="localSelectedId" @change="handleSelectChange">
-                                <option value="">지원자를 선택하세요</option>
+                                <option value="">대상자선택</option>
                                 <option v-for="bene in my_beneficiaries" :key="bene.bene_id" :value="bene.bene_id">
                                     {{ bene.bene_name }}
                                 </option>
@@ -111,7 +111,7 @@ th {
 }
 
 th label {
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #64748b;
     white-space: nowrap;
@@ -130,7 +130,7 @@ input[type='text'] {
     width: 100%;
     height: 38px;
     padding: 0 10px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #334155;
     background-color: #ffffff;
     border: 1px solid #cbd5e1;

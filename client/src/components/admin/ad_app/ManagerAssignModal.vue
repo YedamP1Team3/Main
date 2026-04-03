@@ -157,14 +157,14 @@ onMounted(async () => {
 
 <style scoped>
 .assign-view-container {
-    max-width: 700px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 30px;
     background-color: #fef9f6;
 }
 
 h2 {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 800;
     color: #1e293b;
     margin-bottom: 8px;
@@ -204,14 +204,14 @@ h2 {
 }
 
 .title-text {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     color: #1e293b;
     line-height: 1.6;
     margin: 0;
 }
 
 .title-text b {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
 }
 
 .highlight {
@@ -224,7 +224,7 @@ h2 {
     max-width: 300px;
     height: 45px;
     padding: 0 15px;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #334155;
     border: 2px solid #f4e2de;
@@ -248,7 +248,7 @@ h2 {
 
 .btn-group button {
     padding: 10px 30px;
-    font-size: 1rem;
+    font-size: 1.3rem;
     font-weight: 700;
     border-radius: 25px;
     cursor: pointer;
@@ -332,7 +332,7 @@ h2 {
 
 .timeline-date {
     display: block;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #ffab91;
     margin-bottom: 4px;
@@ -347,16 +347,18 @@ h2 {
 
 .timeline-main {
     font-weight: 600;
+    font-size: 1.1rem;
 }
 
 .timeline-main strong {
     color: #1e293b;
     font-weight: 800;
+    font-size: 1.2rem;
 }
 
 .timeline-sub {
     margin-top: 4px;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #94a3b8;
 }
 </style>

@@ -129,7 +129,7 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
 }
 
 .side-panel {
-    flex: 0 0 600px;
+    flex: 0 0 700px;
     background-color: #fef9f6;
     border-right: 2px solid #f4e2de;
     display: flex;
@@ -147,7 +147,8 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
 .main-content {
     flex: 1;
     background-color: #fef9f6;
-    padding: 40px;
+    /* 좌우 패딩을 조금 더 늘려(40px -> 60px) 콘텐츠가 벽에 붙지 않게 조절 */
+    padding: 40px 60px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -155,7 +156,8 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
 
 .editor-container {
     width: 100%;
-    max-width: 900px;
+    /* 기존 900px에서 1050px로 변경하여 적당한 볼륨감 확보 */
+    max-width: 1100px;
     margin: 0 auto;
 }
 
