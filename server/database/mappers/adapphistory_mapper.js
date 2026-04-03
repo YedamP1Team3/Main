@@ -32,20 +32,6 @@ const adapphistory_mapper = {
       if (conn) conn.end();
     }
   },
-
-  deleteUser: async (userId) => {
-    let conn = null;
-    try {
-      conn = await pool.getConnection();
-      const result = await conn.query(historysql.deletehistory, [userId]);
-      return result;
-    } catch (err) {
-      console.error("Mapper Error (deleteUser):", err);
-      throw err;
-    } finally {
-      if (conn) conn.end();
-    }
-  },
 };
 
 module.exports = adapphistory_mapper;

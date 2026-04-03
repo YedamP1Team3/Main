@@ -179,9 +179,9 @@ const saveInfo = async () => {
                     </div>
                 </div>
 
-                <div class="btn-group gap-3">
-                    <Button label="취 소" type="button" class="p-button-secondary cancel-btn" @click="router.back()" />
-                    <Button label="정보 저장" type="submit" class="p-button-success submit-btn" />
+                <div class="btn-group">
+                    <Button label="취 소" type="button" class="cancel-btn" @click="router.back()" />
+                    <Button label="정보 저장" type="submit" class="save-btn" />
                 </div>
             </form>
         </div>
@@ -196,7 +196,7 @@ const saveInfo = async () => {
     width: 100%;
     /* 상단 패딩을 10px에서 5px로 줄여 카드를 위로 올림 */
     padding: 5px 0 40px 0;
-    background-color: #f8fafc;
+    background-color: #fef9f6 !important;
 }
 
 .form-container {
@@ -205,6 +205,7 @@ const saveInfo = async () => {
     background-color: #ffffff;
     /* 상단 내부 패딩을 1.5rem에서 1.2rem으로 줄여 제목을 위로 올림 */
     padding: 1.2rem 2rem !important;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
@@ -246,10 +247,11 @@ const saveInfo = async () => {
     color: #475569;
 }
 
+/* [우편번호 검색 버튼] - 이미지처럼 테두리 연하게, 글자색 코랄 */
 .post-btn {
-    background: white;
-    border: 1px solid #10b981;
-    color: #10b981;
+    background-color: #fef9f6;
+    border: 2px solid #f4e2de;
+    color: #ffab91;
     padding: 0 0.8rem;
     border-radius: 6px;
     font-size: 0.8rem;
@@ -257,18 +259,54 @@ const saveInfo = async () => {
     white-space: nowrap;
 }
 
+.post-btn:hover {
+    background-color: #fef9f6;
+    border-color: #ffab91;
+}
+
+/* [하단 버튼 그룹] */
 .btn-group {
     display: flex;
     justify-content: center;
-    margin-top: 1rem;
+    margin-top: 2rem;
+    gap: 10px; /* 버튼 사이 좁은 간격 */
 }
 
 .submit-btn,
 .cancel-btn {
     flex: 1;
-    padding: 0.6rem;
-    font-size: 0.95rem;
+    background-color: #eff3f8 !important; /* 항상 보이는 연한 회색 */
+    border: none !important;
+    color: #475569 !important;
+    padding: 0.8rem !important;
+    font-size: 1rem;
     font-weight: bold;
+    border-radius: 10px !important;
+}
+
+/* 정보 저장 버튼 - 이미지의 메인 코랄색 */
+.save-btn {
+    flex: 2;
+    background-color: #ffab91 !important; /* 항상 보이는 코랄색 */
+    border: none !important;
+    color: white !important;
+    padding: 0.8rem !important;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 10px !important;
+}
+
+/* 호버 효과 추가 */
+.save-btn:hover {
+    filter: brightness(0.95); /* 아주 살짝 어둡게만 */
+}
+
+.post-btn:hover {
+    background-color: #fffafa; /* 아주 살짝 배경색 변화 */
+}
+
+.cancel-btn:hover {
+    background-color: #e2e8f0 !important;
 }
 
 .submit-btn {

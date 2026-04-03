@@ -35,7 +35,7 @@ const goToCenterInfo = () => {
                 </h3>
             </div>
 
-            <hr class="mb-3 mx-3 border-top-1 surface-border" />
+            <hr class="mb-3 mx-3" style="border: 0; border-top: 2px solid #f4e2de; opacity: 1" />
 
             <ul class="layout-menu list-none p-0 m-0">
                 <li class="menu-item px-4 py-3 cursor-pointer hover:surface-hover transition-colors" :class="{ 'active-menu-link': route.name === 'adjoinfamily' }" @click="navigateTo('admininfo')">
@@ -85,9 +85,9 @@ const goToCenterInfo = () => {
 }
 
 .active-menu-link {
-    background-color: #f0fdf4 !important;
-    color: #10b981 !important;
-    border-left: 4px solid #10b981;
+    background-color: #fef9f6 !important;
+    color: #ffab91 !important;
+    border-left: 4px solid #f3c4b9;
 }
 
 .active-menu-link span {

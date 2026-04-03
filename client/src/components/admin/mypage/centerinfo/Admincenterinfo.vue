@@ -106,7 +106,7 @@ const handleSave = async () => {
                 <h3 class="text-xl font-bold">기관 정보</h3>
                 <div class="button-group">
                     <button v-if="!isEditMode" @click="toggleEditMode" class="p-button p-button-sm coral-btn">수정하기</button>
-                    <button v-else @click="handleSave" class="p-button p-button-primary p-button-sm">저장하기</button>
+                    <button v-else @click="handleSave" class="p-button p-button-sm coral-btn">저장하기</button>
                 </div>
             </div>
 
@@ -258,18 +258,28 @@ const handleSave = async () => {
     gap: 0.5rem;
 }
 
-/* 모든 '수정', '추가' 버튼에 공통 적용 */
-.coral-btn {
-    background-color: #ffab91 !important; /* 따뜻한 코랄 배경 */
-    color: #ffffff !important; /* 흰색 글자 */
-    border: 2px solid #ffab91 !important; /* 배경과 같은 색의 테두리 */
+/* 모든 버튼에 공통으로 적용될 강제 스타일 */
+.p-button.coral-btn {
+    background-color: #ffab91 !important; /* 배경색 코랄 */
+    color: #ffffff !important; /* 글자색 흰색 */
+    border: 1px solid #ffab91 !important; /* 테두리색 코랄 */
     font-weight: 700 !important; /* 글자 두껍게 */
-    transition: background-color 0.2s; /* 부드러운 색상 변화 */
+    border-radius: 6px !important; /* 모서리 곡률 */
+    opacity: 1 !important; /* 투명도 제거 */
+    box-shadow: none !important; /* 기본 그림자 제거 */
+    padding: 5px;
 }
 
-.coral-btn:hover {
-    background-color: #ff9e80 !important; /* 마우스 올렸을 때 살짝 진하게 */
+/* 마우스를 올렸을 때 스타일 */
+.p-button.coral-btn:enabled:hover {
+    background-color: #ff9e80 !important; /* 살짝 진한 코랄 */
     border-color: #ff9e80 !important;
+    color: #ffffff !important;
+}
+
+/* 버튼 내부 아이콘이 있다면 흰색으로 고정 */
+.p-button.coral-btn .pi {
+    color: #ffffff !important;
 }
 
 /* 반응형 모바일 대응 */
