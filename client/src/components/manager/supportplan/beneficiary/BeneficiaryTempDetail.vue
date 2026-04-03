@@ -200,7 +200,7 @@ watch(
         <hr class="main-hr" />
 
         <div class="info-row-top">
-            <div class="status-box">
+            <div class="state-badge">
                 <span>상태: {{ tempDetail.progress_state }}</span>
             </div>
             <div class="date-box"><strong>작성일 :</strong> {{ tempDetail.created_at }}</div>
@@ -257,11 +257,12 @@ watch(
 <style scoped>
 /* 전체 컨테이너 */
 .BfnewPlan {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
-    background-color: #ffffff;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
     border: 2px solid #f4e2de;
+    background-color: #ffffff;
+    color: #334155;
 }
 
 .main-hr {
@@ -279,7 +280,7 @@ watch(
 }
 
 .date-box {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #475569;
 }
 
@@ -287,12 +288,12 @@ watch(
 .state-badge {
     padding: 4px 12px;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 .state-badge.임시 {
     background: #f1f5f9;
-    color: #475569;
+    color: #006aff;
 }
 .state-badge.반려 {
     background: #fee2e2;
@@ -354,7 +355,7 @@ watch(
     color: #ffab91;
     border: 1px solid #ffab91;
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -394,7 +395,7 @@ watch(
 }
 
 .file_icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-right: 10px;
     display: flex;
     align-items: center;
@@ -403,7 +404,7 @@ watch(
 
 .file_name {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #334155;
     font-weight: 500;
     white-space: nowrap;
@@ -417,7 +418,7 @@ watch(
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -433,7 +434,7 @@ watch(
 .no-attachments {
     padding: 5px 0;
     color: #94a3b8;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 
 .clickable {
@@ -446,7 +447,7 @@ watch(
     border: none;
     padding: 15px;
     outline: none;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-family: inherit;
     color: #1e293b;
 }
@@ -528,50 +529,6 @@ textarea[readonly] {
 }
 
 /* 반려 히스토리 섹션 (관리자용 디자인 계승) */
-.history-section {
-    margin-top: 50px;
-}
-
-.history-title {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 15px;
-}
-
-.history-card {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 18px;
-    margin-bottom: 12px;
-}
-
-.history-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    border-bottom: 1px dashed #cbd5e1;
-    padding-bottom: 8px;
-}
-
-.history-user {
-    font-weight: 700;
-    color: #475569;
-    font-size: 0.9rem;
-}
-
-.history-date {
-    font-size: 0.85rem;
-    color: #94a3b8;
-}
-
-.history-body {
-    color: #334155;
-    line-height: 1.6;
-    font-size: 0.95rem;
-    white-space: pre-wrap;
-}
 
 .download-list {
     list-style: none;
@@ -603,13 +560,13 @@ textarea[readonly] {
 }
 
 .file-name-text {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 500;
     flex: 1;
 }
 
 .file-size {
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     color: #94a3b8;
     margin-left: 10px;
 }

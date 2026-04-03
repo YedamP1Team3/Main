@@ -99,7 +99,7 @@ const deleteTemp = async (resultId) => {
 const Approval = async (id) => {
     if (isSubmitting.value) return;
     if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
-    if (!resultDetail.value.result_title || !resultDetail.value.result_content) {
+    if (!resultDetail.value.result_title) {
         alert('내용을 입력해주세요');
         return;
     }
@@ -253,11 +253,14 @@ onMounted(() => {
 <style scoped>
 /* 전체 컨테이너 */
 .BfnewPlan {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
+    border: 2px solid #f4e2de;
     background-color: #ffffff;
+    color: #334155;
 }
+
 h2 {
     font-size: 1.5rem;
     font-weight: 800;
@@ -280,48 +283,36 @@ h2 {
 }
 .state-badge {
     padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 0.85rem;
+    border-radius: 4px;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 .state-badge.임시 {
-    background-color: #f1f5f9;
-    color: #64748b;
-}
-.state-badge.대기 {
-    background-color: #fef3c7;
-    color: #d97706;
-}
-.state-badge.반려 {
-    background-color: #fee2e2;
-    color: #ef4444;
-}
-.date-box {
-    color: #64748b;
-    font-size: 0.95rem;
+    background: #f1f5f9;
+    color: #475569;
 }
 
 /* 표 레이아웃 */
 .table-container {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #f4e2de;
 }
 .form-row {
     display: flex;
-    border-bottom: 1px solid #e2e8f0;
-    border-left: 1px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f4e2de;
+    border-left: 1px solid #f4e2de;
+    border-right: 1px solid #f4e2de;
 }
 .form-row label {
     width: 140px;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
     color: #475569;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    border-right: 1px solid #e2e8f0;
-    font-size: 0.9rem;
+    border-right: 1px solid #f4e2de;
+    font-size: 1.1rem;
     flex-shrink: 0;
 }
 .input-wrapper {
@@ -337,7 +328,7 @@ h2 {
     width: 100%;
     border: none;
     padding: 15px 20px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #334155;
     outline: none;
     background: transparent;
@@ -368,8 +359,8 @@ h2 {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    border: 1px solid #1e293b;
-    background: #fff;
+    border: 1px solid #f4e2de;
+    background: #fef9f6;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -379,14 +370,18 @@ h2 {
 .plan-tag-item {
     display: flex;
     align-items: center;
-    background: #eff6ff;
     padding: 5px 15px;
     border-radius: 20px;
-    font-size: 0.85rem;
-    color: #1e40af;
-    border: 1px solid #dbeafe;
+    font-size: 1.1rem;
+    border: 1px solid #ffab91;
     cursor: pointer;
     margin-right: 5px;
+}
+
+.plan-tag-item:hover {
+    background-color: #ff8a65; /* 아주 연한 살구색 배경 */
+    border-color: #ff8a65; /* 테두리 한 톤 진하게 */
+    color: #ffffff; /* 글자색도 함께 강조 */
 }
 .active-tag {
     background-color: #1e293b !important;
@@ -405,30 +400,53 @@ h2 {
 .button-group {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    margin-top: 30px;
+    gap: 10px;
+    margin: 25px 0;
 }
-.btn-approve {
-    padding: 12px 40px;
-    background: #fff;
-    color: #1e293b;
-    border: 1.5px solid #1e293b;
-    border-radius: 30px;
-    font-weight: 800;
-    cursor: pointer;
-}
-.btn-temp,
-.btn-delete {
-    padding: 12px 24px;
-    background: #f1f5f9;
-    color: #64748b;
-    border: none;
-    border-radius: 30px;
+
+.button-group button {
+    padding: 10px 24px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
+    border: 1px solid transparent;
+    transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-approve {
+    background: #ffab91;
+    color: #fff;
+}
+.btn-temp {
+    background: #ffffff;
+    border: 2px solid #ffab91 !important;
+    color: #ffab91;
 }
 .btn-delete {
-    color: #ef4444;
+    background: #ffffff;
+    color: #e11d48 !important;
+    border: 2px solid #e11d48 !important;
+}
+/* 2. 승인 신청 호버 */
+.button-group .btn-approve:hover {
+    background-color: #ff8a65;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(255, 171, 145, 0.4);
+}
+
+/* 3. 임시 저장 호버 (이제 확실히 작동합니다) */
+.button-group .btn-temp:not(.active-temp):hover {
+    background-color: #ffab91;
+    color: #ffffff;
+    border-color: #ff8a65;
+    box-shadow: 0 4px 6px rgba(255, 171, 145, 0.1);
+}
+
+/* 4. 삭제 버튼 호버 */
+.button-group .btn-delete:hover {
+    background-color: #fff1f2; /* 연한 레드 */
+    color: #be123c;
+    border-color: #be123c;
 }
 
 /* 반려 이력 */
@@ -438,7 +456,7 @@ h2 {
 }
 
 .history-title {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: #1e293b;
     margin-bottom: 15px;
@@ -463,18 +481,18 @@ h2 {
 .history-user {
     font-weight: 700;
     color: #475569;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 
 .history-date {
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     color: #94a3b8;
 }
 
 .history-body {
     color: #334155;
     line-height: 1.6;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     white-space: pre-wrap;
 }
 </style>

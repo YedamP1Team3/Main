@@ -29,7 +29,6 @@ watch(
         <hr />
 
         <div class="plan-header">
-            <span class="status-badge">{{ resultDetail.progress_state }}</span>
             <span class="date-info">작성일: {{ resultDetail.created_at }}</span>
         </div>
 
@@ -59,27 +58,30 @@ watch(
 </template>
 <style scoped>
 .BfnewPlan {
-    max-width: 900px;
+    max-width: 1000px;
+    background-color: #fff;
+    border: 2px solid #f4e2de;
     margin: 30px auto;
     padding: 0 20px;
     color: #333;
+    padding: 30px;
 }
 
 h2 {
-    font-size: 24px;
+    font-size: 1.5rem;
     margin-bottom: 10px;
 }
 
 hr {
     border: 0;
-    border-top: 2px solid #35495e;
+    border-top: 2px solid #f4e2de;
     margin-bottom: 20px;
 }
 
 /* 상단 정보 스타일 */
 .plan-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-bottom: 15px;
     align-items: center;
 }
@@ -90,11 +92,11 @@ hr {
     padding: 4px 12px;
     border-radius: 15px;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 1.1rem;
 }
 
 .date-info {
-    font-size: 14px;
+    font-size: 1.1rem;
     color: #666;
 }
 
@@ -105,11 +107,12 @@ hr {
     border-top: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
     table-layout: fixed;
+    font-size: 1.1rem;
 }
 
 .detail-table th {
-    background-color: #f5f5f5; /* 담당자 화면과 동일한 회색 배경 */
-    border: 1px solid #ddd;
+    background-color: #fef9f6; /* 담당자 화면과 동일한 회색 배경 */
+    border: 1px solid #f4e2de;
     padding: 15px;
     text-align: left;
     font-weight: bold;

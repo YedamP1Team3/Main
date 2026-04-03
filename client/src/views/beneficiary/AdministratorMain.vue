@@ -171,7 +171,7 @@ const handleSelectSubPlan = (planId) => {
 /* 작성창 컨테이너 */
 .editor-container {
     width: 100%;
-    max-width: 900px; /* 너무 넓어지지 않게 가이드라인 설정 */
+    max-width: 1100px; /* 너무 넓어지지 않게 가이드라인 설정 */
     margin: 0 auto; /* 중앙 정렬 */
 }
 
