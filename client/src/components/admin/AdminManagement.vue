@@ -96,17 +96,17 @@ defineExpose({
 <style scoped>
 .management-container {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     padding: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     overflow: hidden;
 }
 
 .tab-menu {
     display: flex;
     background-color: #ffffff;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 0.5px solid #f4e2de;
     padding: 0 10px;
 }
 
@@ -116,14 +116,16 @@ defineExpose({
     padding: 15px 20px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: #000000;
     cursor: pointer;
     position: relative;
     transition: all 0.2s;
+    opacity: 0.3;
 }
 
 .tab-menu button.active {
-    color: #3b82f6;
+    color: #ffab91;
+    opacity: 1;
 }
 
 .tab-menu button.active::after {
@@ -133,11 +135,49 @@ defineExpose({
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: #3b82f6;
+    background-color: #ffab91;
 }
 
 .tab-content {
     padding: 20px;
     min-height: 400px;
+}
+
+.content-header {
+    margin-bottom: 20px;
+}
+.content-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1e293b;
+}
+.list-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    font-size: 0.9rem;
+}
+.list-table th {
+    padding: 10px;
+    font-weight: 600;
+    color: #64748b;
+    border-top: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+}
+.list-table td {
+    padding: 12px 10px;
+    color: #334155;
+    border-bottom: 1px solid #e2e8f0;
+}
+.empty-msg {
+    padding: 30px !important;
+    color: #94a3b8 !important;
+}
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.clickable-row:hover {
+    background-color: #f8fafc;
 }
 </style>

@@ -81,7 +81,7 @@ onMounted(async () => {
 /* 카드 전체 컨테이너 */
 .BfInfo {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     padding: 20px 15px; /* 좌우 패딩을 줄여 내부 공간 확보 */
     width: 100%;

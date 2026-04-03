@@ -120,7 +120,7 @@ watch(
 <style scoped>
 .management-container {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     padding: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -130,7 +130,7 @@ watch(
 .tab-menu {
     display: flex;
     background-color: #ffffff;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 0.5px solid #f4e2de;
     padding: 0 10px;
 }
 
@@ -140,14 +140,16 @@ watch(
     padding: 15px 20px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: #000000;
     cursor: pointer;
     position: relative;
     transition: all 0.2s;
+    opacity: 0.3;
 }
 
 .tab-menu button.active {
-    color: #3b82f6;
+    color: #ffab91;
+    opacity: 1;
 }
 
 .tab-menu button.active::after {
@@ -157,7 +159,7 @@ watch(
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: #3b82f6;
+    background-color: #ffab91;
 }
 
 .tab-content {
