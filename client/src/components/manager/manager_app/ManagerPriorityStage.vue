@@ -75,7 +75,7 @@ const handleCancel = () => {
 
         <div class="action-group">
             <button class="action-btn" @click="handleSubmit">{{ submitButtonText }}</button>
-            <button class="action-btn" @click="handleCancel">취소</button>
+            <button class="action-btn2" @click="handleCancel">취소</button>
         </div>
 
         <!-- ⭐️ 2. 반려 이력은 화면 하단에 단단한 실선 박스와 함께 배치 (Secondary Info) -->
@@ -96,14 +96,13 @@ const handleCancel = () => {
 </template>
 
 <style scoped>
-/* 기존 스타일과 100% 동일하게 유지하시면 됩니다. (생략) */
 .priority-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     padding: 40px;
-    background-color: #ffffff;
+    background-color: #fef9f6;
     height: 100%;
     overflow-y: auto;
 }
@@ -112,19 +111,10 @@ const handleCancel = () => {
     margin-bottom: 30px;
 }
 .title-area h2 {
-    font-size: 1.8rem;
-    font-weight: 500;
-    color: #333;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
     line-height: 1.4;
-    margin: 0;
-}
-.reject-reason {
-    margin-bottom: 30px;
-}
-.reject-reason p {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: #ef4444;
     margin: 0;
 }
 .circle-group {
@@ -138,8 +128,8 @@ const handleCancel = () => {
     height: 140px;
     border-radius: 50%;
     border: none;
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.7rem;
+    font-weight: 700;
     color: #000;
     cursor: pointer;
     transition:
@@ -151,9 +141,11 @@ const handleCancel = () => {
 .circle-btn.active {
     opacity: 1;
     transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(255, 171, 145, 0.4);
     color: #fff;
 }
+
+/* 상태별 고유 컬러 유지 (투명도 조절용) */
 .btn-red {
     background-color: #ef4444;
 }
@@ -163,45 +155,69 @@ const handleCancel = () => {
 .btn-green {
     background-color: #22c55e;
 }
+
 .action-group {
     display: flex;
     gap: 20px;
     margin-bottom: 50px;
 }
+
+/* 승인 요청 (Primary 포인트) */
 .action-btn {
-    padding: 10px 30px;
-    font-size: 1rem;
-    color: #333;
-    background-color: #fff;
-    border: 1px solid #ccc;
+    padding: 12px 35px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: #ffab91;
+    border: 2px solid #ffab91;
     border-radius: 25px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(255, 171, 145, 0.3);
 }
 .action-btn:hover {
-    background-color: #f8fafc;
+    background-color: #ff8a65;
+    border-color: #ff8a65;
 }
 
-/* ⭐️ 하단으로 분리된 반려 이력 실선 박스 */
+/* 취소 (Secondary 테두리) */
+.action-btn2 {
+    padding: 12px 35px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffab91;
+    background-color: #fff;
+    border: 2px solid #f4e2de;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.action-btn2:hover {
+    background-color: #fef9f6;
+    color: #ff8a65;
+    border-color: #ff8a65;
+}
+
+/* 반려 이력 박스 */
 .reject-history-box {
     width: 100%;
     max-width: 500px;
     margin-top: 20px;
     padding: 20px;
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1; /* 요청하신 명확한 실선 */
-    border-radius: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+    border: 2px solid #f4e2de;
+    border-radius: 12px;
 }
 .history-title {
-    font-size: 1.1rem;
-    color: #ef4444; /* 경고 느낌의 붉은색 타이틀 */
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffab91;
     margin-top: 0;
     margin-bottom: 15px;
     display: flex;
     align-items: center;
     gap: 8px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 2px solid #f4e2de;
     padding-bottom: 10px;
 }
 .history-list {
@@ -211,7 +227,7 @@ const handleCancel = () => {
 .history-item {
     padding-bottom: 12px;
     margin-bottom: 12px;
-    border-bottom: 1px dashed #e2e8f0;
+    border-bottom: 2px dashed #f4e2de;
 }
 .history-item:last-child {
     border-bottom: none;
@@ -221,18 +237,19 @@ const handleCancel = () => {
 .history-date {
     display: block;
     font-size: 0.85rem;
-    color: #64748b;
+    color: #ffab91;
+    font-weight: 600;
     margin-bottom: 4px;
 }
 .history-reason {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #334155;
     margin: 0;
     line-height: 1.5;
-    font-weight: 500;
+    font-weight: 600;
 }
 .reject-reason-empty {
-    color: #ef4444;
+    color: #ffab91;
     font-weight: 600;
     text-align: center;
     padding: 10px;

@@ -204,10 +204,11 @@ watch(
 <style scoped>
 /* 1. 전체 컨테이너 레이아웃 */
 .BfnewPlan {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
     background-color: #ffffff;
+    border: 2px solid #f4e2de;
     color: #1e293b;
     font-family:
         'Pretendard',
@@ -215,10 +216,24 @@ watch(
         sans-serif;
 }
 
+h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
 /* 메인 제목 아래 구분선 */
 .main-hr {
     border: none;
-    border-top: 2px solid #334155;
+    border-top: 2px solid #f4e2de;
     margin-bottom: 20px;
 }
 
@@ -238,7 +253,7 @@ watch(
 }
 
 .author-row {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #475569;
     font-weight: 500;
     white-space: nowrap; /* 텍스트 줄바꿈 방지 */
@@ -248,7 +263,7 @@ watch(
 .state-badge {
     padding: 4px 12px;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: bold;
     display: inline-block;
 }
@@ -272,7 +287,7 @@ watch(
 
 /* 3. 테이블 컨테이너 (조회용 그리드) */
 .table-container {
-    border: 1px solid #e2e8f0;
+    border: 1px solid #f4e2de;
     background-color: #ffffff;
     margin-bottom: 25px;
     border-radius: 2px;
@@ -280,7 +295,7 @@ watch(
 
 .form-row {
     display: flex;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .form-row:last-child {
@@ -291,14 +306,14 @@ watch(
 .form-row label {
     width: 140px;
     min-width: 140px;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
     color: #475569;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    border-right: 1px solid #e2e8f0;
+    border-right: 1px solid #f4e2de;
 }
 
 /* 오른쪽 내용 영역 */
@@ -306,7 +321,7 @@ watch(
     flex: 1;
     padding: 15px 20px;
     color: #1e293b;
-    font-size: 1rem;
+    font-size: 1.1rem;
     display: flex;
     align-items: center;
     word-break: break-all;
@@ -340,32 +355,38 @@ watch(
 .file_item {
     display: flex;
     align-items: center;
-    background-color: #f1f5f9;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    color: #334155;
-    border: 1px solid #e2e8f0;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    border: 1px solid #ff8a65;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    min-width: 200px;
     transition: all 0.2s;
-    max-width: 250px;
 }
 
-.file_item.clickable:hover {
-    background-color: #e2e8f0;
-    border-color: #cbd5e1;
-    cursor: pointer;
+.file_item:hover {
+    border-color: #ff8a65;
+    color: white;
+    background-color: #ff8a65;
 }
 
 .file_icon {
-    margin-right: 8px;
     font-size: 1.1rem;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    line-height: 1;
 }
 
 .file_name {
     flex: 1;
+    font-size: 1.1rem;
+    color: #334155;
+    font-weight: 500;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .no-file {
@@ -377,30 +398,32 @@ watch(
 .button-group {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    margin: 30px 0;
+    gap: 10px;
+    margin: 25px 0;
 }
 
 .button-group button {
-    padding: 12px 28px;
-    border-radius: 30px; /* 담당자 페이지와 동일한 알약 모양 */
-    font-size: 1rem;
-    font-weight: bold;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 승인 버튼 (어두운 색상) */
-.btn-approve,
+.btn-approve {
+    background: #ffab91;
+    color: #fff;
+}
 .btn-submit-reject {
-    background-color: #ffffff !important; /* 배경 흰색 */
-    color: #e11d48 !important; /* 글자 빨간색 */
-    border: 1px solid #e11d48 !important; /* 빨간 테두리 */
-    padding: 12px 28px;
-    border-radius: 30px; /* 알약 모양 */
-    font-size: 1rem;
-    font-weight: bold;
+    background-color: #ffab91 !important; /* 배경 흰색 */
+    color: white !important; /* 글자 빨간색 */
+    padding: 10px 24px;
+    border-radius: 8px; /* 알약 모양 */
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     display: block; /* 줄바꿈 적용 */
@@ -410,8 +433,8 @@ watch(
 /* 반려 버튼 (흰색 배경 + 빨간 테두리) */
 .btn-reject {
     background-color: #ffffff;
-    color: #e11d48;
-    border: 1px solid #e11d48 !important;
+    color: #ffab91;
+    border: 2px solid #ffab91 !important;
 }
 
 button:hover {
@@ -421,8 +444,8 @@ button:hover {
 
 /* 5. 반려 사유 입력창 섹션 */
 .reason-input-area {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: #fef9f6;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     padding: 25px;
     margin-top: 15px;
@@ -430,7 +453,7 @@ button:hover {
 
 .reason-label {
     font-weight: 800;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     margin-bottom: 12px;
     color: #1e293b;
 }
@@ -439,69 +462,65 @@ button:hover {
     width: 100%;
     height: 120px;
     padding: 15px;
-    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+    border: 1px solid #f4e2de;
     border-radius: 8px;
     resize: none;
     margin-bottom: 15px;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
 }
 
 /* 6. 반려 히스토리 섹션 */
 .history-section {
-    margin-top: 50px;
+    margin-top: 40px;
     padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #f4e2de;
 }
 
-.history-section h3 {
-    font-size: 1.25rem;
+.history-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
     font-weight: 800;
-    margin-bottom: 20px;
+    color: #1e293b;
 }
 
 .history-card {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 10px;
-    padding: 20px;
+    padding: 18px;
     margin-bottom: 15px;
+    background: #fef9f6; /* 관리자 카드 배경색 적용 */
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: 0.2s ease;
 }
 
 .history-card:hover {
-    background-color: #f1f5f9;
+    background-color: #ffab91;
+    border-color: #ffab91;
 }
 
 .history-header {
     display: flex;
     justify-content: space-between;
+    font-size: 1.1rem;
+    color: #64748b;
     margin-bottom: 12px;
-    border-bottom: 1px dashed #cbd5e1;
     padding-bottom: 10px;
-    font-size: 0.9rem;
-}
-
-.history-user {
-    font-weight: 700;
-    color: #334155;
-}
-.history-date {
-    color: #94a3b8;
+    border-bottom: 2px dashed #f4e2de; /* 관리자용 점선 스타일 */
 }
 
 .history-body {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #1e293b;
     line-height: 1.6;
 }
 
-/* 상세 접힘 영역 */
+/* 상세 접힘 영역 상세 디자인 */
 .history-detail-fold {
     margin-top: 15px;
     padding: 15px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: #ffffff; /* 카드 배경보다 밝게 하여 구분감 생성 */
+    border: 2px solid #f4e2de;
     border-radius: 8px;
 }
 
@@ -509,13 +528,16 @@ button:hover {
     display: block;
     font-weight: bold;
     color: #64748b;
-    font-size: 0.85rem;
-    margin-top: 12px;
+    font-size: 1.1rem;
+    margin-top: 10px;
     margin-bottom: 5px;
 }
 
 .pre-wrap {
     white-space: pre-wrap;
     word-break: break-all;
+    font-size: 1.1rem;
+    color: #334155;
+    line-height: 1.6;
 }
 </style>

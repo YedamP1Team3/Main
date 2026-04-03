@@ -293,16 +293,24 @@ watch(
 <style scoped>
 /* 1. 전체 컨테이너 및 기본 텍스트 */
 .BfnewPlan {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #fff;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
+    border: 2px solid #f4e2de;
+    background-color: #ffffff;
     color: #334155;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
 }
 
 .main-hr {
     border: none;
-    border-top: 2px solid #334155;
+    border-top: 2px solid #f4e2de;
     margin: 15px 0;
 }
 
@@ -317,7 +325,7 @@ watch(
 
 .author-row,
 .date-box {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #475569;
     white-space: nowrap;
 }
@@ -325,7 +333,7 @@ watch(
 .state-badge {
     padding: 4px 12px;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 .state-badge.임시 {
@@ -348,28 +356,29 @@ watch(
 
 /* 3. 테이블형 폼 */
 .table-container {
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-bottom: none;
     background-color: #fff;
 }
 
 .form-row {
     display: flex;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 2px solid #f4e2de;
     min-height: 50px;
 }
 
 .form-row label {
     width: 140px;
-    background: #f8fafc;
+    background: #fef9f6;
     padding: 15px;
     font-weight: bold;
     color: #475569;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 1px solid #e2e8f0;
+    border-right: 2px solid #f4e2de;
     flex-shrink: 0;
+    font-size: 1.1rem;
 }
 
 .input-wrapper {
@@ -384,7 +393,7 @@ watch(
     border: none;
     padding: 15px;
     outline: none;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #1e293b;
     background: transparent;
 }
@@ -404,54 +413,76 @@ watch(
 
 .button-group button {
     padding: 10px 24px;
-    border-radius: 30px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     border: 1px solid transparent;
     transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-approve {
-    background: #1e293b;
+    background: #ffab91;
     color: #fff;
 }
 .btn-temp {
-    background: #64748b;
-    color: #fff;
+    background: #ffffff;
+    border: 2px solid #ffab91 !important;
+    color: #ffab91;
 }
 .btn-delete {
-    background: #fff;
+    background: #ffffff !important;
     color: #e11d48;
-    border-color: #e11d48 !important;
+    border: 2px solid #e11d48 !important;
+}
+/* [+추가하기] 버튼 호버 */
+button:first-of-type:hover {
+    background-color: #ff8a65;
+    transform: translateY(-1px); /* 조금 더 확실한 상승감 */
+    /* 버튼 색상과 맞춘 부드러운 그림자 */
+    box-shadow: 0 10px 15px -3px rgba(255, 171, 145, 0.4);
+}
+
+/* [임시저장] 버튼 호버 */
+button:last-of-type:not(.active-temp):hover {
+    background-color: #ffab91; /* 아주 연한 주황 배경 */
+    color: #ffffff;
+    border-color: #ff8a65;
+    box-shadow: 0 4px 6px rgba(255, 171, 145, 0.1);
+}
+/* 삭제 호버 */
+.btn-delete:hover {
+    background-color: #ffffff !important; /* 아주 연한 레드 배경 */
+    color: #be123c !important;
 }
 
 /* 5. 반려 히스토리 (관리자 스타일과 완벽 통일) */
 .history-section {
     margin-top: 40px;
     padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #f4e2de;
 }
 
 .history-title {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     margin-bottom: 15px;
     font-weight: 800;
     color: #1e293b;
 }
 
 .history-card {
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 10px;
     padding: 18px;
     margin-bottom: 15px;
-    background: #f8fafc; /* 관리자 카드 배경색 적용 */
+    background: #fef9f6; /* 관리자 카드 배경색 적용 */
     cursor: pointer;
     transition: 0.2s ease;
 }
 
 .history-card:hover {
-    background-color: #f1f5f9;
-    border-color: #cbd5e1;
+    background-color: #ffab91;
+    border-color: #ffab91;
 }
 
 .history-header {
@@ -461,11 +492,11 @@ watch(
     color: #64748b;
     margin-bottom: 12px;
     padding-bottom: 10px;
-    border-bottom: 1px dashed #cbd5e1; /* 관리자용 점선 스타일 */
+    border-bottom: 2px dashed #f4e2de; /* 관리자용 점선 스타일 */
 }
 
 .history-body {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #1e293b;
     line-height: 1.6;
 }
@@ -475,7 +506,7 @@ watch(
     margin-top: 15px;
     padding: 15px;
     background: #ffffff; /* 카드 배경보다 밝게 하여 구분감 생성 */
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 8px;
 }
 
@@ -483,7 +514,7 @@ watch(
     display: block;
     font-weight: bold;
     color: #64748b;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     margin-top: 10px;
     margin-bottom: 5px;
 }
@@ -491,7 +522,7 @@ watch(
 .pre-wrap {
     white-space: pre-wrap;
     word-break: break-all;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #334155;
     line-height: 1.6;
 }
@@ -519,7 +550,7 @@ watch(
     align-items: center;
     padding: 10px 16px;
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #ff8a65;
     border-radius: 12px;
     margin-bottom: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
@@ -528,12 +559,13 @@ watch(
 }
 
 .file_item:hover {
-    border-color: #2563eb;
-    background-color: #f8fafc;
+    border-color: #ff8a65;
+    color: white;
+    background-color: #ff8a65;
 }
 
 .file_icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-right: 10px;
     display: flex;
     align-items: center;
@@ -542,7 +574,7 @@ watch(
 
 .file_name {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #334155;
     font-weight: 500;
     white-space: nowrap;
@@ -587,7 +619,7 @@ watch(
 
 .no-attachments {
     color: #94a3b8;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     padding: 5px 0;
 }
 

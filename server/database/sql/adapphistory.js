@@ -17,13 +17,7 @@ const updatehistory = `
     WHERE user_id = ?;
 `;
 
-const deletehistory = `
-    DELETE FROM user_info 
-    WHERE user_id = ?;
-`;
-
 module.exports = {
   selecthistory,
   updatehistory,
-  deletehistory,
 };

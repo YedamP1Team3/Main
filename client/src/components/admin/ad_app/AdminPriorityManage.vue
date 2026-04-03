@@ -189,19 +189,19 @@ const handleReject = async () => {
 <style scoped>
 .priority-manage-container {
     padding: 40px;
-    background-color: #ffffff;
+    background-color: #fef9f6;
     height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow-y: auto;
+    font-size: 1.5rem;
 }
 
 .title {
-    font-size: 1.6rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 20px;
 }
 
 .action-area {
@@ -211,29 +211,31 @@ const handleReject = async () => {
 }
 
 .summary-card {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: #fff;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 30px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .summary-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: transparent;
 }
 
 .summary-divider {
-    height: 1px;
-    background-color: #e2e8f0;
+    height: 2px;
+    background-color: #f4e2de;
     margin: 15px 0;
 }
 
 .info-label {
     font-size: 1rem;
-    color: #64748b;
-    font-weight: 600;
+    color: #ffab91;
+    font-weight: 700;
 }
 
 .info-value {
@@ -243,12 +245,13 @@ const handleReject = async () => {
 }
 
 .status-badge.pending {
-    background-color: #fef08a;
-    color: #854d0e;
+    background-color: #ffab91;
+    color: #fff;
     padding: 6px 14px;
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 700;
+    box-shadow: 0 2px 4px rgba(255, 171, 145, 0.3);
 }
 
 .action-buttons {
@@ -268,63 +271,70 @@ button {
 }
 
 .btn-approve {
-    background-color: #3b82f6;
+    background-color: #ffab91;
     color: white;
+    box-shadow: 0 2px 4px rgba(255, 171, 145, 0.3);
 }
 
 .btn-approve:hover {
-    background-color: #2563eb;
+    background-color: #ff8a65;
 }
 
 .btn-reject {
-    background-color: #ef4444;
-    color: white;
+    background-color: #fff;
+    color: #ef4444;
+    border: 2px solid #fecaca;
 }
 
 .btn-reject:hover {
-    background-color: #dc2626;
+    background-color: #fef2f2;
+    border-color: #f87171;
 }
 
 .btn-cancel {
-    background-color: #f1f5f9;
-    color: #475569;
-    border: 1px solid #cbd5e1;
+    background-color: #fff;
+    color: #ffab91;
+    border: 2px solid #f4e2de;
 }
 
 .btn-cancel:hover {
-    background-color: #e2e8f0;
+    background-color: #fef9f6;
+    color: #ff8a65;
+    border-color: #ff8a65;
 }
 
 .reject-form {
     margin-top: 30px;
     text-align: left;
-    background-color: #fef2f2;
+    background-color: #fff;
     padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #fecaca;
+    border-radius: 12px;
+    border: 2px solid #fecaca;
 }
 
 .reject-form h3 {
     color: #b91c1c;
     margin-top: 0;
     font-size: 1.1rem;
+    font-weight: 700;
 }
 
 textarea {
     width: 100%;
     padding: 12px;
-    border: 1px solid #fca5a5;
-    border-radius: 6px;
+    border: 2px solid #fecaca;
+    border-radius: 8px;
     resize: none;
     font-size: 1rem;
     margin-bottom: 15px;
     box-sizing: border-box;
+    background-color: #fef2f2;
 }
 
 textarea:focus {
     outline: none;
     border-color: #ef4444;
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    background-color: #fff;
 }
 
 .form-actions {
@@ -337,22 +347,24 @@ textarea:focus {
     background-color: #ef4444;
     color: white;
 }
+.btn-submit-reject:hover {
+    background-color: #dc2626;
+}
 
 .info-area {
     text-align: center;
-    margin-top: 50px;
+    margin-top: 150px;
     color: #475569;
 }
 
 .info-area i {
-    font-size: 3rem;
+    font-size: 7rem;
     margin-bottom: 15px;
 }
 
 .text-green {
     color: #22c55e;
 }
-
 .text-red {
     color: #ef4444;
 }
@@ -360,21 +372,22 @@ textarea:focus {
 .history-section {
     margin-top: 40px;
     background-color: #fff;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .history-title {
     font-size: 1.1rem;
-    color: #475569;
+    font-weight: 700;
+    color: #ffab91;
     margin-top: 0;
     margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 8px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 2px solid #f4e2de;
     padding-bottom: 10px;
 }
 
@@ -393,9 +406,8 @@ textarea:focus {
     top: 5px;
     bottom: 5px;
     width: 2px;
-    background-color: #e2e8f0;
+    background-color: #f4e2de;
 }
-
 .timeline-item {
     position: relative;
     padding-left: 25px;
@@ -408,15 +420,16 @@ textarea:focus {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #cbd5e1;
+    background-color: #ffab91;
     border: 2px solid #fff;
-    box-shadow: 0 0 0 1px #cbd5e1;
+    box-shadow: 0 0 0 1px #ffab91;
     z-index: 1;
 }
 
 .timeline-date {
     font-size: 0.85rem;
-    color: #94a3b8;
+    font-weight: 600;
+    color: #ffab91;
     display: block;
     margin-bottom: 4px;
 }
@@ -424,12 +437,13 @@ textarea:focus {
 .stage-tag {
     display: inline-block;
     font-size: 0.8rem;
-    background-color: #f1f5f9;
-    color: #64748b;
+    background-color: #fef9f6;
+    color: #ff8a65;
+    border: 1px solid #ffab91;
     padding: 2px 8px;
     border-radius: 4px;
     margin-bottom: 8px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .timeline-reason {
@@ -437,9 +451,10 @@ textarea:focus {
     color: #334155;
     margin: 0;
     line-height: 1.5;
-    background-color: #f8fafc;
+    font-weight: 600;
+    background-color: #fff;
     padding: 10px;
     border-radius: 6px;
-    border-left: 3px solid #cbd5e1;
+    border-left: 3px dashed #f4e2de;
 }
 </style>

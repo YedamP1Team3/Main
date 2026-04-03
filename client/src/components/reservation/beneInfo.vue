@@ -34,74 +34,86 @@ const handleSelect = (event) => {
             <p>보호자가 등록한 지원대상자 중 상담예약할 대상을 선택하세요.</p>
         </div>
 
-        <div class="bene-select-row">
-            <label for="bene-select">지원대상자</label>
-            <select id="bene-select" :value="selectedBeneId || ''" @change="handleSelect">
-                <option value="" disabled>지원대상자를 선택하세요</option>
-                <option v-for="bene in beneficiaries" :key="bene.bene_id" :value="bene.bene_id">
-                    {{ bene.bene_name }}
-                </option>
-            </select>
+        <div class="bene-content-row">
+            <div class="bene-select-row">
+                <label for="bene-select">지원대상자</label>
+                <select id="bene-select" :value="selectedBeneId || ''" @change="handleSelect">
+                    <option value="" disabled>지원대상자를 선택하세요</option>
+                    <option v-for="bene in beneficiaries" :key="bene.bene_id" :value="bene.bene_id">
+                        {{ bene.bene_name }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="bene-detail-wrapper">
+                <div v-if="selectedBeneficiary" class="bene-detail-grid">
+                    <div class="detail-item">
+                        <span class="label">이름</span>
+                        <span class="value">{{ selectedBeneficiary.bene_name }}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="label">담당자 ID</span>
+                        <span class="value">{{ selectedBeneficiary.manager_id || '-' }}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="label">관계</span>
+                        <span class="value">{{ selectedBeneficiary.relationship || '-' }}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="label">장애 유형</span>
+                        <span class="value">{{ selectedBeneficiary.disability_type || '-' }}</span>
+                    </div>
+                </div>
+
+                <div v-else class="empty-message">지원대상자를 선택하면 상세 정보가 표시됩니다.</div>
+            </div>
         </div>
-
-        <div v-if="selectedBeneficiary" class="bene-detail-grid">
-            <div class="detail-item">
-                <span class="label">이름</span>
-                <span class="value">{{ selectedBeneficiary.bene_name }}</span>
-            </div>
-
-            <div class="detail-item">
-                <span class="label">담당자 ID</span>
-                <span class="value">{{ selectedBeneficiary.manager_id || '-' }}</span>
-            </div>
-
-            <div class="detail-item">
-                <span class="label">관계</span>
-                <span class="value">{{ selectedBeneficiary.relationship || '-' }}</span>
-            </div>
-
-            <div class="detail-item">
-                <span class="label">장애 유형</span>
-                <span class="value">{{ selectedBeneficiary.disability_type || '-' }}</span>
-            </div>
-        </div>
-
-        <div v-else class="empty-message">지원대상자를 선택하면 상세 정보가 표시됩니다.</div>
     </section>
 </template>
 
 <style scoped>
 .bene-info-card {
     width: 100%;
-    background: #fff;
-    border-radius: 16px;
-    padding: 24px 28px;
+    max-width: 320px;
+    min-width: 260px;
+    background: #ffffff;
+    border-right: 1px solid #f4e2de;
+    padding: 24px 20px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .bene-header {
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 .bene-header h2 {
     margin: 0 0 8px;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     color: #222;
+    line-height: 1.3;
 }
 
 .bene-header p {
     margin: 0;
     color: #666;
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: keep-all;
 }
 
 .bene-select-row {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 24px;
+    margin-bottom: 0;
 }
 
 .bene-select-row label {
@@ -112,7 +124,6 @@ const handleSelect = (event) => {
 
 .bene-select-row select {
     width: 100%;
-    max-width: 420px;
     height: 44px;
     border: 1px solid #dcdfe6;
     border-radius: 10px;
@@ -120,6 +131,7 @@ const handleSelect = (event) => {
     font-size: 14px;
     background: #fff;
     outline: none;
+    box-sizing: border-box;
 }
 
 .bene-select-row select:focus {
@@ -127,55 +139,50 @@ const handleSelect = (event) => {
 }
 
 .bene-detail-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(180px, 1fr));
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .detail-item {
     background: #f8f9fc;
     border-radius: 12px;
-    padding: 16px;
-    min-height: 86px;
+    padding: 14px 16px;
+    min-height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    border: 1px solid #eef1f6;
 }
 
 .label {
-    font-size: 13px;
+    font-size: 12px;
     color: #777;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .value {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: #222;
     word-break: break-word;
+    line-height: 1.4;
 }
 
 .empty-message {
-    padding: 18px;
+    padding: 16px;
     border-radius: 12px;
     background: #f8f9fc;
     color: #777;
     font-size: 14px;
+    line-height: 1.5;
+    border: 1px solid #eef1f6;
 }
 
-@media (max-width: 1100px) {
-    .bene-detail-grid {
-        grid-template-columns: repeat(2, minmax(180px, 1fr));
-    }
-}
-
-@media (max-width: 700px) {
-    .bene-detail-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .bene-select-row select {
+@media (max-width: 900px) {
+    .bene-info-card {
         max-width: 100%;
+        min-width: 100%;
     }
 }
 </style>

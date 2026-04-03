@@ -95,7 +95,7 @@ const goToAddRecipient = () => {
         <section class="card mb-6">
             <div class="section-header">
                 <h2 class="text-2xl font-bold m-0 text-900">기본 정보 확인</h2>
-                <button class="p-button p-button-outlined p-button-sm" @click="goToMemberEdit">수정하기</button>
+                <button class="p-button p-button-sm coral-btn" @click="goToMemberEdit">수정하기</button>
             </div>
 
             <div class="info-grid-container flex flex-wrap gap-4 mt-4">
@@ -129,7 +129,7 @@ const goToAddRecipient = () => {
         <section class="card mt-6">
             <div class="section-header">
                 <h2 class="text-2xl font-bold m-0 text-900">지원대상자</h2>
-                <button class="p-button p-button-outlined p-button-sm text-teal-600 border-teal-600" @click="goToAddRecipient"><i class="pi pi-plus mr-2"></i>추가하기</button>
+                <button class="p-button p-button-sm mr-2 coral-btn" @click="goToAddRecipient"><i class="pi pi-plus mr-2"></i>추가하기</button>
             </div>
 
             <div class="recipient-list-scroll mt-4">
@@ -141,7 +141,9 @@ const goToAddRecipient = () => {
                         <div class="text-sm text-600">{{ person.relationship }} | {{ person.gender === 'M' ? '남성' : '여성' }}</div>
                     </div>
                     <div class="recipient-action ml-auto">
-                        <button class="p-button p-button-text p-button-sm p-0 h-2rem text-teal-600" @click="goToRecipientEdit(person.bene_id)">수정</button>
+                        <div class="recipient-action ml-auto">
+                            <button class="p-button p-button-sm coral-btn edit-card-btn" @click="goToRecipientEdit(person.bene_id)">수정</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -152,7 +154,9 @@ const goToAddRecipient = () => {
 <style scoped>
 /* 전체 컨테이너 */
 .member-info-wrapper {
-    padding: 2rem;
+    /* ⭐ 핵심 1: 상단 패딩(padding-top)을 0으로 만듭니다. 
+       그래야 부모(layout-body)가 준 시작점과 사이드바 시작점이 똑같아집니다. */
+    padding: 0 2rem 2rem 2rem !important;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -162,8 +166,9 @@ const goToAddRecipient = () => {
     background: white !important;
     border-radius: 16px !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
-    border: none !important;
+    border: 2px solid #f4e2de !important; /* 분홍 테두리 */
     padding: 2rem !important;
+    margin-bottom: 2rem !important;
 }
 
 /* ⭐ 핵심: 제목과 버튼을 감싸는 헤더 영역에 밑줄 부여 */
@@ -172,7 +177,7 @@ const goToAddRecipient = () => {
     justify-content: space-between !important;
     align-items: center !important;
     padding-bottom: 1rem !important;
-    border-bottom: 2px solid #f1f5f9 !important; /* 여기에 선을 그어야 버튼까지 포함됩니다 */
+    border-bottom: 2px solid #f4e2de !important; /* 여기에 선을 그어야 버튼까지 포함됩니다 */
     margin-bottom: 1.5rem !important;
 }
 
@@ -237,5 +242,40 @@ const goToAddRecipient = () => {
 .recipient-list-scroll::-webkit-scrollbar-thumb {
     background-color: #e2e8f0;
     border-radius: 10px;
+}
+
+/* ⭐ 사진처럼 채워진 코랄색 버튼 스타일 */
+.coral-btn {
+    /* 배경색을 요청하신 코랄색 계열로 지정 */
+    background-color: #ffab91 !important;
+    /* 글자색을 하얀색으로 지정 */
+    color: #ffffff !important;
+    /* 테두리를 배경색과 맞춰서 자연스럽게 처리 */
+    border: 1px solid #ffab91 !important;
+    /* 미세한 그림자를 주어 입체감 부여 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+    font-weight: 700 !important; /* 글자를 조금 더 두껍게 */
+}
+
+/* 마우스를 올렸을 때(Hover) 효과 */
+.coral-btn:hover {
+    background-color: #ff9e80 !important; /* 조금 더 진한 코랄색으로 변경 */
+    border-color: #ff9e80 !important;
+}
+
+/* ⭐ 카드 내부 '수정' 버튼 전용: 크기를 조금 더 아담하게 조절 */
+.edit-card-btn {
+    padding: 0.2rem 0.8rem !important; /* 좌우 여백 조절 */
+    font-size: 0.8rem !important; /* 글자 크기 살짝 줄임 */
+    height: 2rem !important; /* 높이 고정 */
+}
+
+:deep(.layout-main)::-webkit-scrollbar {
+    display: none;
+}
+
+:deep(.layout-main) {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 </style>

@@ -97,7 +97,7 @@ watch(
 <style scoped>
 .management-container {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     overflow: hidden;
@@ -108,23 +108,25 @@ watch(
     display: flex;
     padding: 0 10px;
     background-color: #ffffff;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .tab-menu button {
     position: relative;
     padding: 15px 20px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #94a3b8;
     background: none;
     border: none;
     cursor: pointer;
     transition: color 0.2s;
+    opacity: 0.7;
 }
 
 .tab-menu button.active {
-    color: #3b82f6;
+    color: #ffab91;
+    opacity: 1;
 }
 
 .tab-menu button.active::after {
@@ -134,7 +136,7 @@ watch(
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: #3b82f6;
+    background-color: #ffab91;
 }
 
 .tab-content {
@@ -150,22 +152,22 @@ watch(
 
 .content-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     color: #1e293b;
 }
 
 .btn-add {
     padding: 4px 10px;
-    font-size: 0.8rem;
-    color: #475569;
-    background-color: #fff;
-    border: 1px solid #cbd5e1;
+    font-size: 1.1rem;
+    color: #fff;
+    background-color: #ffab91;
+    border: 1px solid #f4e2de;
     border-radius: 4px;
     cursor: pointer;
 }
 
 .btn-add:hover:not(:disabled) {
-    background-color: #f1f5f9;
+    background-color: #ff8a65;
 }
 
 .btn-add:disabled {
@@ -175,23 +177,30 @@ watch(
 
 .list-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed; /* 글자가 길어져도 표가 깨지지 않게 고정 */
     text-align: center;
-    font-size: 0.9rem;
 }
 
 .list-table th {
-    padding: 10px;
-    font-weight: 600;
+    background-color: #fef9f6; /* 오른쪽 이미지의 연한 회색 배경 */
     color: #64748b;
-    border-top: 1px solid #cbd5e1;
-    border-bottom: 1px solid #cbd5e1;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 12px 10px;
+    border-top: none; /* 기존 왼쪽 이미지에 있던 맨 위 얇은 선 제거 */
+    border-bottom: 2px solid #f4e2de; /* 헤더 아래쪽 두꺼운 구분선 */
 }
 
 .list-table td {
-    padding: 12px 10px;
+    padding: 16px 10px;
+    font-size: 1.1rem;
     color: #334155;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f4e2de; /* 데이터 간의 아주 얇고 연한 구분선 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .empty-msg {

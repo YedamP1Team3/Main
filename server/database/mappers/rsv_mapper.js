@@ -1,5 +1,5 @@
-const { pool } = require("../DAO.js");
-const rsvSql = require("../sql/rsv.js");
+const { pool } = require('../DAO.js');
+const rsvSql = require('../sql/rsv.js');
 
 const getBeneficiaryManagerInfo = async (beneId) => {
   let conn = null;
@@ -55,10 +55,10 @@ const selectFamilyReservations = async (userId) => {
   try {
     conn = await pool.getConnection();
     const rows = await conn.query(rsvSql.selectFamilyReservations, [userId]);
-    console.log("FamilyRsvInfo : ", rows);
+    console.log('FamilyRsvInfo : ', rows);
     return rows;
   } catch (err) {
-    console.error("selectFamilyReservations mapper 에러:", err);
+    console.error('selectFamilyReservations mapper 에러:', err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -72,7 +72,7 @@ const deleteReservation = async (rsvId) => {
     const result = await conn.query(rsvSql.deleteReservation, [rsvId]);
     return result;
   } catch (err) {
-    console.error("deleteReservation mapper 에러:", err);
+    console.error('deleteReservation mapper 에러:', err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -211,24 +211,25 @@ const selectManagerReservations = async (managerId) => {
     ]);
     return rows;
   } catch (err) {
-    console.error("selectManagerReservations error:", err);
+    console.error('selectManagerReservations error:', err);
     throw err;
   } finally {
     if (conn) conn.release();
   }
 };
 
-const updateReservationStatus = async (rsvId, status) => {
+const updateReservationStatus = async (rsvId, status, rejectReason) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
     const result = await conn.query(rsvSql.updateReservationStatus, [
       status,
+      rejectReason,
       rsvId,
     ]);
     return result;
   } catch (err) {
-    console.error("updateReservationStatus error:", err);
+    console.error('updateReservationStatus error:', err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -244,7 +245,7 @@ const selectManagerCounselList = async (managerId) => {
     const rows = await conn.query(rsvSql.selectManagerCounselList, [managerId]);
     return rows;
   } catch (err) {
-    console.error("selectManagerCounselList error:", err);
+    console.error('selectManagerCounselList error:', err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -260,7 +261,7 @@ const selectCounselReservationByRsvId = async (rsvId) => {
     ]);
     return rows;
   } catch (err) {
-    console.error("selectCounselReservationByRsvId error:", err);
+    console.error('selectCounselReservationByRsvId error:', err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -284,7 +285,7 @@ const insertCounselingNote = async (noteData) => {
 
     return result;
   } catch (err) {
-    console.error("insertCounselingNote error:", err);
+    console.error('insertCounselingNote error:', err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -303,7 +304,7 @@ const updateReservationStatusToNoteWritten = async (rsvId) => {
 
     return result;
   } catch (err) {
-    console.error("updateReservationStatusToNoteWritten error:", err);
+    console.error('updateReservationStatusToNoteWritten error:', err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -319,7 +320,7 @@ const selectCounselingNoteByRsvId = async (rsvId) => {
 
     return rows;
   } catch (err) {
-    console.error("selectCounselingNoteByRsvId error:", err);
+    console.error('selectCounselingNoteByRsvId error:', err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -343,7 +344,7 @@ const updateCounselingNoteByRsvId = async (noteData) => {
 
     return result;
   } catch (err) {
-    console.error("updateCounselingNoteByRsvId error:", err);
+    console.error('updateCounselingNoteByRsvId error:', err);
     throw err;
   } finally {
     if (conn) conn.release();

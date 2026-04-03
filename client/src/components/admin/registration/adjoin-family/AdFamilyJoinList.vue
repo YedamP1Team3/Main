@@ -10,7 +10,7 @@ const authStore = useAuthStore();
 // --- 상태 관리 ---
 const historyRows = ref([]);
 const isLoading = ref(false);
-const filterStatus = ref('all');
+const filterStatus = ref('PENDING');
 const searchName = ref('');
 const currentPage = ref(1);
 
@@ -67,23 +67,34 @@ const approveUser = async (userId) => {
     }
 };
 
-const openRejectModal = (user) => {
-    console.log('반려 모달 오픈:', user.userName);
-};
-
-const deleteUser = async (userId) => {
-    if (confirm('정말로 삭제하시겠습니까?')) {
+const openRejectModal = async (user) => {
+    if (confirm(`${user.userName}님의 가입 신청을 반려하시겠습니까 ?`)) {
         try {
-            // 라우터의 /delete/:userId 경로와 매칭
-            const res = await axios.delete(`/api/adhistory/delete/${userId}`);
+            const res = await axios.post(`/api/adhistory/reject/${user.userId}`);
+
             if (res.data.success) {
-                alert('삭제되었습니다');
+                alert('반려 처리가 완료되었습니다.');
                 fetchJoinRequests();
+            } else {
+                alert('처리 실패');
             }
         } catch (e) {
-            console.error('삭제 에러:', e);
-            alert('삭제 중 오류가 발생했습니다.');
+            console.error('반려 에러:', e);
+            alert('반려 처리 중 오류 발생');
         }
+    }
+};
+
+const getStatusLabel = (status) => {
+    switch (status.toUpperCase()) {
+        case 'PENDING':
+            return '대기';
+        case 'ACTIVE':
+            return '승인완료';
+        case 'REJECTED':
+            return '반려됨';
+        default:
+            return status;
     }
 };
 
@@ -108,7 +119,7 @@ onMounted(fetchJoinRequests);
 
             <div class="search-box">
                 <input type="text" v-model="searchName" placeholder="사용자 이름을 입력하세요" @keyup.enter="currentPage = 1" />
-                <button type="button" class="btn-search" @click="currentPage = 1">조회</button>
+                <button type="button" class="btn-search coral-btn" @click="currentPage = 1">조회</button>
             </div>
         </div>
 
@@ -124,8 +135,9 @@ onMounted(fetchJoinRequests);
                         <th>연락처</th>
                         <th>이메일</th>
                         <th>가입일</th>
-                        <th style="width: 140px">승인</th>
-                        <th>삭제</th>
+                        <th>승인 상태</th>
+                        <th style="width: 100px">승인</th>
+                        <th style="width: 100px">반려</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -137,17 +149,19 @@ onMounted(fetchJoinRequests);
                         <td>{{ item.email }}</td>
                         <td>{{ item.joinDate }}</td>
                         <td>
-                            <div class="btn-group">
-                                <button class="btn-action" @click="approveUser(item.userId)">승인</button>
-                                <button class="btn-action-outline" @click="openRejectModal(item)">반려</button>
-                            </div>
+                            <span :class="['status-badge', item.status.toLowerCase()]">
+                                {{ getStatusLabel(item.status) }}
+                            </span>
                         </td>
                         <td>
-                            <button class="btn-delete" @click="deleteUser(item.userId)">삭제</button>
+                            <button class="btn-action" @click="approveUser(item.userId)">승인</button>
+                        </td>
+                        <td>
+                            <button class="btn-action-outline" @click="openRejectModal(item)">반려</button>
                         </td>
                     </tr>
                     <tr v-if="filteredRows.length === 0">
-                        <td colspan="8" class="empty-msg">해당 조건에 맞는 신청 내역이 없습니다.</td>
+                        <td colspan="9" class="empty-msg">해당 조건에 맞는 신청 내역이 없습니다.</td>
                     </tr>
                 </tbody>
             </table>
@@ -170,6 +184,7 @@ onMounted(fetchJoinRequests);
 .card {
     background: #ffffff;
     padding: 2rem;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     margin: 1rem;
@@ -256,7 +271,6 @@ onMounted(fetchJoinRequests);
     padding: 1rem;
     border-bottom: 1px solid #f1f5f9;
     text-align: center;
-    color: #334155;
     vertical-align: middle;
 }
 
@@ -269,22 +283,27 @@ onMounted(fetchJoinRequests);
 
 .btn-action {
     background: #64748b; /* 승인: 차분한 그레이블루 */
-    color: white;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
+    color: black;
+    border: 2px solid #f4e2de;
+    padding: 0.5rem 1rem; /* 클릭 영역 확보를 위해 약간 키움 */
+    border-radius: 6px;
     cursor: pointer;
     font-size: 0.85rem;
+    width: 100%; /* 셀 너비에 맞춤 */
+    max-width: 70px;
+    background-color: #fef9f6;
 }
 
 .btn-action-outline {
-    background: white;
-    color: #64748b;
-    border: 1px solid #64748b;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
+    background-color: #fef9f6;
+    color: black;
+    border: 2px solid #f4e2de;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 0.85rem;
+    width: 100%; /* 셀 너비에 맞춤 */
+    max-width: 70px;
 }
 
 .btn-delete {
@@ -321,13 +340,21 @@ onMounted(fetchJoinRequests);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s;
 }
 
 .page-num.active {
-    background: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
+    background-color: #ffab91 !important; /* 요청하신 코랄색 */
+    color: white !important; /* 글자색 흰색 */
+    border-color: #ffab91 !important; /* 테두리도 코랄색으로 통일 */
     font-weight: bold;
+}
+
+/* 마우스를 올렸을 때 살짝 변하는 효과 (선택사항) */
+.page-num:hover:not(.active) {
+    background-color: #fff5f2; /* 아주 연한 코랄빛 */
+    border-color: #ffab91;
+    color: #ffab91;
 }
 
 .page-nav:disabled {
@@ -343,5 +370,54 @@ onMounted(fetchJoinRequests);
 
 .font-bold {
     font-weight: 600;
+}
+
+/* 공통 코랄 버튼 스타일 */
+.coral-btn {
+    background-color: #ffab91 !important; /* 따뜻한 코랄 배경 */
+    color: #ffffff !important; /* 흰색 글자 */
+    border: 1px solid #ffab91 !important; /* 테두리 색상 통일 */
+    font-weight: 700 !important; /* 글자 두껍게 */
+    border-radius: 6px !important; /* 모서리 라운딩 */
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.coral-btn:hover {
+    background-color: #ff9e80 !important; /* 마우스 오버 시 약간 진하게 */
+    border-color: #ff9e80 !important;
+}
+
+/* 조회 버튼 전용 크기 조절 (필요 시) */
+.btn-search {
+    padding: 0.4rem 1.2rem !important; /* 조회 버튼에 적당한 좌우 여백 */
+    min-width: 80px; /* 최소 너비 지정 */
+}
+
+/* 상태 배지 기본 스타일 */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* 대기: 주황색 계열 */
+.status-badge.pending {
+    color: #ef6c00;
+}
+
+/* 승인: 초록색 계열 */
+.status-badge.active {
+    color: #2e7d32;
+}
+
+/* 반려: 빨간색 계열 */
+.status-badge.rejected {
+    color: #c62828;
+}
+
+.status-badge.detele {
+    color: #7a1c1c;
 }
 </style>

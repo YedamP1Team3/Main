@@ -200,7 +200,7 @@ watch(
         <hr class="main-hr" />
 
         <div class="info-row-top">
-            <div class="status-box">
+            <div class="state-badge">
                 <span>상태: {{ tempDetail.progress_state }}</span>
             </div>
             <div class="date-box"><strong>작성일 :</strong> {{ tempDetail.created_at }}</div>
@@ -226,22 +226,21 @@ watch(
                         <input type="file" ref="fileInput" multiple @change="handleFileChange" @click.stop accept=".pdf, .png, .jpg, .jpeg, .xlsx, .xls, .docx, .doc, .hwp" style="display: none" />
                         <button v-if="['임시', '반려'].includes(tempDetail.progress_state)" type="button" class="btn_file_select" @click="$refs.fileInput.click()">파일 선택하기</button>
 
-                        <ul v-if="attachments.length > 0" class="file_list">
+                        <ul v-if="attachments.length > 0 || selectedFiles.length > 0" class="file_list">
                             <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
                                 <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
                                 <span class="file_name">{{ file.origin_name }}</span>
                                 <button v-if="['임시', '반려'].includes(tempDetail.progress_state)" type="button" class="btn_remove" @click.stop="deleteExistingFile(file.file_id)">✕</button>
                             </li>
-                        </ul>
-                        <div v-else class="no-attachments">첨부된 파일이 없습니다.</div>
 
-                        <ul v-if="selectedFiles.length > 0" class="file_list">
                             <li v-for="(file, index) in selectedFiles" :key="index" class="file_item">
                                 <span class="file_icon">{{ getFileIcon(file.name) }}</span>
                                 <span class="file_name">{{ file.name }}</span>
                                 <button type="button" class="btn_remove" @click="removeFile(index)">✕</button>
                             </li>
                         </ul>
+
+                        <div v-else class="no-attachments">첨부된 파일이 없습니다.</div>
                     </div>
                 </div>
             </div>
@@ -258,15 +257,17 @@ watch(
 <style scoped>
 /* 전체 컨테이너 */
 .BfnewPlan {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
+    border: 2px solid #f4e2de;
     background-color: #ffffff;
+    color: #334155;
 }
 
 .main-hr {
     border: none;
-    border-top: 2px solid #334155;
+    border-top: 2px solid #f4e2de;
     margin-bottom: 15px;
 }
 
@@ -279,7 +280,7 @@ watch(
 }
 
 .date-box {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #475569;
 }
 
@@ -287,12 +288,12 @@ watch(
 .state-badge {
     padding: 4px 12px;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 .state-badge.임시 {
     background: #f1f5f9;
-    color: #475569;
+    color: #006aff;
 }
 .state-badge.반려 {
     background: #fee2e2;
@@ -309,29 +310,29 @@ watch(
 
 /* 폼 테이블 박스 (관리자와 동일) */
 .table-container {
-    border: 1px solid #e2e8f0;
+    border: 1px solid #f4e2de;
 }
 
 .form-row {
     display: flex;
-    border-bottom: 1px solid #e2e8f0;
+    border: 1px solid #f4e2de;
 }
 
 .form-row:last-child {
-    border-bottom: none;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .form-row label {
     width: 140px;
     min-width: 140px;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
     color: #475569;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    border-right: 1px solid #e2e8f0;
+    border-right: 1px solid #f4e2de;
 }
 
 .input-wrapper {
@@ -351,17 +352,18 @@ watch(
     width: fit-content;
     padding: 8px 16px;
     background-color: #fff;
-    color: #2563eb;
-    border: 1px solid #2563eb;
+    color: #ffab91;
+    border: 1px solid #ffab91;
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .btn_file_select:hover {
-    background-color: #eff6ff;
+    background-color: #ff8a65;
+    color: white;
     box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
 }
 
@@ -371,15 +373,15 @@ watch(
     margin: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 5px;
 }
 
 .file_item {
     display: flex;
     align-items: center;
-    padding: 10px 16px;
+    padding: 3px 16px;
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #f4e2de;
     border-radius: 12px;
     margin-bottom: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
@@ -388,12 +390,12 @@ watch(
 }
 
 .file_item:hover {
-    border-color: #2563eb;
+    border-color: #ff8a65;
     background-color: #f8fafc;
 }
 
 .file_icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-right: 10px;
     display: flex;
     align-items: center;
@@ -402,7 +404,7 @@ watch(
 
 .file_name {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #334155;
     font-weight: 500;
     white-space: nowrap;
@@ -411,13 +413,12 @@ watch(
 }
 
 .btn_remove {
-    background: #f1f5f9;
     border: none;
     color: #64748b;
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -433,7 +434,7 @@ watch(
 .no-attachments {
     padding: 5px 0;
     color: #94a3b8;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 
 .clickable {
@@ -446,7 +447,7 @@ watch(
     border: none;
     padding: 15px;
     outline: none;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-family: inherit;
     color: #1e293b;
 }
@@ -471,84 +472,63 @@ textarea[readonly] {
 .button-group {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    margin-top: 30px;
+    gap: 10px;
+    margin: 25px 0;
 }
 
 .button-group button {
-    padding: 10px 25px;
-    border-radius: 30px;
-    font-size: 1rem;
-    font-weight: bold;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
-    border: none;
-    transition: 0.2s;
+    border: 2px solid transparent; /* 테두리 두께 통일 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 1. 승인 신청 (Primary) */
 .btn-approve {
-    background-color: #1e293b;
-    color: #ffffff;
+    background-color: #ffab91;
+    color: #fff;
+    border-color: #ffab91;
 }
+
+.btn-approve:hover {
+    background-color: #ff8a65;
+    border-color: #ff8a65;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(255, 171, 145, 0.4);
+}
+
+/* 2. 임시 저장 (Secondary) */
 .btn-temp {
-    background-color: #64748b;
-    color: #ffffff;
+    background-color: #ffffff;
+    border-color: #ffab91 !important;
+    color: #ffab91;
 }
+
+.btn-temp:hover {
+    background-color: #ffab91;
+    color: #ffffff;
+    border-color: #ff8a65;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(255, 171, 145, 0.1);
+}
+
+/* 3. 삭제 (Danger) */
 .btn-delete {
     background-color: #ffffff;
     color: #e11d48;
-    border: 1px solid #e11d48 !important;
+    border-color: #e11d48 !important;
 }
 
-button:hover {
-    opacity: 0.8;
+.btn-delete:hover {
+    background-color: #fff1f2 !important; /* 아주 연한 레드 배경 */
+    color: #be123c;
+    border-color: #be123c;
     transform: translateY(-1px);
 }
 
 /* 반려 히스토리 섹션 (관리자용 디자인 계승) */
-.history-section {
-    margin-top: 50px;
-}
-
-.history-title {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 15px;
-}
-
-.history-card {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 18px;
-    margin-bottom: 12px;
-}
-
-.history-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    border-bottom: 1px dashed #cbd5e1;
-    padding-bottom: 8px;
-}
-
-.history-user {
-    font-weight: 700;
-    color: #475569;
-    font-size: 0.9rem;
-}
-
-.history-date {
-    font-size: 0.85rem;
-    color: #94a3b8;
-}
-
-.history-body {
-    color: #334155;
-    line-height: 1.6;
-    font-size: 0.95rem;
-    white-space: pre-wrap;
-}
 
 .download-list {
     list-style: none;
@@ -580,13 +560,13 @@ button:hover {
 }
 
 .file-name-text {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 500;
     flex: 1;
 }
 
 .file-size {
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     color: #94a3b8;
     margin-left: 10px;
 }

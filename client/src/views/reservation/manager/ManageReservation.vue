@@ -24,8 +24,7 @@ const columns = [
     { key: 'reservation_date', label: '예약날짜' },
     { key: 'reservation_time', label: '예약시간' },
     { key: 'rsv_status', label: '예약상태', type: 'status' },
-    { key: 'process', label: '처리', type: 'action', action: 'process' },
-    { key: 'write_log', label: '일지작성', type: 'action', action: 'writeLog' }
+    { key: 'process', label: '처리', type: 'action', action: 'process' }
 ];
 
 const formatReservationRow = (item) => {
@@ -49,7 +48,9 @@ const fetchReservations = async () => {
         const res = await getManagerReservations(userId.value);
         const list = res.data.reservations || [];
 
-        reservations.value = list.map(formatReservationRow);
+        const visibleStatuses = ['APPROVED', 'REJECTED', 'REQUESTED'];
+
+        reservations.value = list.filter((item) => visibleStatuses.includes(item.rsv_status)).map(formatReservationRow);
     } catch (err) {
         console.error('담당자 예약 목록 조회 실패:', err);
         alert(err.response?.data?.message || '예약 목록 조회 실패');
@@ -85,11 +86,6 @@ const handleActionClick = ({ action, row }) => {
         openProcessModal(row);
         return;
     }
-
-    if (action === 'writeLog') {
-        console.log('일지작성 클릭:', row);
-        // 다음 단계: 일지작성 페이지 이동 또는 모달 연결
-    }
 };
 
 onMounted(() => {
@@ -124,11 +120,14 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    background-color: #fef9f6;
 }
 
 .layout-header {
     height: 70px;
     flex-shrink: 0;
+    background-color: #fff;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .layout-body {
@@ -141,13 +140,17 @@ onMounted(() => {
     flex: 1;
     padding: 24px;
     overflow-y: auto;
-    background-color: #f8f9fa;
+    background-color: #fef9f6;
 }
 
 .reservation-manage-container {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 .page-title {

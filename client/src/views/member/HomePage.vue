@@ -47,7 +47,7 @@ const handleReset = () => {
     display: flex;
     width: 100%;
     min-height: calc(100vh - 64px);
-    background-color: #f8fafc;
+    background-color: #fef9f6;
     padding: 20px;
     gap: 20px;
 }

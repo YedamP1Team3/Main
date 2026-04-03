@@ -216,7 +216,7 @@ onMounted(async () => {
             </div>
         </div>
 
-        <div class="action-buttons">
+        <div class="button-group">
             <button class="btn-approve" @click="Approval">승인하기</button>
             <button class="btn-temp" @click="SaveTemp">임시저장</button>
         </div>
@@ -226,10 +226,12 @@ onMounted(async () => {
 <style scoped>
 /* 1. 전체 컨테이너 및 기본 폰트 */
 .BfnewPlan {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
+    border: 2px solid #f4e2de;
     background-color: #ffffff;
+    color: #334155;
 }
 
 h2 {
@@ -244,34 +246,34 @@ h2 {
     text-align: right;
     margin-bottom: 20px;
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     border-bottom: 2px solid #334155;
     padding-bottom: 10px;
 }
 
 /* 2. 표 형식 레이아웃 */
 .form-container {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #f4e2de;
 }
 
 .form_BfnewPlan {
     display: flex;
-    border-bottom: 1px solid #e2e8f0;
-    border-left: 1px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f4e2de;
+    border-left: 1px solid #f4e2de;
+    border-right: 1px solid #f4e2de;
 }
 
 .form_BfnewPlan label {
     width: 140px;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
     color: #475569;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    border-right: 1px solid #e2e8f0;
-    font-size: 0.9rem;
+    border-right: 1px solid #f4e2de;
+    font-size: 1.1rem;
     flex-shrink: 0;
 }
 
@@ -282,7 +284,7 @@ h2 {
     flex: 1;
     border: none;
     padding: 15px 20px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #334155;
     outline: none;
     background-color: transparent;
@@ -346,7 +348,7 @@ h2 {
     background-color: #eff6ff; /* 사진처럼 살짝 푸른 빛 */
     padding: 5px 15px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     color: #1e40af;
     border: 1px solid #dbeafe;
 }
@@ -363,46 +365,45 @@ h2 {
 
 /* 5. 하단 버튼 디자인 (이미지 기준) */
 /* 5. 하단 버튼 디자인 (우측 정렬로 수정) */
-.action-buttons {
+.button-group {
     display: flex;
-    justify-content: flex-end; /* 중앙(center)에서 오른쪽(flex-end)으로 변경 */
-    gap: 12px;
-    margin-top: 30px;
-    padding-right: 5px; /* 표 끝 라인과 맞추기 위한 미세 조정 */
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 25px 0;
+}
+
+.button-group button {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-approve {
-    padding: 12px 40px;
-    background-color: #ffffff;
-    color: #1e293b;
-    border: 1.5px solid #1e293b;
-    border-radius: 30px;
-    font-size: 1rem;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all 0.2s;
+    background: #ffab91;
+    color: #fff;
 }
 
-.btn-approve:hover {
-    background-color: #1e293b;
-    color: #ffffff;
+button:first-of-type:hover {
+    background-color: #ff8a65;
+    transform: translateY(-1px); /* 조금 더 확실한 상승감 */
+    /* 버튼 색상과 맞춘 부드러운 그림자 */
+    box-shadow: 0 10px 15px -3px rgba(255, 171, 145, 0.4);
 }
 
 .btn-temp {
-    padding: 12px 24px;
-    background-color: #f1f5f9;
-    color: #64748b;
-    border: none;
-    border-radius: 30px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    background: #ffffff;
+    border: 2px solid #ffab91 !important;
+    color: #ffab91;
 }
-
-.btn-temp:hover {
-    background-color: #e2e8f0;
-    color: #475569;
+button:last-of-type:not(.active-temp):hover {
+    background-color: #ffab91; /* 아주 연한 주황 배경 */
+    color: #ffffff;
+    border-color: #ff8a65;
+    box-shadow: 0 4px 6px rgba(255, 171, 145, 0.1);
 }
 
 .file_input_container {

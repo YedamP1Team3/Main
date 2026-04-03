@@ -157,13 +157,14 @@ onMounted(async () => {
 
 <style scoped>
 .assign-view-container {
-    max-width: 700px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 30px;
+    background-color: #fef9f6;
 }
 
 h2 {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 800;
     color: #1e293b;
     margin-bottom: 8px;
@@ -171,16 +172,17 @@ h2 {
 
 .divider {
     border: none;
-    border-top: 2px solid #334155;
+    border-top: 2px solid #f4e2de;
     margin-bottom: 40px;
 }
 
 .assign-card,
 .history-card {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: #fff;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     padding: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .assign-card {
@@ -191,7 +193,10 @@ h2 {
 .history-card h3 {
     margin-top: 0;
     margin-bottom: 20px;
-    color: #1e293b;
+    font-weight: 700;
+    color: #ffab91;
+    border-bottom: 2px solid #f4e2de;
+    padding-bottom: 10px;
 }
 
 .card-header {
@@ -199,19 +204,19 @@ h2 {
 }
 
 .title-text {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     color: #1e293b;
     line-height: 1.6;
     margin: 0;
 }
 
 .title-text b {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
 }
 
 .highlight {
-    color: #3b82f6;
-    font-weight: 700;
+    color: #ffab91;
+    font-weight: 800;
 }
 
 .manager-select {
@@ -219,17 +224,20 @@ h2 {
     max-width: 300px;
     height: 45px;
     padding: 0 15px;
-    font-size: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
     color: #334155;
-    border: 1px solid #94a3b8;
+    border: 2px solid #f4e2de;
     border-radius: 8px;
     outline: none;
     margin-bottom: 40px;
+    background-color: #fff;
+    cursor: pointer;
 }
 
 .manager-select:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    border-color: #ffab91;
+    box-shadow: 0 0 0 2px rgba(255, 171, 145, 0.2);
 }
 
 .btn-group {
@@ -240,38 +248,41 @@ h2 {
 
 .btn-group button {
     padding: 10px 30px;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 30px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 25px;
     cursor: pointer;
     transition: 0.2s;
 }
 
 .btn-confirm {
-    background-color: #1e293b;
+    background-color: #ffab91;
     color: #ffffff;
     border: none;
+    box-shadow: 0 2px 4px rgba(255, 171, 145, 0.3);
 }
 
 .btn-confirm:hover {
-    background-color: #0f172a;
+    background-color: #ff8a65;
 }
 
 .btn-cancel {
     background-color: #ffffff;
-    color: #64748b;
-    border: 1px solid #cbd5e1;
+    color: #ffab91;
+    border: 2px solid #f4e2de;
 }
 
 .btn-cancel:hover {
-    background-color: #f1f5f9;
-    color: #475569;
+    background-color: #fef9f6;
+    color: #ff8a65;
+    border-color: #ff8a65;
 }
 
 .empty-history {
     color: #94a3b8;
     text-align: center;
     padding: 16px 0;
+    font-weight: 500;
 }
 
 .timeline {
@@ -292,7 +303,7 @@ h2 {
     top: 4px;
     bottom: 4px;
     width: 2px;
-    background-color: #dbe4ee;
+    background-color: #f4e2de;
 }
 
 .timeline::-webkit-scrollbar {
@@ -300,7 +311,7 @@ h2 {
 }
 
 .timeline::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
+    background-color: #f4e2de;
     border-radius: 999px;
 }
 
@@ -316,13 +327,14 @@ h2 {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #3b82f6;
+    background-color: #ffab91;
 }
 
 .timeline-date {
     display: block;
-    font-size: 0.85rem;
-    color: #94a3b8;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffab91;
     margin-bottom: 4px;
 }
 
@@ -333,9 +345,20 @@ h2 {
     line-height: 1.5;
 }
 
+.timeline-main {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.timeline-main strong {
+    color: #1e293b;
+    font-weight: 800;
+    font-size: 1.2rem;
+}
+
 .timeline-sub {
     margin-top: 4px;
-    font-size: 0.95rem;
-    color: #64748b;
+    font-size: 1.1rem;
+    color: #94a3b8;
 }
 </style>

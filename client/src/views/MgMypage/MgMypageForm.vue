@@ -1,6 +1,6 @@
 <script setup>
-import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
-import JsSidbarmg from '@/layout/manger/JsSidbarmg.vue';
+import JsTopbarmg from '@/layout/manager/JsTopbarmg.vue';
+import JsSidbarmg from '@/layout/manager/JsSidbarmg.vue';
 </script>
 
 <template>
@@ -32,14 +32,14 @@ import JsSidbarmg from '@/layout/manger/JsSidbarmg.vue';
     display: flex;
     flex: 1;
     overflow: hidden;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
 }
 
 .layout-sidebar {
     width: 280px;
     flex-shrink: 0;
     background: white;
-    border-right: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de !important;
     z-index: 10;
 }
 

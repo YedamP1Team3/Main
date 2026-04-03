@@ -4,6 +4,7 @@ import Calendar from '@/components/common/Calendar.vue';
 import TimeSlot from '@/components/common/TimeSlot.vue';
 import JsTopbarmg from '@/layout/manager/JsTopbarmg.vue';
 import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
+import RsvTable from '@/components/common/RsvTable.vue';
 
 import { getManagerSchedule } from '@/api/reservation/schedule';
 import { createBlockedTimes, deleteBlockedTimes } from '@/api/reservation/block';
@@ -16,7 +17,8 @@ export default {
         Calendar,
         TimeSlot,
         JsTopbarmg,
-        RsvSideBar
+        RsvSideBar,
+        RsvTable
     },
 
     setup() {
@@ -167,16 +169,21 @@ export default {
 </script>
 
 <template>
-    <div calss="page">
+    <div class="page">
         <header class="layout-header">
             <JsTopbarmg />
         </header>
         <div class="layout-body">
             <RsvSideBar />
             <main class="layout-main">
-                <div class="content row">
-                    <Calendar v-model="selectedDate" />
-                    <TimeSlot :selectedDate="selectedDate" :slots="slots" :blockedSummary="blockedSummary" mode="manager" @blockTimes="handleBlock" />
+                <div class="reservation-container">
+                    <div class="content-row">
+                        <Calendar v-model="selectedDate" />
+                        <TimeSlot :selectedDate="selectedDate" :slots="slots" :blockedSummary="blockedSummary" mode="manager" @blockTimes="handleBlock" />
+                    </div>
+                    <div class="table-container">
+                        <RsvTable :columns="reservationColumns" :rows="reservationRows" rowKey="rsv_id" emptyMessage="상담 신청 내역이 없습니다." @action-click="handleTableActionClick" />
+                    </div>
                 </div>
             </main>
         </div>
@@ -193,22 +200,26 @@ export default {
 .layout-header {
     height: 70px;
     flex-shrink: 0;
+    background-color: #fff;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .layout-body {
     display: flex;
-    flex: 1; /* 남은 공간 자동 */
+    flex: 1;
+    min-height: 0;
 }
 
 .layout-sidebar {
-    width: 250px; /* 사이드바 너비 고정 */
-    flex-shrink: 0; /* 너비가 줄어들지 않도록 설정 */
-    border-right: 1px solid #ccc; /* 구분선 */
+    width: 250px;
+    flex-shrink: 0;
+    border-right: 1px solid #ccc;
 }
 
 .layout-main {
     flex: 1;
-    background-color: #f9f9f9;
+    min-height: 0;
+    background-color: #fef9f6;
 
     display: flex;
     justify-content: center;
@@ -218,15 +229,46 @@ export default {
     overflow-y: auto;
 }
 
-.content.row {
-    display: flex;
-    flex-direction: row; /* 🔥 핵심 */
-    justify-content: center;
-    align-items: flex-start;
-
-    gap: 30px; /* 컴포넌트 사이 간격 */
+.reservation-container {
     width: 100%;
-    max-width: 800px; /* 🔥 전체 레이아웃 폭 */
+    max-width: 1060px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    background-color: transparent;
+    box-sizing: border-box;
+}
+
+.content-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 44px;
+    width: 100%;
+    max-width: 1060px;
+}
+
+.content-row > :first-child {
+    flex: 0 0 340px;
+}
+
+.content-row > :last-child {
+    flex: 0 1 720px;
+    min-width: 0;
+}
+
+.table-container {
+    width: 100%;
+    max-width: 1060px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
 }
 
 .selected-date {
@@ -234,7 +276,7 @@ export default {
 }
 
 @media (max-width: 1100px) {
-    .content.row {
+    .content-row {
         flex-direction: column;
         align-items: center;
     }

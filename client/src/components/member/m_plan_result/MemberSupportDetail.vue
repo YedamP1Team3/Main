@@ -3,16 +3,24 @@ import axios from 'axios';
 import { ref, watch } from 'vue';
 const props = defineProps({ beneId: [String, Number], priorityId: [String, Number], planId: [String, Number] });
 
-const planDetail = ref({});
+const attachments = ref([]);
+const planDetail = ref(null);
 
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
         const response = await axios.get(`/api/support-plans/${id}`);
-        planDetail.value = response.data?.plan || {};
-        attachments.value = response.data?.files || [];
+        console.log('서버 응답 데이터:', response.data);
+
+        // 핵심 수정: response.data가 아니라 response.data.plan에 접근해야 합니다.
+        // 콘솔 데이터 구조가 { plan: {...}, files: [...] } 이기 때문입니다.
+        planDetail.value = response.data.plan;
+
+        // 첨부파일도 response.data.files로 바로 할당합니다.
+        attachments.value = response.data.files || [];
     } catch (error) {
-        console.error(`에러`, error);
+        console.error('에러 상세:', error);
+        planDetail.value = null; // 에러 시 null로 처리하여 v-else(로딩/에러)가 뜨게 함
     }
 };
 
@@ -25,12 +33,11 @@ watch(
 );
 </script>
 <template>
-    <div class="BfnewPlan">
+    <div v-if="planDetail" class="BfnewPlan">
         <h2>지원계획서 조회</h2>
         <hr />
 
         <div class="plan-header">
-            <span class="status-badge">{{ planDetail.progress_state }}</span>
             <span class="date-info">작성일: {{ planDetail.created_at }}</span>
         </div>
 
@@ -53,39 +60,43 @@ watch(
                 <tr>
                     <th>파일첨부</th>
                     <td class="file-cell">
-                        <div v-if="attachments.length > 0">
-                            <div v-for="file in attachments" :key="file.file_id">{{ file.origin_name }}</div>
+                        <div v-if="attachments && attachments.length > 0">
+                            <div v-for="file in attachments" :key="file.file_id" class="file-item">{{ file.origin_name }}</div>
                         </div>
-                        <div v-else>첨부파일 없음</div>
+                        <div v-else class="no-file">첨부파일 없음</div>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
+
+    <div v-else class="loading-state">데이터를 불러오는 중입니다...</div>
 </template>
 <style scoped>
 .BfnewPlan {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 0 20px;
-    color: #333;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
+    border: 2px solid #f4e2de;
+    background-color: #ffffff;
+    color: #334155;
 }
 
 h2 {
-    font-size: 24px;
+    font-size: 1.5rem;
     margin-bottom: 10px;
 }
 
 hr {
     border: 0;
-    border-top: 2px solid #35495e;
+    border-top: 2px solid #f4e2de;
     margin-bottom: 20px;
 }
 
 /* 상단 정보 스타일 */
 .plan-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-bottom: 15px;
     align-items: center;
 }
@@ -96,11 +107,11 @@ hr {
     padding: 4px 12px;
     border-radius: 15px;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 1.1rem;
 }
 
 .date-info {
-    font-size: 14px;
+    font-size: 1.1rem;
     color: #666;
 }
 
@@ -111,11 +122,12 @@ hr {
     border-top: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
     table-layout: fixed;
+    font-size: 1.1rem;
 }
 
 .detail-table th {
-    background-color: #f5f5f5; /* 담당자 화면과 동일한 회색 배경 */
-    border: 1px solid #ddd;
+    background-color: #fef9f6; /* 담당자 화면과 동일한 회색 배경 */
+    border: 1px solid #f4e2de;
     padding: 15px;
     text-align: left;
     font-weight: bold;

@@ -21,7 +21,8 @@ const selectSupportResultTempList = `
         s.result_title,      
         DATE_FORMAT(s.created_at, '%Y-%m-%d') AS created_at, 
         s.progress_state,    
-        s.bene_id
+        s.bene_id,
+        u.user_name AS manager_name
     FROM result_draft s
     LEFT JOIN user_info u ON s.manager_id = u.user_id
     WHERE s.bene_id = ? 

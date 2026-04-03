@@ -146,30 +146,38 @@ const getFileIcon = (fileName) => {
 
 .btn-close {
     padding: 8px 16px;
-    background-color: #64748b;
+    background-color: #ffab91;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.btn-close:hover {
+    background-color: #ff8a65; /* 더 진한 코랄색으로 변경 */
+    transform: translateY(-1px); /* 살짝 위로 떠오름 */
+    /* 버튼 색상과 맞춘 부드러운 그림자 추가 */
 }
 
 .detail-table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 1.1rem;
 }
 
 .detail-table th {
     width: 120px;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
     padding: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #f4e2de;
     text-align: left;
     color: #475569;
 }
 
 .detail-table td {
     padding: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #f4e2de;
     color: #1e293b;
 }
 
@@ -182,7 +190,7 @@ const getFileIcon = (fileName) => {
 .status-badge {
     padding: 4px 8px;
     border-radius: 12px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 

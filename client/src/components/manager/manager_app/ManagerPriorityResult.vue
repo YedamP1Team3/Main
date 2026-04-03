@@ -59,7 +59,6 @@ const circleColorClass = computed(() => {
 </template>
 
 <style scoped>
-/* 기존 스타일과 100% 동일하게 유지하시면 됩니다. (생략) */
 .result-container {
     display: flex;
     flex-direction: column;
@@ -67,20 +66,24 @@ const circleColorClass = computed(() => {
     justify-content: center;
     height: 100%;
     padding: 40px;
-    background-color: #ffffff;
+    background-color: #fef9f6;
     text-align: center;
 }
 .result-title {
-    font-size: 1.6rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: #1e293b;
     margin-bottom: 20px;
 }
 .info-summary {
     margin-bottom: 40px;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     color: #334155;
     line-height: 1.6;
+    font-weight: 500;
+}
+.info-summary p {
+    margin: 5px 0;
 }
 .stage-circle {
     display: flex;
@@ -89,12 +92,14 @@ const circleColorClass = computed(() => {
     width: 160px;
     height: 160px;
     border-radius: 50%;
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #ffffff;
     margin-bottom: 40px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
+/* 상태별 고유 컬러 유지 */
 .bg-red {
     background-color: #ef4444;
 }
@@ -104,20 +109,25 @@ const circleColorClass = computed(() => {
 .bg-green {
     background-color: #22c55e;
 }
+
 .action-area button {
     padding: 12px 40px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border-radius: 25px;
     cursor: pointer;
-    transition: all 0.2s;
-    color: #ffffff;
+    transition: all 0.2s ease;
 }
+
+/* 취소하기 버튼 (Secondary 스타일) */
 .btn-cancel {
-    background-color: #6366f1;
+    background-color: #fff;
+    color: #ffab91;
+    border: 2px solid #f4e2de;
 }
 .btn-cancel:hover {
-    background-color: #4f46e5;
+    background-color: #fef9f6;
+    color: #ff8a65;
+    border-color: #ff8a65;
 }
 </style>

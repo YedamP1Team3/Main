@@ -40,7 +40,7 @@ onMounted(async () => {
                     <th><label>지원자</label></th>
                     <td>
                         <select v-model="selectedBeneId" @change="fetchBeneDetail">
-                            <option value="">지원자를 선택하세요</option>
+                            <option value="">대상자선택</option>
                             <template v-if="authStore.userId">
                                 <option v-for="bene in beneficiaryList" :key="bene.bene_id" :value="bene.bene_id">
                                     {{ bene.bene_name }}
@@ -81,7 +81,7 @@ onMounted(async () => {
 /* 카드 전체 컨테이너 */
 .BfInfo {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     padding: 20px 15px; /* 좌우 패딩을 줄여 내부 공간 확보 */
     width: 100%;
@@ -89,7 +89,7 @@ onMounted(async () => {
 }
 
 h3 {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1e293b;
     margin-bottom: 15px;
@@ -112,7 +112,7 @@ th {
 }
 
 th label {
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     color: #64748b;
     font-weight: 600;
     white-space: nowrap; /* 한 줄 고정 */
@@ -132,7 +132,7 @@ input[type='text'] {
     padding: 0 10px;
     border: 1px solid #cbd5e1;
     border-radius: 8px; /* 조금 더 둥근 느낌으로 세련되게 */
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #334155;
     background-color: #ffffff;
     outline: none;

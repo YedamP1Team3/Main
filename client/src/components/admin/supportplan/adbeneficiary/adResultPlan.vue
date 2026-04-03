@@ -73,69 +73,15 @@ watch(
 }
 
 h2 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1e293b;
     letter-spacing: -0.025em;
     margin: 0;
 }
-
-/* 2. 버튼 디자인 (현대적인 둥근 스타일) */
-.btn-group {
-    display: flex;
-    gap: 10px;
-}
-
-button {
-    padding: 8px 16px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border-radius: 8px; /* 조금 더 둥글게 */
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* [+추가하기] 버튼 - 메인 포인트 컬러 */
-button:first-of-type {
-    background-color: #3b82f6; /* 신뢰감 있는 블루 */
-    color: #ffffff;
-    border: 1px solid #3b82f6;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-button:first-of-type:hover {
-    background-color: #2563eb;
-    border-color: #2563eb;
-    transform: translateY(-1px); /* 살짝 떠오르는 효과 */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* [임시저장] 버튼 - 차분한 보조 컬러 */
-button:last-of-type {
-    background-color: #ffffff;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-}
-/*임시저장 버튼을 눌렀을때 화면 표시*/
-.active-temp {
-    background-color: #fff7ed; /* 연한 주황 배경 */
-    border-color: #fb923c; /* 진한 주황 테두리 */
-    color: #ea580c; /* 진한 주황 글씨 */
-    box-shadow: 0 0 8px rgba(251, 146, 60, 0.3); /* 살짝 빛나는 효과 */
-    font-weight: bold;
-}
-
-button:last-of-type:hover {
-    background-color: #f8fafc;
-    color: #1e293b;
-    border-color: #cbd5e1;
-}
-
 /* 3. 테이블 레이아웃 최적화 (600px 기준) */
 table {
+    padding-top: 10px;
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -143,21 +89,21 @@ table {
 }
 
 th {
-    background-color: #f8fafc; /* 헤더에 아주 연한 배경색 추가 */
+    background-color: #fef9f6; /* 헤더에 아주 연한 배경색 추가 */
     color: #64748b;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 12px 10px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #f4e2de;
 }
 
 td {
     padding: 16px 10px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f4e2de;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -199,5 +145,51 @@ tr:hover td {
 td:last-child {
     font-weight: 600;
     color: #3b82f6; /* 기본적으로 포인트 컬러 적용 */
+}
+
+/* 반려 히스토리 섹션 (관리자용 디자인 계승) */
+.history-section {
+    margin-top: 50px;
+}
+
+.history-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 15px;
+}
+
+.history-card {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #cbd5e1;
+    padding-bottom: 8px;
+}
+
+.history-user {
+    font-weight: 700;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.history-date {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.history-body {
+    color: #334155;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
 }
 </style>

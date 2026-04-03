@@ -139,17 +139,18 @@ onMounted(() => {
     display: flex;
     height: calc(100vh - 150px); /* 헤더 등을 제외한 높이 */
     background-color: #fff;
-    border: 1px solid #e1e1e1;
+    border: 2px solid #f4e2de;
     margin: 20px;
 }
 
 /* 목록 영역 */
 .list-section {
     width: 320px;
-    border-right: 1px solid #eee;
+    border-right: 2px solid #f4e2de;
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* 세로 배치 */
     padding: 20px;
+    height: 100%; /* 부모 높이를 다 채우도록 설정 */
 }
 
 .list-header {
@@ -169,8 +170,9 @@ onMounted(() => {
     padding: 0;
     margin: 0;
     border: 1px solid #ddd;
-    flex-grow: 1;
+    /* flex-grow를 빼거나 유지해도 되지만, 페이징을 아래로 밀기 위해 아래 설정이 중요합니다 */
     overflow-y: auto;
+    max-height: calc(100% - 120px); /* 페이징과 헤더 공간 확보 */
 }
 
 .beneficiary-list li {
@@ -187,37 +189,61 @@ onMounted(() => {
 }
 
 .beneficiary-list li.selected {
-    background-color: #f0f7ff;
-    border-left: 4px solid #4a90e2;
+    background-color: #fef9f6;
+    border-left: 4px solid #f3c4b9;
     font-weight: bold;
 }
 
 .arrow-icon::after {
     content: '>';
-    color: #ccc;
+    color: #666;
 }
 
 /* 페이징 */
 .pagination {
-    margin-top: 20px;
+    margin-top: auto; /* 위쪽 여백을 자동으로 채워 아래로 밀어냄 */
+    padding-top: 20px; /* 리스트와의 간격 */
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 5px;
+    background-color: #fff; /* 리스트가 길어져도 겹치지 않게 배경색 지정 */
 }
 
-.page-numbers button {
-    padding: 5px 10px;
-    margin: 0 2px;
-    border: 1px solid #ddd;
+.page-numbers button,
+.page-nav {
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
     background: #fff;
     cursor: pointer;
+    border-radius: 4px;
+    color: #64748b;
+    font-size: 13px;
+    transition: all 0.2s;
 }
 
+/* [3] ⭐ 활성화된(선택된) 페이지 번호 스타일 */
 .page-numbers button.active {
-    background-color: #333;
-    color: #fff;
-    border-color: #333;
+    background-color: #ffab91 !important;
+    border-color: #ffab91 !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+/* [4] 마우스 올렸을 때(Hover) 효과 */
+.page-numbers button:hover:not(.active),
+.page-nav:hover:not(:disabled) {
+    background-color: #fff5f2; /* 매우 연한 코랄빛 */
+    border-color: #ffab91;
+    color: #ffab91;
+}
+
+/* [5] 비활성화된 이전/이후 버튼 */
+.page-nav:disabled {
+    color: #cbd5e1;
+    cursor: not-allowed;
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
 }
 
 .page-nav {
@@ -236,7 +262,7 @@ onMounted(() => {
 }
 
 .detail-header {
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid #f4e2de;
     padding-bottom: 15px;
     margin-bottom: 25px;
 }

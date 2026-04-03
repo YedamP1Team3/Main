@@ -233,11 +233,11 @@ onMounted(fetchHistoryRows);
     background-color: white;
     padding: 30px;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
 }
 
 h2 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     color: #1e293b;
     margin-bottom: 20px;
 }
@@ -248,10 +248,10 @@ h2 {
     justify-content: center;
     min-height: 240px;
     color: #64748b;
-    font-size: 0.95rem;
-    border: 1px dashed #cbd5e1;
+    font-size: 1.1rem;
+    border: 1px dashed #f4e2de;
     border-radius: 8px;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
 }
 
 .history-table {
@@ -265,20 +265,20 @@ h2 {
     padding: 12px;
     font-weight: 600;
     color: #64748b;
-    border-top: 2px solid #e2e8f0;
-    border-bottom: 1px solid #e2e8f0;
-    background-color: #f8fafc;
+    border-top: 2px solid #f4e2de;
+    border-bottom: 1px solid #f4e2de;
+    background-color: #fef9f6;
 }
 
 .history-table td {
     padding: 12px;
     color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f4e2de;
     vertical-align: middle;
 }
 
 .history-table tbody tr:hover td {
-    background-color: #f8fafc;
+    background-color: #fef9f6;
 }
 
 .btn-view,
@@ -291,15 +291,15 @@ h2 {
 }
 
 .btn-view {
-    background-color: #3b82f6;
+    background-color: #ffab91;
     color: white;
     border: none;
 }
 
 .btn-view-outline {
     background-color: white;
-    color: #3b82f6;
-    border: 1px solid #3b82f6;
+    color: #ffab91;
+    border: 1px solid #ffab91;
 }
 
 .btn-view:disabled,

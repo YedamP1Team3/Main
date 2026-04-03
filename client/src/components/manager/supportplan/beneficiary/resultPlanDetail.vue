@@ -119,14 +119,38 @@ const fetchAllSupportList = async () => {
 const fetchRejectionHistory = async (id) => {
     if (!id) return;
     try {
-        // 관리자용 API를 그대로 사용하여 해당 결과서의 이력을 가져옵니다.
         const response = await axios.get(`api/adsupport/admin/support-result/${id}/rejection-history`);
-        // 데이터가 배열인지 확인 후 저장합니다.
-        rejectionLog.value = Array.isArray(response.data) ? response.data : [];
+        // 어드민과 동일하게 각 항목에 상태값 주입
+        rejectionLog.value = response.data.map((item) => ({
+            ...item,
+            plans: [], // 상세 계획을 담을 배열
+            isOpened: false // 초기에는 닫힘 상태
+        }));
     } catch (error) {
         console.error('이력 조회 실패', error);
         rejectionLog.value = [];
     }
+};
+
+//특정 항목 클릭 시 상세 계획서 조회 함수
+const fetchHistoryPlans = async (log) => {
+    if (log.isOpened) {
+        log.isOpened = false;
+        return;
+    }
+    rejectionLog.value.forEach((item) => (item.isOpened = false));
+
+    // 상세 계획 데이터가 아직 없을 때만 서버에서 호출
+    if (!log.plans || log.plans.length === 0) {
+        try {
+            const response = await axios.get(`api/adsupport/admin/rejection-history/${log.history_id}/plans`);
+            log.plans = response.data.plans || [];
+        } catch (error) {
+            console.error('상세 계획 조회 실패:', error);
+        }
+    }
+
+    log.isOpened = true; // 내용 표시
 };
 
 const Plus = () => {
@@ -346,12 +370,39 @@ onMounted(() => {
         <div v-if="rejectionLog.length > 0" class="history-section">
             <h3 class="history-title">반려 사유 목록</h3>
             <div class="history-list">
-                <div v-for="(log, index) in rejectionLog" :key="index" class="history-card">
+                <div v-for="log in rejectionLog" :key="log.history_id" class="history-card" :class="{ 'is-active': log.isOpened }" @click="fetchHistoryPlans(log)">
                     <div class="history-header">
                         <span class="history-user">검토자: {{ log.manager_name }}</span>
                         <span class="history-date">{{ log.created_at }}</span>
                     </div>
-                    <div class="history-body"><strong>사유:</strong> {{ log.rejection_reason }}</div>
+
+                    <div v-if="!log.isOpened" class="history-summary"><strong>사유:</strong> {{ log.rejection_reason }}</div>
+
+                    <div v-if="log.isOpened" class="history-detail">
+                        <div class="detail-inner-box">
+                            <div class="detail-row">
+                                <span class="detail-label">지원 목표</span>
+                                <div class="detail-value">{{ log.result_title || '내용 없음' }}</div>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">지원 내용</span>
+                                <div class="detail-value">{{ log.result_content || '내용 없음' }}</div>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">연결된 계획</span>
+                                <div class="plan-tags">
+                                    <span v-for="plan in log.plans" :key="plan.plan_id" class="plan-badge">
+                                        {{ plan.plan_objective }}
+                                    </span>
+                                    <div v-if="!log.plans || log.plans.length === 0" class="no-data">연결된 계획 정보가 없습니다.</div>
+                                </div>
+                            </div>
+                            <div class="detail-row rejection-reason-box">
+                                <span class="detail-label">반려 사유</span>
+                                <div class="detail-value reason-text">{{ log.rejection_reason }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -361,11 +412,14 @@ onMounted(() => {
 <style scoped>
 /* 전체 컨테이너 */
 .BfnewPlan {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
+    border: 2px solid #f4e2de;
     background-color: #ffffff;
+    color: #334155;
 }
+
 h2 {
     font-size: 1.5rem;
     font-weight: 800;
@@ -375,7 +429,7 @@ h2 {
 .main-hr {
     border: 0;
     height: 2px;
-    background: #334155;
+    background: #f4e2de;
     margin: 15px 0 20px 0;
 }
 
@@ -388,48 +442,49 @@ h2 {
 }
 .state-badge {
     padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 0.85rem;
+    border-radius: 4px;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 .state-badge.임시 {
-    background-color: #f1f5f9;
-    color: #64748b;
+    background: #f1f5f9;
+    color: #475569;
+}
+.state-badge.반려,
+.state-badge.반려\/재승인 {
+    background: #fee2e2;
+    color: #dc2626;
 }
 .state-badge.대기 {
-    background-color: #fef3c7;
+    background: #fef3c7;
     color: #d97706;
 }
-.state-badge.반려 {
-    background-color: #fee2e2;
-    color: #ef4444;
-}
-.date-box {
-    color: #64748b;
-    font-size: 0.95rem;
+.state-badge.승인 {
+    background: #dcfce7;
+    color: #16a34a;
 }
 
 /* 표 레이아웃 */
 .table-container {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #f4e2de;
 }
 .form-row {
     display: flex;
-    border-bottom: 1px solid #e2e8f0;
-    border-left: 1px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f4e2de;
+    border-left: 1px solid #f4e2de;
+    border-right: 1px solid #f4e2de;
 }
 .form-row label {
     width: 140px;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
     color: #475569;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    border-right: 1px solid #e2e8f0;
-    font-size: 0.9rem;
+    border-right: 1px solid #f4e2de;
+    font-size: 1.1rem;
     flex-shrink: 0;
 }
 .input-wrapper {
@@ -445,7 +500,7 @@ h2 {
     width: 100%;
     border: none;
     padding: 15px 20px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #334155;
     outline: none;
     background: transparent;
@@ -476,8 +531,8 @@ h2 {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    border: 1px solid #1e293b;
-    background: #fff;
+    border: 1px solid #f4e2de;
+    background: #fef9f6;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -487,15 +542,20 @@ h2 {
 .plan-tag-item {
     display: flex;
     align-items: center;
-    background: #eff6ff;
     padding: 5px 15px;
     border-radius: 20px;
-    font-size: 0.85rem;
-    color: #1e40af;
-    border: 1px solid #dbeafe;
+    font-size: 1.1rem;
+    border: 1px solid #ffab91;
     cursor: pointer;
     margin-right: 5px;
 }
+
+.plan-tag-item:hover {
+    background-color: #ff8a65; /* 아주 연한 살구색 배경 */
+    border-color: #ff8a65; /* 테두리 한 톤 진하게 */
+    color: #ffffff; /* 글자색도 함께 강조 */
+}
+
 .active-tag {
     background-color: #1e293b !important;
     color: #fff !important;
@@ -509,81 +569,123 @@ h2 {
     cursor: pointer;
 }
 
+/* 삭제 버튼 호버 시 효과 */
+.btn-remove-tag:hover {
+    background-color: #fee2e2; /* 연한 빨간색 배경 생성 */
+    color: #ef4444; /* 글자색을 진한 빨간색으로 강조 */
+    transform: scale(1.2); /* 버튼 크기를 살짝 키워 강조 */
+}
+
 /* 하단 버튼 (우측 정렬) */
 .button-group {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    margin-top: 30px;
+    gap: 10px;
+    margin: 25px 0;
 }
-.btn-approve {
-    padding: 12px 40px;
-    background: #fff;
-    color: #1e293b;
-    border: 1.5px solid #1e293b;
-    border-radius: 30px;
-    font-weight: 800;
-    cursor: pointer;
-}
-.btn-temp,
-.btn-delete {
-    padding: 12px 24px;
-    background: #f1f5f9;
-    color: #64748b;
-    border: none;
-    border-radius: 30px;
+
+.button-group button {
+    padding: 10px 24px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
+    border: 1px solid transparent;
+    transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-approve {
+    background: #ffab91;
+    color: #fff;
+}
+.btn-temp {
+    background: #ffffff;
+    border: 2px solid #ffab91 !important;
+    color: #ffab91;
 }
 .btn-delete {
-    color: #ef4444;
+    background: #ffffff !important;
+    color: #e11d48;
+    border: 2px solid #e11d48 !important;
+}
+/* [+추가하기] 버튼 호버 */
+button:first-of-type:hover {
+    background-color: #ff8a65;
+    transform: translateY(-1px); /* 조금 더 확실한 상승감 */
+    /* 버튼 색상과 맞춘 부드러운 그림자 */
+    box-shadow: 0 10px 15px -3px rgba(255, 171, 145, 0.4);
+}
+
+/* [임시저장] 버튼 호버 */
+button:last-of-type:not(.active-temp):hover {
+    background-color: #ffab91; /* 아주 연한 주황 배경 */
+    color: #ffffff;
+    border-color: #ff8a65;
+    box-shadow: 0 4px 6px rgba(255, 171, 145, 0.1);
+}
+/* 삭제 호버 */
+.btn-delete:hover {
+    background-color: #ffffff !important; /* 아주 연한 레드 배경 */
+    color: #be123c !important;
 }
 
 /* 반려 이력 */
 /* 반려 히스토리 섹션 (관리자용 디자인 계승) */
+/* 6. 반려 히스토리 섹션 */
 .history-section {
     margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #f4e2de;
 }
 
-.history-title {
-    font-size: 1.2rem;
+.history-section h3 {
+    font-size: 1.5rem;
     font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .history-card {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: #fef9f6;
+    border: 1px solid #f4e2de;
     border-radius: 10px;
-    padding: 18px;
-    margin-bottom: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.history-card:hover {
+    background-color: #ff8a65;
 }
 
 .history-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     border-bottom: 1px dashed #cbd5e1;
-    padding-bottom: 8px;
+    padding-bottom: 10px;
+    font-size: 1.1rem;
 }
 
 .history-user {
     font-weight: 700;
-    color: #475569;
-    font-size: 0.9rem;
+    color: #334155;
 }
-
 .history-date {
-    font-size: 0.85rem;
     color: #94a3b8;
 }
 
-.history-body {
-    color: #334155;
-    line-height: 1.6;
-    font-size: 0.95rem;
-    white-space: pre-wrap;
+.history-summary {
+    font-size: 1.1rem;
+    color: #1e293b;
+}
+
+/* 상세 내역 스타일 */
+.history-detail {
+    margin-top: 15px;
+    padding: 15px;
+    background: #ffffff;
+    border: 1px solid #f4e2de;
+    border-radius: 8px;
 }
 
 .file_input_container {

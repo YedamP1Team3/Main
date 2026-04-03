@@ -133,7 +133,7 @@ const goToEditPage = () => {
     border-radius: 16px !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
     padding: 2rem !important;
-    border: none !important;
+    border: 2px solid #f4e2de !important;
 }
 
 .section-header {
@@ -141,8 +141,21 @@ const goToEditPage = () => {
     justify-content: space-between;
     align-items: center;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #f1f5f9;
+    border-bottom: 2px solid #f4e2de;
     margin-bottom: 1.5rem;
+}
+
+.p-button.p-button-outlined.p-button-sm {
+    background-color: #ffab91 !important;
+    border: none !important;
+    color: white !important;
+    padding: 10px 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+}
+
+.p-button.p-button-outlined.p-button-sm:hover {
+    background-color: #ff8a65 !important;
 }
 
 .info-item {

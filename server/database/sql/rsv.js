@@ -37,7 +37,8 @@ const selectFamilyReservations = `
     b.disability_type,
     DATE_FORMAT(r.start_time, '%Y-%m-%d %H:%i:%s') AS start_time,
     DATE_FORMAT(r.end_time, '%Y-%m-%d %H:%i:%s') AS end_time,
-    r.rsv_status
+    r.rsv_status,
+    r.rejection_reason
   FROM reservations r
   INNER JOIN beneficiary_info b
     ON r.bene_id = b.bene_id
@@ -148,7 +149,8 @@ SELECT
     b.disability_type,
     DATE_FORMAT(r.start_time, '%Y-%m-%d %H:%i:%s') AS start_time,
     DATE_FORMAT(r.end_time, '%Y-%m-%d %H:%i:%s') AS end_time,
-    r.rsv_status
+    r.rsv_status,
+    r.rejection_reason
 FROM reservations r
 JOIN beneficiary_info b
     ON r.bene_id = b.bene_id
@@ -160,7 +162,8 @@ ORDER BY r.start_time DESC
 
 const updateReservationStatus = `
 UPDATE reservations
-SET rsv_status = ?
+SET rsv_status = ?,
+    rejection_reason = ?
 WHERE rsv_id = ?
   AND rsv_status = 'REQUESTED'
 `;

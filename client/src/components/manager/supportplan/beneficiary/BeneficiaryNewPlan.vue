@@ -171,10 +171,12 @@ const getFileIcon = (fileName) => {
 </template>
 <style scoped>
 .BfnewPlan {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
+    border: 2px solid #f4e2de;
     background-color: #ffffff;
+    color: #334155;
 }
 
 h2 {
@@ -196,16 +198,16 @@ h2 {
 
 .date-box {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
 }
 
 .table-container {
-    border: 1px solid #e2e8f0;
+    border: 1px solid #f4e2de;
 }
 
 .form-row {
     display: flex;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .form-row:last-child {
@@ -215,15 +217,15 @@ h2 {
 .form-row label {
     width: 140px;
     min-width: 140px;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
     color: #475569;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    border-right: 1px solid #e2e8f0;
-    font-size: 0.9rem;
+    border-right: 1px solid #f4e2de;
+    font-size: 1.1rem;
 }
 
 .input-wrapper {
@@ -237,7 +239,7 @@ h2 {
     border: none;
     padding: 15px;
     outline: none;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-family: inherit;
     color: #1e293b;
     background-color: transparent;
@@ -252,33 +254,43 @@ h2 {
 .button-group {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    margin-top: 30px;
+    gap: 10px;
+    margin: 25px 0;
 }
 
 .button-group button {
-    padding: 10px 25px;
-    border-radius: 30px;
-    font-size: 1rem;
-    font-weight: bold;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
-    border: none;
+    border: 1px solid transparent;
     transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-approve {
-    background-color: #1e293b;
-    color: #ffffff;
+    background: #ffab91;
+    color: #fff;
 }
 
 .btn-temp {
-    background-color: #64748b;
-    color: #ffffff;
+    background: #ffffff;
+    border: 2px solid #ffab91 !important;
+    color: #ffab91;
 }
 
-button:hover {
-    opacity: 0.8;
-    transform: translateY(-1px);
+button:first-of-type:hover {
+    background-color: #ff8a65;
+    transform: translateY(-1px); /* 조금 더 확실한 상승감 */
+    /* 버튼 색상과 맞춘 부드러운 그림자 */
+    box-shadow: 0 10px 15px -3px rgba(255, 171, 145, 0.4);
+}
+
+button:last-of-type:not(.active-temp):hover {
+    background-color: #ffab91; /* 아주 연한 주황 배경 */
+    color: #ffffff;
+    border-color: #ff8a65;
+    box-shadow: 0 4px 6px rgba(255, 171, 145, 0.1);
 }
 
 .file_input_container {
@@ -293,10 +305,10 @@ button:hover {
     width: fit-content;
     padding: 8px 16px;
     background-color: #fff;
-    color: #2563eb;
-    border: 1px solid #2563eb;
+    color: #ffab91;
+    border: 1px solid #ffab91;
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -335,7 +347,7 @@ button:hover {
 }
 
 .file_icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-right: 10px;
     display: flex;
     align-items: center;
@@ -344,7 +356,7 @@ button:hover {
 
 .file_name {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #334155;
     font-weight: 500;
     white-space: nowrap;
@@ -359,7 +371,7 @@ button:hover {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     cursor: pointer;
     display: flex;
     align-items: center;

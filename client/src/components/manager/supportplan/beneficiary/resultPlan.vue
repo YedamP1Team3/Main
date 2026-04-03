@@ -68,9 +68,11 @@ watch(
 <template>
     <div>
         <div>
-            <h2>지원결과서</h2>
-            <button @click="addNewPlan">+추가하기</button>
-            <button @click="savefile" :class="{ 'active-temp': showTemp }" class="btn-temp-check">{{ showTemp ? '일반 목록' : '임시저장' }}</button>
+            <div class="btn-group">
+                <h2>지원결과서</h2>
+                <button @click="addNewPlan">+추가하기</button>
+                <button @click="savefile" :class="{ 'active-temp': showTemp }" class="btn-temp-check">{{ showTemp ? '일반 목록' : '임시저장' }}</button>
+            </div>
         </div>
         <table>
             <tbody>
@@ -103,7 +105,7 @@ watch(
 }
 
 h2 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1e293b;
     letter-spacing: -0.025em;
@@ -118,7 +120,7 @@ h2 {
 
 button {
     padding: 8px 16px;
-    font-size: 0.875rem;
+    font-size: 1.1rem;
     font-weight: 600;
     border-radius: 8px; /* 조금 더 둥글게 */
     cursor: pointer;
@@ -130,9 +132,9 @@ button {
 
 /* [+추가하기] 버튼 - 메인 포인트 컬러 */
 button:first-of-type {
-    background-color: #3b82f6; /* 신뢰감 있는 블루 */
+    background-color: #ffab91; /* 신뢰감 있는 블루 */
     color: #ffffff;
-    border: 1px solid #3b82f6;
+    border: 1px solid #ffab91;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -146,8 +148,8 @@ button:first-of-type:hover {
 /* [임시저장] 버튼 - 차분한 보조 컬러 */
 button:last-of-type {
     background-color: #ffffff;
-    color: #475569;
-    border: 1px solid #e2e8f0;
+    color: #ffab91;
+    border: 1px solid #ffab91;
 }
 /*임시저장 버튼을 눌렀을때 화면 표시*/
 .active-temp {
@@ -170,24 +172,25 @@ table {
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
+    padding-top: 10px;
 }
 
 th {
-    background-color: #f8fafc; /* 헤더에 아주 연한 배경색 추가 */
+    background-color: #fef9f6; /* 헤더에 아주 연한 배경색 추가 */
     color: #64748b;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 12px 10px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #f4e2de;
 }
 
 td {
     padding: 16px 10px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f4e2de;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
