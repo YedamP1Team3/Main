@@ -184,7 +184,7 @@ const saveInfo = async () => {
     width: 100%;
     /* 상단 패딩을 10px에서 5px로 줄여 카드를 위로 올림 */
     padding: 5px 0 40px 0;
-    background-color: #f8fafc;
+    background-color: #fef9f6 !important;
 }
 
 .form-container {
@@ -194,6 +194,7 @@ const saveInfo = async () => {
     /* 상단 내부 패딩을 1.5rem에서 1.2rem으로 줄여 제목을 위로 올림 */
     padding: 1.2rem 2rem !important;
     border-radius: 12px;
+    border: 2px solid #f4e2de;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
@@ -235,9 +236,9 @@ const saveInfo = async () => {
 }
 
 .post-btn {
-    background: white;
-    border: 1px solid #10b981;
-    color: #10b981;
+    background-color: #fef9f6;
+    border: 2px solid #f4e2de;
+    color: #ffab91;
     padding: 0 0.8rem;
     border-radius: 6px;
     font-size: 0.8rem;
@@ -260,7 +261,7 @@ const saveInfo = async () => {
 }
 
 .submit-btn {
-    background-color: #10b981 !important;
+    background-color: #ffab91 !important;
     border: none;
 }
 

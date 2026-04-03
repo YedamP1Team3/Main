@@ -148,9 +148,32 @@ const handleSave = async () => {
                 <div class="section-header">
                     <h3 class="text-xl font-bold">기관관리자 정보</h3>
                     <div>
-                        <button v-if="isEditMode" type="button" @click="handleCancel" class="p-button p-button-outlined p-button-secondary p-button-sm mr-2">취소하기</button>
-                        <button v-if="!isEditMode" type="button" @click="toggleEditMode" class="p-button p-button-outlined p-button-sm p-button-success">수정하기</button>
-                        <button v-else type="submit" class="p-button p-button-primary p-button-sm">저장하기</button>
+                        <button
+                            v-if="!isEditMode"
+                            @click="toggleEditMode"
+                            class="p-button p-button-sm"
+                            style="background-color: #ffab91 !important; border: none !important; color: white !important; padding: 10px !important; border-radius: 8px !important"
+                        >
+                            수정하기
+                        </button>
+
+                        <button
+                            v-if="isEditMode"
+                            @click="handleCancel"
+                            class="p-button p-button-sm mr-2"
+                            style="background-color: #ffab91 !important; border: none !important; color: white !important; padding: 10px !important; border-radius: 8px !important"
+                        >
+                            취소하기
+                        </button>
+
+                        <button
+                            v-if="isEditMode"
+                            @click="handleSave"
+                            class="p-button p-button-sm"
+                            style="background-color: #ffab91 !important; border: none !important; color: white !important; padding: 10px !important; border-radius: 8px !important"
+                        >
+                            저장하기
+                        </button>
                     </div>
                 </div>
 
@@ -231,8 +254,26 @@ const handleSave = async () => {
     border-radius: 16px !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
     padding: 2.5rem !important; /* 내부 여백 조금 더 확보 */
-    border: 1px solid #f1f5f9 !important;
+    border: 2px solid #f4e2de !important;
     margin-bottom: 2rem;
+}
+
+/* 커스텀 채우기 버튼 스타일 */
+.custom-fill-btn {
+    /* 배경색 적용 (필수) */
+    background-color: #ffab91 !important;
+    /* 테두리 색상도 동일하게 맞춰서 깔끔하게 처리 (필수) */
+    border-color: #ffab91 !important;
+    /* 글자색 (흰색으로 설정) */
+    color: #ffffff !important;
+    padding: 10px;
+    border-radius: 10%;
+}
+
+/* 마우스를 올렸을 때(Hover) 약간 더 진하게 변하게 하고 싶다면 추가 (선택 사항) */
+.custom-fill-btn:hover {
+    background-color: #ff8a65 !important;
+    border-color: #ff8a65 !important;
 }
 
 .section-header {

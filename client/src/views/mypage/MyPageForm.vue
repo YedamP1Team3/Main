@@ -22,51 +22,58 @@ import memberSid from '../../layout/member/mSidbar.vue';
 </template>
 
 <style scoped>
-/* 1. 바디 레이아웃 - 높이 계산을 더 안전하게 조정 */
-.layout-body {
-    position: relative;
+/* 1. 전체를 화면 높이(100vh)에 가두어 스크롤이 밖으로 나가지 않게 합니다 */
+.layout-wrapper {
     display: flex;
-    width: 100%;
-    min-height: calc(100vh - 64px); /* 고정 height 대신 min-height 사용 */
-    margin-top: 64px;
-    background-color: #f8fafc;
-
-    /* ⭐ 수정: 여기서 overflow: hidden을 제거합니다 */
-    overflow: visible;
-    box-sizing: border-box;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden; /* 전체 페이지 스크롤 방지 */
 }
 
-/* 2. 사이드바 - 바닥에 0.1px의 오차도 없게 밀착 */
+/* 2. 바디 영역 */
+.layout-body {
+    display: flex;
+    flex: 1;
+    margin-top: 64px;
+    background-color: #fef9f6;
+    padding: 2rem;
+    gap: 2rem;
+    box-sizing: border-box;
+
+    /* ⭐ [핵심 추가] 이 한 줄이 사이드바가 본문 따라 길어지는 걸 막아줍니다! */
+    align-items: flex-start;
+
+    /* 아래 속성들은 유지하거나 필요 없으면 지우셔도 됩니다 */
+    min-height: calc(100vh - 64px);
+    overflow: visible;
+}
+
+/* 3. 사이드바 - 이제 부모 높이 안에서만 존재하며 길어지지 않습니다 */
 .layout-sidebar {
-    position: fixed; /* absolute 대신 fixed를 써야 본문이 길어져도 따라옵니다 */
-    top: 64px;
-    left: 0;
-    bottom: 0;
     width: 250px;
+    flex-shrink: 0;
     background-color: #ffffff;
-    border-right: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de !important;
+    border-radius: 16px;
     z-index: 10;
     box-sizing: border-box;
+
+    /* ⭐ [핵심 수정] 100%가 아니라 화면 높이에 맞춰 고정합니다 */
+    /* 100vh(화면전체) - 64px(헤더) - 4rem(위아래 padding 2rem씩) */
+    height: calc(100vh - 64px - 4rem) !important;
+
+    /* 화면에 고정시키기 */
+    position: sticky;
+    top: calc(64px + 2rem);
 }
 
-/* 3. 본문 영역 - 여기서만 스크롤 허용 */
+/* 4. 본문 영역 - 본문이 길어지면 '여기서만' 스크롤이 생깁니다 */
 .layout-main {
-    margin-left: 250px;
-    width: calc(100% - 250px);
-
-    /* ⭐ 핵심 수정 사항 */
-    height: auto; /* 100% 고정 해제 */
-    min-height: 100%;
-    padding: 1.5rem 2.5rem 2.5rem 2.5rem;
-    overflow: visible !important; /* 내부 스크롤 발생 원천 차단 */
-    background-color: #f8fafc;
+    flex: 1;
+    height: 100%;
+    /* ⭐ 중요: 사이드바는 가만히 있고 본문만 위아래로 움직이게 함 */
+    overflow: hidden !important;
+    background-color: transparent;
     box-sizing: border-box;
-}
-
-/* ⭐ 브라우저 스크롤을 다시 살려냅니다 */
-:deep(html),
-:deep(body) {
-    overflow: auto !important; /* hidden에서 auto로 변경 */
-    height: auto;
 }
 </style>

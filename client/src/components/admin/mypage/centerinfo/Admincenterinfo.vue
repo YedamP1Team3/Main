@@ -105,7 +105,7 @@ const handleSave = async () => {
             <div class="section-header">
                 <h3 class="text-xl font-bold">기관 정보</h3>
                 <div class="button-group">
-                    <button v-if="!isEditMode" @click="toggleEditMode" class="p-button p-button-outlined p-button-success p-button-sm">수정하기</button>
+                    <button v-if="!isEditMode" @click="toggleEditMode" class="p-button p-button-sm coral-btn">수정하기</button>
                     <button v-else @click="handleSave" class="p-button p-button-primary p-button-sm">저장하기</button>
                 </div>
             </div>
@@ -171,7 +171,7 @@ const handleSave = async () => {
     border-radius: 16px !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
     padding: 2.5rem !important;
-    border: 1px solid #f1f5f9 !important;
+    border: 2px solid #f4e2de !important;
 }
 
 /* 헤더 영역 */
@@ -180,7 +180,7 @@ const handleSave = async () => {
     justify-content: space-between;
     align-items: center;
     padding-bottom: 1.25rem;
-    border-bottom: 2px solid #f8fafc;
+    border-bottom: 2px solid #f4e2de;
     margin-bottom: 2rem;
 }
 
@@ -196,7 +196,7 @@ const handleSave = async () => {
     display: flex;
     align-items: flex-start;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .info-row.no-border {
@@ -221,7 +221,7 @@ const handleSave = async () => {
     padding: 0.85rem;
     border-radius: 8px;
     background-color: #f8fafc !important;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     font-size: 0.95rem;
     transition: all 0.2s ease;
 }
@@ -256,6 +256,20 @@ const handleSave = async () => {
 .button-group {
     display: flex;
     gap: 0.5rem;
+}
+
+/* 모든 '수정', '추가' 버튼에 공통 적용 */
+.coral-btn {
+    background-color: #ffab91 !important; /* 따뜻한 코랄 배경 */
+    color: #ffffff !important; /* 흰색 글자 */
+    border: 2px solid #ffab91 !important; /* 배경과 같은 색의 테두리 */
+    font-weight: 700 !important; /* 글자 두껍게 */
+    transition: background-color 0.2s; /* 부드러운 색상 변화 */
+}
+
+.coral-btn:hover {
+    background-color: #ff9e80 !important; /* 마우스 올렸을 때 살짝 진하게 */
+    border-color: #ff9e80 !important;
 }
 
 /* 반응형 모바일 대응 */

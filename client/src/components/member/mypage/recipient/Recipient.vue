@@ -207,6 +207,7 @@ watch(
     max-width: 550px;
     background-color: #ffffff;
     padding: 2rem !important;
+    border: 2px solid #f4e2de !important;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* 그림자 살짝 */
 
@@ -233,19 +234,21 @@ watch(
     font-size: 0.9rem;
     color: #475569;
 }
-.post-btn {
+/* .post-btn {
     background: white;
-    border: 1px solid #10b981;
-    color: #10b981;
+    border: 2px solid #f4e2de;
+    color: #fef9f6;
     padding: 0 1rem;
     border-radius: 6px;
     font-size: 0.85rem;
-    white-space: nowrap; /* 글자 줄바꿈 방지 */
+    white-space: nowrap;
     cursor: pointer;
-}
-.post-btn:hover {
-    background: #f0fdf4;
-}
+} */
+
+/* .post-btn:hover {
+    background: #ff8a65;
+} */
+
 .notice {
     color: #ef4444;
     font-weight: normal;
@@ -259,7 +262,7 @@ watch(
     padding: 0.7rem;
     font-size: 1rem;
     font-weight: bold;
-    background-color: #10b981;
+    background-color: #ffab91;
     border: none;
 }
 :deep(.p-inputtext-sm) {
@@ -312,6 +315,6 @@ watch(
     min-height: auto !important;
     height: auto !important;
     overflow: visible !important; /* 스크롤 방해 금지 */
-    background-color: #f8fafc;
+    background-color: #fef9f6 !important;
 }
 </style>
