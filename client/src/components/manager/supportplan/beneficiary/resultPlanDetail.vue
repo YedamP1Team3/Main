@@ -699,8 +699,9 @@ button:last-of-type:not(.active-temp):hover {
 .btn_file_select {
     width: fit-content;
     padding: 10px 15px;
-    background-color: #2563eb;
-    color: #fff;
+    border:1px solid #ff8a65 !important;
+    background-color: #ffffff;
+    color: #ff8a65;
     border: none;
     border-radius: 10px;
     cursor: pointer;

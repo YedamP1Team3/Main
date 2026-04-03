@@ -488,7 +488,7 @@ button:last-of-type:not(.active-temp):hover {
 .history-header {
     display: flex;
     justify-content: space-between;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #64748b;
     margin-bottom: 12px;
     padding-bottom: 10px;
@@ -575,7 +575,6 @@ button:last-of-type:not(.active-temp):hover {
 .file_name {
     flex: 1;
     font-size: 1.1rem;
-    color: #334155;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
@@ -585,8 +584,9 @@ button:last-of-type:not(.active-temp):hover {
 .btn_file_select {
     width: fit-content;
     padding: 10px 15px;
-    background-color: #2563eb;
-    color: #fff;
+    border:1px solid #ff8a65 !important;
+    background-color: #ffffff;
+    color: #ff8a65;
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -604,7 +604,7 @@ button:last-of-type:not(.active-temp):hover {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     cursor: pointer;
     display: flex;
     align-items: center;

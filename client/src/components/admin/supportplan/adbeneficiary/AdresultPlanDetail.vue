@@ -225,7 +225,7 @@ watch(
             <button class="btn-submit-reject" @click="updateReturn(resultDetail.result_id)">반려 확정</button>
         </div>
 
-        <div class="history-section">
+        <div v-if="rejectionLog.length > 0" class="history-section">
             <h3>반려 리스트</h3>
 
             <div v-for="log in rejectionLog" :key="log.history_id" class="history-card" :class="{ 'is-active': log.isOpened }" @click="fetchHistoryPlans(log)">
@@ -641,7 +641,7 @@ button:hover {
 
 .file_name {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: 1.1.rem;
     color: #334155;
     font-weight: 500;
     white-space: nowrap;
@@ -651,7 +651,7 @@ button:hover {
 
 .no-attachments {
     color: #94a3b8;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     padding: 5px 0;
 }
 
