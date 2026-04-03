@@ -175,21 +175,30 @@ watch(
 }
 .list-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed; /* 글자가 길어져도 표가 깨지지 않게 고정 */
     text-align: center;
-    font-size: 0.9rem;
 }
+
 .list-table th {
-    padding: 10px;
-    font-weight: 600;
+    background-color: #f8fafc; /* 오른쪽 이미지의 연한 회색 배경 */
     color: #64748b;
-    border-top: 1px solid #cbd5e1;
-    border-bottom: 1px solid #cbd5e1;
-}
-.list-table td {
+    font-size: 0.85rem;
+    font-weight: 700;
     padding: 12px 10px;
+    border-top: none; /* 기존 왼쪽 이미지에 있던 맨 위 얇은 선 제거 */
+    border-bottom: 2px solid #e2e8f0; /* 헤더 아래쪽 두꺼운 구분선 */
+}
+
+.list-table td {
+    padding: 16px 10px;
+    font-size: 0.9rem;
     color: #334155;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f1f5f9; /* 데이터 간의 아주 얇고 연한 구분선 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .empty-msg {
     padding: 30px !important;

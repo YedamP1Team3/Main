@@ -55,7 +55,7 @@ watch(
         <table class="list-table">
             <thead>
                 <tr>
-                    <th>신청번호</th>
+                    <th>NO</th>
                     <th>작성자</th>
                     <th>신청단계</th>
                     <th>신청일자</th>
@@ -80,65 +80,96 @@ watch(
 .application-container {
     width: 100%;
 }
+
+/* MemberManagement.vue의 헤더(content-header)와 동일한 레이아웃 */
 .header-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 15px; /* 제목과 버튼을 가깝게 밀착 */
     margin-bottom: 20px;
+    justify-content: flex-start; /* 양끝 정렬(space-between) 해제하고 왼쪽 정렬 */
 }
+
 h2 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1e293b;
     margin: 0;
+    font-size: 1.1rem; /* h3 사이즈로 축소하여 탭과 조화롭게 변경 */
+    color: #1e293b;
+    font-weight: bold;
 }
-.btn-assign {
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #ffffff;
-    background-color: #10b981;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+
+.btn-group {
     display: flex;
     align-items: center;
 }
-.btn-assign:hover {
-    background-color: #059669;
+
+/* MemberManagement.vue의 추가 버튼(btn-add)과 완벽히 동일한 스타일 */
+.btn-assign {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    color: #fff;
+    background-color: #ffab91;
+    border: 1px solid #f4e2de;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
 }
+
+.btn-assign i {
+    font-size: 0.8rem; /* 아이콘 크기도 폰트에 맞게 조절 */
+}
+
+.btn-assign:hover {
+    background-color: #ff8a65;
+}
+
+/* MemberManagement.vue의 테이블(list-table)과 완벽히 동일한 스타일 */
 .list-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed; /* 글자가 길어져도 표가 깨지지 않게 고정 */
     text-align: center;
 }
+
 .list-table th {
-    padding: 12px;
-    font-weight: 600;
+    background-color: #f8fafc; /* 오른쪽 이미지의 연한 회색 배경 */
     color: #64748b;
-    background-color: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    border-bottom: 2px solid #e2e8f0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 12px 10px;
+    border-top: none; /* 기존 왼쪽 이미지에 있던 맨 위 얇은 선 제거 */
+    border-bottom: 2px solid #e2e8f0; /* 헤더 아래쪽 두꺼운 구분선 */
 }
+
 .list-table td {
-    padding: 14px 12px;
+    padding: 16px 10px;
+    font-size: 0.9rem;
     color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9; /* 데이터 간의 아주 얇고 연한 구분선 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 .clickable-row {
     cursor: pointer;
     transition: background-color 0.2s;
 }
+
 .clickable-row:hover {
     background-color: #f8fafc;
 }
+
 .empty-msg {
-    padding: 40px !important;
+    padding: 30px !important;
     color: #94a3b8 !important;
+    text-align: center;
 }
+
 .status-text {
     font-weight: 600;
-    color: #3b82f6;
+    color: #ffab91;
 }
 </style>

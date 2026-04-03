@@ -86,7 +86,7 @@ const handleReset = () => {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
 }
 
 .sidebar-header {

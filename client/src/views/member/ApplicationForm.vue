@@ -114,7 +114,7 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
     width: 100%;
     height: 64px;
     background-color: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 2px solid #f4e2de;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -130,8 +130,8 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
 
 .side-panel {
     flex: 0 0 600px;
-    background-color: #f8fafc;
-    border-right: 1px solid #e2e8f0;
+    background-color: #fef9f6;
+    border-right: 2px solid #f4e2de;
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -146,7 +146,7 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
 
 .main-content {
     flex: 1;
-    background-color: #ffffff;
+    background-color: #fef9f6;
     padding: 40px;
     overflow-y: auto;
     display: flex;
@@ -169,7 +169,7 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
 
 .guide-box {
     text-align: center;
-    border: 2px dashed #e2e8f0;
+    border: 2px dashed #f4e2de;
     padding: 50px;
     border-radius: 16px;
 }

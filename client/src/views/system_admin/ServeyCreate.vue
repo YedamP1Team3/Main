@@ -218,11 +218,11 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="bg-slate-50 min-h-screen pt-[5rem] px-4 pb-8 md:px-6">
-        <div class="flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+    <div class="bg-[#fef9f6] min-h-screen pt-[5rem] px-4 pb-8 md:px-6">
+        <div class="flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border-2 border-[#f4e2de]">
             <div class="flex items-center gap-3">
                 <label class="font-bold text-slate-700">설문지 버전 선택:</label>
-                <select v-model="selectedVersionId" @change="handleVersionChange" class="border rounded-lg p-2 bg-slate-50 font-medium outline-none focus:ring-2 focus:ring-blue-500">
+                <select v-model="selectedVersionId" @change="handleVersionChange" class="border-2 border-[#f4e2de] rounded-lg p-2 bg-white font-medium outline-none focus:ring-2 focus:ring-[#ffab91] focus:border-[#ffab91]">
                     <option v-for="version in versionList" :key="getVersionId(version)" :value="getVersionId(version)">
                         버전 {{ getVersionId(version) }}
                         {{ getIsActive(version) === 1 ? '(현재 활성)' : getVersionId(version) === maxVersionId ? '(수정 가능 draft)' : '' }}
@@ -230,7 +230,7 @@ onMounted(async () => {
                 </select>
             </div>
 
-            <button @click="openPreviewModal" class="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-600 transition-colors shadow-md">현재 버전 적용 및 새 설문 버전 생성</button>
+            <button @click="openPreviewModal" class="bg-[#ffab91] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#ff8a65] transition-colors shadow-md">현재 버전 적용 및 새 설문 버전 생성</button>
         </div>
 
         <div class="grid grid-cols-12 gap-4 md:gap-6">
@@ -268,35 +268,34 @@ onMounted(async () => {
             </div>
         </div>
 
-        <!-- 제출전 -->
         <div v-if="showPreviewModal" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
                 <div @click="showPreviewModal = false" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
 
                 <div class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-4xl max-h-[calc(100vh-15rem)] flex flex-col mt-20">
-                    <button @click="showPreviewModal = false" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors z-10">
+                    <button @click="showPreviewModal = false" class="absolute top-6 right-6 text-slate-400 hover:text-[#ff8a65] transition-colors z-10">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
 
-                    <div class="px-8 pt-8 pb-6 border-b border-slate-100 shrink-0">
-                        <h3 class="text-2xl font-extrabold text-slate-950 tracking-tight" id="modal-title">설문지 미리보기</h3>
+                    <div class="px-8 pt-8 pb-6 border-b-2 border-[#f4e2de] shrink-0">
+                        <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight" id="modal-title">설문지 미리보기</h3>
                         <p class="text-base text-slate-500 mt-1.5 font-medium">최종 적용 전, 질문이 올바른지 확인해주세요.</p>
                     </div>
 
-                    <div class="p-8 overflow-y-auto flex-1 bg-slate-50 confirm-scroll-area">
-                        <div v-for="item in surveyData" :key="'preview_' + item.id" class="mb-8 last:mb-0 border border-slate-200 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
-                            <h4 class="text-xl font-bold text-slate-900 mb-6 pb-3 border-b border-slate-200"><span class="text-blue-600 mr-2">Q.</span>{{ item.name }}</h4>
+                    <div class="p-8 overflow-y-auto flex-1 bg-[#fef9f6] confirm-scroll-area">
+                        <div v-for="item in surveyData" :key="'preview_' + item.id" class="mb-8 last:mb-0 border-2 border-[#f4e2de] bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <h4 class="text-xl font-bold text-slate-900 mb-6 pb-3 border-b-2 border-[#f4e2de]"><span class="text-[#ffab91] mr-2">Q.</span>{{ item.name }}</h4>
 
                             <div v-for="sub in item.subItems" :key="'preview_sub_' + sub.id" class="mb-6 last:mb-0">
-                                <h5 class="text-base font-semibold text-blue-700 mb-3 ml-1 flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                <h5 class="text-base font-semibold text-[#ffab91] mb-3 ml-1 flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#ffab91]"></span>
                                     {{ sub.name }}
                                 </h5>
 
-                                <ul class="divide-y divide-slate-100 border border-slate-100 rounded-xl bg-slate-50/50">
-                                    <li v-for="(detail, index) in sub.details" :key="'preview_det_' + detail.id" class="p-4 flex items-start gap-3.5 hover:bg-slate-50 rounded-lg transition-colors">
+                                <ul class="divide-y-2 divide-[#f4e2de] border-2 border-[#f4e2de] rounded-xl bg-[#fef9f6]/50">
+                                    <li v-for="(detail, index) in sub.details" :key="'preview_det_' + detail.id" class="p-4 flex items-start gap-3.5 hover:bg-white rounded-lg transition-colors">
                                         <span class="font-mono font-bold text-slate-400 shrink-0 pt-0.5 text-xs w-5 text-right">
                                             {{ String(index + 1).padStart(2, '0') }}
                                         </span>
@@ -310,9 +309,9 @@ onMounted(async () => {
                         </div>
                     </div>
 
-                    <div class="px-8 py-6 border-t border-slate-100 bg-white flex justify-end gap-3.5 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.03)]">
-                        <button @click="showPreviewModal = false" class="px-5 py-2.5 text-sm rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors border border-slate-200">돌아가기</button>
-                        <button @click="confirmAndApplyVersion" class="px-5 py-2.5 text-sm rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30">버전 적용 및 생성</button>
+                    <div class="px-8 py-6 border-t-2 border-[#f4e2de] bg-white flex justify-end gap-3.5 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.03)]">
+                        <button @click="showPreviewModal = false" class="px-5 py-2.5 text-sm rounded-xl font-bold bg-white text-[#ff8a65] hover:bg-[#fef9f6] transition-colors border-2 border-[#f4e2de]">돌아가기</button>
+                        <button @click="confirmAndApplyVersion" class="px-5 py-2.5 text-sm rounded-xl font-bold bg-[#ffab91] text-white hover:bg-[#ff8a65] transition-colors shadow-sm shadow-[#ffab91]/30">버전 적용 및 생성</button>
                     </div>
                 </div>
             </div>

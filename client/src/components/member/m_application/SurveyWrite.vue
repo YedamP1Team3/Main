@@ -183,6 +183,7 @@ onMounted(() => {
     font-weight: 700;
 }
 
+/* 탭 메뉴 스타일 */
 .tabs {
     display: flex;
     gap: 12px;
@@ -192,16 +193,24 @@ onMounted(() => {
 .tabs button {
     padding: 10px 24px;
     font-weight: 600;
-    color: #64748b;
-    background: #f1f5f9;
-    border: none;
-    border-radius: 6px;
+    color: #ffab91;
+    background: #fff;
+    border: 2px solid #f4e2de;
+    border-radius: 8px;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tabs button:hover {
+    background: #fef9f6;
+    border-color: #ffab91;
 }
 
 .tabs button.active {
     color: #fff;
-    background: #94a3b8;
+    background: #ffab91;
+    border-color: #ffab91;
+    box-shadow: 0 2px 4px rgba(255, 171, 145, 0.3);
 }
 
 .q-section {
@@ -210,16 +219,16 @@ onMounted(() => {
 
 .q-section h3 {
     margin-bottom: 15px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #64748b;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffab91;
 }
 
 .q-section ul {
     margin: 0;
     padding: 0;
     list-style: none;
-    border-top: 2px solid #334155;
+    border-top: 2px solid #f4e2de;
 }
 
 .q-section li {
@@ -227,7 +236,7 @@ onMounted(() => {
     gap: 40px;
     justify-content: space-between;
     padding: 24px 10px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 2px solid #f4e2de;
 }
 
 .q-section p {
@@ -240,6 +249,7 @@ onMounted(() => {
 .q-section span {
     margin-right: 6px;
     font-weight: 700;
+    color: #ffab91;
 }
 
 .radios {
@@ -254,14 +264,16 @@ onMounted(() => {
     display: flex;
     gap: 8px;
     align-items: center;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
+    color: #475569;
 }
 
+/* 라디오 버튼 포인트 컬러 적용 */
 .radios input {
     width: 18px;
     height: 18px;
-    accent-color: #475569;
+    accent-color: black;
 }
 
 .empty-msg {
@@ -287,47 +299,54 @@ onMounted(() => {
     border-radius: 30px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border: 1px solid transparent;
 }
 
+/* 주요 제출 버튼 */
 .btn-primary {
-    background: #fff;
-    border-color: #94a3b8 !important;
-    color: #1e293b;
+    background: #ffab91;
+    border: 2px solid #ffab91;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(255, 171, 145, 0.3);
 }
 
 .btn-primary:hover {
-    background: #f8fafc;
-    border-color: #0f172a !important;
+    background: #ff8a65;
+    border-color: #ff8a65;
 }
 
+/* 취소/돌아가기 버튼 */
 .btn-secondary {
-    background: #f1f5f9;
-    color: #64748b;
-    border-color: #cbd5e1 !important;
+    background: #fff;
+    color: #ffab91;
+    border: 2px solid #f4e2de;
 }
 
 .btn-secondary:hover {
-    background: #e2e8f0;
-    color: #475569;
+    background: #fef9f6;
+    color: #ff8a65;
+    border-color: #ff8a65;
 }
 
+/* ========================================== */
+/* 미리보기(확인) 모드 스타일 */
+/* ========================================== */
 .confirm-notice {
     padding: 15px;
     margin-bottom: 20px;
-    background-color: #eff6ff;
-    color: #1d4ed8;
+    background-color: #fef9f6;
+    color: #ffab91;
+    border: 2px solid #f4e2de;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .confirm-scroll-area {
     max-height: 500px;
     overflow-y: auto;
-    padding: 20px 15px 20px 20px;
-    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border: 2px solid #f4e2de;
     border-radius: 8px;
-    background-color: #fafafa;
+    background-color: #fff;
 }
 
 .confirm-scroll-area::-webkit-scrollbar {
@@ -335,7 +354,7 @@ onMounted(() => {
 }
 
 .confirm-scroll-area::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
+    background-color: #f4e2de;
     border-radius: 4px;
 }
 
@@ -348,21 +367,22 @@ onMounted(() => {
     color: #1e293b;
     margin-bottom: 15px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #cbd5e1;
+    border-bottom: 2px solid #f4e2de;
 }
 
 .conf-sub-title {
     font-size: 1rem;
-    color: #475569;
+    color: #ffab91;
+    font-weight: 600;
     margin: 10px 0;
 }
 
 .conf-list {
     list-style: none;
-    padding: 0;
-    margin: 0 0 20px;
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    padding: 4px;
+    margin: 0 0 20px 0;
+    background: #fef9f6;
+    border: 2px solid #f4e2de;
     border-radius: 8px;
 }
 
@@ -370,17 +390,25 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     padding: 15px;
-    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 4px;
+    background: #fff;
+    border: 2px solid #f4e2de;
+    border-radius: 6px;
 }
 
 .conf-list li:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .conf-q {
     flex: 1;
     padding-right: 20px;
     line-height: 1.5;
+}
+
+.conf-q span {
+    color: #ffab91;
+    font-weight: bold;
 }
 
 .conf-a {
@@ -390,10 +418,10 @@ onMounted(() => {
 }
 
 .ans-yes {
-    color: #2563eb;
+    color: #ffab91;
 }
 
 .ans-no {
-    color: #dc2626;
+    color: #94a3b8;
 }
 </style>
