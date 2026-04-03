@@ -29,7 +29,7 @@ export default {
     min-height: 100%;
     padding: 20px 16px;
     background: #fff;
-    border-right: 1px solid #e5e7eb;
+    border-right: 1px solid #f4e2de;
     box-sizing: border-box;
 }
 

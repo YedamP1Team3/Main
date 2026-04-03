@@ -241,15 +241,15 @@ export default {
 
 /* 오늘 날짜 */
 .date-cell.today {
-    border-color: #03c75a; /* 네이버 느낌 포인트 */
-    color: #03c75a;
+    border-color: #ffab91; /* 네이버 느낌 포인트 */
+    color: #ffab91;
     font-weight: 700;
 }
 
 /* 선택 날짜 */
 .date-cell.selected {
-    background: #2563eb;
-    border-color: #2563eb;
+    background: #ffab91;
+    border-color: #ffab91;
     color: #fff;
     font-weight: 700;
 }
