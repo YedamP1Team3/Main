@@ -46,8 +46,7 @@ const columns = [
     { key: 'reservation_date', label: '예약날짜' },
     { key: 'reservation_time', label: '예약시간' },
     { key: 'rsv_status', label: '예약상태', type: 'status' },
-    { key: 'process', label: '처리', type: 'action', action: 'process' },
-    { key: 'write_log', label: '일지작성', type: 'action', action: 'writeLog' }
+    { key: 'process', label: '처리', type: 'action', action: 'process' }
 ];
 
 const formatReservationRow = (item) => {
@@ -71,7 +70,9 @@ const fetchReservations = async () => {
         const res = await getManagerReservations(userId.value);
         const list = res.data.reservations || [];
 
-        reservations.value = list.map(formatReservationRow);
+        const visibleStatuses = ['APPROVED', 'REJECTED', 'REQUESTED'];
+
+        reservations.value = list.filter((item) => visibleStatuses.includes(item.rsv_status)).map(formatReservationRow);
     } catch (err) {
         console.error('담당자 예약 목록 조회 실패:', err);
         alert(err.response?.data?.message || '예약 목록 조회 실패');
@@ -106,11 +107,6 @@ const handleActionClick = ({ action, row }) => {
     if (action === 'process') {
         openProcessModal(row);
         return;
-    }
-
-    if (action === 'writeLog') {
-        console.log('일지작성 클릭:', row);
-        // 다음 단계: 일지작성 페이지 이동 또는 모달 연결
     }
 };
 

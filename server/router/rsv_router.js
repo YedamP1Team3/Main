@@ -1,17 +1,17 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
-const rsvService = require("../service/rsv_service.js");
+const rsvService = require('../service/rsv_service.js');
 
 //담당자 ID 조회
-router.get("/manager-id", async (req, res) => {
+router.get('/manager-id', async (req, res) => {
   try {
     // 나중에는 로그인 정보로 대체
     const userId = req.headers.userid;
     const userRole = req.headers.role;
 
     const { beneId } = req.query;
-    console.log("router.userId, userRole, beneId : ", userId, userRole, beneId);
+    console.log('router.userId, userRole, beneId : ', userId, userRole, beneId);
 
     const managerId = await rsvService.resolveManagerId({
       userId,
@@ -34,7 +34,7 @@ router.get("/manager-id", async (req, res) => {
 // -----------------------------------reservation REST--------------------------
 
 // 보호자 -< 지원대상자 조회
-router.get("/beneficiaries", async (req, res) => {
+router.get('/beneficiaries', async (req, res) => {
   try {
     const familyId = req.headers.userid;
 
@@ -53,7 +53,7 @@ router.get("/beneficiaries", async (req, res) => {
 });
 
 // 상담예약 신청버튼
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { beneId, managerId, date, times } = req.body;
 
@@ -66,7 +66,7 @@ router.post("/", async (req, res) => {
     ) {
       return res.status(400).json({
         success: false,
-        message: "beneId, managerId, date, times는 필수입니다.",
+        message: 'beneId, managerId, date, times는 필수입니다.',
       });
     }
 
@@ -79,31 +79,31 @@ router.post("/", async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "상담 신청이 완료되었습니다.",
+      message: '상담 신청이 완료되었습니다.',
       data: result,
     });
   } catch (err) {
-    console.error("상담 신청 실패:", err);
+    console.error('상담 신청 실패:', err);
 
     return res.status(500).json({
       success: false,
-      message: err.message || "상담 신청 중 오류가 발생했습니다.",
+      message: err.message || '상담 신청 중 오류가 발생했습니다.',
     });
   }
 });
 
 // 보호자 전체 지원대상자 상담 신청 내역 조회
-router.get("/reservations", async (req, res) => {
+router.get('/reservations', async (req, res) => {
   try {
     const userId = req.headers.userid;
     const role = req.headers.role;
 
-    console.log("상담 신청 내역 조회 요청:", { userId, role });
+    console.log('상담 신청 내역 조회 요청:', { userId, role });
 
     if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "userId가 필요합니다.",
+        message: 'userId가 필요합니다.',
       });
     }
 
@@ -117,26 +117,26 @@ router.get("/reservations", async (req, res) => {
       data: reservationList,
     });
   } catch (err) {
-    console.error("상담 신청 내역 조회 실패:", err);
+    console.error('상담 신청 내역 조회 실패:', err);
 
     return res.status(500).json({
       success: false,
-      message: "상담 신청 내역 조회 중 오류가 발생했습니다.",
+      message: '상담 신청 내역 조회 중 오류가 발생했습니다.',
     });
   }
 });
 
 // 상담 신청 취소(삭제)
-router.delete("/reservations/:rsvId", async (req, res) => {
+router.delete('/reservations/:rsvId', async (req, res) => {
   try {
     const { rsvId } = req.params;
 
-    console.log("상담 신청 취소 요청 rsvId:", rsvId);
+    console.log('상담 신청 취소 요청 rsvId:', rsvId);
 
     if (!rsvId) {
       return res.status(400).json({
         success: false,
-        message: "rsvId가 필요합니다.",
+        message: 'rsvId가 필요합니다.',
       });
     }
 
@@ -145,20 +145,20 @@ router.delete("/reservations/:rsvId", async (req, res) => {
     if (!result) {
       return res.status(404).json({
         success: false,
-        message: "삭제할 예약이 존재하지 않습니다.",
+        message: '삭제할 예약이 존재하지 않습니다.',
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "상담 신청이 취소되었습니다.",
+      message: '상담 신청이 취소되었습니다.',
     });
   } catch (err) {
-    console.error("상담 신청 취소 실패:", err);
+    console.error('상담 신청 취소 실패:', err);
 
     return res.status(500).json({
       success: false,
-      message: "상담 신청 취소 중 오류가 발생했습니다.",
+      message: '상담 신청 취소 중 오류가 발생했습니다.',
     });
   }
 });
@@ -166,7 +166,7 @@ router.delete("/reservations/:rsvId", async (req, res) => {
 // -----------------------------------managerSchedule REST--------------------------
 
 // 다음 달 스케줄 수동 생성 테스트용
-router.post("/schedule/auto-generate", async (req, res) => {
+router.post('/schedule/auto-generate', async (req, res) => {
   try {
     const result = await rsvService.generateNextMonthSchedules();
 
@@ -180,7 +180,7 @@ router.post("/schedule/auto-generate", async (req, res) => {
 });
 
 // 예약가능 시간 조회 (MANAGER_ID, WORK_DATE)
-router.get("/schedule", async (req, res) => {
+router.get('/schedule', async (req, res) => {
   try {
     // (ex: ?date=2026-03-24)
     const { managerId, date } = req.query;
@@ -188,7 +188,7 @@ router.get("/schedule", async (req, res) => {
     if (!date) {
       return res.status(400).json({
         success: false,
-        message: "date 파라미터가 필요합니다.",
+        message: 'date 파라미터가 필요합니다.',
       });
     }
 
@@ -207,18 +207,18 @@ router.get("/schedule", async (req, res) => {
 });
 
 // 담당자 일정조정(예약불가) (MANAGER_ID)
-router.post("/blocked-times", async (req, res) => {
+router.post('/blocked-times', async (req, res) => {
   try {
     const { managerId, date, times } = req.body;
 
-    console.log("managerId : ", managerId);
-    console.log("date : ", date);
-    console.log("times : ", times);
+    console.log('managerId : ', managerId);
+    console.log('date : ', date);
+    console.log('times : ', times);
 
     if (!date || !times || times.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "date와 times가 필요합니다.",
+        message: 'date와 times가 필요합니다.',
       });
     }
 
@@ -226,7 +226,7 @@ router.post("/blocked-times", async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "예약불가 시간 등록 완료",
+      message: '예약불가 시간 등록 완료',
     });
   } catch (err) {
     res.status(500).json({
@@ -237,15 +237,15 @@ router.post("/blocked-times", async (req, res) => {
 });
 
 // 예약 가능 처리 (예약불가 해제)
-router.delete("/unblock-times", async (req, res) => {
+router.delete('/unblock-times', async (req, res) => {
   try {
     const { managerId, date, times } = req.body; // times: ["09:30", "10:00", ...]
-    console.log("예약해제.date : ", date);
+    console.log('예약해제.date : ', date);
 
     if (!date || !times || times.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "date와 times가 필요합니다.",
+        message: 'date와 times가 필요합니다.',
       });
     }
 
@@ -253,7 +253,7 @@ router.delete("/unblock-times", async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "예약 가능 처리 완료",
+      message: '예약 가능 처리 완료',
       removed,
     });
   } catch (err) {
@@ -266,16 +266,14 @@ router.delete("/unblock-times", async (req, res) => {
 
 // -----------------------------------manageReservation API--------------------------
 
-router.get("/manager/reservations", async (req, res) => {
+router.get('/manager/reservations', async (req, res) => {
   try {
     const { managerId } = req.query;
-
-    console.log("담당자 예약 조회 req.query :", req.query);
 
     if (!managerId) {
       return res.status(400).json({
         success: false,
-        message: "managerId 파라미터가 필요합니다.",
+        message: 'managerId 파라미터가 필요합니다.',
       });
     }
 
@@ -286,65 +284,62 @@ router.get("/manager/reservations", async (req, res) => {
       reservations,
     });
   } catch (err) {
-    console.error("담당자 예약 조회 실패:", err);
+    console.error('담당자 예약 조회 실패:', err);
     return res.status(500).json({
       success: false,
-      message: "담당자 예약 조회 실패",
+      message: '담당자 예약 조회 실패',
     });
   }
 });
 
-router.patch("/manager/reservations/:rsvId/process", async (req, res) => {
+router.patch('/manager/reservations/:rsvId/process', async (req, res) => {
   try {
     const { rsvId } = req.params;
     const { decision, rejectReason } = req.body;
 
-    console.log("예약 처리 req.params :", req.params);
-    console.log("예약 처리 req.body :", req.body);
-
     if (!rsvId) {
       return res.status(400).json({
         success: false,
-        message: "rsvId 파라미터가 필요합니다.",
+        message: 'rsvId 파라미터가 필요합니다.',
       });
     }
 
     if (!decision) {
       return res.status(400).json({
         success: false,
-        message: "decision 값이 필요합니다.",
+        message: 'decision 값이 필요합니다.',
       });
     }
 
-    if (decision === "REJECTED" && !rejectReason?.trim()) {
+    if (decision === 'REJECTED' && !rejectReason?.trim()) {
       return res.status(400).json({
         success: false,
-        message: "반려 사유를 입력해주세요.",
+        message: '반려 사유를 입력해주세요.',
       });
     }
 
-    await rsvService.processReservation(rsvId, decision);
+    await rsvService.processReservation(rsvId, decision, rejectReason);
 
     return res.status(200).json({
       success: true,
       message:
-        decision === "APPROVED"
-          ? "예약이 승인되었습니다."
-          : "예약이 반려되었습니다.",
+        decision === 'APPROVED'
+          ? '예약이 승인되었습니다.'
+          : '예약이 반려되었습니다.',
     });
   } catch (err) {
-    console.error("예약 처리 실패:", err);
+    console.error('예약 처리 실패:', err);
 
     return res.status(err.statusCode || 500).json({
       success: false,
-      message: err.message || "예약 처리 실패",
+      message: err.message || '예약 처리 실패',
     });
   }
 });
 
 // -----------------------------------counseling API--------------------------
 
-router.get("/manager/counsel", async (req, res) => {
+router.get('/manager/counsel', async (req, res) => {
   try {
     const { managerId } = req.query;
 
@@ -355,16 +350,16 @@ router.get("/manager/counsel", async (req, res) => {
       counsels: list,
     });
   } catch (err) {
-    console.error("getManagerCounselList error:", err);
+    console.error('getManagerCounselList error:', err);
 
     return res.status(400).json({
       success: false,
-      message: err.message || "상담일지 관리 목록 조회 실패",
+      message: err.message || '상담일지 관리 목록 조회 실패',
     });
   }
 });
 
-router.get("/manager/:rsvId", async (req, res) => {
+router.get('/manager/:rsvId', async (req, res) => {
   try {
     const { rsvId } = req.params;
 
@@ -375,16 +370,16 @@ router.get("/manager/:rsvId", async (req, res) => {
       reservation,
     });
   } catch (err) {
-    console.error("getCounselReservationByRsvId error:", err);
+    console.error('getCounselReservationByRsvId error:', err);
 
     return res.status(400).json({
       success: false,
-      message: err.message || "상담 예약 정보 조회 실패",
+      message: err.message || '상담 예약 정보 조회 실패',
     });
   }
 });
 
-router.post("/counsel", async (req, res) => {
+router.post('/counsel', async (req, res) => {
   try {
     const { rsvId, counselingType, title, content, futurePlan } = req.body;
 
@@ -398,20 +393,20 @@ router.post("/counsel", async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "상담일지 등록 완료",
+      message: '상담일지 등록 완료',
       data: result,
     });
   } catch (err) {
-    console.error("createCounselingNote error:", err);
+    console.error('createCounselingNote error:', err);
 
     return res.status(500).json({
       success: false,
-      message: err.message || "상담일지 등록 실패",
+      message: err.message || '상담일지 등록 실패',
     });
   }
 });
 
-router.get("/counsel/:rsvId", async (req, res) => {
+router.get('/counsel/:rsvId', async (req, res) => {
   try {
     const { rsvId } = req.params;
 
@@ -422,17 +417,17 @@ router.get("/counsel/:rsvId", async (req, res) => {
       note,
     });
   } catch (err) {
-    console.error("getCounselingNoteByRsvId error:", err);
+    console.error('getCounselingNoteByRsvId error:', err);
 
     return res.status(404).json({
       success: false,
-      message: err.message || "상담일지 조회 실패",
+      message: err.message || '상담일지 조회 실패',
     });
   }
 });
 
 // 상담일지 수정
-router.put("/counsel/:rsvId", async (req, res) => {
+router.put('/counsel/:rsvId', async (req, res) => {
   try {
     const { rsvId } = req.params;
     const { counselingType, title, content, futurePlan } = req.body;
@@ -447,15 +442,15 @@ router.put("/counsel/:rsvId", async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "상담일지 수정 완료",
+      message: '상담일지 수정 완료',
       data: result,
     });
   } catch (err) {
-    console.error("updateCounselingNote error:", err);
+    console.error('updateCounselingNote error:', err);
 
     return res.status(500).json({
       success: false,
-      message: err.message || "상담일지 수정 실패",
+      message: err.message || '상담일지 수정 실패',
     });
   }
 });
