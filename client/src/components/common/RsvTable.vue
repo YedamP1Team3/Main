@@ -223,6 +223,7 @@ const handleActionClick = (row, column) => {
     border-top: 1px solid #cbd5e1;
     border-bottom: 1px solid #cbd5e1;
     background-color: #f8fafc;
+    font-size: 1rem;
 }
 
 .list-table td {
@@ -230,6 +231,7 @@ const handleActionClick = (row, column) => {
     color: #5f4b45;
     border-bottom: 1px solid #f1ddd6;
     vertical-align: middle;
+    font-size: 1rem;
 }
 
 .empty-msg {
@@ -252,7 +254,7 @@ const handleActionClick = (row, column) => {
     min-width: 82px;
     padding: 6px 10px;
     border-radius: 999px;
-    font-size: 0.8rem;
+    font-size: 1rem;
     font-weight: 700;
     background-color: transparent;
 }
@@ -282,7 +284,7 @@ const handleActionClick = (row, column) => {
     padding: 7px 12px;
     border: none;
     border-radius: 8px;
-    font-size: 0.82rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #ffffff;
     background-color: #ffab91;
