@@ -42,7 +42,7 @@ const route = useRoute();
     width: 280px;
     flex-shrink: 0;
     background: white;
-    border-right: 1px solid #e2e8f0;
+    border: 2px solid #f4e2de;
     z-index: 10;
 }
 
@@ -51,6 +51,7 @@ const route = useRoute();
     overflow-y: auto;
     /* [수정] 기존 40px에서 10px을 더해 50px로 설정 (본문이 더 내려옵니다) */
     padding: 50px 2rem 2rem 2rem !important;
+    background-color: #fef9f6;
 }
 
 /* [추가] ManagerInfo.vue의 내용이 너무 퍼지지 않게 잡아주는 설정 */

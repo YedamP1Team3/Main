@@ -139,14 +139,14 @@ onMounted(() => {
     display: flex;
     height: calc(100vh - 150px); /* 헤더 등을 제외한 높이 */
     background-color: #fff;
-    border: 1px solid #e1e1e1;
+    border: 2px solid #f4e2de;
     margin: 20px;
 }
 
 /* 목록 영역 */
 .list-section {
     width: 320px;
-    border-right: 1px solid #eee;
+    border-right: 2px solid #f4e2de;
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -187,14 +187,14 @@ onMounted(() => {
 }
 
 .beneficiary-list li.selected {
-    background-color: #f0f7ff;
-    border-left: 4px solid #4a90e2;
+    background-color: #fef9f6;
+    border-left: 4px solid #f3c4b9;
     font-weight: bold;
 }
 
 .arrow-icon::after {
     content: '>';
-    color: #ccc;
+    color: #666;
 }
 
 /* 페이징 */
@@ -236,7 +236,7 @@ onMounted(() => {
 }
 
 .detail-header {
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid #f4e2de;
     padding-bottom: 15px;
     margin-bottom: 25px;
 }

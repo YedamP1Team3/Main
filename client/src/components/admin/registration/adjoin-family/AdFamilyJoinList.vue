@@ -170,6 +170,7 @@ onMounted(fetchJoinRequests);
 .card {
     background: #ffffff;
     padding: 2rem;
+    border: 2px solid #f4e2de;
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     margin: 1rem;
