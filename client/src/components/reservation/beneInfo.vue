@@ -80,7 +80,7 @@ const handleSelect = (event) => {
     max-width: 320px;
     min-width: 260px;
     background: #ffffff;
-    border-radius: 16px;
+    border-right: 1px solid #f4e2de;
     padding: 24px 20px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     box-sizing: border-box;

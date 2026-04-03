@@ -55,7 +55,7 @@ export default {
             emit('blockTimes', {
                 date: props.selectedDate,
                 times: selectedTimes.value,
-                type // 'available' | 'unavailable'
+                type
             });
 
             selectedTimes.value = [];
@@ -118,9 +118,7 @@ export default {
                         unavailable: slot.status === 'reserved' || (slot.status === 'blocked' && mode !== 'manager'),
 
                         'selected-manager': selectedTimes.includes(slot.time) && slot.status === 'available' && mode === 'manager',
-
                         'selected-family': selectedTimes.includes(slot.time) && slot.status === 'available' && mode === 'family',
-
                         'selected-blocked': selectedTimes.includes(slot.time) && slot.status === 'blocked' && mode === 'manager'
                     }"
                     @click="toggleTime(slot)"
@@ -142,12 +140,12 @@ export default {
             <div class="action-buttons">
                 <template v-if="mode === 'manager'">
                     <button class="unavailable-btn" @click="handleManagerAction('unavailable')">예약차단</button>
-                    <button class="available-btn" @click="handleManagerAction('available')">차단해제</button>
+                    <button class="available-btn manager-available-btn" @click="handleManagerAction('available')">차단해제</button>
                 </template>
 
                 <template v-else>
-                    <button class="available-btn" @click="handleUserAction">상담신청</button>
-                    <button class="unavailable-btn" @click="selectedTimes = []">취소</button>
+                    <button class="available-btn family-available-btn" @click="handleUserAction">상담신청</button>
+                    <button class="cancel-btn" @click="selectedTimes = []">취소</button>
                 </template>
             </div>
         </div>
@@ -165,8 +163,8 @@ export default {
     background: #fff;
     padding: 20px 20px 18px;
     border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
     box-sizing: border-box;
 }
 
@@ -224,14 +222,15 @@ export default {
 }
 
 .period-toggle button:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
+    background: #fef9f6;
+    border-color: #ffab91;
+    color: #ffab91;
 }
 
 .period-toggle button.active {
-    background: #2563eb;
+    background: #ffab91;
     color: #fff;
-    border-color: #2563eb;
+    border-color: #ffab91;
 }
 
 .time-grid {
@@ -257,35 +256,37 @@ export default {
     user-select: none;
 }
 
-/* 담당자: 일반 슬롯 hover = 붉은 느낌 */
+/* 담당자: 일반 available 슬롯 hover = 차단 의미(빨강) */
 .time-item.manager-mode:not(.reserved):not(.unavailable):not(.blocked):not(.selected-manager):not(.selected-family):not(.selected-blocked):hover {
-    background: #fee2e2;
+    background: #fff5f5;
     border-color: #f87171;
-    color: #b91c1c;
+    color: #dc2626;
 }
 
-/* 보호자: 일반 슬롯 hover = 푸른 느낌 */
+/* 보호자: 일반 available 슬롯 hover = 선택/신청 의미(브랜드톤) */
 .time-item.family-mode:not(.reserved):not(.unavailable):not(.blocked):not(.selected-manager):not(.selected-family):not(.selected-blocked):hover {
-    background: #eff6ff;
-    border-color: #93c5fd;
-    color: #1d4ed8;
+    background: #fef9f6;
+    border-color: #ffab91;
+    color: #ffab91;
 }
 
 .time-item.reserved,
 .time-item.unavailable {
     cursor: not-allowed;
-    opacity: 0.55;
+    opacity: 0.6;
     background: #f9fafb;
     color: #9ca3af;
+    border-color: #e5e7eb;
 }
 
 .time-item.reserved:hover,
 .time-item.unavailable:hover {
-    background-color: #e0e0e0;
-    border-color: #cfcfcf;
-    color: #777;
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+    color: #9ca3af;
 }
 
+/* 담당자에게만 보이는 차단된 시간 */
 .time-item.blocked {
     background: #fff;
     color: #dc2626;
@@ -294,10 +295,11 @@ export default {
     cursor: pointer;
 }
 
+/* 담당자 입장: blocked hover = 해제 가능 의미(teal) */
 .time-item.blocked:hover {
-    background: #eff6ff;
-    border-color: #93c5fd;
-    color: #1d4ed8;
+    background: #f0fdfa;
+    border-color: #14b8a6;
+    color: #0f766e;
 }
 
 .time-item.selected-manager {
@@ -309,18 +311,37 @@ export default {
 }
 
 .time-item.selected-family {
-    background: #2563eb;
+    background: #ffab91;
     color: #fff;
-    border-color: #2563eb;
+    border-color: #ffab91;
     font-weight: 600;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .time-item.selected-blocked {
-    background: #2563eb;
+    background: #14b8a6;
     color: #fff;
-    border-color: #2563eb;
+    border-color: #14b8a6;
     font-weight: 700;
+}
+
+/* 선택된 상태 hover 시 색 흔들림 방지 */
+.time-item.selected-manager:hover {
+    background: #ef4444;
+    color: #fff;
+    border-color: #dc2626;
+}
+
+.time-item.selected-family:hover {
+    background: #ffab91;
+    color: #fff;
+    border-color: #ffab91;
+}
+
+.time-item.selected-blocked:hover {
+    background: #14b8a6;
+    color: #fff;
+    border-color: #14b8a6;
 }
 
 .summary-box {
@@ -362,7 +383,8 @@ export default {
 }
 
 .available-btn,
-.unavailable-btn {
+.unavailable-btn,
+.cancel-btn {
     flex: 1;
     height: 42px;
     border-radius: 8px;
@@ -372,17 +394,31 @@ export default {
     transition: all 0.18s ease;
 }
 
-.available-btn {
-    background: #2563eb;
+/* manager: 차단해제 버튼 */
+.manager-available-btn {
+    background: #fff;
+    color: #14b8a6;
+    border: 1px solid #14b8a6;
+}
+
+.manager-available-btn:hover {
+    background: #0d9488;
+    border-color: #0d9488;
+}
+
+/* family: 상담신청 버튼 */
+.family-available-btn {
+    background: #ffab91;
     color: #fff;
-    border: 1px solid #2563eb;
+    border: 1px solid #ffab91;
 }
 
-.available-btn:hover {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
+.family-available-btn:hover {
+    background: #ff9472;
+    border-color: #ff9472;
 }
 
+/* manager: 예약차단 버튼 */
 .unavailable-btn {
     background: #fff;
     color: #dc2626;
@@ -392,6 +428,19 @@ export default {
 .unavailable-btn:hover {
     background: #fff5f5;
     border-color: #f87171;
+}
+
+/* family: 취소 버튼 */
+.cancel-btn {
+    background: #fff;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+}
+
+.cancel-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #4b5563;
 }
 
 @media (max-width: 1100px) {

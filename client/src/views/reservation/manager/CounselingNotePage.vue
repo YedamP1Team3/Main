@@ -145,6 +145,8 @@ onMounted(() => {
 .layout-header {
     height: 70px;
     flex-shrink: 0;
+    background-color: #fff;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .layout-body {
@@ -155,7 +157,7 @@ onMounted(() => {
 .layout-main {
     flex: 1;
     padding: 24px;
-    background-color: #f8f9fb;
+    background-color: #fef9f6;
     overflow-y: auto;
 }
 
