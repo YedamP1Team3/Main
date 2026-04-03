@@ -68,8 +68,8 @@ watch(
 <template>
     <div>
         <div>
-            <h2>지원결과서</h2>
             <div class="btn-group">
+                <h2>지원결과서</h2>
                 <button @click="addNewPlan">+추가하기</button>
                 <button @click="savefile" :class="{ 'active-temp': showTemp }" class="btn-temp-check">{{ showTemp ? '일반 목록' : '임시저장' }}</button>
             </div>
@@ -105,7 +105,7 @@ watch(
 }
 
 h2 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1e293b;
     letter-spacing: -0.025em;
@@ -120,7 +120,7 @@ h2 {
 
 button {
     padding: 8px 16px;
-    font-size: 0.875rem;
+    font-size: 1.1rem;
     font-weight: 600;
     border-radius: 8px; /* 조금 더 둥글게 */
     cursor: pointer;
@@ -172,12 +172,13 @@ table {
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
+    padding-top: 10px;
 }
 
 th {
     background-color: #fef9f6; /* 헤더에 아주 연한 배경색 추가 */
     color: #64748b;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -187,7 +188,7 @@ th {
 
 td {
     padding: 16px 10px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #334155;
     border-bottom: 1px solid #f4e2de;
     white-space: nowrap;

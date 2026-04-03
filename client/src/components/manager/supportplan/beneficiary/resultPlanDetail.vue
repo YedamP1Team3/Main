@@ -306,12 +306,14 @@ onMounted(() => {
 <style scoped>
 /* 전체 컨테이너 */
 .BfnewPlan {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
-    background-color: #ffffff;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
     border: 2px solid #f4e2de;
+    background-color: #ffffff;
+    color: #334155;
 }
+
 h2 {
     font-size: 1.5rem;
     font-weight: 800;
@@ -334,25 +336,26 @@ h2 {
 }
 .state-badge {
     padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 0.85rem;
+    border-radius: 4px;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 .state-badge.임시 {
-    background-color: #f1f5f9;
-    color: #64748b;
+    background: #f1f5f9;
+    color: #475569;
+}
+.state-badge.반려,
+.state-badge.반려\/재승인 {
+    background: #fee2e2;
+    color: #dc2626;
 }
 .state-badge.대기 {
-    background-color: #fef3c7;
+    background: #fef3c7;
     color: #d97706;
 }
-.state-badge.반려 {
-    background-color: #fee2e2;
-    color: #ef4444;
-}
-.date-box {
-    color: #64748b;
-    font-size: 0.95rem;
+.state-badge.승인 {
+    background: #dcfce7;
+    color: #16a34a;
 }
 
 /* 표 레이아웃 */
@@ -375,7 +378,7 @@ h2 {
     justify-content: center;
     padding: 20px;
     border-right: 1px solid #f4e2de;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     flex-shrink: 0;
 }
 .input-wrapper {
@@ -391,7 +394,7 @@ h2 {
     width: 100%;
     border: none;
     padding: 15px 20px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #334155;
     outline: none;
     background: transparent;
@@ -435,7 +438,7 @@ h2 {
     align-items: center;
     padding: 5px 15px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     border: 1px solid #ffab91;
     cursor: pointer;
     margin-right: 5px;
@@ -529,7 +532,7 @@ button:last-of-type:not(.active-temp):hover {
 }
 
 .history-section h3 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 800;
     margin-bottom: 20px;
 }
@@ -554,7 +557,7 @@ button:last-of-type:not(.active-temp):hover {
     margin-bottom: 12px;
     border-bottom: 1px dashed #cbd5e1;
     padding-bottom: 10px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 
 .history-user {
@@ -566,7 +569,7 @@ button:last-of-type:not(.active-temp):hover {
 }
 
 .history-summary {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #1e293b;
 }
 

@@ -151,6 +151,7 @@ const getFileIcon = (fileName) => {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 1.2rem;
 }
 
 .btn-close:hover {
@@ -162,6 +163,7 @@ const getFileIcon = (fileName) => {
 .detail-table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 1.1rem;
 }
 
 .detail-table th {
@@ -188,7 +190,7 @@ const getFileIcon = (fileName) => {
 .status-badge {
     padding: 4px 8px;
     border-radius: 12px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 

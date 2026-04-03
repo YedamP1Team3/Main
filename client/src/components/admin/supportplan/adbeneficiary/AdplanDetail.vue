@@ -204,9 +204,9 @@ watch(
 <style scoped>
 /* 1. 전체 컨테이너 레이아웃 */
 .BfnewPlan {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
     background-color: #ffffff;
     border: 2px solid #f4e2de;
     color: #1e293b;
@@ -214,6 +214,20 @@ watch(
         'Pretendard',
         -apple-system,
         sans-serif;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
 }
 
 /* 메인 제목 아래 구분선 */
@@ -239,7 +253,7 @@ watch(
 }
 
 .author-row {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #475569;
     font-weight: 500;
     white-space: nowrap; /* 텍스트 줄바꿈 방지 */
@@ -249,7 +263,7 @@ watch(
 .state-badge {
     padding: 4px 12px;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: bold;
     display: inline-block;
 }
@@ -307,7 +321,7 @@ watch(
     flex: 1;
     padding: 15px 20px;
     color: #1e293b;
-    font-size: 1rem;
+    font-size: 1.1rem;
     display: flex;
     align-items: center;
     word-break: break-all;
@@ -358,7 +372,7 @@ watch(
 }
 
 .file_icon {
-    font-size: 1rem;
+    font-size: 1.1rem;
     margin-right: 10px;
     display: flex;
     align-items: center;
@@ -367,7 +381,7 @@ watch(
 
 .file_name {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #334155;
     font-weight: 500;
     white-space: nowrap;
@@ -408,7 +422,7 @@ watch(
     color: white !important; /* 글자 빨간색 */
     padding: 10px 24px;
     border-radius: 8px; /* 알약 모양 */
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -439,7 +453,7 @@ button:hover {
 
 .reason-label {
     font-weight: 800;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     margin-bottom: 12px;
     color: #1e293b;
 }
@@ -453,7 +467,7 @@ button:hover {
     border-radius: 8px;
     resize: none;
     margin-bottom: 15px;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
 }
 
 /* 6. 반려 히스토리 섹션 */
@@ -464,7 +478,7 @@ button:hover {
 }
 
 .history-title {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     margin-bottom: 15px;
     font-weight: 800;
     color: #1e293b;
@@ -488,7 +502,7 @@ button:hover {
 .history-header {
     display: flex;
     justify-content: space-between;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #64748b;
     margin-bottom: 12px;
     padding-bottom: 10px;
@@ -496,7 +510,7 @@ button:hover {
 }
 
 .history-body {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #1e293b;
     line-height: 1.6;
 }
@@ -514,7 +528,7 @@ button:hover {
     display: block;
     font-weight: bold;
     color: #64748b;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     margin-top: 10px;
     margin-bottom: 5px;
 }
@@ -522,7 +536,7 @@ button:hover {
 .pre-wrap {
     white-space: pre-wrap;
     word-break: break-all;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #334155;
     line-height: 1.6;
 }

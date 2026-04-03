@@ -138,7 +138,7 @@ watch(
     background: none;
     border: none;
     padding: 15px 20px;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #000000;
     cursor: pointer;

@@ -224,12 +224,19 @@ watch(
 <style scoped>
 /* 1. 전체 컨테이너 및 기본 텍스트 */
 .BfnewPlan {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
     border: 2px solid #f4e2de;
-    background: #ffffff;
+    background-color: #ffffff;
     color: #334155;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
 }
 
 .main-hr {
@@ -249,7 +256,7 @@ watch(
 
 .author-row,
 .date-box {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #475569;
     white-space: nowrap;
 }
@@ -257,7 +264,7 @@ watch(
 .state-badge {
     padding: 4px 12px;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 .state-badge.임시 {
@@ -302,6 +309,7 @@ watch(
     justify-content: center;
     border-right: 2px solid #f4e2de;
     flex-shrink: 0;
+    font-size: 1.1rem;
 }
 
 .input-wrapper {
@@ -316,7 +324,7 @@ watch(
     border: none;
     padding: 15px;
     outline: none;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #1e293b;
     background: transparent;
 }
@@ -387,7 +395,7 @@ button:last-of-type:not(.active-temp):hover {
 }
 
 .history-title {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     margin-bottom: 15px;
     font-weight: 800;
     color: #1e293b;
@@ -419,7 +427,7 @@ button:last-of-type:not(.active-temp):hover {
 }
 
 .history-body {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #1e293b;
     line-height: 1.6;
 }
@@ -437,7 +445,7 @@ button:last-of-type:not(.active-temp):hover {
     display: block;
     font-weight: bold;
     color: #64748b;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     margin-top: 10px;
     margin-bottom: 5px;
 }
@@ -445,7 +453,7 @@ button:last-of-type:not(.active-temp):hover {
 .pre-wrap {
     white-space: pre-wrap;
     word-break: break-all;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #334155;
     line-height: 1.6;
 }
@@ -488,7 +496,7 @@ button:last-of-type:not(.active-temp):hover {
 }
 
 .file_icon {
-    font-size: 1rem;
+    font-size: 1.1rem;
     margin-right: 10px;
     display: flex;
     align-items: center;
@@ -497,7 +505,7 @@ button:last-of-type:not(.active-temp):hover {
 
 .file_name {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #334155;
     font-weight: 500;
     white-space: nowrap;
@@ -507,7 +515,7 @@ button:last-of-type:not(.active-temp):hover {
 
 .no-attachments {
     color: #94a3b8;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     padding: 5px 0;
 }
 

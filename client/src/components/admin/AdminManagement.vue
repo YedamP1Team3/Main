@@ -114,7 +114,7 @@ defineExpose({
     background: none;
     border: none;
     padding: 15px 20px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #000000;
     cursor: pointer;
@@ -148,14 +148,14 @@ defineExpose({
 }
 .content-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     color: #1e293b;
 }
 .list-table {
     width: 100%;
     border-collapse: collapse;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 .list-table th {
     padding: 10px;

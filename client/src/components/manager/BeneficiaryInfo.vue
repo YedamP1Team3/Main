@@ -89,7 +89,7 @@ onMounted(async () => {
 }
 
 h3 {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1e293b;
     margin-bottom: 15px;
@@ -112,7 +112,7 @@ th {
 }
 
 th label {
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     color: #64748b;
     font-weight: 600;
     white-space: nowrap; /* 한 줄 고정 */
@@ -132,7 +132,7 @@ input[type='text'] {
     padding: 0 10px;
     border: 1px solid #cbd5e1;
     border-radius: 8px; /* 조금 더 둥근 느낌으로 세련되게 */
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #334155;
     background-color: #ffffff;
     outline: none;
