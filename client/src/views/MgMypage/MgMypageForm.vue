@@ -1,6 +1,6 @@
 <script setup>
-import JsTopbarmg from '@/layout/manger/JsTopbarmg.vue';
-import JsSidbarmg from '@/layout/manger/JsSidbarmg.vue';
+import JsTopbarmg from '@/layout/manager/JsTopbarmg.vue';
+import JsSidbarmg from '@/layout/manager/JsSidbarmg.vue';
 </script>
 
 <template>
