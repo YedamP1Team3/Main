@@ -13,11 +13,9 @@ const props = defineProps({
 const authStore = useAuthStore();
 
 const resultDetail = ref({});
+const attachments = ref([]);
 const rejectionLog = ref([]); // 반려 히스토리 저장용
 const selectedPlans = ref([]); //연결된 지원계획서 목록 저장용
-
-const supportList = ref([]);
-const supportPlan = ref('');
 
 const reasoninsert = ref(false);
 const rejectReason = ref('');
@@ -29,6 +27,7 @@ const fetchResultDetail = async (id) => {
         const response = await axios.get(`api/adsupport/admin/support-result/${id}`);
         resultDetail.value = response.data;
         selectedPlans.value = response.data.selected_plans || []; // ✅ 계획서 목록 추출
+        attachments.value = response.data.files || [];
         fetchRejectionHistory(id);
     } catch (error) {
         console.error(`에러`, error);
@@ -89,6 +88,33 @@ const Approval = async (resultId) => {
 const selectSubPlan = (planId) => {
     if (!planId) return;
     emit('select-sub-plan', planId);
+};
+
+const downloadFile = (file) => {
+    const isConfirmed = confirm(`'${file.origin_name}' 파일을 다운로드하시겠습니까?`);
+    if (isConfirmed) {
+        const url = `api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
+        window.location.href = url;
+    }
+};
+
+const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(ext)) {
+        return '🖼️';
+    }
+
+    const iconMap = {
+        pdf: '📕',
+        xlsx: '📗',
+        xls: '📗',
+        docx: '📘',
+        doc: '📘',
+        hwp: '📝'
+    };
+
+    return iconMap[ext] || '📄';
 };
 
 // 4. 반려사항
@@ -165,7 +191,15 @@ watch(
             <div class="form-row">
                 <label>파일첨부</label>
                 <div class="input-wrapper">
-                    <input type="text" placeholder="첨부된 파일이 없습니다." readonly class="content-input gray-bg" />
+                    <div class="file_input_container">
+                        <ul v-if="attachments.length > 0" class="file_list">
+                            <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
+                                <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
+                                <span class="file_name">{{ file.origin_name }}</span>
+                            </li>
+                        </ul>
+                        <span v-else class="no-attachments">첨부된 파일이 없습니다.</span>
+                    </div>
                 </div>
             </div>
             <div class="form-row">
@@ -538,5 +572,68 @@ button:hover {
     font-size: 0.85rem;
     margin-right: 5px;
     margin-top: 5px;
+}
+
+.file_input_container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 15px;
+}
+
+.file_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.file_item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    min-width: 200px;
+    transition: all 0.2s;
+}
+
+.file_item:hover {
+    border-color: #2563eb;
+    background-color: #f8fafc;
+}
+
+.file_icon {
+    font-size: 1.2rem;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.file_name {
+    flex: 1;
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.no-attachments {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    padding: 5px 0;
+}
+
+.clickable {
+    cursor: pointer;
 }
 </style>

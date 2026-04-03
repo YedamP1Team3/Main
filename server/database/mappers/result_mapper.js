@@ -250,6 +250,165 @@ const selectLinkedTempList = async (draftId) => {
   }
 };
 
+const insertResultAttachment = async (fileData) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(resultSql.insertResultAttachment, fileData);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (insertResultAttachment):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectResultAttachments = async (resultId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(resultSql.selectResultAttachments, [resultId]);
+    return rows;
+  } catch (err) {
+    console.error("매퍼 에러 (selectResultAttachments):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectDraftResultAttachments = async (resultDraftId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(resultSql.selectDraftResultAttachments, [
+      resultDraftId,
+    ]);
+    return rows;
+  } catch (err) {
+    console.error("매퍼 에러 (selectDraftResultAttachments):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectResultAttachment = async (resultId, fileId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(resultSql.selectResultAttachment, [
+      resultId,
+      fileId,
+    ]);
+    return rows[0] || null;
+  } catch (err) {
+    console.error("매퍼 에러 (selectResultAttachment):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const selectDraftResultAttachment = async (resultDraftId, fileId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(resultSql.selectDraftResultAttachment, [
+      resultDraftId,
+      fileId,
+    ]);
+    return rows[0] || null;
+  } catch (err) {
+    console.error("매퍼 에러 (selectDraftResultAttachment):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const deleteResultAttachment = async (resultId, fileId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(resultSql.deleteResultAttachment, [
+      resultId,
+      fileId,
+    ]);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (deleteResultAttachment):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const deleteDraftResultAttachment = async (resultDraftId, fileId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(resultSql.deleteDraftResultAttachment, [
+      resultDraftId,
+      fileId,
+    ]);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (deleteDraftResultAttachment):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const deleteResultAttachments = async (resultId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(resultSql.deleteResultAttachments, [resultId]);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (deleteResultAttachments):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const deleteDraftResultAttachments = async (resultDraftId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(resultSql.deleteDraftResultAttachments, [
+      resultDraftId,
+    ]);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (deleteDraftResultAttachments):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+const moveDraftResultAttachmentsToResult = async (resultId, resultDraftId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(resultSql.moveDraftResultAttachmentsToResult, [
+      resultId,
+      resultDraftId,
+    ]);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (moveDraftResultAttachmentsToResult):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 // 반려 처리 (반려/수정중)
 const rejectSupportResult = async (title, content, resultId) => {
   let conn = await pool.getConnection();
@@ -289,6 +448,16 @@ module.exports = {
   selectLinkedTempList,
   removeTempResult,
   removeTempMapping,
+  insertResultAttachment,
+  selectResultAttachments,
+  selectDraftResultAttachments,
+  selectResultAttachment,
+  selectDraftResultAttachment,
+  deleteResultAttachment,
+  deleteDraftResultAttachment,
+  deleteResultAttachments,
+  deleteDraftResultAttachments,
+  moveDraftResultAttachmentsToResult,
   rejectSupportResult,
   resubmitSupportResult
 };

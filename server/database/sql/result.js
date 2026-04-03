@@ -176,6 +176,91 @@ const resubmitSupportResult = `
     WHERE result_id = ?
 `;
 
+const insertResultAttachment = `
+  INSERT INTO attachment_file (
+    plan_id,
+    plan_draft_id,
+    result_id,
+    result_draft_id,
+    origin_name,
+    path,
+    file_size,
+    created_at
+  ) VALUES (NULL, NULL, ?, ?, ?, ?, ?, NOW())
+`;
+
+const selectResultAttachments = `
+  SELECT
+    file_id,
+    result_id,
+    result_draft_id,
+    origin_name,
+    path AS file_name,
+    file_size,
+    created_at
+  FROM attachment_file
+  WHERE result_id = ?
+`;
+
+const selectDraftResultAttachments = `
+  SELECT
+    file_id,
+    result_id,
+    result_draft_id,
+    origin_name,
+    path AS file_name,
+    file_size,
+    created_at
+  FROM attachment_file
+  WHERE result_draft_id = ?
+`;
+
+const selectResultAttachment = `
+  SELECT
+    file_id,
+    result_id,
+    path AS file_name
+  FROM attachment_file
+  WHERE result_id = ? AND file_id = ?
+  LIMIT 1
+`;
+
+const selectDraftResultAttachment = `
+  SELECT
+    file_id,
+    result_draft_id,
+    path AS file_name
+  FROM attachment_file
+  WHERE result_draft_id = ? AND file_id = ?
+  LIMIT 1
+`;
+
+const deleteResultAttachment = `
+  DELETE FROM attachment_file
+  WHERE result_id = ? AND file_id = ?
+`;
+
+const deleteDraftResultAttachment = `
+  DELETE FROM attachment_file
+  WHERE result_draft_id = ? AND file_id = ?
+`;
+
+const deleteResultAttachments = `
+  DELETE FROM attachment_file
+  WHERE result_id = ?
+`;
+
+const deleteDraftResultAttachments = `
+  DELETE FROM attachment_file
+  WHERE result_draft_id = ?
+`;
+
+const moveDraftResultAttachmentsToResult = `
+  UPDATE attachment_file
+  SET result_id = ?, result_draft_id = NULL
+  WHERE result_draft_id = ?
+`;
+
 module.exports = {
   selectSupportResultList,
   selectSupportResultTempList,
@@ -197,4 +282,14 @@ module.exports = {
   removeTempMapping,
   rejectSupportResult,
   resubmitSupportResult,
+  insertResultAttachment,
+  selectResultAttachments,
+  selectDraftResultAttachments,
+  selectResultAttachment,
+  selectDraftResultAttachment,
+  deleteResultAttachment,
+  deleteDraftResultAttachment,
+  deleteResultAttachments,
+  deleteDraftResultAttachments,
+  moveDraftResultAttachmentsToResult,
 };

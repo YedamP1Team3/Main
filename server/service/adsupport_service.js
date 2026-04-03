@@ -84,8 +84,10 @@ const getSupportResultList = async (beneId) => {
 const getSupportResultDetail = async (resultId) => {
   let list = await adminMapper.selectSupportResultDetail(resultId);
   let planList = await MappingMapper.selectLinkedPlanList(resultId);
+  let fileList = await adminMapper.selectResultAttachments(resultId);
   if (list) {
     list.selected_plans = planList || [];
+    list.files = fileList || [];
     return list;
   }
   return {};

@@ -13,7 +13,37 @@ const today = new Date().toLocaleDateString(); //작성일
 const supportList = ref([]);
 const supportPlan = ref('');
 const selectedPlans = ref([]);
+const selectedFiles = ref([]);
 const isSubmitting = ref(false);
+
+const handleFileChange = (event) => {
+    const newFiles = Array.from(event.target.files);
+    selectedFiles.value = [...selectedFiles.value, ...newFiles];
+    event.target.value = '';
+};
+
+const removeFile = (index) => {
+    selectedFiles.value.splice(index, 1);
+};
+
+const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(ext)) {
+        return '🖼️';
+    }
+
+    const iconMap = {
+        pdf: '📕',
+        xlsx: '📗',
+        xls: '📗',
+        docx: '📘',
+        doc: '📘',
+        hwp: '📝'
+    };
+
+    return iconMap[ext] || '📄';
+};
 
 const Approval = async () => {
     if (isSubmitting.value) return;
@@ -27,17 +57,24 @@ const Approval = async () => {
         return;
     }
 
-    const target = {
-        manager_id: authStore.userId,
-        bene_id: props.beneId,
-        result_title: resultTitle.value,
-        result_content: resultContent.value,
-        progress_state: '대기',
-        selected_plans: selectedPlans.value
-    };
+    const formData = new FormData();
+    formData.append('manager_id', authStore.userId);
+    formData.append('bene_id', props.beneId);
+    formData.append('result_title', resultTitle.value);
+    formData.append('result_content', resultContent.value);
+    formData.append('progress_state', '대기');
+    formData.append('selected_plans', JSON.stringify(selectedPlans.value));
+
+    selectedFiles.value.forEach((file) => {
+        formData.append('files', file);
+    });
     try {
         isSubmitting.value = true;
-        const response = await axios.post('api/resultPlan/support-result', target);
+        const response = await axios.post('api/resultPlan/support-result', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         if (response.data.success) {
             alert('지원서가 입력되었습니다');
             emit('refresh');
@@ -56,17 +93,24 @@ const SaveTemp = async () => {
         return;
     }
     if (isSubmitting.value) return;
-    const target = {
-        manager_id: authStore.userId,
-        bene_id: props.beneId,
-        result_title: resultTitle.value,
-        result_content: resultContent.value,
-        progress_state: '임시',
-        selected_plans: selectedPlans.value
-    };
+    const formData = new FormData();
+    formData.append('manager_id', authStore.userId);
+    formData.append('bene_id', props.beneId);
+    formData.append('result_title', resultTitle.value);
+    formData.append('result_content', resultContent.value);
+    formData.append('progress_state', '임시');
+    formData.append('selected_plans', JSON.stringify(selectedPlans.value));
+
+    selectedFiles.value.forEach((file) => {
+        formData.append('files', file);
+    });
     try {
         isSubmitting.value = true;
-        const response = await axios.post('api/resultPlan/temp-result', target);
+        const response = await axios.post('api/resultPlan/temp-result', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         if (response.data.success) {
             alert('지원서가 입력되었습니다');
             emit('refresh');
@@ -106,11 +150,6 @@ const removePlan = (id) => {
     selectedPlans.value = selectedPlans.value.filter((p) => p.plan_id !== id);
 };
 
-// 3. 템플릿에 @change="fetchSupportPlan"이 있으므로 선언해둡니다.
-const fetchSupportPlan = () => {
-    console.log('계획 선택됨:', supportPlan.value);
-};
-
 onMounted(async () => {
     const response = await axios.get(`http://localhost:3000/resultPlan/support-plans/approved/${props.beneId}`);
     supportList.value = response.data;
@@ -118,7 +157,7 @@ onMounted(async () => {
 </script>
 <template>
     <div class="BfnewPlan">
-        <h2>지원계획서 입력하기</h2>
+        <h2>지원결과서 입력하기</h2>
 
         <div class="date-section">
             <label>작성일:</label>
@@ -138,7 +177,19 @@ onMounted(async () => {
 
             <div class="form_BfnewPlan">
                 <label for="file">파일첨부</label>
-                <input type="text" placeholder="임시" readonly />
+                <div class="file_input_container">
+                    <input type="file" ref="fileInput" multiple @change="handleFileChange" @click.stop accept=".pdf, .png, .jpg, .jpeg, .xlsx, .xls, .docx, .doc, .hwp" style="display: none" />
+                    <button type="button" class="btn_file_select" @click="$refs.fileInput.click()">파일 선택하기</button>
+
+                    <ul v-if="selectedFiles.length > 0" class="file_list">
+                        <li v-for="(file, index) in selectedFiles" :key="index" class="file_item">
+                            <span class="file_icon">{{ getFileIcon(file.name) }}</span>
+                            <span class="file_name">{{ file.name }}</span>
+                            <button type="button" class="btn_remove" @click="removeFile(index)">✕</button>
+                        </li>
+                    </ul>
+                    <div v-else class="no-attachments">선택된 파일이 없습니다.</div>
+                </div>
             </div>
 
             <div class="form_BfnewPlan">
@@ -352,5 +403,99 @@ h2 {
 .btn-temp:hover {
     background-color: #e2e8f0;
     color: #475569;
+}
+
+.file_input_container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px 20px;
+    gap: 15px;
+}
+
+.btn_file_select {
+    width: fit-content;
+    padding: 10px 15px;
+    background-color: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn_file_select:hover {
+    background-color: #1d4ed8;
+}
+
+.file_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.file_item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    min-width: 200px;
+    transition: all 0.2s;
+}
+
+.file_item:hover {
+    border-color: #2563eb;
+    background-color: #f8fafc;
+}
+
+.file_icon {
+    font-size: 1.2rem;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.file_name {
+    flex: 1;
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn_remove {
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn_remove:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.no-attachments {
+    padding: 5px 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
 }
 </style>
