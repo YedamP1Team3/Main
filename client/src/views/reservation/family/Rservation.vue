@@ -2,7 +2,6 @@
 import { ref, watch, onMounted } from 'vue';
 import Calendar from '@/components/common/Calendar.vue';
 import TimeSlot from '@/components/common/TimeSlot.vue';
-import RsvSideBar from '@/components/reservation/RsvSideBar.vue';
 import MTopbar from '@/layout/member/mTopbar.vue';
 import BeneInfo from '@/components/reservation/beneInfo.vue';
 import RsvTable from '@/components/common/RsvTable.vue';
@@ -16,7 +15,6 @@ export default {
         Calendar,
         TimeSlot,
         MTopbar,
-        RsvSideBar,
         BeneInfo,
         RsvTable,
         RejectionReasonModal
@@ -288,15 +286,16 @@ export default {
             <MTopbar />
         </header>
         <div class="layout-body">
-            <RsvSideBar />
+            <BeneInfo :beneficiaries="beneficiaries" :selectedBeneId="selectedBeneId" @select-beneficiary="handleSelectBeneficiary" />
             <main class="layout-main">
                 <div class="reservation-container">
-                    <BeneInfo :beneficiaries="beneficiaries" :selectedBeneId="selectedBeneId" @select-beneficiary="handleSelectBeneficiary" />
                     <div class="content-row">
                         <Calendar v-model="selectedDate" />
                         <TimeSlot :selectedDate="selectedDate" :slots="slots" mode="family" @reserveTimes="handleReserve" />
                     </div>
-                    <RsvTable :columns="reservationColumns" :rows="reservationRows" rowKey="rsv_id" emptyMessage="상담 신청 내역이 없습니다." @action-click="handleTableActionClick" />
+                    <div class="table-container">
+                        <RsvTable :columns="reservationColumns" :rows="reservationRows" rowKey="rsv_id" emptyMessage="상담 신청 내역이 없습니다." @action-click="handleTableActionClick" />
+                    </div>
                     <RejectionReasonModal :visible="isRejectReasonModalOpen" :reservation="selectedRejectReservation" @close="closeRejectReasonModal" />
                 </div>
             </main>
@@ -314,59 +313,78 @@ export default {
 .layout-header {
     height: 70px;
     flex-shrink: 0;
+    background-color: #fff;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .layout-body {
     display: flex;
-    flex: 1; /* 남은 공간 자동 */
-}
-
-.layout-sidebar {
-    width: 250px; /* 사이드바 너비 고정 */
-    flex-shrink: 0; /* 너비가 줄어들지 않도록 설정 */
-    border-right: 1px solid #ccc; /* 구분선 */
+    flex: 1;
+    background-color: #fef9f6;
 }
 
 .layout-main {
     flex: 1;
-    background-color: #f9f9f9;
 
     display: flex;
     justify-content: center;
     align-items: flex-start;
 
-    padding-top: 40px;
+    padding: 40px 32px 0;
     overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .reservation-container {
     width: 100%;
-    max-width: 1400px;
+    max-width: 1500px;
     margin: 0 auto;
 
     display: flex;
     flex-direction: column;
     gap: 28px;
+    background-color: #f9f9f9;
+}
+
+.table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 .content-row {
     display: flex;
-    flex-direction: row; /* 🔥 핵심 */
-    justify-content: center;
     align-items: flex-start;
 
-    gap: 30px; /* 컴포넌트 사이 간격 */
     width: 100%;
-    max-width: 800px; /* 🔥 전체 레이아웃 폭 */
+    max-width: 1100px;
 }
 
-.selected-date {
-    font-size: 16px;
+.content-row > :first-child {
+    flex: 0 0 340px;
+}
+
+.content-row > :last-child {
+    flex: 0 0 660px;
+    margin-left: auto;
 }
 
 @media (max-width: 1100px) {
     .content-row {
         flex-direction: column;
+        gap: 24px;
+        max-width: 100%;
+    }
+
+    .content-row > :first-child,
+    .content-row > :last-child {
+        flex: none;
+        width: 100%;
+        margin-left: 0;
     }
 }
 </style>

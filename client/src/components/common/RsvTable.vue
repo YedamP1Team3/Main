@@ -227,14 +227,14 @@ const handleActionClick = (row, column) => {
 
 .list-table td {
     padding: 12px 10px;
-    color: #334155;
-    border-bottom: 1px solid #e2e8f0;
+    color: #5f4b45;
+    border-bottom: 1px solid #f1ddd6;
     vertical-align: middle;
 }
 
 .empty-msg {
     padding: 30px !important;
-    color: #94a3b8 !important;
+    color: #a8a29e !important;
     text-align: center;
 }
 
@@ -244,7 +244,7 @@ const handleActionClick = (row, column) => {
 }
 
 .clickable-row:hover {
-    background-color: #f8fafc;
+    background-color: #fff4ef;
 }
 
 .status-badge {
@@ -253,32 +253,28 @@ const handleActionClick = (row, column) => {
     padding: 6px 10px;
     border-radius: 999px;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 700;
+    background-color: transparent;
 }
 
 .status-badge.requested {
-    background-color: #eff6ff;
-    color: #2563eb;
+    color: #e07a5f;
 }
 
 .status-badge.approved {
-    background-color: #ecfdf5;
-    color: #059669;
+    color: #4d8b6b;
 }
 
 .status-badge.rejected {
-    background-color: #fef2f2;
     color: #dc2626;
 }
 
 .status-badge.completed {
-    background-color: #f1f5f9;
-    color: #475569;
+    color: #7b6a58;
 }
 
 .status-badge.note-written {
-    background-color: #f3e8ff;
-    color: #7c3aed;
+    color: #8a6fa8;
 }
 
 .action-btn {
@@ -289,6 +285,7 @@ const handleActionClick = (row, column) => {
     font-size: 0.82rem;
     font-weight: 600;
     color: #ffffff;
+    background-color: #ffab91;
     cursor: pointer;
     transition: opacity 0.2s ease;
 }
@@ -302,20 +299,20 @@ const handleActionClick = (row, column) => {
 }
 
 .action-btn.process {
-    background-color: #3b82f6;
+    background-color: #ffab91;
 }
 
 .action-btn.write-log {
-    background-color: #10b981;
+    background-color: #ffab91;
 }
 
 .action-btn:disabled {
-    background-color: #cbd5e1;
-    color: #f8fafc;
+    background-color: #cac1bc;
+    color: #ffffff;
     cursor: not-allowed;
 }
 .action-btn.view-reject-reason {
-    background-color: #f1f3f5;
-    color: #333;
+    background-color: #ffab91;
+    color: #ffffff;
 }
 </style>

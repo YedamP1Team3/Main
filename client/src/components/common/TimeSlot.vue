@@ -89,75 +89,81 @@ export default {
 </script>
 
 <template>
-    <div class="timeslot-container">
-        <div class="header">
-            <div class="header-text">
-                <h3>시간 선택</h3>
-                <p v-if="selectedDate">{{ selectedDate }}</p>
-                <p v-else>날짜를 먼저 선택하세요</p>
+    <div class="timeslot-root">
+        <div class="timeslot-container">
+            <div class="header">
+                <div class="header-text">
+                    <h3>시간 선택</h3>
+                    <p v-if="selectedDate">{{ selectedDate }}</p>
+                    <p v-else>날짜를 먼저 선택하세요</p>
+                </div>
+
+                <div class="period-toggle">
+                    <button :class="{ active: period === 'AM' }" @click="period = 'AM'">오전</button>
+                    <button :class="{ active: period === 'PM' }" @click="period = 'PM'">오후</button>
+                </div>
             </div>
 
-            <div class="period-toggle">
-                <button :class="{ active: period === 'AM' }" @click="period = 'AM'">오전</button>
-                <button :class="{ active: period === 'PM' }" @click="period = 'PM'">오후</button>
+            <div class="time-grid">
+                <div
+                    v-for="slot in timeSlots"
+                    :key="slot.time"
+                    class="time-item"
+                    :class="{
+                        'manager-mode': mode === 'manager',
+                        'family-mode': mode === 'family',
+
+                        reserved: slot.status === 'reserved',
+                        blocked: slot.status === 'blocked' && mode === 'manager',
+                        unavailable: slot.status === 'reserved' || (slot.status === 'blocked' && mode !== 'manager'),
+
+                        'selected-manager': selectedTimes.includes(slot.time) && slot.status === 'available' && mode === 'manager',
+
+                        'selected-family': selectedTimes.includes(slot.time) && slot.status === 'available' && mode === 'family',
+
+                        'selected-blocked': selectedTimes.includes(slot.time) && slot.status === 'blocked' && mode === 'manager'
+                    }"
+                    @click="toggleTime(slot)"
+                >
+                    {{ slot.time }}
+                </div>
             </div>
-        </div>
 
-        <div class="time-grid">
-            <div
-                v-for="slot in timeSlots"
-                :key="slot.time"
-                class="time-item"
-                :class="{
-                    'manager-mode': mode === 'manager',
-                    'family-mode': mode === 'family',
+            <div v-if="mode === 'manager'" class="summary-box">
+                <h4>예약불가 시간</h4>
 
-                    reserved: slot.status === 'reserved',
-                    blocked: slot.status === 'blocked' && mode === 'manager',
-                    unavailable: slot.status === 'reserved' || (slot.status === 'blocked' && mode !== 'manager'),
+                <ul v-if="filteredBlockedSummary.length > 0" class="summary-list">
+                    <li v-for="(item, index) in filteredBlockedSummary" :key="index">{{ item }}</li>
+                </ul>
 
-                    'selected-manager': selectedTimes.includes(slot.time) && slot.status === 'available' && mode === 'manager',
-
-                    'selected-family': selectedTimes.includes(slot.time) && slot.status === 'available' && mode === 'family',
-
-                    'selected-blocked': selectedTimes.includes(slot.time) && slot.status === 'blocked' && mode === 'manager'
-                }"
-                @click="toggleTime(slot)"
-            >
-                {{ slot.time }}
+                <p v-else class="summary-empty">등록된 예약불가 시간이 없습니다.</p>
             </div>
-        </div>
 
-        <div v-if="mode === 'manager'" class="summary-box">
-            <h4>예약불가 시간</h4>
+            <div class="action-buttons">
+                <template v-if="mode === 'manager'">
+                    <button class="unavailable-btn" @click="handleManagerAction('unavailable')">예약차단</button>
+                    <button class="available-btn" @click="handleManagerAction('available')">차단해제</button>
+                </template>
 
-            <ul v-if="filteredBlockedSummary.length > 0" class="summary-list">
-                <li v-for="(item, index) in filteredBlockedSummary" :key="index">{{ item }}</li>
-            </ul>
-
-            <p v-else class="summary-empty">등록된 예약불가 시간이 없습니다.</p>
-        </div>
-
-        <div class="action-buttons">
-            <template v-if="mode === 'manager'">
-                <button class="unavailable-btn" @click="handleManagerAction('unavailable')">예약차단</button>
-                <button class="available-btn" @click="handleManagerAction('available')">차단해제</button>
-            </template>
-
-            <template v-else>
-                <button class="available-btn" @click="handleUserAction">상담신청</button>
-                <button class="unavailable-btn" @click="selectedTimes = []">취소</button>
-            </template>
+                <template v-else>
+                    <button class="available-btn" @click="handleUserAction">상담신청</button>
+                    <button class="unavailable-btn" @click="selectedTimes = []">취소</button>
+                </template>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
+.timeslot-root {
+    width: 100%;
+}
+
 .timeslot-container {
     width: 100%;
-    max-width: 520px;
+    max-width: none;
     background: #fff;
-    padding: 16px;
+    padding: 20px 20px 18px;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
@@ -168,8 +174,8 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 16px;
+    margin-bottom: 18px;
 }
 
 .header-text {
@@ -196,7 +202,7 @@ export default {
 .period-toggle {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-shrink: 0;
     margin: 0;
 }
@@ -230,8 +236,8 @@ export default {
 
 .time-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
 }
 
 .time-item {
@@ -250,6 +256,7 @@ export default {
     transition: all 0.18s ease;
     user-select: none;
 }
+
 /* 담당자: 일반 슬롯 hover = 붉은 느낌 */
 .time-item.manager-mode:not(.reserved):not(.unavailable):not(.blocked):not(.selected-manager):not(.selected-family):not(.selected-blocked):hover {
     background: #fee2e2;
@@ -264,7 +271,6 @@ export default {
     color: #1d4ed8;
 }
 
-/* 예약됨 / 보호자에게 보이는 차단시간 */
 .time-item.reserved,
 .time-item.unavailable {
     cursor: not-allowed;
@@ -280,7 +286,6 @@ export default {
     color: #777;
 }
 
-/* 담당자에게 보이는 차단시간 */
 .time-item.blocked {
     background: #fff;
     color: #dc2626;
@@ -295,7 +300,6 @@ export default {
     color: #1d4ed8;
 }
 
-/* 담당자 일반 선택 */
 .time-item.selected-manager {
     background: #ef4444;
     color: #fff;
@@ -304,7 +308,6 @@ export default {
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-/* 보호자 일반 선택 */
 .time-item.selected-family {
     background: #2563eb;
     color: #fff;
@@ -313,7 +316,6 @@ export default {
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-/* 담당자 차단시간 선택 */
 .time-item.selected-blocked {
     background: #2563eb;
     color: #fff;
@@ -321,9 +323,8 @@ export default {
     font-weight: 700;
 }
 
-/* 요약 박스 */
 .summary-box {
-    margin-top: 18px;
+    margin-top: 20px;
     padding: 14px;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
@@ -356,11 +357,10 @@ export default {
 
 .action-buttons {
     display: flex;
-    gap: 10px;
-    margin-top: 18px;
+    gap: 12px;
+    margin-top: 20px;
 }
 
-/* manager 모드 기준 버튼 */
 .available-btn,
 .unavailable-btn {
     flex: 1;
@@ -372,7 +372,6 @@ export default {
     transition: all 0.18s ease;
 }
 
-/* 차단해제 / 상담신청 */
 .available-btn {
     background: #2563eb;
     color: #fff;
@@ -384,7 +383,6 @@ export default {
     border-color: #1d4ed8;
 }
 
-/* 예약차단 / 취소 */
 .unavailable-btn {
     background: #fff;
     color: #dc2626;
@@ -394,5 +392,17 @@ export default {
 .unavailable-btn:hover {
     background: #fff5f5;
     border-color: #f87171;
+}
+
+@media (max-width: 1100px) {
+    .timeslot-container {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 700px) {
+    .time-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 </style>

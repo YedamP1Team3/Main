@@ -120,11 +120,14 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    background-color: #fef9f6;
 }
 
 .layout-header {
     height: 70px;
     flex-shrink: 0;
+    background-color: #fff;
+    border-bottom: 1px solid #f4e2de;
 }
 
 .layout-body {
@@ -137,13 +140,17 @@ onMounted(() => {
     flex: 1;
     padding: 24px;
     overflow-y: auto;
-    background-color: #f8f9fa;
+    background-color: #fef9f6;
 }
 
 .reservation-manage-container {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 .page-title {
