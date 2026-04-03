@@ -1,23 +1,3 @@
-<template>
-    <div class="page">
-        <header class="layout-header">
-            <JsTopbarmg />
-        </header>
-
-        <div class="layout-body">
-            <RsvSideBar />
-
-            <main class="layout-main">
-                <div class="counsel-manage-container">
-                    <h2 class="page-title">상담일지 관리</h2>
-
-                    <RsvTable :columns="columns" :rows="counsels" @action-click="handleActionClick" />
-                </div>
-            </main>
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -97,6 +77,26 @@ onMounted(() => {
     fetchCounsels();
 });
 </script>
+
+<template>
+    <div class="page">
+        <header class="layout-header">
+            <JsTopbarmg />
+        </header>
+
+        <div class="layout-body">
+            <RsvSideBar />
+
+            <main class="layout-main">
+                <div class="counsel-manage-container">
+                    <h2 class="page-title">상담일지 관리</h2>
+
+                    <RsvTable :columns="columns" :rows="counsels" @action-click="handleActionClick" />
+                </div>
+            </main>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .page {

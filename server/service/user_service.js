@@ -275,6 +275,28 @@ const addTempPlanFiles = async (planDraftId, files) => {
 
   return { status: "success" };
 };
+//지원계획서 파일 저장
+const addSupportPlanFiles = async (planId, files) => {
+  if (!planId) {
+    return { status: "fail" };
+  }
+  if (!files || files.length === 0) {
+    return { status: "fail" };
+  }
+
+  for (const file of files) {
+    const fileData = [
+      planId,
+      null,
+      file.originalname,
+      file.filename,
+      file.size,
+    ];
+    await userMapper.insertAttachment(fileData);
+  }
+
+  return { status: "success" };
+};
 //지원계획서 임시 파일 삭제
 const removeTempPlanFile = async (planDraftId, fileId) => {
   const draftId = Number(planDraftId);
@@ -289,6 +311,42 @@ const removeTempPlanFile = async (planDraftId, fileId) => {
   }
 
   const result = await userMapper.deleteDraftAttachment(draftId, attachmentId);
+  if (!result || result.affectedRows <= 0) {
+    return { status: "fail" };
+  }
+
+  const uploadDir = "d:/uploads";
+  const targetPath = path.join(uploadDir, fileRow.file_name);
+  try {
+    if (fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  return { status: "success" };
+};
+//지원계획서 파일 삭제
+const removeSupportPlanFile = async (planId, fileId) => {
+  const supportPlanId = Number(planId);
+  const attachmentId = Number(fileId);
+  if (!Number.isFinite(supportPlanId) || !Number.isFinite(attachmentId)) {
+    return { status: "fail" };
+  }
+
+  const fileRow = await userMapper.selectPlanAttachment(
+    supportPlanId,
+    attachmentId,
+  );
+  if (!fileRow) {
+    return { status: "fail" };
+  }
+
+  const result = await userMapper.deletePlanAttachment(
+    supportPlanId,
+    attachmentId,
+  );
   if (!result || result.affectedRows <= 0) {
     return { status: "fail" };
   }
@@ -324,4 +382,6 @@ module.exports = {
   approveTempPlan,
   addTempPlanFiles,
   removeTempPlanFile,
+  addSupportPlanFiles,
+  removeSupportPlanFile,
 };

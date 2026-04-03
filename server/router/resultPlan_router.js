@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+const upload = require("../middleware/uploads.js");
 const resultService = require("../service/result_service.js");
 //지원결과서조회
 router.get("/beneficiaries/:beneId/support-result", async (req, res) => {
@@ -15,15 +16,17 @@ router.get("/beneficiaries/:beneId/temp", async (req, res) => {
   res.send(list);
 });
 //지원결과서생성
-router.post("/support-result", async (req, res) => {
+router.post("/support-result", upload.array("files"), async (req, res) => {
   let target = req.body;
-  let result = await resultService.createSupportResult(target);
+  let files = req.files;
+  let result = await resultService.createSupportResult(target, files);
   res.send(result);
 });
 //임시지원결과서생성
-router.post("/temp-result", async (req, res) => {
+router.post("/temp-result", upload.array("files"), async (req, res) => {
   let target = req.body;
-  let result = await resultService.createTempResult(target);
+  let files = req.files;
+  let result = await resultService.createTempResult(target, files);
   res.send(result);
 });
 
@@ -37,6 +40,24 @@ router.get("/support-plans/approved/:beneId", async (req, res) => {
 router.get("/support-result/:resultId", async (req, res) => {
   let target = req.params.resultId;
   let result = await resultService.getSupportDetail(target);
+  res.send(result);
+});
+//지원결과서 파일추가
+router.post(
+  "/support-result/:resultId/files",
+  upload.array("files"),
+  async (req, res) => {
+    let resultId = req.params.resultId;
+    let files = req.files;
+    let result = await resultService.addSupportResultFiles(resultId, files);
+    res.send(result);
+  },
+);
+//지원결과서 파일삭제
+router.delete("/support-result/:resultId/files/:fileId", async (req, res) => {
+  let resultId = req.params.resultId;
+  let fileId = req.params.fileId;
+  let result = await resultService.removeSupportResultFile(resultId, fileId);
   res.send(result);
 });
 //지원결과서삭제
@@ -78,6 +99,24 @@ router.put("/support-result/:id/temp", async (req, res) => {
 router.get("/temp-result/:resultId", async (req, res) => {
   let target = req.params.resultId;
   let result = await resultService.getSupportTempDetail(target);
+  res.send(result);
+});
+//임시지원결과서 파일추가
+router.post(
+  "/temp-result/:resultDraftId/files",
+  upload.array("files"),
+  async (req, res) => {
+    let resultDraftId = req.params.resultDraftId;
+    let files = req.files;
+    let result = await resultService.addTempResultFiles(resultDraftId, files);
+    res.send(result);
+  },
+);
+//임시지원결과서 파일삭제
+router.delete("/temp-result/:resultDraftId/files/:fileId", async (req, res) => {
+  let resultDraftId = req.params.resultDraftId;
+  let fileId = req.params.fileId;
+  let result = await resultService.removeTempResultFile(resultDraftId, fileId);
   res.send(result);
 });
 //반려-임시저장-반려/수정중

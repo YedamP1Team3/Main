@@ -74,6 +74,20 @@ router.delete("/temp-plans/:planDraftId/files/:fileId", async (req, res) => {
   let result = await userService.removeTempPlanFile(planDraftId, fileId);
   res.send(result);
 });
+//지원계획서 파일추가
+router.post("/support-plans/:planId/files", upload.array("files"), async (req, res) => {
+  let planId = req.params.planId;
+  let files = req.files;
+  let result = await userService.addSupportPlanFiles(planId, files);
+  res.send(result);
+});
+//지원계획서 파일삭제
+router.delete("/support-plans/:planId/files/:fileId", async (req, res) => {
+  let planId = req.params.planId;
+  let fileId = req.params.fileId;
+  let result = await userService.removeSupportPlanFile(planId, fileId);
+  res.send(result);
+});
 //지원계획서삭제
 router.delete("/support-plans/:planId", async (req, res) => {
   let planNo = req.params.planId;

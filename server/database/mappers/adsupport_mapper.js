@@ -143,6 +143,20 @@ const selectAttachments = async (planId) => {
   }
 };
 
+const selectResultAttachments = async (resultId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(adminSql.selectResultAttachments, [resultId]);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (selectResultAttachments):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 const approveSupportResult = async (resultID) => {
   let conn = null;
   try {
@@ -266,4 +280,5 @@ module.exports = {
   resultMappingHistory,
   selectResultMappingHistory,
   selectAttachments,
+  selectResultAttachments,
 };

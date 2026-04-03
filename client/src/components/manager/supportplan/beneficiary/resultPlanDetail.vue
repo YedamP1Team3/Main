@@ -12,6 +12,8 @@ const props = defineProps({
 const resultDetail = ref({});
 const rejectionLog = ref([]);
 const selectedPlans = ref([]);
+const attachments = ref([]);
+const selectedFiles = ref([]);
 
 const supportList = ref([]);
 const supportPlan = ref('');
@@ -25,9 +27,83 @@ const fetchResultDetail = async (id) => {
         const response = await axios.get(`http://localhost:3000/resultPlan/support-result/${id}`);
         resultDetail.value = response.data;
         selectedPlans.value = response.data.selected_plans || [];
+        attachments.value = response.data.files || [];
     } catch (error) {
         console.error(`에러`, error);
     }
+};
+
+const uploadSelectedFiles = async (resultId) => {
+    if (!resultId) return false;
+    if (selectedFiles.value.length === 0) return true;
+
+    const formData = new FormData();
+    selectedFiles.value.forEach((file) => {
+        formData.append('files', file);
+    });
+
+    const response = await axios.post(`api/resultPlan/support-result/${resultId}/files`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    if (response.data?.status !== 'success') return false;
+    selectedFiles.value = [];
+    await fetchResultDetail(resultId);
+    return true;
+};
+
+const deleteExistingFile = async (fileId) => {
+    const resultId = resultDetail.value?.result_id;
+    if (!resultId || !fileId) return;
+    if (!confirm('이 파일을 삭제하시겠습니까?')) return;
+    try {
+        const response = await axios.delete(`api/resultPlan/support-result/${resultId}/files/${fileId}`);
+        if (response.data?.status === 'success') {
+            await fetchResultDetail(resultId);
+        } else {
+            alert('파일 삭제에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('파일 삭제 중 오류 발생', error);
+        alert('파일 삭제 중 오류가 발생했습니다.');
+    }
+};
+
+const handleFileChange = (event) => {
+    const newFiles = Array.from(event.target.files);
+    selectedFiles.value = [...selectedFiles.value, ...newFiles];
+    event.target.value = '';
+};
+
+const removeSelectedFile = (index) => {
+    selectedFiles.value.splice(index, 1);
+};
+
+const downloadFile = (file) => {
+    const isConfirmed = confirm(`'${file.origin_name}' 파일을 다운로드하시겠습니까?`);
+    if (isConfirmed) {
+        const url = `api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
+        window.location.href = url;
+    }
+};
+
+const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(ext)) {
+        return '🖼️';
+    }
+
+    const iconMap = {
+        pdf: '📕',
+        xlsx: '📗',
+        xls: '📗',
+        docx: '📘',
+        doc: '📘',
+        hwp: '📝'
+    };
+
+    return iconMap[ext] || '📄';
 };
 
 const fetchAllSupportList = async () => {
@@ -133,6 +209,11 @@ const Approval = async (id) => {
     }
     try {
         isSubmitting.value = true;
+        const uploaded = await uploadSelectedFiles(id);
+        if (!uploaded) {
+            alert('파일 업로드에 실패했습니다.');
+            return;
+        }
         const planIds = selectedPlans.value.map((plan) => plan.plan_id);
         const updateData = {
             result_title: resultDetail.value.result_title,
@@ -159,6 +240,11 @@ const SaveTemp = async (id) => {
     if (!confirm('수정한 내용으로 임시저장하겠습니까?')) return;
     try {
         isSubmitting.value = true;
+        const uploaded = await uploadSelectedFiles(id);
+        if (!uploaded) {
+            alert('파일 업로드에 실패했습니다.');
+            return;
+        }
         const planIds = selectedPlans.value.map((plan) => plan.plan_id);
         const updateData = {
             result_title: resultDetail.value.result_title,
@@ -223,7 +309,27 @@ onMounted(() => {
             <div class="form-row">
                 <label>파일첨부</label>
                 <div class="input-wrapper">
-                    <input type="text" placeholder="첨부된 파일이 없습니다." readonly class="content-input gray-bg" />
+                    <div class="file_input_container">
+                        <input type="file" ref="fileInput" multiple @change="handleFileChange" @click.stop accept=".pdf, .png, .jpg, .jpeg, .xlsx, .xls, .docx, .doc, .hwp" style="display: none" />
+                        <button v-if="['반려/수정중', '반려'].includes(resultDetail.progress_state)" type="button" class="btn_file_select" @click="$refs.fileInput.click()">파일 선택하기</button>
+
+                        <ul v-if="attachments.length > 0" class="file_list">
+                            <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
+                                <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
+                                <span class="file_name">{{ file.origin_name }}</span>
+                                <button v-if="['반려/수정중', '반려'].includes(resultDetail.progress_state)" type="button" class="btn_remove" @click.stop="deleteExistingFile(file.file_id)">✕</button>
+                            </li>
+                        </ul>
+                        <div v-else class="no-attachments">첨부된 파일이 없습니다.</div>
+
+                        <ul v-if="selectedFiles.length > 0" class="file_list">
+                            <li v-for="(file, index) in selectedFiles" :key="index" class="file_item">
+                                <span class="file_icon">{{ getFileIcon(file.name) }}</span>
+                                <span class="file_name">{{ file.name }}</span>
+                                <button type="button" class="btn_remove" @click="removeSelectedFile(index)">✕</button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -580,5 +686,104 @@ button:last-of-type:not(.active-temp):hover {
     background: #ffffff;
     border: 1px solid #f4e2de;
     border-radius: 8px;
+}
+
+.file_input_container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 15px;
+}
+
+.btn_file_select {
+    width: fit-content;
+    padding: 10px 15px;
+    border:1px solid #ff8a65 !important;
+    background-color: #ffffff;
+    color: #ff8a65;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn_file_select:hover {
+    background-color: #1d4ed8;
+}
+
+.file_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.file_item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    min-width: 200px;
+    transition: all 0.2s;
+}
+
+.file_item:hover {
+    border-color: #2563eb;
+    background-color: #f8fafc;
+}
+
+.file_icon {
+    font-size: 1.2rem;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.file_name {
+    flex: 1;
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn_remove {
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn_remove:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.no-attachments {
+    padding: 5px 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.clickable {
+    cursor: pointer;
 }
 </style>

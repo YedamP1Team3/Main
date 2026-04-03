@@ -1,25 +1,3 @@
-<template>
-    <div class="page">
-        <header class="layout-header">
-            <JsTopbarmg />
-        </header>
-
-        <div class="layout-body">
-            <RsvSideBar />
-
-            <main class="layout-main">
-                <div class="reservation-manage-container">
-                    <h2 class="page-title">예약 관리</h2>
-
-                    <RsvTable :columns="columns" :rows="reservations" @action-click="handleActionClick" />
-                </div>
-            </main>
-        </div>
-
-        <RsvProcessModal :visible="isProcessModalOpen" :reservation="selectedReservation" @close="closeProcessModal" @confirm="handleProcessConfirm" />
-    </div>
-</template>
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -114,6 +92,28 @@ onMounted(() => {
     fetchReservations();
 });
 </script>
+
+<template>
+    <div class="page">
+        <header class="layout-header">
+            <JsTopbarmg />
+        </header>
+
+        <div class="layout-body">
+            <RsvSideBar />
+
+            <main class="layout-main">
+                <div class="reservation-manage-container">
+                    <h2 class="page-title">예약 관리</h2>
+
+                    <RsvTable :columns="columns" :rows="reservations" @action-click="handleActionClick" />
+                </div>
+            </main>
+        </div>
+
+        <RsvProcessModal :visible="isProcessModalOpen" :reservation="selectedReservation" @close="closeProcessModal" @confirm="handleProcessConfirm" />
+    </div>
+</template>
 
 <style scoped>
 .page {

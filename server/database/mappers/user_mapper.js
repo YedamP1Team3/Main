@@ -316,6 +316,20 @@ const selectDraftAttachment = async (planDraftId, fileId) => {
     if (conn) conn.release();
   }
 };
+//지원계획서 파일 상세조회
+const selectPlanAttachment = async (planId, fileId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let rows = await conn.query(userSql.selectPlanAttachment, [planId, fileId]);
+    return rows[0] || null;
+  } catch (err) {
+    console.error("매퍼 에러 (selectPlanAttachment):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
 //임시지원계획서 파일 삭제
 const deleteDraftAttachment = async (planDraftId, fileId) => {
   let conn = null;
@@ -328,6 +342,20 @@ const deleteDraftAttachment = async (planDraftId, fileId) => {
     return result;
   } catch (err) {
     console.error("매퍼 에러 (deleteDraftAttachment):", err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+};
+//지원계획서 파일 삭제
+const deletePlanAttachment = async (planId, fileId) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+    let result = await conn.query(userSql.deletePlanAttachment, [planId, fileId]);
+    return result;
+  } catch (err) {
+    console.error("매퍼 에러 (deletePlanAttachment):", err);
     throw err;
   } finally {
     if (conn) conn.release();
@@ -357,4 +385,6 @@ module.exports = {
   moveDraftAttachmentsToPlan,
   selectDraftAttachment,
   deleteDraftAttachment,
+  selectPlanAttachment,
+  deletePlanAttachment,
 };

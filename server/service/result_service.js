@@ -1,4 +1,6 @@
 const resultMapper = require("../database/mappers/result_mapper.js");
+const fs = require("fs");
+const path = require("path");
 
 //지원결과 리스트
 const getSupportResultList = async (beneId) => {
@@ -11,15 +13,20 @@ const getSupportResultTempList = async (beneId) => {
   return list || [];
 };
 
-const createSupportResult = async (newResult) => {
-  const {
-    selected_plans,
-    manager_id,
-    bene_id,
-    result_title,
-    result_content,
-    progress_state,
-  } = newResult;
+const createSupportResult = async (newResult, files) => {
+  const selectedPlansRaw = newResult?.selected_plans;
+  const selected_plans = (() => {
+    if (Array.isArray(selectedPlansRaw)) return selectedPlansRaw;
+    if (!selectedPlansRaw) return [];
+    try {
+      return JSON.parse(selectedPlansRaw);
+    } catch {
+      return [];
+    }
+  })();
+
+  const { manager_id, bene_id, result_title, result_content, progress_state } =
+    newResult;
 
   // 1. 결과서 본문 데이터 준비 (첫 번째 계획서를 대표 ID로 사용)
   const mainPlanId =
@@ -46,12 +53,35 @@ const createSupportResult = async (newResult) => {
     await resultMapper.insertMapping(mappingValues);
   }
 
+  if (newResultId && files && files.length > 0) {
+    for (const file of files) {
+      const fileData = [
+        newResultId,
+        null,
+        file.originalname,
+        file.filename,
+        file.size,
+      ];
+      await resultMapper.insertResultAttachment(fileData);
+    }
+  }
+
   return { success: true, insertId: newResultId };
 };
 
-const createTempResult = async (newResult) => {
-  const { selected_plans, manager_id, bene_id, result_title, result_content } =
-    newResult;
+const createTempResult = async (newResult, files) => {
+  const selectedPlansRaw = newResult?.selected_plans;
+  const selected_plans = (() => {
+    if (Array.isArray(selectedPlansRaw)) return selectedPlansRaw;
+    if (!selectedPlansRaw) return [];
+    try {
+      return JSON.parse(selectedPlansRaw);
+    } catch {
+      return [];
+    }
+  })();
+
+  const { manager_id, bene_id, result_title, result_content } = newResult;
 
   // 1. 본문 데이터 준비
   const mainPlanId = selected_plans?.[0]?.plan_id || null;
@@ -75,6 +105,19 @@ const createTempResult = async (newResult) => {
       await resultMapper.insertTempMapping(newResultId, planIds);
     }
 
+    if (newResultId && files && files.length > 0) {
+      for (const file of files) {
+        const fileData = [
+          null,
+          newResultId,
+          file.originalname,
+          file.filename,
+          file.size,
+        ];
+        await resultMapper.insertResultAttachment(fileData);
+      }
+    }
+
     return { success: true, insertId: newResultId };
   } catch (err) {
     console.error("임시저장 서비스 에러:", err);
@@ -90,16 +133,37 @@ const getApprovedPlanList = async (beneId) => {
 const getSupportDetail = async (resultID) => {
   let resultInfo = await resultMapper.selectSupportResultDetail(resultID);
   let planList = await resultMapper.selectLinkedPlanList(resultID);
+  let files = await resultMapper.selectResultAttachments(resultID);
   // 3. 결과서 정보가 있을 때만 목록을 합쳐서 반환
   if (resultInfo) {
     // resultInfo 객체 안에 'selected_plans'라는 이름으로 목록을 쏙 넣어줍니다.
     resultInfo.selected_plans = planList || [];
+    resultInfo.files = files || [];
     return resultInfo;
   }
   return {};
 };
 
 const removeSupportResult = async (resultId) => {
+  try {
+    const rows = await resultMapper.selectResultAttachments(resultId);
+    await resultMapper.deleteResultAttachments(resultId);
+
+    const uploadDir = "d:/uploads";
+    for (const row of rows || []) {
+      const targetPath = path.join(uploadDir, row.file_name);
+      try {
+        if (fs.existsSync(targetPath)) {
+          fs.unlinkSync(targetPath);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
   let result = await resultMapper.removeSupportResult(resultId);
   let resObj = {
     status: result.affectedRows > 0 ? "success" : "fail",
@@ -109,12 +173,147 @@ const removeSupportResult = async (resultId) => {
 };
 
 const removeTempResult = async (resultId) => {
+  try {
+    const rows = await resultMapper.selectDraftResultAttachments(resultId);
+    await resultMapper.deleteDraftResultAttachments(resultId);
+
+    const uploadDir = "d:/uploads";
+    for (const row of rows || []) {
+      const targetPath = path.join(uploadDir, row.file_name);
+      try {
+        if (fs.existsSync(targetPath)) {
+          fs.unlinkSync(targetPath);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
   let result = await resultMapper.removeTempResult(resultId);
   let resObj = {
     status: result.affectedRows > 0 ? "success" : "fail",
     result_no: resultId,
   };
   return resObj;
+};
+
+const addSupportResultFiles = async (resultId, files) => {
+  if (!resultId) {
+    return { status: "fail" };
+  }
+  if (!files || files.length === 0) {
+    return { status: "fail" };
+  }
+
+  for (const file of files) {
+    const fileData = [
+      resultId,
+      null,
+      file.originalname,
+      file.filename,
+      file.size,
+    ];
+    await resultMapper.insertResultAttachment(fileData);
+  }
+
+  return { status: "success" };
+};
+
+const addTempResultFiles = async (resultDraftId, files) => {
+  if (!resultDraftId) {
+    return { status: "fail" };
+  }
+  if (!files || files.length === 0) {
+    return { status: "fail" };
+  }
+
+  for (const file of files) {
+    const fileData = [
+      null,
+      resultDraftId,
+      file.originalname,
+      file.filename,
+      file.size,
+    ];
+    await resultMapper.insertResultAttachment(fileData);
+  }
+
+  return { status: "success" };
+};
+
+const removeSupportResultFile = async (resultId, fileId) => {
+  const parsedResultId = Number(resultId);
+  const parsedFileId = Number(fileId);
+  if (!Number.isFinite(parsedResultId) || !Number.isFinite(parsedFileId)) {
+    return { status: "fail" };
+  }
+
+  const fileRow = await resultMapper.selectResultAttachment(
+    parsedResultId,
+    parsedFileId,
+  );
+  if (!fileRow) {
+    return { status: "fail" };
+  }
+
+  const result = await resultMapper.deleteResultAttachment(
+    parsedResultId,
+    parsedFileId,
+  );
+  if (!result || result.affectedRows <= 0) {
+    return { status: "fail" };
+  }
+
+  const uploadDir = "d:/uploads";
+  const targetPath = path.join(uploadDir, fileRow.file_name);
+  try {
+    if (fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  return { status: "success" };
+};
+
+const removeTempResultFile = async (resultDraftId, fileId) => {
+  const parsedDraftId = Number(resultDraftId);
+  const parsedFileId = Number(fileId);
+  if (!Number.isFinite(parsedDraftId) || !Number.isFinite(parsedFileId)) {
+    return { status: "fail" };
+  }
+
+  const fileRow = await resultMapper.selectDraftResultAttachment(
+    parsedDraftId,
+    parsedFileId,
+  );
+  if (!fileRow) {
+    return { status: "fail" };
+  }
+
+  const result = await resultMapper.deleteDraftResultAttachment(
+    parsedDraftId,
+    parsedFileId,
+  );
+  if (!result || result.affectedRows <= 0) {
+    return { status: "fail" };
+  }
+
+  const uploadDir = "d:/uploads";
+  const targetPath = path.join(uploadDir, fileRow.file_name);
+  try {
+    if (fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  return { status: "success" };
 };
 
 const applySupportResult = async (tempId, resultData, planIds = []) => {
@@ -143,6 +342,8 @@ const applySupportResult = async (tempId, resultData, planIds = []) => {
         const mappingValues = planIds.map((planId) => [newResultId, planId]);
         await resultMapper.insertMapping(mappingValues);
       }
+
+      await resultMapper.moveDraftResultAttachmentsToResult(newResultId, tempId);
 
       // 3-2. 기존 임시 저장본 삭제 (result_draft)
       // 매핑 테이블(result_draft_mapping)은 DB의 ON DELETE CASCADE 설정에 따라 자동 삭제되거나, 
@@ -189,9 +390,11 @@ const getSupportTempDetail = async (resultId) => {
     if (resultInfo) {
       // 2. [수정] 매핑 테이블(result_draft_mapping)에서 연결된 계획서 목록 가져오기
       let planList = await resultMapper.selectLinkedTempList(resultId);
+      let files = await resultMapper.selectDraftResultAttachments(resultId);
       
       // 화면에서 사용할 수 있도록 selected_plans에 넣어줌
       resultInfo.selected_plans = planList || [];
+      resultInfo.files = files || [];
       return resultInfo;
     }
     return {};
@@ -276,6 +479,10 @@ module.exports = {
   updateTempSupportResult,
   getSupportTempDetail,
   removeTempResult,
+  addSupportResultFiles,
+  addTempResultFiles,
+  removeSupportResultFile,
+  removeTempResultFile,
   resubmitSupportResult,
   rejectSupportResult
 };
