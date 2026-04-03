@@ -169,15 +169,15 @@ const handleNewPlanOpen = (priorityIdFromChild) => {
     display: flex;
     width: 100%;
     height: 100vh;
-    background-color: #ffffff; /* 전체는 흰색 바탕 */
+    background-color: #fef9f6; /* 전체는 흰색 바탕 */
     overflow: hidden;
 }
 
 /* 🟢 왼쪽 사이드 패널 (500px) */
 .side-panel {
     flex: 0 0 600px;
-    background-color: #f8fafc; /* 살짝 회색빛을 주어 영역 분리 */
-    border-right: 1px solid #e2e8f0; /* 중간 세로 구분선 */
+    background-color: #fef9f6; /* 살짝 회색빛을 주어 영역 분리 */
+    border-right: 2px solid #f4e2de; /* 중간 세로 구분선 */
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -194,7 +194,7 @@ const handleNewPlanOpen = (priorityIdFromChild) => {
 /* 🔵 오른쪽 메인 콘텐츠 영역 */
 .main-content {
     flex: 1;
-    background-color: #ffffff;
+    background-color: #fef9f6;
     padding: 40px;
     overflow-y: auto;
     display: flex;
