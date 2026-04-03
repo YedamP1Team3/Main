@@ -172,7 +172,7 @@ watch(
 }
 .content-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     color: #1e293b;
 }
 .list-table {
@@ -186,7 +186,7 @@ watch(
 .list-table th {
     background-color: #fef9f6; /* 오른쪽 이미지의 연한 회색 배경 */
     color: #64748b;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: 700;
     padding: 12px 10px;
     border-top: none; /* 기존 왼쪽 이미지에 있던 맨 위 얇은 선 제거 */
@@ -195,7 +195,7 @@ watch(
 
 .list-table td {
     padding: 16px 10px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #334155;
     border-bottom: 1px solid #f4e2de; /* 데이터 간의 아주 얇고 연한 구분선 */
     white-space: nowrap;

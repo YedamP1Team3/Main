@@ -55,10 +55,10 @@ watch(
         <table class="list-table">
             <thead>
                 <tr>
-                    <th>NO</th>
                     <th>작성자</th>
+                    <th>지원대상자</th>
                     <th>신청단계</th>
-                    <th>신청일자</th>
+                    <th>작성일자</th>
                 </tr>
             </thead>
             <tbody>
@@ -66,8 +66,8 @@ watch(
                     <td colspan="4" class="empty-msg">등록된 지원신청서가 없습니다.</td>
                 </tr>
                 <tr v-else v-for="app in application_list" :key="app.id" class="clickable-row" @click="viewApplicationDetail(app.id)">
-                    <td>{{ app.id }}</td>
                     <td>{{ app.writer }}</td>
+                    <td>{{ app.bene_name }}</td>
                     <td class="status-text">{{ app.app_status || '대기' }}</td>
                     <td>{{ app.date }}</td>
                 </tr>
@@ -92,7 +92,7 @@ watch(
 
 h2 {
     margin: 0;
-    font-size: 1.1rem; /* h3 사이즈로 축소하여 탭과 조화롭게 변경 */
+    font-size: 1.5rem; /* h3 사이즈로 축소하여 탭과 조화롭게 변경 */
     color: #1e293b;
     font-weight: bold;
 }
@@ -105,7 +105,7 @@ h2 {
 /* MemberManagement.vue의 추가 버튼(btn-add)과 완벽히 동일한 스타일 */
 .btn-assign {
     padding: 4px 10px;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     color: #fff;
     background-color: #ffab91;
     border: 1px solid #f4e2de;
@@ -117,7 +117,7 @@ h2 {
 }
 
 .btn-assign i {
-    font-size: 0.8rem; /* 아이콘 크기도 폰트에 맞게 조절 */
+    font-size: 1.1rem; /* 아이콘 크기도 폰트에 맞게 조절 */
 }
 
 .btn-assign:hover {
@@ -136,7 +136,7 @@ h2 {
 .list-table th {
     background-color: #fef9f6; /* 오른쪽 이미지의 연한 회색 배경 */
     color: #64748b;
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: 700;
     padding: 12px 10px;
     border-top: none; /* 기존 왼쪽 이미지에 있던 맨 위 얇은 선 제거 */
@@ -145,7 +145,7 @@ h2 {
 
 .list-table td {
     padding: 16px 10px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #334155;
     border-bottom: 1px solid #f4e2de; /* 데이터 간의 아주 얇고 연한 구분선 */
     white-space: nowrap;
@@ -166,10 +166,5 @@ h2 {
     padding: 30px !important;
     color: #94a3b8 !important;
     text-align: center;
-}
-
-.status-text {
-    font-weight: 600;
-    color: #ffab91;
 }
 </style>
