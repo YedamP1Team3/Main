@@ -21,13 +21,14 @@ const adapphistory_service = {
     }
   },
 
-  removeUser: async (userId) => {
+  // 반려 처리 추가
+  rejectUser: async (userId) => {
     try {
-      const result = await mapper.deleteUser(userId);
+      const result = await mapper.updateJoinStatus(userId, "REJECTED");
       return { success: result.affectedRows > 0 };
     } catch (error) {
-      console.error("Service Error (removeUser):", error);
-      return { success: false, message: "삭제 처리 중 오류 발생" };
+      console.error("Service Error (rejectUser):", error);
+      return { success: false, message: "반려 처리 중 오류 발생" };
     }
   },
 };

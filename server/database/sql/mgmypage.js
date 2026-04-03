@@ -22,7 +22,7 @@ module.exports = {
   getTaskStats: `
         SELECT '지원서' AS title, '접수' AS label, COUNT(*) AS value 
         FROM application 
-        WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        WHERE bene_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
         
         UNION ALL
         

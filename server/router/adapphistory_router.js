@@ -21,10 +21,10 @@ router.post("/active/:userId", async (req, res) => {
   }
 });
 
-router.delete("/delete/:userId", async (req, res) => {
+router.post("/reject/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-    const result = await service.removeUser(userId);
+    const result = await service.rejectUser(userId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, message: "서버 오류" });
