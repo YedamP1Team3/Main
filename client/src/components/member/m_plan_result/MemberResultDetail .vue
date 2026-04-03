@@ -58,13 +58,12 @@ watch(
 </template>
 <style scoped>
 .BfnewPlan {
-    max-width: 1000px;
-    background-color: #fff;
+    max-width: 100%;
+    margin: 10px auto;
+    padding: 50px;
     border: 2px solid #f4e2de;
-    margin: 30px auto;
-    padding: 0 20px;
-    color: #333;
-    padding: 30px;
+    background-color: #ffffff;
+    color: #334155;
 }
 
 h2 {
