@@ -298,83 +298,35 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 1. 페이지 배경 이미지 설정 (로그인과 동일하게 맞춤) */
 .page-wrapper {
-    /* 로그인 페이지와 같은 사진 주소를 넣어주세요 */
-    background-image: url('./img/회원가입2.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed; /* 스크롤할 때 배경이 고정되어 더 예쁩니다 */
-    background-repeat: no-repeat;
-
-    box-shadow: inset 0 0 0 2000px rgba(254, 249, 246, 0.3);
-
+    background-color: #f8fafc;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px; /* 세로로 긴 폼이므로 상하 여백을 조금 더 줍니다 */
+    padding: 20px;
 }
-
-/* 2. 회원가입 카드 너비 설정 */
 .signup-container {
     width: 100%;
-    max-width: 650px; /* 로그인창보다 살짝 넓게 */
+    max-width: 700px;
 }
-
-/* 3. 코랄 웜톤 그라데이션 테두리 */
 .gradient-border {
     padding: 3px;
     border-radius: 30px;
-    background: linear-gradient(180deg, rgba(255, 171, 145, 0.9) 0%, rgba(255, 255, 255, 0) 40%);
+    background: linear-gradient(180deg, #6366f1 0%, rgba(99, 102, 241, 0) 100%);
 }
-
-/* 4. 글래스모피즘 (반투명 유리) 회원가입 카드 */
 .signup-card {
-    /* 하얀색 반투명 배경 (입력칸이 많아 로그인보다 살짝 더 불투명하게 0.8 설정) */
-    background: rgba(255, 255, 255, 0.8);
-
-    /* 뒷배경 블러 처리 */
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-
-    /* 유리 표면 빛 반사 테두리 */
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-top: 1px solid rgba(255, 255, 255, 0.9);
-
-    /* 부드러운 그림자 */
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-
-    padding: 2.5rem 2rem;
+    background: #ffffff;
+    padding: 2rem;
     border-radius: 28px;
 }
-
-/* 5. 내부 요소 스타일 디테일 */
 .surface-100 {
-    /* 라디오 버튼 묶음 배경을 조금 더 투명하고 따뜻하게 */
-    background-color: rgba(254, 249, 246, 0.7);
-    border: 1px solid #f4e2de;
+    background-color: #f1f5f9;
 }
-
-/* PrimeVue Select 컴포넌트 너비 조절 */
 :deep(.p-select) {
     width: 100%;
 }
-
-/* 에러 메시지 텍스트 */
 .p-error {
     color: #ef4444;
-}
-
-/* 제목 텍스트 (text-primary 속성 덮어쓰기) */
-.text-primary {
-    color: #ffab91 !important;
-}
-
-/* 입력창 포커스 시 테두리 색상 웜톤으로 변경 */
-:deep(.p-inputtext:enabled:focus),
-:deep(.p-password-input:enabled:focus) {
-    border-color: #ffab91 !important;
-    box-shadow: 0 0 0 0.2rem rgba(255, 171, 145, 0.2) !important;
 }
 </style>
