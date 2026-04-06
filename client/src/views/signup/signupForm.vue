@@ -287,7 +287,7 @@ onMounted(() => {
                         </div>
 
                         <div class="flex flex-column gap-3">
-                            <Button type="submit" :label="form.userType === 'user' ? '일반 회원가입 완료' : '기관 담당자 가입 완료'" class="p-3 text-xl border-round-xl" />
+                            <Button type="submit" :label="form.userType === 'user' ? '일반 회원가입 완료' : '기관 담당자 가입 완료'" class="p-3-save-btn text-xl border-round-xl" />
                             <Button label="취소" @click="router.push('/login')" class="p-button-text text-600" />
                         </div>
                     </form>
@@ -313,7 +313,7 @@ onMounted(() => {
 .gradient-border {
     padding: 3px;
     border-radius: 30px;
-    background: linear-gradient(180deg, #6366f1 0%, rgba(99, 102, 241, 0) 100%);
+    background: linear-gradient(180deg, #f4e2de 0%, rgba(99, 102, 241, 0) 100%);
 }
 .signup-card {
     background: #ffffff;
@@ -323,9 +323,56 @@ onMounted(() => {
 .surface-100 {
     background-color: #f1f5f9;
 }
+
+.text-primary {
+    color: #ffab91;
+}
+
+.p-button-outlined {
+    background-color: #ffab91 !important;
+    border: none !important;
+    color: white !important;
+    padding: 10px 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+}
+
+.p-button-secondary {
+    background-color: #fef9f6;
+    border: 2px solid #f4e2de;
+    color: #ffab91;
+    padding: 0 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.p-3-save-btn {
+    /* flex: 2; */
+    background-color: #ffab91 !important; /* 항상 보이는 코랄색 */
+    border: none !important;
+    color: white !important;
+    padding: 0.8rem !important;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 10px !important;
+}
+
+.p-button-text {
+    background-color: #ffab91 !important; /* 항상 보이는 코랄색 */
+    border: none !important;
+    color: white !important;
+    padding: 0.8rem !important;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 10px !important;
+}
+
 :deep(.p-select) {
     width: 100%;
 }
+
 .p-error {
     color: #ef4444;
 }
