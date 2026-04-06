@@ -77,9 +77,7 @@ const updateUserWithPassword = async (updateDataArray) => {
   try {
     conn = await pool.getConnection();
     // SET 부분에 password=? 가 추가되어 비밀번호까지 함께 덮어씁니다.
-    const sql =
-      "UPDATE user_info SET user_name=?, tel=?, email=?, zip_code=?, address=?, detail_address=?, password=? WHERE user_id=?";
-    const result = await conn.query(sql, updateDataArray);
+    const result = await conn.query(infoSql.updateUser, updateDataArray);
     return result;
   } catch (err) {
     console.error("Mapper updateUserWithPassword Error:", err);
