@@ -91,34 +91,41 @@ const getUserDetail = async (userId) => {
 // 5. [정보 수정] 내 정보를 최신으로 업데이트합니다.
 const updateUser = async (data) => {
   try {
-    // 사용자가 '새 비밀번호' 칸에 글자를 입력했는지 확인합니다.
-    if (data.newPassword && data.newPassword.trim() !== "") {
-      // --- [상황 A: 비밀번호도 같이 바꿀 때] ---
-      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+    // 1. 프론트에서 넘어온 값들을 변수에 담습니다 (매핑 작업)
+    const {
+      id, // Payload의 'id'
+      name, // Payload of 'name'
+      phone, // Payload of 'phone'
+      email,
+      postcode, // Payload of 'postcode'
+      address,
+      detailAddress, // Payload of 'detailAddress'
+      newPassword,
+    } = data;
+
+    if (newPassword && newPassword.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
       const updateParams = [
-        data.user_name, // data.name -> data.user_name (회원가입과 통일)
-        data.tel, // data.phone -> data.tel
-        data.email,
-        data.zip_code, // data.postcode -> data.zip_code (★)
-        data.address,
-        data.detail_address, // data.detailAddress -> data.detail_address (★)
+        name, // user_name
+        phone, // tel
+        email,
+        postcode, // zip_code
+        address,
+        detailAddress, // detail_address
         hashedPassword,
-        data.user_id, // data.id -> data.user_id (★)
+        id, // user_id (WHERE 절)
       ];
-      // 비밀번호가 포함된 전용 매퍼를 호출합니다.
       await infoMapper.updateUserWithPassword(updateParams);
     } else {
-      // --- [상황 B: 이름, 연락처 등만 바꿀 때] ---
       const updateParams = [
-        data.user_name,
-        data.tel,
-        data.email,
-        data.zip_code, // ★
-        data.address,
-        data.detail_address, // ★
-        data.user_id, // ★
+        name,
+        phone,
+        email,
+        postcode,
+        address,
+        detailAddress,
+        id,
       ];
-      // 기존 비밀번호는 건드리지 않는 일반 매퍼를 호출합니다.
       await infoMapper.updateUser(updateParams);
     }
 
