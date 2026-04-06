@@ -32,26 +32,25 @@ const admypageRouter = require("./router/admypage_router.js");
 const adapphistoryRouter = require("./router/adapphistory_router.js");
 const adagencyinRouter = require("./router/adAgencyInfo_router.js");
 
-app.use("/download", downloadRouter);
-app.use("/abc", require("./router/noTouch_router.js"));
-app.use("/", userRouter);
+app.use("/api/download", downloadRouter);
+app.use("/api/abc", require("./router/noTouch_router.js"));
 app.use("/api", userRouter);
-app.use("/reserve", require("./router/rsv_router.js"));
-app.use("/survey", surveyRouter);
-app.use("/adsupport", adsupportPlan);
-app.use("/resultPlan", resultPlan);
-app.use("/info", infoRouter);
-app.use("/recipient", recipientRouter);
-app.use("/mgmypage", mgMyPageRouter);
-app.use("/mgtargets", mgTargetRouter);
-app.use("/adagency", adAgencyRouter);
-app.use("/admypage", admypageRouter);
-app.use("/adhistory", adapphistoryRouter);
-app.use("/adagencyinfo", adagencyinRouter);
+app.use("/api/reserve", require("./router/rsv_router.js"));
+app.use("/api/survey", surveyRouter);
+app.use("/api/adsupport", adsupportPlan);
+app.use("/api/resultPlan", resultPlan);
+app.use("/api/info", infoRouter);
+app.use("/api/recipient", recipientRouter);
+app.use("/api/mgmypage", mgMyPageRouter);
+app.use("/api/mgtargets", mgTargetRouter);
+app.use("/api/adagency", adAgencyRouter);
+app.use("/api/admypage", admypageRouter);
+app.use("/api/adhistory", adapphistoryRouter);
+app.use("/api/adagencyinfo", adagencyinRouter);
 
-app.get("/", (req, res) => {
-  res.send("Welcom!!");
-});
+// app.get("/", (req, res) => {
+//   res.send("Welcom!!");
+// });
 
 // 매달 1일 01:00, 한국 시간 기준으로 담당자 일정 데이터 생성 (다음 달 한달치)
 cron.schedule(
@@ -71,12 +70,22 @@ cron.schedule(
     timezone: "Asia/Seoul",
   },
 );
+// 민규가 매달 데이터 자동생성 (cron) 기능 썼기에, module.exports 추가작성된거로 추정
+module.exports = app;
+
+const publicPath = path.join(__dirname, "public"); // __dirname = 절대경로
+app.use(express.static(publicPath));
+
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "./public", "index.html")); // ./dist 상대경로
+});
+
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "./public", "index.html")); // 파일의 경로를 연결한 router는 index.html에 존재하기에 경로를 middleware로 연결
+});
 
 app.listen(process.env.PORT, () => {
   console.log(
     `서버가 http://localhost:${process.env.PORT} 에서 실행 중입니다.`,
   );
 });
-
-// 민규가 매달 데이터 자동생성 (cron) 기능 썼기에, module.exports 추가작성된거로 추정
-module.exports = app;

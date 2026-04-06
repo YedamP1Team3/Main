@@ -41,6 +41,9 @@ export default defineConfig({
                 // 전달할 때 주소에서 '/api' 글자는 지우고 보냅니다. (예: /api/users -> http://localhost:3000/users)
                 rewrite: (path) => path.replace(/^\/api/, '')
             }
+        },
+        build: {
+            // outDir: '../../server/public'
         }
     }
 });
