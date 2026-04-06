@@ -109,4 +109,30 @@ const router = createRouter({
     ]
 });
 
+import { useAuthStore } from '@/stores/auth'; // 경로 확인 필요
+
+// 라우터 이동 전에 무조건 실행되는 문지기(Guard)
+router.beforeEach((to, from, next) => {
+    // Pinia store는 라우터 밖에서 초기화하면 에러가 날 수 있어서 함수 안에서 호출해야 함
+    const authStore = useAuthStore();
+    const isLoggedIn = authStore.isLoggedIn;
+
+    // 1. 로그인이 필요 없는 공개 페이지 목록 (필요하면 추가)
+    const publicPages = ['/login', '/signup'];
+    const authRequired = !publicPages.includes(to.path);
+
+    // 2. 인증이 필요한 페이지인데 로그인을 안 했다면? -> 로그인 창으로 쫓아냄
+    if (authRequired && !isLoggedIn) {
+        alert('로그인이 필요한 서비스입니다.');
+        return next('/login');
+    }
+
+    // 3. 이미 로그인한 유저가 또 로그인/회원가입 페이지로 가려고 한다면? -> 메인으로 돌려보냄
+    if (!authRequired && isLoggedIn) {
+        return next('/');
+    }
+
+    // 4. 문제없으면 그대로 통과
+    next();
+});
 export default router;

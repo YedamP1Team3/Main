@@ -1,11 +1,11 @@
 export const member = [
     {
-        path: '/memberApplication',
+        path: 'memberApplication',
         name: 'mApplication',
         component: () => import('@/views/member/ApplicationForm.vue')
     },
     {
-        path: '/mypage',
+        path: 'mypage',
         name: 'myPageMain',
         component: () => import('@/views/mypage/MyPageForm.vue'),
         // ⭐ 추가: /mypage 접속 시 자동으로 /mypage/info로 보냅니다.
