@@ -6,7 +6,7 @@ const router = useRouter();
 // [수정] 일반 이용자 헤더와 동일하게 로그아웃 로직 분리
 const toggleAuth = () => {
     alert('로그아웃 되었습니다.');
-    router.push('/login');
+    router.push('/');
 };
 </script>
 
