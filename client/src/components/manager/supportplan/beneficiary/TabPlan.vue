@@ -18,7 +18,7 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const url = showTemp.value ? `/api/beneficiaries/${id}/support-plans/temp` : `/api/beneficiaries/${id}/support-plan`;
+        const url = showTemp.value ? `/api/support/beneficiaries/${id}/support-plans/temp` : `/api/support/beneficiaries/${id}/support-plan`;
         const response = await axios.get(url);
         planList.value = response.data || [];
     } catch (error) {
@@ -91,7 +91,11 @@ watch(
                     <td>{{ plan.manager_name }}</td>
                     <td>{{ plan.plan_objective }}</td>
                     <td>{{ plan.created_at }}</td>
-                    <td>{{ plan.progress_state }}</td>
+                    <td>
+                        <span class="state-badge" :class="plan.progress_state">
+                            {{ plan.progress_state }}
+                        </span>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -113,6 +117,30 @@ h2 {
     color: #1e293b;
     letter-spacing: -0.025em;
     margin: 0;
+}
+
+.state-badge {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+.state-badge.임시 {
+    background: #f1f5f9;
+    color: #475569;
+}
+.state-badge.반려,
+.state-badge.반려\/재승인 {
+    background: #fee2e2;
+    color: #dc2626;
+}
+.state-badge.대기 {
+    background: #fef3c7;
+    color: #d97706;
+}
+.state-badge.승인 {
+    background: #dcfce7;
+    color: #16a34a;
 }
 
 /* 2. 버튼 디자인 (현대적인 둥근 스타일) */
@@ -220,7 +248,7 @@ td:nth-child(4) {
 } /* 작성일자 */
 th:nth-child(5),
 td:nth-child(5) {
-    width: 85px;
+    width: 90px;
     text-align: center;
     padding-right: 10px; /* 오른쪽 치우침 방지 */
 }

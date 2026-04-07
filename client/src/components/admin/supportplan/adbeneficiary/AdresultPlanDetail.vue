@@ -72,7 +72,7 @@ const fetchHistoryPlans = async (log) => {
 const Approval = async (resultId) => {
     if (!confirm('승인하시겠습니까?')) return;
     try {
-        const response = await axios.put(`http://localhost:3000/adsupport/admin/support-result/${resultId}/approval`);
+        const response = await axios.put(`api/adsupport/admin/support-result/${resultId}/approval`);
         if (response.data.status == true) {
             alert('승인신청했습니다');
             emit('refresh');

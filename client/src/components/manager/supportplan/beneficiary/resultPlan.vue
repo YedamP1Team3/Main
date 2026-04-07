@@ -88,7 +88,9 @@ watch(
                     <td>{{ plan.manager_name }}</td>
                     <td>{{ plan.result_title }}</td>
                     <td>{{ plan.created_at }}</td>
-                    <td>{{ plan.progress_state }}</td>
+                    <td>
+                        <span class="state-badge" :class="plan.progress_state"> {{ plan.progress_state }} </span>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -112,6 +114,29 @@ h2 {
     margin: 0;
 }
 
+.state-badge {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+.state-badge.임시 {
+    background: #f1f5f9;
+    color: #475569;
+}
+.state-badge.반려,
+.state-badge.반려\/재승인 {
+    background: #fee2e2;
+    color: #dc2626;
+}
+.state-badge.대기 {
+    background: #fef3c7;
+    color: #d97706;
+}
+.state-badge.승인 {
+    background: #dcfce7;
+    color: #16a34a;
+}
 /* 2. 버튼 디자인 (현대적인 둥근 스타일) */
 .btn-group {
     display: flex;

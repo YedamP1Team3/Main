@@ -34,7 +34,7 @@ const adagencyinRouter = require("./router/adAgencyInfo_router.js");
 
 app.use("/api/download", downloadRouter);
 app.use("/api/abc", require("./router/noTouch_router.js"));
-app.use("/api", userRouter);
+app.use("/api/support", userRouter);
 app.use("/api/reserve", require("./router/rsv_router.js"));
 app.use("/api/survey", surveyRouter);
 app.use("/api/adsupport", adsupportPlan);

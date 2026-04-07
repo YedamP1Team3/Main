@@ -49,7 +49,7 @@ const Approval = async () => {
 
     try {
         isSubmitting.value = true;
-        const response = await axios.post('/api/support-plan', formData, {
+        const response = await axios.post('/api/support/support-plan', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -86,7 +86,7 @@ const SaveTemp = async () => {
             formData.append('files', file);
         });
 
-        const response = await axios.post('/api/temp-plan', formData, {
+        const response = await axios.post('/api/support/temp-plan', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
