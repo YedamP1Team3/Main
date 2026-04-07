@@ -206,7 +206,7 @@ watch(
     width: 100%;
     max-width: 550px;
     background-color: #ffffff;
-    padding: 2rem !important;
+    padding: 3rem !important;
     border: 2px solid #f4e2de !important;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* 그림자 살짝 */

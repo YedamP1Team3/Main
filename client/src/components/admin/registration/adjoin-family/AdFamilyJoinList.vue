@@ -90,9 +90,9 @@ const getStatusLabel = (status) => {
         case 'PENDING':
             return '대기';
         case 'ACTIVE':
-            return '승인완료';
+            return '승인';
         case 'REJECTED':
-            return '반려됨';
+            return '반려';
         default:
             return status;
     }
@@ -187,7 +187,7 @@ onMounted(fetchJoinRequests);
     border: 2px solid #f4e2de;
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    margin: 1rem;
+    margin: 2.5rem;
 }
 
 .page-title {
@@ -259,17 +259,17 @@ onMounted(fetchJoinRequests);
 }
 
 .custom-table th {
-    background-color: #f1f5f9; /* 6번 사진의 밝은 회색 헤더 */
-    color: #475569;
+    background-color: #fef9f6; /* 6번 사진의 밝은 회색 헤더 */
+    color: #ffab91;
     padding: 1rem;
     text-align: center;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #f4e2de;
     white-space: nowrap;
 }
 
 .custom-table td {
     padding: 1rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 2px solid #f4e2de;
     text-align: center;
     vertical-align: middle;
 }
