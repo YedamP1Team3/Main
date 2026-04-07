@@ -32,21 +32,21 @@ const admypageRouter = require("./router/admypage_router.js");
 const adapphistoryRouter = require("./router/adapphistory_router.js");
 const adagencyinRouter = require("./router/adAgencyInfo_router.js");
 
-app.use("/download", downloadRouter);
-app.use("/abc", require("./router/noTouch_router.js"));
-app.use("/support", userRouter);
-app.use("/reserve", require("./router/rsv_router.js"));
-app.use("/survey", surveyRouter);
-app.use("/adsupport", adsupportPlan);
-app.use("/resultPlan", resultPlan);
-app.use("/info", infoRouter);
-app.use("/recipient", recipientRouter);
-app.use("/mgmypage", mgMyPageRouter);
-app.use("/mgtargets", mgTargetRouter);
-app.use("/adagency", adAgencyRouter);
-app.use("/admypage", admypageRouter);
-app.use("/adhistory", adapphistoryRouter);
-app.use("/adagencyinfo", adagencyinRouter);
+app.use("/api/download", downloadRouter);
+app.use("/api/abc", require("./router/noTouch_router.js"));
+app.use("/api/support", userRouter);
+app.use("/api/reserve", require("./router/rsv_router.js"));
+app.use("/api/survey", surveyRouter);
+app.use("/api/adsupport", adsupportPlan);
+app.use("/api/resultPlan", resultPlan);
+app.use("/api/info", infoRouter);
+app.use("/api/recipient", recipientRouter);
+app.use("/api/mgmypage", mgMyPageRouter);
+app.use("/api/mgtargets", mgTargetRouter);
+app.use("/api/adagency", adAgencyRouter);
+app.use("/api/admypage", admypageRouter);
+app.use("/api/adhistory", adapphistoryRouter);
+app.use("/api/adagencyinfo", adagencyinRouter);
 
 // app.get("/", (req, res) => {
 //   res.send("Welcom!!");
