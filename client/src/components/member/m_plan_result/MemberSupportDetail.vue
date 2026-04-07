@@ -147,8 +147,8 @@ hr {
 .detail-table {
     width: 100%;
     border-collapse: collapse;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #f4e2de;
+    border-bottom: 1px solid #f4e2de;
     table-layout: fixed;
     font-size: 1.1rem;
 }
@@ -162,7 +162,7 @@ hr {
 }
 
 .detail-table td {
-    border: 1px solid #ddd;
+    border: 1px solid #f4e2de;
     padding: 15px;
     text-align: left;
     background-color: #fff;
@@ -181,8 +181,12 @@ hr {
 }
 
 .file-cell {
-    color: #999;
-    font-style: italic;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 .file_list {
     list-style: none;

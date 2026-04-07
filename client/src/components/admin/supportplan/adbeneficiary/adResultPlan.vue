@@ -95,7 +95,8 @@ h2 {
     color: #475569;
 }
 .state-badge.반려,
-.state-badge.반려\/재승인 {
+.state-badge.재승인,
+.state-badge.수정중 {
     background: #fee2e2;
     color: #dc2626;
 }
@@ -107,13 +108,68 @@ h2 {
     background: #dcfce7;
     color: #16a34a;
 }
+
+/* 2. 버튼 디자인 (현대적인 둥근 스타일) */
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+button {
+    padding: 8px 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px; /* 조금 더 둥글게 */
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* [+추가하기] 버튼 - 메인 포인트 컬러 */
+button:first-of-type {
+    background-color: #ffab91; /* 신뢰감 있는 블루 */
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+button:first-of-type:hover {
+    background-color: #ff8a65;
+    border-color: #ff8a65;
+    transform: translateY(-1px); /* 살짝 떠오르는 효과 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* [임시저장] 버튼 - 차분한 보조 컬러 */
+button:last-of-type {
+    background-color: #ffffff;
+    color: #ffab91;
+    border: 1px solid #ffab91;
+}
+/*임시저장 버튼을 눌렀을때 화면 표시*/
+.active-temp {
+    background-color: #fff7ed; /* 연한 주황 배경 */
+    border-color: #fb923c; /* 진한 주황 테두리 */
+    color: #ea580c; /* 진한 주황 글씨 */
+    box-shadow: 0 0 8px rgba(251, 146, 60, 0.3); /* 살짝 빛나는 효과 */
+    font-weight: bold;
+}
+
+button:last-of-type:hover {
+    background-color: #ff8a65;
+    color: #ffffff;
+    border-color: #cbd5e1;
+}
+
 /* 3. 테이블 레이아웃 최적화 (600px 기준) */
 table {
-    padding-top: 10px;
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
+    padding-top: 10px;
 }
 
 th {
@@ -158,7 +214,7 @@ td:nth-child(4) {
 } /* 작성일자 */
 th:nth-child(5),
 td:nth-child(5) {
-    width: 85px;
+    width: 90px;
     text-align: center;
     padding-right: 10px; /* 오른쪽 치우침 방지 */
 }
@@ -173,51 +229,5 @@ tr:hover td {
 td:last-child {
     font-weight: 600;
     color: #3b82f6; /* 기본적으로 포인트 컬러 적용 */
-}
-
-/* 반려 히스토리 섹션 (관리자용 디자인 계승) */
-.history-section {
-    margin-top: 50px;
-}
-
-.history-title {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 15px;
-}
-
-.history-card {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 18px;
-    margin-bottom: 12px;
-}
-
-.history-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    border-bottom: 1px dashed #cbd5e1;
-    padding-bottom: 8px;
-}
-
-.history-user {
-    font-weight: 700;
-    color: #475569;
-    font-size: 0.9rem;
-}
-
-.history-date {
-    font-size: 0.85rem;
-    color: #94a3b8;
-}
-
-.history-body {
-    color: #334155;
-    line-height: 1.6;
-    font-size: 0.95rem;
-    white-space: pre-wrap;
 }
 </style>
