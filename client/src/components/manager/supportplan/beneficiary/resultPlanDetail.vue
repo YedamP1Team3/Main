@@ -24,7 +24,7 @@ const isSubmitting = ref(false); //중복방지
 const fetchResultDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`http://localhost:3000/resultPlan/support-result/${id}`);
+        const response = await axios.get(`api/resultPlan/support-result/${id}`);
         resultDetail.value = response.data;
         selectedPlans.value = response.data.selected_plans || [];
         attachments.value = response.data.files || [];
@@ -109,7 +109,7 @@ const getFileIcon = (fileName) => {
 const fetchAllSupportList = async () => {
     if (!props.beneId) return;
     try {
-        const response = await axios.get(`http://localhost:3000/resultPlan/support-plans/approved/${props.beneId}`);
+        const response = await axios.get(`api/resultPlan/support-plans/approved/${props.beneId}`);
         supportList.value = response.data;
     } catch (error) {
         console.error('목록 로드 실패', error);
@@ -119,7 +119,7 @@ const fetchAllSupportList = async () => {
 const fetchRejectionHistory = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`api/adsupport/admin/support-result/${id}/rejection-history`);
+        const response = await axios.get(`/api/adsupport/admin/support-result/${id}/rejection-history`);
         // 어드민과 동일하게 각 항목에 상태값 주입
         rejectionLog.value = response.data.map((item) => ({
             ...item,
@@ -183,7 +183,7 @@ const selectSubPlan = (planId) => {
 const deleteTemp = async (resultId) => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`http://localhost:3000/resultPlan/support-result/${resultId}`);
+        const response = await axios.delete(`api/resultPlan/support-result/${resultId}`);
         if (response.data.status == 'success') {
             alert('삭제되었습니다');
             emit('refresh');
@@ -699,7 +699,7 @@ button:last-of-type:not(.active-temp):hover {
 .btn_file_select {
     width: fit-content;
     padding: 10px 15px;
-    border:1px solid #ff8a65 !important;
+    border: 1px solid #ff8a65 !important;
     background-color: #ffffff;
     color: #ff8a65;
     border: none;
@@ -709,7 +709,8 @@ button:last-of-type:not(.active-temp):hover {
 }
 
 .btn_file_select:hover {
-    background-color: #1d4ed8;
+    background-color: #eff6ff;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
 }
 
 .file_list {

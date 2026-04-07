@@ -16,7 +16,7 @@ const fetchPlanList = async (id) => {
         return;
     }
     try {
-        const response = await axios.get(`http://localhost:3000/adsupport/admin/beneficiaries/${id}/support-result`);
+        const response = await axios.get(`/api/adsupport/admin/beneficiaries/${id}/support-result`);
         planList.value = response.data || [];
     } catch (error) {
         console.error('에러', error);
@@ -56,7 +56,11 @@ watch(
                     <td>{{ plan.user_name }}</td>
                     <td>{{ plan.result_title }}</td>
                     <td>{{ plan.created_at }}</td>
-                    <td>{{ plan.progress_state === '반려/수정중' ? '반려' : plan.progress_state }}</td>
+                    <td>
+                        <span class="state-badge" :class="plan.progress_state">
+                            {{ plan.progress_state === '반려/수정중' ? '반려' : plan.progress_state }}
+                        </span>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -78,6 +82,30 @@ h2 {
     color: #1e293b;
     letter-spacing: -0.025em;
     margin: 0;
+}
+
+.state-badge {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+.state-badge.임시 {
+    background: #f1f5f9;
+    color: #475569;
+}
+.state-badge.반려,
+.state-badge.반려\/재승인 {
+    background: #fee2e2;
+    color: #dc2626;
+}
+.state-badge.대기 {
+    background: #fef3c7;
+    color: #d97706;
+}
+.state-badge.승인 {
+    background: #dcfce7;
+    color: #16a34a;
 }
 /* 3. 테이블 레이아웃 최적화 (600px 기준) */
 table {
