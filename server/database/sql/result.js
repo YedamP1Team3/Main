@@ -158,7 +158,7 @@ const selectLinkedTempList = `SELECT
 const rejectSupportResult = `
     UPDATE support_result 
     SET 
-        progress_state = '반려/수정중', 
+        progress_state = '수정중', 
         rejection_reason = ?, 
         result_content = ?,
         updated_at = NOW() 
@@ -171,7 +171,7 @@ const resubmitSupportResult = `
     SET 
         result_title = ?, 
         result_content = ?, 
-        progress_state = '반려/재승인', 
+        progress_state = '재승인', 
         rejection_reason = NULL, -- 재승인 시 이전 반려 사유는 비워줍니다.
         updated_at = NOW() 
     WHERE result_id = ?

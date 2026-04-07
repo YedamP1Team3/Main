@@ -131,7 +131,7 @@ const resubmitSupportPlan = `
   SET
     plan_objective =?,
     plan_content =?,
-    progress_state ='반려/재승인',
+    progress_state ='재승인',
     updated_at = NOW()
   WHERE
     plan_id =?
@@ -142,7 +142,7 @@ const rejectSupportPlan = `
   SET
     plan_objective =?,
     plan_content =?,
-    progress_state ='반려/수정중',
+    progress_state ='수정중',
     updated_at = NOW()
   WHERE
     plan_id =?

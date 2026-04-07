@@ -130,7 +130,8 @@ h2 {
     color: #475569;
 }
 .state-badge.반려,
-.state-badge.반려\/재승인 {
+.state-badge.재승인,
+.state-badge.수정중 {
     background: #fee2e2;
     color: #dc2626;
 }

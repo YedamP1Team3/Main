@@ -95,7 +95,8 @@ h2 {
     color: #475569;
 }
 .state-badge.반려,
-.state-badge.반려\/재승인 {
+.state-badge.재승인,
+.state-badge.수정중 {
     background: #fee2e2;
     color: #dc2626;
 }
@@ -109,11 +110,11 @@ h2 {
 }
 
 table {
-    padding-top: 10px;
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
+    padding-top: 10px;
 }
 
 th {
@@ -158,7 +159,7 @@ td:nth-child(4) {
 } /* 작성일자 */
 th:nth-child(5),
 td:nth-child(5) {
-    width: 85px;
+    width: 90px;
     text-align: center;
     padding-right: 10px; /* 오른쪽 치우침 방지 */
 }
