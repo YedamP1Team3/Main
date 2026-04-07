@@ -390,8 +390,8 @@ onMounted(() => {
                             </div>
                             <div class="detail-row">
                                 <span class="detail-label">연결된 계획</span>
-                                <div class="plan-tags">
-                                    <span v-for="plan in log.plans" :key="plan.plan_id" class="plan-badge">{{ plan.plan_objective }}</span>
+                                <div v-for="plan in selectedPlans" :key="plan.plan_id" class="plan-tag-item" @click.stop="selectSubPlan(plan.plan_id)">
+                                    <span>{{ plan.plan_objective }}</span>
                                     <div v-if="!log.plans || log.plans.length === 0" class="no-data">연결된 계획 정보가 없습니다.</div>
                                 </div>
                             </div>
