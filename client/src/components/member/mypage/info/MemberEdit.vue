@@ -192,7 +192,7 @@ const saveInfo = async () => {
     max-width: 550px;
     background-color: #ffffff;
     /* 상단 내부 패딩을 1.5rem에서 1.2rem으로 줄여 제목을 위로 올림 */
-    padding: 1.2rem 2rem !important;
+    padding: 0.6rem 2rem !important;
     border-radius: 12px;
     border: 2px solid #f4e2de;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
