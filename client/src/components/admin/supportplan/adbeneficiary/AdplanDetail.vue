@@ -163,8 +163,8 @@ watch(
         </div>
 
         <div class="button-group">
-            <button v-if="['반려/재승인', '대기'].includes(planDetail.progress_state)" class="btn-approve" @click="Approval(planDetail.plan_id)">승인</button>
-            <button v-if="['반려/재승인', '대기'].includes(planDetail.progress_state) && !reasoninsert" class="btn-reject" @click="reasoninsert = true">반려하기</button>
+            <button v-if="['재승인', '대기'].includes(planDetail.progress_state)" class="btn-approve" @click="Approval(planDetail.plan_id)">승인</button>
+            <button v-if="['재승인', '대기'].includes(planDetail.progress_state) && !reasoninsert" class="btn-reject" @click="reasoninsert = true">반려하기</button>
         </div>
 
         <div v-if="reasoninsert" class="reason-input-area">
