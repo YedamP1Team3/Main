@@ -134,8 +134,8 @@ const searchAddress = () => {
 
 // 4. [가입하기] 최종 버튼을 눌렀을 때 실행됩니다.
 const submit = async () => {
-    if (!form.name || !form.userId || !form.password || !form.passwordConfirm || !form.phone || !form.address) {
-        alert('이름, 아이디, 비밀번호, 비밀번호확인 ,전화번호, 주소는 필수 입력 사항입니다');
+    if (!form.name || !form.userId || !form.password || !form.passwordConfirm || !form.phone || !form.address || !form.email) {
+        alert('이름, 아이디, 비밀번호, 비밀번호확인 ,전화번호, 주소, 이메일은 필수 입력 사항입니다');
         return;
     }
 
@@ -225,12 +225,12 @@ onMounted(() => {
 
                     <form @submit.prevent="submit">
                         <div class="field mb-3">
-                            <label for="name" class="block text-900 font-semibold mb-2">이름</label>
+                            <label for="name" class="block text-900 font-semibold mb-2">이름<small class="text-red-500">* 필수</small></label>
                             <InputText id="name" v-model="form.name" placeholder="실명을 입력하세요" class="p-3" />
                         </div>
 
                         <div class="field mb-3">
-                            <label for="userId" class="block text-900 font-semibold mb-2">아이디</label>
+                            <label for="userId" class="block text-900 font-semibold mb-2">아이디<small class="text-red-500">* 필수</small></label>
                             <div class="flex gap-2">
                                 <InputText id="userId" v-model="form.userId" placeholder="아이디 입력" class="p-3 flex-1" :class="{ 'p-invalid': isIdDuplicated }" @input="resetIdCheck" autocomplete="username" />
                                 <Button label="중복확인" @click="checkId" class="p-button-outlined w-auto px-4" />
@@ -242,17 +242,17 @@ onMounted(() => {
                         </div>
 
                         <div class="field mb-3">
-                            <label for="password" class="block text-900 font-semibold mb-2">비밀번호</label>
+                            <label for="password" class="block text-900 font-semibold mb-2">비밀번호<small class="text-red-500">* 필수</small></label>
                             <Password id="password" v-model="form.password" placeholder="비밀번호 입력" :toggleMask="true" class="w-full" inputClass="p-3 w-full" :inputProps="{ autocomplete: 'new-password' }" />
                         </div>
 
                         <div class="field mb-3">
-                            <label for="passwordConfirm" class="block text-900 font-semibold mb-2">비밀번호 확인</label>
+                            <label for="passwordConfirm" class="block text-900 font-semibold mb-2">비밀번호 확인<small class="text-red-500">* 필수</small></label>
                             <Password id="passwordConfirm" v-model="form.passwordConfirm" placeholder="비밀번호 재입력" :toggleMask="true" :feedback="false" class="w-full" inputClass="p-3 w-full" :inputProps="{ autocomplete: 'new-password' }" />
                         </div>
 
                         <div class="field mb-3">
-                            <label class="block text-900 font-semibold mb-2">주소</label>
+                            <label class="block text-900 font-semibold mb-2">주소<small class="text-red-500">* 필수</small></label>
 
                             <div class="flex gap-2 mb-3">
                                 <InputText v-model="form.zipcode" placeholder="우편번호" class="p-3 flex-1" readonly />
@@ -269,7 +269,7 @@ onMounted(() => {
                         </div>
 
                         <div class="field mb-3">
-                            <label class="block text-900 font-semibold mb-2">소속 기관 선택</label>
+                            <label class="block text-900 font-semibold mb-2">소속 기관 선택<small class="text-red-500">* 필수</small></label>
                             <div class="flex gap-2">
                                 <Select v-model="form.region" :options="agencyCityOptions" optionLabel="label" optionValue="value" placeholder="지역 선택" class="flex-1" />
                                 <Select v-model="form.organization" :options="agencyOptions" optionLabel="label" optionValue="value" placeholder="기관 선택" class="flex-1" />
@@ -277,12 +277,12 @@ onMounted(() => {
                         </div>
 
                         <div class="field mb-3">
-                            <label for="phone" class="block text-900 font-semibold mb-2">전화번호</label>
+                            <label for="phone" class="block text-900 font-semibold mb-2">전화번호<small class="text-red-500">* 필수</small></label>
                             <InputText id="phone" v-model="form.phone" placeholder="010-0000-0000" class="p-3 w-full" />
                         </div>
 
                         <div class="field mb-6">
-                            <label for="email" class="block text-900 font-semibold mb-2">이메일</label>
+                            <label for="email" class="block text-900 font-semibold mb-2">이메일<small class="text-red-500">* 필수</small></label>
                             <InputText id="email" v-model="form.email" placeholder="email@email.com" class="p-3 w-full" />
                         </div>
 
