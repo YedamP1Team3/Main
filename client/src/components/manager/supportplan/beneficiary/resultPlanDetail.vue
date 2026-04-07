@@ -391,15 +391,9 @@ onMounted(() => {
                             <div class="detail-row">
                                 <span class="detail-label">연결된 계획</span>
                                 <div class="plan-tags">
-                                    <span v-for="plan in log.plans" :key="plan.plan_id" class="plan-badge">
-                                        {{ plan.plan_objective }}
-                                    </span>
+                                    <span v-for="plan in log.plans" :key="plan.plan_id" class="plan-badge">{{ plan.plan_objective }}</span>
                                     <div v-if="!log.plans || log.plans.length === 0" class="no-data">연결된 계획 정보가 없습니다.</div>
                                 </div>
-                            </div>
-                            <div class="detail-row rejection-reason-box">
-                                <span class="detail-label">반려 사유</span>
-                                <div class="detail-value reason-text">{{ log.rejection_reason }}</div>
                             </div>
                         </div>
                     </div>
@@ -688,7 +682,29 @@ button:last-of-type:not(.active-temp):hover {
     border: 1px solid #f4e2de;
     border-radius: 8px;
 }
+.detail-label {
+    display: block;
+    font-weight: bold;
+    color: #64748b;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+.detail-value {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
 
+.plan-badge {
+    display: inline-block;
+    background: #ffffff;
+    border: 1px solid #ffab91;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    margin-right: 5px;
+    margin-top: 5px;
+}
 .file_input_container {
     flex: 1;
     display: flex;

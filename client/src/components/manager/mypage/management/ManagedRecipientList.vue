@@ -140,7 +140,8 @@ onMounted(() => {
     height: calc(100vh - 150px); /* 헤더 등을 제외한 높이 */
     background-color: #fff;
     border: 2px solid #f4e2de;
-    margin: 20px;
+    border-radius: 12px;
+    margin: 2.5rem;
 }
 
 /* 목록 영역 */
