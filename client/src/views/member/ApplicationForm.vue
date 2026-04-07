@@ -174,6 +174,7 @@ watch([() => route.query.beneId, () => route.query.tab], applyRouteState, {
     border: 2px dashed #f4e2de;
     padding: 50px;
     border-radius: 16px;
+    background-color: #ffff;
 }
 
 .guide-box i {
