@@ -160,9 +160,9 @@ const deleteTemp = async (resultId) => {
 
 // 3. 승인 신청 (수정 후 재신청)
 const Approval = async (id) => {
-    if (isSubmitting.value) return;
     if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
-    if (!resultDetail.value.result_title) {
+    if (isSubmitting.value) return;
+    if (!resultDetail.value.result_title || !resultDetail.value.result_content) {
         alert('내용을 입력해주세요');
         return;
     }
@@ -234,7 +234,6 @@ watch(
     (newId) => {
         fetchResultDetail(newId);
         fetchAllSupportList();
-        fetchRejectionHistory(newId);
     },
     { immediate: true }
 );

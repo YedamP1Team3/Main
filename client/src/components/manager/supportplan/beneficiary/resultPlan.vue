@@ -243,7 +243,7 @@ td:nth-child(4) {
 } /* 작성일자 */
 th:nth-child(5),
 td:nth-child(5) {
-    width: 85px;
+    width: 90px;
     text-align: center;
     padding-right: 10px; /* 오른쪽 치우침 방지 */
 }
