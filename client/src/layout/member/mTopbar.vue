@@ -48,10 +48,10 @@ const toggleAuth = () => {
         if (confirm('로그아웃 하시겠습니까?')) {
             authStore.logout();
             alert('로그아웃 되었습니다.');
-            router.push('/login');
+            router.push('/');
         }
     } else {
-        router.push('/login');
+        router.push('/');
     }
 };
 </script>

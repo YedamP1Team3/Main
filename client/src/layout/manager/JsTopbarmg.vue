@@ -16,10 +16,10 @@ const toggleAuth = () => {
         if (confirm('로그아웃 하시겠습니까?')) {
             authStore.logout();
             alert('로그아웃 되었습니다.');
-            router.push('/login');
+            router.push('/');
         }
     } else {
-        router.push('/login');
+        router.push('/');
     }
 };
 
@@ -42,7 +42,7 @@ const goToProfile = () => {
         });
     } else {
         alert('다시 로그인해 주세요.');
-        router.push('/login');
+        router.push('/');
     }
 };
 </script>

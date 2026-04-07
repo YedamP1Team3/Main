@@ -178,7 +178,7 @@ const submit = async () => {
         // 서버의 가입 API(/api/info/signup)로 데이터를 전송합니다.
         const response = await axios.post('/api/info/signup', signupData);
         alert(response.data.message); // 가입 축하 메시지를 띄웁니다.
-        router.push('/login'); // 로그인 페이지로 이동시킵니다.
+        router.push('/'); // 로그인 페이지로 이동시킵니다.
     } catch (error) {
         alert('가입 처리 중 오류가 발생했습니다.');
     }
@@ -288,7 +288,7 @@ onMounted(() => {
 
                         <div class="flex flex-column gap-3">
                             <Button type="submit" :label="form.userType === 'user' ? '일반 회원가입 완료' : '기관 담당자 가입 완료'" class="p-3-save-btn text-xl border-round-xl" />
-                            <Button label="취소" @click="router.push('/login')" class="p-button-text text-600" />
+                            <Button label="취소" @click="router.push('/')" class="p-button-text text-600" />
                         </div>
                     </form>
                 </div>
