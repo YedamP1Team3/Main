@@ -86,7 +86,7 @@ watch(
                 <table class="list-table">
                     <thead>
                         <tr>
-                            <th>작성자</th>
+                            <th>김밥천국</th>
                             <th>지원자</th>
                             <th>신청단계</th>
                             <th>작성일자</th>
