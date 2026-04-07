@@ -100,7 +100,10 @@ const deleteExistingFile = async (fileId) => {
 
 // 3. 승인 신청 (수정 후 재신청)
 const Approval = async (planDraftId) => {
-    if (!confirm('수정한 내용으로 승인을 신청하시겠습니까?')) return;
+    if (!tempDetail.value.plan_objective || !tempDetail.value.plan_content) {
+        alert('내용을 입력해주세요');
+        return;
+    }
     if (isSubmitting.value) return;
     if (!planDraftId) return;
     try {
