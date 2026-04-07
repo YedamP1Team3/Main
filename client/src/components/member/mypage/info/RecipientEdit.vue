@@ -116,55 +116,57 @@ const openPostcode = () => {
             <div class="p-fluid">
                 <div class="input-set">
                     <label>대상자 성명</label>
-                    <InputText v-model="form.name" placeholder="실명을 입력하세요" class="p-inputtext-sm" />
+                    <InputText v-model="form.name" placeholder="실명을 입력하세요" class="custom-input" />
                 </div>
 
                 <div class="input-set">
                     <label>생 년 월 일</label>
-                    <InputText v-model="form.birth" placeholder="예) 19900101" maxlength="8" class="p-inputtext-sm" />
+                    <InputText v-model="form.birth" placeholder="예) 19900101" maxlength="8" class="custom-input" />
                 </div>
 
                 <div class="input-set">
                     <label>성 별</label>
-                    <div class="flex gap-4 p-1">
-                        <div class="flex align-items-center">
+                    <div class="radio-group">
+                        <div class="radio-item">
                             <RadioButton v-model="form.gender" inputId="f" value="여성" />
-                            <label for="f" class="ml-2 text-sm">여성</label>
+                            <label for="f">여성</label>
                         </div>
-                        <div class="flex align-items-center">
+                        <div class="radio-item">
                             <RadioButton v-model="form.gender" inputId="m" value="남성" />
-                            <label for="m" class="ml-2 text-sm">남성</label>
+                            <label for="m">남성</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="input-set">
-                    <label>주소 <span class="text-xs text-primary">(회원 정보와 동일)</span></label>
-                    <InputText v-model="form.postcode" class="p-inputtext-sm w-8rem disabled-input mb-2" readonly />
-                    <InputText v-model="form.address" class="p-inputtext-sm mb-2 disabled-input" readonly />
-                    <InputText v-model="form.detailAddress" class="p-inputtext-sm disabled-input" readonly />
-                    <small class="mt-1 text-gray-500">* 주소 변경은 마이페이지 > 내 정보 관리 > 내 정보 수정에서 가능합니다.</small>
+                    <label>주소 <span class="text-primary">(회원 정보와 동일)</span></label>
+                    <div class="address-group">
+                        <InputText v-model="form.postcode" class="custom-input disabled-input" readonly />
+                        <InputText v-model="form.address" class="custom-input disabled-input" readonly />
+                        <InputText v-model="form.detailAddress" class="custom-input disabled-input" readonly />
+                    </div>
+                    <small class="helper-text">* 주소 변경은 마이페이지 > 내 정보 관리 > 내 정보 수정에서 가능합니다.</small>
                 </div>
 
                 <div class="input-set">
                     <label>장애유형</label>
-                    <Select v-model="form.disabilityType" :options="disabilityOptions" placeholder="선택하세요" class="p-select-sm" />
+                    <Select v-model="form.disabilityType" :options="disabilityOptions" placeholder="선택하세요" class="custom-input" />
                 </div>
 
                 <div class="input-set">
                     <label>대상자와의 관계</label>
-                    <div class="flex flex-wrap align-items-center gap-x-3 gap-y-2 p-1">
-                        <div v-for="rel in relations" :key="rel" class="flex align-items-center">
+                    <div class="relation-group">
+                        <div v-for="rel in relations" :key="rel" class="radio-item">
                             <RadioButton v-model="form.relation" :inputId="rel" :value="rel" />
-                            <label :for="rel" class="ml-1 text-sm">{{ rel }}</label>
+                            <label :for="rel">{{ rel }}</label>
                         </div>
-                        <InputText v-if="form.relation === '기타'" v-model="form.relationEtc" placeholder="직접 입력" class="p-inputtext-sm ml-2" style="width: 120px" />
+                        <InputText v-if="form.relation === '기타'" v-model="form.relationEtc" placeholder="직접 입력" class="custom-input relation-etc-input" />
                     </div>
                 </div>
 
-                <div class="btn-group gap-3 mt-4">
-                    <Button label="취 소" class="p-button-secondary cancel-btn" @click="router.back()" />
-                    <Button label="수정 완료" class="p-button-success submit-btn" @click="updateRecipient" />
+                <div class="btn-group">
+                    <Button label="취 소" class="cancel-btn" @click="router.back()" />
+                    <Button label="수정 완료" class="submit-btn" @click="updateRecipient" />
                 </div>
             </div>
         </div>
@@ -177,42 +179,75 @@ const openPostcode = () => {
     justify-content: center;
     align-items: flex-start;
     width: 100%;
-    padding: 5px 0 40px 0; /* MemberEdit와 동일하게 위로 바짝 올림 */
+    padding: 5px 0 40px 0;
     background-color: #fef9f6 !important;
 }
 
 .form-container {
     width: 100%;
-    max-width: 550px; /* 너비 통일 */
+    max-width: 550px;
     background-color: #ffffff;
-    padding: 1.2rem 2rem !important; /* 상단 여백 축소 버전 */
+    /* 1. 상단 8rem을 3rem으로 줄여서 제목을 위로 올립니다. */
+    padding: 2rem 2rem 4rem 2rem !important;
     border: 2px solid #f4e2de !important;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
 }
 
+/* 제목 스타일 */
 .form-title {
-    font-size: 1.3rem;
-    font-weight: bold;
+    font-size: 1.4rem;
+    font-weight: 700;
     text-align: center;
-    margin-bottom: 1.2rem;
+    /* 제목 위쪽 여백은 없애고, 아래쪽 입력창과의 간격만 확보합니다. */
+    margin-top: 0;
+    margin-bottom: 2.5rem;
     color: #334155;
+    letter-spacing: -0.5px; /* 자간을 살짝 좁혀서 더 깔끔하게 */
 }
 
+/* 개별 입력 그룹 (라벨 + 입력창) */
 .input-set {
     display: flex;
     flex-direction: column;
-    margin-bottom: 0.8rem;
+    margin-bottom: 1.5rem; /* 각 항목들 사이의 간격을 널찍하고 일정하게 */
 }
 
-.input-set label {
+/* 라벨(제목) 스타일 */
+.input-set > label {
     font-weight: 600;
-    margin-bottom: 0.3rem;
-    font-size: 0.85rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.9rem;
     color: #475569;
 }
 
-/* 주소 등 읽기 전용 입력창 스타일 */
+/* 주소 라벨 옆 초록색 글씨 */
+.input-set label span.text-primary {
+    color: #10b981 !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* 공통 입력창 스타일 (InputText, Select 등) */
+:deep(.custom-input) {
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95rem;
+    color: #334155;
+    box-sizing: border-box;
+}
+
+/* 주소 입력창 묶음 */
+.address-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* 3개의 주소창 사이의 일정한 틈새 */
+}
+
+/* 비활성화된 주소 입력창 */
 .disabled-input {
     background-color: #f1f5f9 !important;
     border-color: #e2e8f0 !important;
@@ -220,33 +255,94 @@ const openPostcode = () => {
     cursor: not-allowed !important;
 }
 
-.btn-group {
-    display: flex;
-    justify-content: center;
-    margin-top: 1.5rem;
+/* 주소 하단 안내 문구 */
+.helper-text {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #94a3b8;
 }
 
+/* 라디오 버튼 그룹 정렬 (성별) */
+.radio-group {
+    display: flex;
+    gap: 1.5rem; /* 여성, 남성 사이 간격 */
+    padding-top: 0.3rem;
+}
+
+/* 라디오 버튼 그룹 정렬 (관계) */
+.relation-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* 수직 중앙 정렬 */
+    gap: 1rem 1.2rem; /* 위아래, 양옆 간격 */
+    padding-top: 0.3rem;
+}
+
+/* 개별 라디오 버튼 + 텍스트 묶음 */
+.radio-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem; /* 동그라미와 글자 사이 간격 */
+}
+
+.radio-item label {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #334155;
+    cursor: pointer;
+}
+
+/* '기타' 선택 시 나타나는 직접 입력창 */
+.relation-etc-input {
+    width: 120px !important; /* 너무 길지 않게 설정 */
+    padding: 0.4rem 0.6rem !important; /* 라디오 버튼 높이에 맞게 조절 */
+}
+
+/* 하단 버튼 묶음 */
+.btn-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* 하단 버튼 공통 스타일 */
 .submit-btn,
 .cancel-btn {
     flex: 1;
-    padding: 0.6rem;
-    font-size: 0.95rem;
-    font-weight: bold;
+    padding: 0.85rem;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
 }
 
+.submit-btn:hover,
+.cancel-btn:hover {
+    opacity: 0.9;
+}
+
+/* 수정 완료 버튼 */
 .submit-btn {
     background-color: #ffab91 !important;
-    border: none;
+    color: white !important;
 }
 
-/* PrimeVue 컴포넌트 내부 여백 미세 조정 */
-:deep(.p-inputtext-sm),
-:deep(.p-select-sm) {
-    padding: 0.4rem 0.7rem;
+/* 취소 버튼 */
+.cancel-btn {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
 }
 
+/* PrimeVue 라디오 버튼 색상 커스텀 (초록색) */
+:deep(.p-radiobutton .p-radiobutton-box.p-highlight) {
+    background-color: #10b981;
+    border-color: #10b981;
+}
 :deep(.p-radiobutton .p-radiobutton-box) {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
 }
 </style>
