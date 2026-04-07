@@ -19,7 +19,7 @@ const isSubmitting = ref(false);
 const fetchPlanDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`api/api/support-plans/${id}`);
+        const response = await axios.get(`api/support/support-plans/${id}`);
         planDetail.value = response.data.plan || {};
         attachments.value = response.data.files || [];
 
@@ -39,7 +39,7 @@ const uploadSelectedFiles = async (planId) => {
         formData.append('files', file);
     });
 
-    const response = await axios.post(`api/api/support-plans/${planId}/files`, formData, {
+    const response = await axios.post(`api/support/support-plans/${planId}/files`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
 
@@ -54,7 +54,7 @@ const deleteExistingFile = async (fileId) => {
     if (!planId || !fileId) return;
     if (!confirm('이 파일을 삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`api/api/support-plans/${planId}/files/${fileId}`);
+        const response = await axios.delete(`api/support/support-plans/${planId}/files/${fileId}`);
         if (response.data?.status === 'success') {
             await fetchPlanDetail(planId);
         } else {
@@ -96,7 +96,7 @@ const toggleHistory = (log) => {
 const DeleteTemp = async (planId) => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`api/api/support-plans/${planId}`);
+        const response = await axios.delete(`api/support/support-plans/${planId}`);
         if (response.data.status == 'success') {
             alert('삭제되었습니다');
             emit('refresh');
@@ -129,7 +129,7 @@ const Approval = async (planId) => {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
         };
-        const response = await axios.put(`api/api/support-plans/${planId}`, updateData);
+        const response = await axios.put(`api/support/support-plans/${planId}`, updateData);
         if (response.data.status == true) {
             alert('승인 신청되었습니다.');
             emit('refresh');
@@ -156,7 +156,7 @@ const SaveTemp = async (planId) => {
             plan_objective: planDetail.value.plan_objective,
             plan_content: planDetail.value.plan_content
         };
-        const response = await axios.put(`api/api/support-plans/${planId}/save`, updateData);
+        const response = await axios.put(`api/support/support-plans/${planId}/save`, updateData);
         if (response.data.status == true) {
             alert('임시저장되었습니다');
             emit('refresh');
@@ -584,7 +584,7 @@ button:last-of-type:not(.active-temp):hover {
 .btn_file_select {
     width: fit-content;
     padding: 10px 15px;
-    border:1px solid #ff8a65 !important;
+    border: 1px solid #ff8a65 !important;
     background-color: #ffffff;
     color: #ff8a65;
     border: none;

@@ -18,14 +18,14 @@ const fetchBeneDetail = async () => {
         selectedBene.value = {};
         return;
     }
-    const response = await axios.get(`api/api/beneficiaries/${selectedBeneId.value}`);
+    const response = await axios.get(`api/support/beneficiaries/${selectedBeneId.value}`);
     selectedBene.value = response.data;
     emit('updateBeneId', selectedBeneId.value, response.data.priority_id, response.data.progress_status);
 };
 
 onMounted(async () => {
     const userList = authStore.userId;
-    const response = await axios.get('api/api/beneficiaries/names', { params: { user_id: userList } });
+    const response = await axios.get('api/support/beneficiaries/names', { params: { user_id: userList } });
     beneficiaryList.value = response.data;
 });
 </script>

@@ -3,18 +3,46 @@ import axios from 'axios';
 import { ref, watch } from 'vue';
 const props = defineProps({ beneId: [String, Number], priorityId: [String, Number], resultId: [String, Number] });
 
+const attachments = ref([]);
 const resultDetail = ref({});
 
 const fetchResultDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`api/resultPlan/support-result/${id}`);
+        const response = await axios.get(`/api/resultPlan/support-result/${id}`);
         resultDetail.value = response.data;
+        attachments.value = response.data.files || [];
     } catch (error) {
         console.error(`에러`, error);
     }
 };
 
+const downloadFile = (file) => {
+    const isConfirmed = confirm(`'${file.origin_name}' 파일을 다운로드하시겠습니까?`);
+    if (isConfirmed) {
+        const url = `/api/download/${file.file_name}?originName=${encodeURIComponent(file.origin_name)}`;
+        window.location.href = url;
+    }
+};
+
+const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(ext)) {
+        return '🖼️';
+    }
+
+    const iconMap = {
+        pdf: '📕',
+        xlsx: '📗',
+        xls: '📗',
+        docx: '📘',
+        doc: '📘',
+        hwp: '📝'
+    };
+
+    return iconMap[ext] || '📄';
+};
 watch(
     () => props.resultId,
     (newId) => {
@@ -50,7 +78,16 @@ watch(
                 </tr>
                 <tr>
                     <th>파일첨부</th>
-                    <td class="file-cell">임시 (첨부파일 없음)</td>
+                    <td class="file-cell">
+                        <ul v-if="attachments && attachments.length > 0" class="file_list">
+                            <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
+                                <span class="file_icon">{{ getFileIcon(file.origin_name || file.name) }}</span>
+                                <span class="file_name">{{ file.origin_name || file.name }}</span>
+                            </li>
+                        </ul>
+
+                        <div v-else class="no-file">첨부파일 없음</div>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -139,5 +176,95 @@ hr {
 .file-cell {
     color: #999;
     font-style: italic;
+}
+.file_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.file_item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    border: 1px solid #ff8a65;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    min-width: 200px;
+    transition: all 0.2s;
+}
+
+.file_item:hover {
+    border-color: #ff8a65;
+    color: white;
+    background-color: #ff8a65;
+}
+
+.file_icon {
+    font-size: 1.1rem;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.file_name {
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn_file_select {
+    width: fit-content;
+    padding: 10px 15px;
+    border: 1px solid #ff8a65 !important;
+    background-color: #ffffff;
+    color: #ff8a65;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn_file_select:hover {
+    background-color: #1d4ed8;
+}
+
+.btn_remove {
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn_remove:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.no-attachments {
+    color: #94a3b8;
+    font-size: 1.1rem;
+    padding: 5px 0;
+}
+
+.clickable {
+    cursor: pointer;
 }
 </style>

@@ -19,7 +19,7 @@ const fetchPlanDetail = async (id) => {
     isLoading.value = true;
     try {
         // ✅ API 주소 주의: 서버 포트(3000)와 경로를 명확히 작성
-        const response = await axios.get(`api/api/support-plans/${id}`);
+        const response = await axios.get(`api/support/support-plans/${id}`);
         planDetail.value = response.data.plan || {};
         attachments.value = response.data.files || [];
 

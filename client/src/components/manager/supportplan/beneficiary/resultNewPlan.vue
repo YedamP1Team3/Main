@@ -70,7 +70,7 @@ const Approval = async () => {
     });
     try {
         isSubmitting.value = true;
-        const response = await axios.post('api/resultPlan/support-result', formData, {
+        const response = await axios.post('/api/resultPlan/support-result', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -106,7 +106,7 @@ const SaveTemp = async () => {
     });
     try {
         isSubmitting.value = true;
-        const response = await axios.post('api/resultPlan/temp-result', formData, {
+        const response = await axios.post('/api/resultPlan/temp-result', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -151,7 +151,7 @@ const removePlan = (id) => {
 };
 
 onMounted(async () => {
-    const response = await axios.get(`http://localhost:3000/resultPlan/support-plans/approved/${props.beneId}`);
+    const response = await axios.get(`/api/resultPlan/support-plans/approved/${props.beneId}`);
     supportList.value = response.data;
 });
 </script>
@@ -247,7 +247,7 @@ h2 {
     margin-bottom: 20px;
     color: #64748b;
     font-size: 1.1rem;
-    border-bottom: 2px solid #334155;
+    border-bottom: 2px solid #f4e2de;
     padding-bottom: 10px;
 }
 
@@ -416,17 +416,20 @@ button:last-of-type:not(.active-temp):hover {
 
 .btn_file_select {
     width: fit-content;
-    padding: 10px 15px;
-    background-color: #2563eb;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
+    padding: 8px 16px;
+    background-color: #fff;
+    color: #ffab91;
+    border: 1px solid #ffab91;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 700;
     cursor: pointer;
-    font-weight: 600;
+    transition: all 0.2s ease;
 }
 
 .btn_file_select:hover {
-    background-color: #1d4ed8;
+    background-color: #eff6ff;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
 }
 
 .file_list {
