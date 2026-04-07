@@ -40,3 +40,9 @@ export const processReservation = (rsvId, decision, rejectReason = '') => {
         rejectReason
     });
 };
+
+export const completeReservation = (rsvId) => {
+    return axios.patch(`/api/reserve/manager/reservations/${rsvId}/complete`, {
+        rsvId
+    });
+};

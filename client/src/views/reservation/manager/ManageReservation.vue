@@ -8,7 +8,7 @@ import RsvTable from '@/components/common/RsvTable.vue';
 import RsvProcessModal from '@/components/reservation/RsvProcessModal.vue';
 
 import { useAuthStore } from '@/stores/auth';
-import { getManagerReservations, processReservation } from '@/api/reservation/reservation';
+import { getManagerReservations, processReservation, completeReservation } from '@/api/reservation/reservation';
 
 const authStore = useAuthStore();
 const { userId } = storeToRefs(authStore);
@@ -24,7 +24,8 @@ const columns = [
     { key: 'reservation_date', label: '예약날짜' },
     { key: 'reservation_time', label: '예약시간' },
     { key: 'rsv_status', label: '예약상태', type: 'status' },
-    { key: 'process', label: '처리', type: 'action', action: 'process' }
+    { key: 'process', label: '처리', type: 'action', action: 'process' },
+    { key: 'complete', label: '상담완료', type: 'action', action: 'complete' }
 ];
 
 const formatReservationRow = (item) => {
@@ -81,10 +82,26 @@ const handleProcessConfirm = async ({ rsvId, decision, rejectReason }) => {
     }
 };
 
+const handleCompleteReservation = async (row) => {
+    try {
+        await completeReservation(row.rsv_id);
+
+        alert('상담이 완료 처리되었습니다.');
+        await fetchReservations();
+    } catch (err) {
+        console.error('상담 완료 처리 실패:', err);
+        alert(err.response?.data?.message || '상담 완료 처리 실패');
+    }
+};
+
 const handleActionClick = ({ action, row }) => {
     if (action === 'process') {
         openProcessModal(row);
         return;
+    }
+
+    if (action === 'complete') {
+        handleCompleteReservation(row);
     }
 };
 
