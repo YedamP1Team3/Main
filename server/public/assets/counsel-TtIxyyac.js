@@ -1,1 +1,0 @@
-import{b as s}from"./index-CPm1mvAF.js";const n=e=>s.get("/api/reserve/manager/counsel",{params:{managerId:e}}),a=e=>s.get(`/api/reserve/manager/${e}`),o=e=>s.post("/api/reserve/counsel",e),u=e=>s.get(`/api/reserve/counsel/${e}`),g=(e,r)=>s.put(`/api/reserve/counsel/${e}`,r);export{a,u as b,o as c,n as g,g as u};
