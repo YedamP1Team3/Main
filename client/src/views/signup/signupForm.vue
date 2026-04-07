@@ -306,7 +306,7 @@ onMounted(() => {
     background-attachment: fixed; /* 스크롤할 때 배경이 고정되어 더 예쁩니다 */
     background-repeat: no-repeat;
     box-shadow: inset 0 0 0 2000px rgba(254, 249, 246, 0.3);
-    min-height: 100vh;
+    min-height: 90vh;
     display: flex;
     align-items: center;
     justify-content: center;
