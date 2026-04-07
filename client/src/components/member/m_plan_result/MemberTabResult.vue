@@ -15,8 +15,18 @@ const fetchResultList = async (id) => {
         return;
     }
     try {
-        const response = await axios.get(`api/resultPlan/beneficiaries/${id}/support-result`);
+        // 1. 여기서 먼저 데이터를 받아와서 response 변수에 담습니다.
+        const response = await axios.get(`/api/resultPlan/beneficiaries/${id}/support-result`);
+
+        // 2. [수정 포인트] 이제 데이터가 들어왔으니 로그를 찍습니다.
+        console.log('서버 응답 데이터:', response.data);
+
         resultList.value = response.data || [];
+
+        if (resultList.value.length > 0) {
+            const states = resultList.value.map((plan) => plan.progress_state);
+            console.log('현재 데이터들의 상태값들:', states);
+        }
     } catch (error) {
         console.error('에러', error);
     }

@@ -17,7 +17,7 @@ const fetchBeneDetail = async () => {
         selectedBene.value = {};
         return;
     }
-    const response = await axios.get(`/api/beneficiaries/${selectedBeneId.value}`);
+    const response = await axios.get(`/api/support/beneficiaries/${selectedBeneId.value}`);
     selectedBene.value = response.data;
     emit('updateBeneId', selectedBeneId.value, response.data.priority_id);
 };

@@ -116,19 +116,6 @@ const fetchAllSupportList = async () => {
     }
 };
 
-const fetchRejectionHistory = async (id) => {
-    if (!id) return;
-    try {
-        // 관리자용 API를 그대로 사용하여 해당 결과서의 이력을 가져옵니다.
-        const response = await axios.get(`api/adsupport/admin/support-result/${id}/rejection-history`);
-        // 데이터가 배열인지 확인 후 저장합니다.
-        rejectionLog.value = Array.isArray(response.data) ? response.data : [];
-    } catch (error) {
-        console.error('이력 조회 실패', error);
-        rejectionLog.value = [];
-    }
-};
-
 const Plus = () => {
     if (!supportPlan.value) {
         alert('계획을 선택해주세요');
@@ -228,7 +215,7 @@ const SaveTemp = async (id) => {
             result_content: resultDetail.value.result_content,
             planIds: planIds
         };
-        const response = await axios.put(`http://localhost:3000/resultPlan/support-result/${id}/temp`, updateData);
+        const response = await axios.put(`api/resultPlan/support-result/${id}/temp`, updateData);
         if (response.data.status === 'success') {
             alert('임시저장되었습니다');
             emit('refresh');
@@ -272,14 +259,14 @@ onMounted(() => {
             <div class="form-row">
                 <label for="objective">지원목표</label>
                 <div class="input-wrapper">
-                    <input id="objective" v-model="resultDetail.result_title" :readonly="!['임시', '반려'].includes(resultDetail.progress_state)" type="text" class="content-input" />
+                    <input id="objective" v-model="resultDetail.result_title" type="text" class="content-input" />
                 </div>
             </div>
 
             <div class="form-row">
                 <label for="content">계획내용</label>
                 <div class="input-wrapper">
-                    <textarea id="content" v-model="resultDetail.result_content" rows="8" :readonly="!['임시', '반려'].includes(resultDetail.progress_state)" class="content-textarea"></textarea>
+                    <textarea id="content" v-model="resultDetail.result_content" rows="8" class="content-textarea"></textarea>
                 </div>
             </div>
 
@@ -288,13 +275,13 @@ onMounted(() => {
                 <div class="input-wrapper">
                     <div class="file_input_container">
                         <input type="file" ref="fileInput" multiple @change="handleFileChange" @click.stop accept=".pdf, .png, .jpg, .jpeg, .xlsx, .xls, .docx, .doc, .hwp" style="display: none" />
-                        <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" type="button" class="btn_file_select" @click="$refs.fileInput.click()">파일 선택하기</button>
+                        <button type="button" class="btn_file_select" @click="$refs.fileInput.click()">파일 선택하기</button>
 
                         <ul v-if="attachments.length > 0" class="file_list">
                             <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
                                 <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
                                 <span class="file_name">{{ file.origin_name }}</span>
-                                <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" type="button" class="btn_remove" @click.stop="deleteExistingFile(file.file_id)">✕</button>
+                                <button type="button" class="btn_remove" @click.stop="deleteExistingFile(file.file_id)">✕</button>
                             </li>
                         </ul>
                         <div v-else class="no-attachments">첨부된 파일이 없습니다.</div>
@@ -310,7 +297,7 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div v-if="['임시', '반려'].includes(resultDetail.progress_state)" class="form-row">
+            <div class="form-row">
                 <label>계획서 추가</label>
                 <div class="input-wrapper">
                     <div class="select-group-inline">
@@ -332,29 +319,16 @@ onMounted(() => {
 
                     <div v-for="plan in selectedPlans" :key="plan.plan_id" class="plan-tag-item" @click="selectSubPlan(plan.plan_id)">
                         <span>{{ plan.plan_objective }}</span>
-                        <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" type="button" class="btn-remove-tag" @click.stop="removePlan(plan.plan_id)">X</button>
+                        <button type="button" class="btn-remove-tag" @click.stop="removePlan(plan.plan_id)">X</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="button-group">
-            <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" class="btn-approve" @click="Approval(resultDetail.result_id)">승인 신청</button>
-            <button v-if="['임시', '반려'].includes(resultDetail.progress_state)" class="btn-temp" @click="SaveTemp(resultDetail.result_id)">임시 저장</button>
-            <button v-if="['임시', '대기'].includes(resultDetail.progress_state) && rejectionLog.length === 0" class="btn-delete" @click="deleteTemp(resultDetail.result_id)">삭제</button>
-        </div>
-
-        <div v-if="rejectionLog.length > 0" class="history-section">
-            <h3 class="history-title">반려 사유 목록</h3>
-            <div class="history-list">
-                <div v-for="(log, index) in rejectionLog" :key="index" class="history-card">
-                    <div class="history-header">
-                        <span class="history-user">검토자: {{ log.manager_name }}</span>
-                        <span class="history-date">{{ log.created_at }}</span>
-                    </div>
-                    <div class="history-body"><strong>사유:</strong> {{ log.rejection_reason }}</div>
-                </div>
-            </div>
+            <button class="btn-approve" @click="Approval(resultDetail.result_id)">승인 신청</button>
+            <button class="btn-temp" @click="SaveTemp(resultDetail.result_id)">임시 저장</button>
+            <button class="btn-delete" @click="deleteTemp(resultDetail.result_id)">삭제</button>
         </div>
     </div>
 </template>
@@ -615,17 +589,20 @@ h2 {
 
 .btn_file_select {
     width: fit-content;
-    padding: 10px 15px;
-    background-color: #2563eb;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
+    padding: 8px 16px;
+    background-color: #fff;
+    color: #ffab91;
+    border: 1px solid #ffab91;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 700;
     cursor: pointer;
-    font-weight: 600;
+    transition: all 0.2s ease;
 }
 
 .btn_file_select:hover {
-    background-color: #1d4ed8;
+    background-color: #eff6ff;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
 }
 
 .file_list {

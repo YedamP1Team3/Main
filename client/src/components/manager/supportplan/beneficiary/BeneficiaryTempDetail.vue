@@ -20,7 +20,7 @@ const isSubmitting = ref(false);
 const fetchTempDetail = async (id) => {
     if (!id) return;
     try {
-        const response = await axios.get(`/api/temp-plans/${id}`);
+        const response = await axios.get(`/api/support/temp-plans/${id}`);
         tempDetail.value = response.data || {};
         attachments.value = response.data?.files || [];
     } catch (error) {
@@ -32,7 +32,7 @@ const fetchTempDetail = async (id) => {
 const DeleteTemp = async (planDraftId) => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`/api/temp-plans/${planDraftId}`);
+        const response = await axios.delete(`/api/support/temp-plans/${planDraftId}`);
         if (response.data.status == 'success') {
             alert('삭제되었습니다');
             emit('refresh');
@@ -72,7 +72,7 @@ const uploadSelectedFiles = async (planDraftId) => {
         formData.append('files', file);
     });
 
-    const response = await axios.post(`/api/temp-plans/${planDraftId}/files`, formData, {
+    const response = await axios.post(`/api/support/temp-plans/${planDraftId}/files`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
 
@@ -86,7 +86,7 @@ const deleteExistingFile = async (fileId) => {
     if (!planDraftId || !fileId) return;
     if (!confirm('이 파일을 삭제하시겠습니까?')) return;
     try {
-        const response = await axios.delete(`/api/temp-plans/${planDraftId}/files/${fileId}`);
+        const response = await axios.delete(`/api/support/temp-plans/${planDraftId}/files/${fileId}`);
         if (response.data?.status === 'success') {
             await fetchTempDetail(planDraftId);
         } else {
@@ -126,7 +126,7 @@ const Approval = async (planDraftId) => {
     };
 
     try {
-        const response = await axios.post(`/api/temp-plans/approve`, target);
+        const response = await axios.post(`/api/support/temp-plans/approve`, target);
         if (response.data.status === 'success') {
             alert('승인 신청되었습니다.');
             emit('refresh');
@@ -153,7 +153,7 @@ const SaveTemp = async (planDraftId) => {
             plan_objective: tempDetail.value.plan_objective,
             plan_content: tempDetail.value.plan_content
         };
-        const response = await axios.put(`/api/temp-plans/${planDraftId}`, updateData);
+        const response = await axios.put(`/api/support/temp-plans/${planDraftId}`, updateData);
         if (response.data.status == true) {
             await fetchTempDetail(planDraftId);
             alert('임시저장되었습니다');
@@ -210,13 +210,13 @@ watch(
             <div class="form-row">
                 <label for="objective">지원목표</label>
                 <div class="input-wrapper">
-                    <input id="objective" v-model="tempDetail.plan_objective" :readonly="!['임시', '반려'].includes(tempDetail.progress_state)" type="text" class="content-input" />
+                    <input id="objective" v-model="tempDetail.plan_objective" type="text" class="content-input" />
                 </div>
             </div>
             <div class="form-row">
                 <label for="content">계획내용</label>
                 <div class="input-wrapper">
-                    <textarea id="content" v-model="tempDetail.plan_content" rows="8" :readonly="!['임시', '반려'].includes(tempDetail.progress_state)" class="content-textarea"></textarea>
+                    <textarea id="content" v-model="tempDetail.plan_content" rows="8" class="content-textarea"></textarea>
                 </div>
             </div>
             <div class="form-row">
@@ -224,13 +224,13 @@ watch(
                 <div class="input-wrapper">
                     <div class="file_input_container">
                         <input type="file" ref="fileInput" multiple @change="handleFileChange" @click.stop accept=".pdf, .png, .jpg, .jpeg, .xlsx, .xls, .docx, .doc, .hwp" style="display: none" />
-                        <button v-if="['임시', '반려'].includes(tempDetail.progress_state)" type="button" class="btn_file_select" @click="$refs.fileInput.click()">파일 선택하기</button>
+                        <button type="button" class="btn_file_select" @click="$refs.fileInput.click()">파일 선택하기</button>
 
                         <ul v-if="attachments.length > 0 || selectedFiles.length > 0" class="file_list">
                             <li v-for="file in attachments" :key="file.file_id" class="file_item clickable" @click="downloadFile(file)">
                                 <span class="file_icon">{{ getFileIcon(file.origin_name) }}</span>
                                 <span class="file_name">{{ file.origin_name }}</span>
-                                <button v-if="['임시', '반려'].includes(tempDetail.progress_state)" type="button" class="btn_remove" @click.stop="deleteExistingFile(file.file_id)">✕</button>
+                                <button type="button" class="btn_remove" @click.stop="deleteExistingFile(file.file_id)">✕</button>
                             </li>
 
                             <li v-for="(file, index) in selectedFiles" :key="index" class="file_item">
