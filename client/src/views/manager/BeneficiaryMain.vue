@@ -222,6 +222,7 @@ const handleNewPlanOpen = (priorityIdFromChild) => {
     border: 2px dashed #e2e8f0;
     padding: 50px;
     border-radius: 16px;
+    background-color: #ffff;
 }
 
 .guide-box i {
