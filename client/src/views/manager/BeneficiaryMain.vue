@@ -31,7 +31,6 @@ const handleIdUpdate = async (id, priorityId, progressStatus) => {
     selectedId.value = id;
     selectedPriorityId.value = priorityId;
     selectedProgressStatus.value = progressStatus;
-    viewMode.value = 'empty';
     surveyStore.is_survey_visible = false;
 
     // 💡 대상자 선택 시 스토어 강제 동기화 (오류 방지)
@@ -127,26 +126,26 @@ const handleNewPlanOpen = (priorityIdFromChild) => {
 
         <main class="main-content">
             <div v-if="viewMode === 'create'" class="editor-container">
-                <BeneficiaryNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+                <BeneficiaryNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @refresh="reloadList" />
             </div>
             <div v-else-if="viewMode === 'detail'" class="editor-container">
-                <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+                <BeneficiaryDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @refresh="reloadList" />
             </div>
 
             <div v-else-if="viewMode === 'tempDetail'" class="editor-container">
-                <BeneficiaryTempDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+                <BeneficiaryTempDetail :planId="selectPlan" :beneId="selectedId" :priorityId="selectedPriorityId" @refresh="reloadList" />
             </div>
             <div v-else-if="viewMode === 'resultCreate'" class="editor-container">
-                <ResultNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @cancel="viewMode = 'empty'" @refresh="reloadList" />
+                <ResultNewPlan :beneId="selectedId" :priorityId="selectedPriorityId" @refresh="reloadList" />
             </div>
             <div v-else-if="viewMode === 'app_detail'" class="editor-container">
                 <ManagerSurveyView @close="viewMode = 'empty'" />
             </div>
             <div v-else-if="viewMode === 'resultDetail'" class="editor-container">
-                <resultPlanDetail :resultId="selectResultId" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan" />
+                <resultPlanDetail :resultId="selectResultId" :beneId="selectedId" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan" />
             </div>
             <div v-else-if="viewMode === 'resultTempDetail'" class="editor-container">
-                <resultTempDetail :resultId="selectResultId" :beneId="selectedId" @cancel="viewMode = 'empty'" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan" />
+                <resultTempDetail :resultId="selectResultId" :beneId="selectedId" @refresh="reloadList" @select-sub-plan="handleSelectSubPlan" />
             </div>
             <!-- 💡 [추가] Manager 대기단계 설정 화면 -->
             <div v-else-if="viewMode === 'priority'" class="editor-container" style="height: 100%">
