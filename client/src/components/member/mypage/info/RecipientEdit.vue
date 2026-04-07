@@ -185,7 +185,7 @@ const openPostcode = () => {
     width: 100%;
     max-width: 550px; /* 너비 통일 */
     background-color: #ffffff;
-    padding: 1.2rem 2rem !important; /* 상단 여백 축소 버전 */
+    padding: 8rem 2rem !important; /* 상단 여백 축소 버전 */
     border: 2px solid #f4e2de !important;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);

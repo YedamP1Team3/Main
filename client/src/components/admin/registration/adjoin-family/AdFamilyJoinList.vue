@@ -187,7 +187,7 @@ onMounted(fetchJoinRequests);
     border: 2px solid #f4e2de;
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    margin: 1rem;
+    margin: 2.5rem;
 }
 
 .page-title {
@@ -204,7 +204,7 @@ onMounted(fetchJoinRequests);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #fef9f6;
+    background: #f8fafc;
     padding: 1rem 1.5rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
@@ -263,7 +263,7 @@ onMounted(fetchJoinRequests);
     color: #ffab91;
     padding: 1rem;
     text-align: center;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #f4e2de;
     white-space: nowrap;
 }
 
