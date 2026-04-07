@@ -92,13 +92,10 @@ const getCellValue = (row, column) => {
     switch (column.type) {
         case 'date':
             return formatDate(row[column.key]);
-
         case 'timeRange':
             return formatTimeRange(row[column.key], row[column.endKey]);
-
         case 'status':
             return formatStatusLabel(row[column.key]);
-
         case 'text':
         default:
             return row[column.key] ?? '-';
@@ -115,6 +112,8 @@ const getActionLabel = (column, row) => {
             return row.rsv_status === 'NOTE_WRITTEN' ? '수정' : '작성';
         case 'viewRejectReason':
             return '조회';
+        case 'complete':
+            return '완료';
         default:
             return '버튼';
     }
@@ -130,6 +129,8 @@ const getActionClass = (column) => {
             return 'write-log';
         case 'viewRejectReason':
             return 'view-reject-reason';
+        case 'complete':
+            return 'complete';
         default:
             return '';
     }
@@ -148,6 +149,10 @@ const isActionDisabled = (row, column) => {
 
         case 'viewRejectReason':
             return row.rsv_status !== 'REJECTED';
+
+        case 'complete':
+            return row.rsv_status !== 'APPROVED';
+
         default:
             return false;
     }
@@ -222,7 +227,7 @@ const handleActionClick = (row, column) => {
     color: #64748b;
     border-top: 1px solid #cbd5e1;
     border-bottom: 1px solid #cbd5e1;
-    background-color: #f8fafc;
+    background-color: #fef9f6;
     font-size: 1rem;
 }
 
@@ -296,15 +301,11 @@ const handleActionClick = (row, column) => {
     opacity: 0.9;
 }
 
-.action-btn.cancel {
-    background-color: #ef4444;
-}
-
 .action-btn.process {
     background-color: #ffab91;
 }
 
-.action-btn.write-log {
+.action-btn.complete {
     background-color: #ffab91;
 }
 
@@ -312,9 +313,5 @@ const handleActionClick = (row, column) => {
     background-color: #cac1bc;
     color: #ffffff;
     cursor: not-allowed;
-}
-.action-btn.view-reject-reason {
-    background-color: #ffab91;
-    color: #ffffff;
 }
 </style>

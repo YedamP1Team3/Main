@@ -168,6 +168,13 @@ WHERE rsv_id = ?
   AND rsv_status = 'REQUESTED'
 `;
 
+const updateReservationToCompleted = `
+UPDATE reservations
+SET rsv_status = 'COMPLETED'
+WHERE rsv_id = ?
+  AND rsv_status = 'APPROVED'
+`;
+
 // -----------------------------------counseling API--------------------------
 
 const selectManagerCounselList = `
@@ -265,6 +272,7 @@ module.exports = {
   getBeneficiaryManagerInfo,
   selectManagerReservations,
   updateReservationStatus,
+  updateReservationToCompleted,
   selectManagerCounselList,
   selectCounselReservationByRsvId,
   insertCounselingNote,
