@@ -19,7 +19,7 @@ const handleClose = () => {
 
 <template>
     <div class="survey-wrap">
-        <h2>태윤아 자지마</h2>
+        <h2></h2>
 
         <!-- 💡 관리자/매니저용 안내 문구로 수정 (수정/삭제 불가 명시) -->
         <div class="confirm-notice"><i class="pi pi-info-circle"></i> 제출된 신청서의 열람 전용 화면입니다. (수정 및 삭제 불가)</div>
