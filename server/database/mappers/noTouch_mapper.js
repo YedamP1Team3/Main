@@ -91,8 +91,9 @@ const insertPriorityHistory = async (
   ]);
 };
 
-const getRejectHistory = async (beneId) => {
-  return runQuery(noTouchSql.priorityRejectHistory, [beneId]);
+// rootPriorityId를 추가로 받아 쿼리에 바인딩합니다.
+const getRejectHistory = async (beneId, rootPriorityId) => {
+  return runQuery(noTouchSql.priorityRejectHistory, [beneId, rootPriorityId, rootPriorityId]);
 };
 
 const cancelPriorityHistory = async (beneId) => {

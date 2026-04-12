@@ -128,6 +128,7 @@ select
 from priority
 where bene_id = ?
   and progress_status = 'rejected'
+  and (priority_id = ? or priority_id2 = ?) -- 현재 사이클의 Root ID와 일치하는 것만 필터링
 order by priority_id asc;
 `;
 
